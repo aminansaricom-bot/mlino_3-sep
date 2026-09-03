@@ -1,0 +1,36 @@
+{
+  "name": "mlino-v1-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MLINO V1 Core implementation scaffold — Wave 1 (Foundation FP-01/FP-03 + Value Engines F-01/F-02/F-03 + Feed/Briefing F-04/F-05, against mocked IC-14 read path).",
+  "main": "dist/index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "jsonwebtoken": "^9.0.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.13",
+    "@types/node": "^22.7.4",
+    "@types/uuid": "^9.0.8",
+    "jest": "^29.7.0",
+    "prisma": "^5.20.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.6.2"
+  }
+}

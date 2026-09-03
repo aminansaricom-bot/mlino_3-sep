@@ -1,0 +1,163 @@
+// MLINO V1 Core — Prisma Schema
+// مبنا: PHASE_4A_IMPLEMENTATION_DESIGN/02_DATABASE/V1_DATABASE_DESIGN.md
+// وضعیت: Wave 1 — فقط جداول لازم برای FP-01/FP-03 و نوشتن Value Engineها فعال هستند.
+// جداول Projection (OpportunityCurrentState/OpportunityInteractionState/RevenueRecoveryRawAggregate)
+// طرح‌شان اینجا حاضر است اما پیاده‌سازی سرویس آن‌ها به FP-02 (پس از Wave 1) موکول شده.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EntityType {
+  Individual
+  Interaction
+}
+
+enum EventType {
+  OCCURRENCE
+  AMENDMENT
+  RETRACTION
+}
+
+enum ProducerType {
+  external
+  internal
+}
+
+enum ProducerKind {
+  value_engine
+  interaction_layer
+}
+
+enum OpportunityState {
+  ACTIVE
+  EXPIRED
+}
+
+enum InteractionType {
+  SEEN
+  ACKNOWLEDGED
+  DISMISSED
+}
+
+model CoreEntity {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  entityType     EntityType @map("entity_type")
+  domainTag      String   @map("domain_tag")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  events         EventLog[] @relation("EventCoreEntities")
+
+  @@index([organizationId, entityType])
+  @@map("core_entities")
+}
+
+model EventLog {
+  id              String       @id @default(uuid())
+  uniqueKey       String       @unique @map("unique_key")
+  eventType       EventType    @map("event_type")
+  eventTime       DateTime     @map("event_time")
+  ingestionTime   DateTime     @default(now()) @map("ingestion_time")
+  sourceRef       String       @map("source_ref")
+  producerType    ProducerType @map("producer_type")
+  producerId      String?      @map("producer_id")
+  kernelVersion   String       @map("kernel_version")
+  confidenceLevel Float        @map("confidence_level")
+  domainTag       String       @map("domain_tag")
+  causalLinks     Json?        @map("causal_links")
+  amendsEventId   String?      @map("amends_event_id")
+  organizationId  String       @map("organization_id")
+  payload         Json
+  // CONTRACT RESOLUTION R5: producer-computed stable business-situation
+  // identity, persisted so a future lookup (FP-02+) can find "the existing
+  // Opportunity for this situation". Nullable — only detection-family
+  // OCCURRENCE candidates carry one; opportunity.interaction Amendments do
+  // not. No uniqueness constraint yet — see
+  // CONTRACT_RESOLUTION/DB_IMPACT_REVIEW.md for why.
+  situationKey    String?      @map("situation_key")
+
+  coreEntities    CoreEntity[] @relation("EventCoreEntities")
+
+  @@index([organizationId, domainTag, eventTime])
+  @@index([amendsEventId])
+  @@index([organizationId, domainTag, situationKey])
+  @@map("event_log")
+}
+
+model AdmissionObservability {
+  id               String   @id @default(uuid())
+  organizationId   String?  @map("organization_id")
+  producerId       String?  @map("producer_id")
+  domainTag        String?  @map("domain_tag")
+  rawPayload       Json     @map("raw_payload")
+  rejectionReason  String   @map("rejection_reason")
+  rejectedAt       DateTime @default(now()) @map("rejected_at")
+
+  @@map("admission_observability")
+}
+
+model DomainSignalProducerRegistry {
+  producerId         String       @id @map("producer_id")
+  producerKind       ProducerKind @map("producer_kind")
+  allowedDomainTags  String[]     @map("allowed_domain_tags")
+  active             Boolean      @default(true)
+  registeredAt       DateTime     @default(now()) @map("registered_at")
+
+  @@map("domain_signal_producer_registry")
+}
+
+// --- جداول Projection — طرح آماده، پیاده‌سازی سرویس در FP-02 (پس از Wave 1) ---
+
+model OpportunityCurrentState {
+  opportunityCorrelationId String            @id @map("opportunity_correlation_id")
+  organizationId           String            @map("organization_id")
+  domainTag                String            @map("domain_tag")
+  state                    OpportunityState
+  materialityScore         Float             @map("materiality_score")
+  materialityBasis         String            @map("materiality_basis")
+  intendedAudience         String            @map("intended_audience")
+  evidenceRefs              Json             @map("evidence_refs")
+  expiresAt                 DateTime?        @map("expires_at")
+  latestEventId              String          @map("latest_event_id")
+  lastComputedAt              DateTime       @map("last_computed_at")
+
+  @@index([organizationId, domainTag, state])
+  @@index([organizationId, state, expiresAt])
+  @@map("opportunity_current_state")
+}
+
+model OpportunityInteractionState {
+  opportunityCorrelationId String   @map("opportunity_correlation_id")
+  // PHASE 5A.1 (Q3): renamed from actorCoreEntityId/actor_core_entity_id —
+  // this is an ActorId (FP-03 authorization identity), never a CoreEntityId.
+  // The old name predated the R6 contract correction and, left unfixed here,
+  // would have reintroduced the exact actor/subject conflation R6 removed —
+  // right where it matters most (the actor-state Projection table). Zero
+  // code consumers existed at rename time (schema-only, FP-02 not yet
+  // implemented) — see 03_ACTOR_IDENTITY/ACTOR_IDENTITY_PERSISTENCE_CLOSURE.md.
+  actorId                  String   @map("actor_id")
+  interactionType          InteractionType @map("interaction_type")
+  latestEventId              String @map("latest_event_id")
+  updatedAt                   DateTime @map("updated_at")
+
+  @@id([opportunityCorrelationId, actorId])
+  @@map("opportunity_interaction_state")
+}
+
+model RevenueRecoveryRawAggregate {
+  organizationId String   @map("organization_id")
+  domainTag      String   @map("domain_tag")
+  periodStart    DateTime @map("period_start")
+  periodEnd      DateTime @map("period_end")
+  openCount      Int      @map("open_count")
+  computedAt     DateTime @map("computed_at")
+
+  @@id([organizationId, domainTag, periodStart, periodEnd])
+  @@map("revenue_recovery_raw_aggregate")
+}

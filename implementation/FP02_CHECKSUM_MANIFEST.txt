@@ -1,0 +1,28 @@
+FP-02 CORE IMPLEMENTATION — CHECKSUM MANIFEST
+HANDOFF_ID: HANDOFF-20260815-2350-FP02CORE
+Generated: 2026-08-15 (session time)
+Algorithm: SHA-256
+
+--- New production files ---
+47269882a0759249f2ae99755ee79445ca91fb427dde2cfd0d3b9220103630f3  implementation/foundation/access-decision/ac2-decision-port.ts
+9aa27be3b4240f5af4db066798bd76252333fe6e89676273287e34074418dc12  implementation/foundation/opportunity-projection/compute-projection.ts
+ca6a0252ebea7561b2682a80f32d44daf794596c4e1ac1539e644ade71418132  implementation/foundation/opportunity-projection/rebuild-projection.service.ts
+0a03e133a1d5fe4eadd1215f56887e8dc9da82e112b4a47214bfbe95bf369a56  implementation/foundation/opportunity-read/access-candidate.ts
+2360a0749cdaf88a10af62dfbb638869d7dc0bb9bfbeff47e6e553e446208b48  implementation/foundation/opportunity-read/opportunity-read.service.ts
+
+--- New test files ---
+0e2188157f28a4f78a141244eba582c49b72398d7d0a16820b3bd7e0f3147a15  implementation/test/mocks/fake-ac2-decision-port.ts
+088d6f4c5155ba96932d0e4dc946c0d51ae798a3b5ae16b971d301b3ff405ea1  implementation/test/foundation/opportunity-projection/rebuild-projection.spec.ts
+ad4bf3c282e0c67f522e9f93b0fc2833ba00c7ebf9d0a77a9d3c42191f415d93  implementation/test/foundation/opportunity-read/opportunity-read.spec.ts
+
+--- Reference checksums of frozen files proven untouched (zero drift) ---
+35d218065f9829f2d9c258d082ba6a2fd48588c573a44f722d35fad6dcb76296  implementation/shared-contracts/types.ts
+84d138c2222647521f981afefc69944b87b6d2b091cc0f3747e2d0599f37eff0  implementation/prisma/schema.prisma
+
+--- Delivery documents included in this pack ---
+implementation/FP02_IMPLEMENTATION_STATUS.md
+implementation/FP02_VALIDATION_RESULTS.md
+implementation/FP02_CONTRACT_COMPLIANCE_REPORT.md
+implementation/FP02_SECURITY_EVIDENCE.md
+implementation/FP02_CHANGED_FILES.md
+implementation/FP02_CHECKSUM_MANIFEST.txt (this file)

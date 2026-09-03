@@ -1,0 +1,21 @@
+# اجرای یک Postgres محلی فقط برای توسعه/تست Wave 1 — بدون نیاز به سرویس آنلاین.
+# استفاده: docker compose up -d
+# سپس در .env: DATABASE_URL="postgresql://mlino:mlino_dev_local@localhost:5435/mlino_v1?schema=public"
+# (پورت 5435 عمداً انتخاب شد تا با نمونه‌های موجود سیستم — 5433 در Malino، 5434 در پروژه‌ی دیگر — تداخل نداشته باشد)
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: mlino-v1-local-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mlino
+      POSTGRES_PASSWORD: mlino_dev_local
+      POSTGRES_DB: mlino_v1
+    ports:
+      - "5435:5432"
+    volumes:
+      - mlino_v1_local_db_data:/var/lib/postgresql/data
+
+volumes:
+  mlino_v1_local_db_data:
