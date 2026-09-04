@@ -1,61 +1,67 @@
-INSTRUCTION_ID: CODEX-20260904-1647-AC2-DUP-HARDENING-AUTH
+INSTRUCTION_ID: CODEX-20260904-1805-AC2HARDENING-REVIEW
 AUTHOR: CODEX
 STATUS: EXECUTED
 EXECUTED_BY: CLAUDE
-EXECUTED_AT: 2026-09-04T17:10:00
-RESULTING_HANDOFF_ID: HANDOFF-20260904-AC2-DUP-HARDENING
-TARGET_HANDOFF_ID: HANDOFF-20260904-RETRACTION-REVIEW-ACK
-TARGET_REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260904_RETRACTION_REVIEW_ACKNOWLEDGEMENT.md
-TARGET_REPORT_SHA256: 8bb22440fb2c77cbf1f25550dd2b11920813ef38d66f5bb407fbe8858e4f52e9
+EXECUTED_AT: 2026-09-04T18:20:00
+RESULTING_HANDOFF_ID: HANDOFF-20260904-AC2HARDENING-REVIEW-ACK
+TARGET_HANDOFF_ID: HANDOFF-20260904-AC2-DUP-HARDENING
+TARGET_REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260904_AC2_DUP_HARDENING_REPORT.md
+TARGET_REPORT_SHA256: 844b45959f92403e85a435ddf4890322d3533b05c211e7003c42c1a042491f51
 TARGET_ZIP_PATH: (none)
 TARGET_ZIP_SHA256: (n/a)
-REVIEW_COMPLETED_AT: 2026-09-04T16:47:00
-AUTHORIZATION_SCOPE: IMPLEMENT_AC2_DUPLICATE_DECISION_HARDENING_ONLY
+REVIEW_COMPLETED_AT: 2026-09-04T18:05:00
+AUTHORIZATION_SCOPE: AC2_HARDENING_REVIEW_APPROVED_NO_CHANGES_REQUIRED_NO_NEW_PHASE
 
 ---
 
-# مجوز فاز بعد: هاردنینگ F-1 — قطعی‌سازی `evaluateAC2FailClosed` در برابر ورودی/خروجی تکراری
+# نتیجه‌ی بازبینی مستقل — هاردنینگ F-1 (قطعی‌سازی evaluateAC2FailClosed)
 
-**صادرکننده:** ممد (بازبین مستقل، GLM 5.3 Flash) — **بر پایه‌ی تصمیم صریح مالک محصول** (۴ سپتامبر ۲۰۲۶).
+**بازبین:** ممد (بازبین مستقل، GLM 5.3 Flash)
+**تاریخ بازبینی:** ۲۰۲۶-۰۹-۰۴
+**تحویل بازبینی‌شده:** `HANDOFF-20260904-AC2-DUP-HARDENING` (اجرا طبق دستور `CODEX-20260904-1647-AC2-DUP-HARDENING-AUTH`)
+**تعارض منافع:** صفر — کد توسط یونس (Claude) نوشته شده؛ بازبین در تولید آن هیچ نقشی نداشت.
 
-## ۱. پیش‌زمینه و مجوز
+## ۱. Verdict
 
-- این یافته دو بار توسط بازبین ثبت شده (بازبینی پنج تحویل: F-1؛ بازبینی RETRACTION: R-2 اشاره به نوبت آینده): در `foundation/access-decision/ac2-decision-port.ts`، تابع `evaluateAC2FailClosed` از Map برای نگاشت `opportunity_correlation_id` استفاده می‌کند — یعنی در دو حالت، رفتار به‌صورت ضمنی «آخری‌برنده» است، نه قطعی‌مصمم:
-  1. Port بیش از یک `AC2Decision` با یک `opportunity_correlation_id` یکسان برگرداند؛
-  2. کاندیداهای ورودی شامل دو آیتم با یک `opportunity_correlation_id` یکسان باشند.
-- این شکاف امنیتی نیست (fail-closed موجود در برابر خطا/عدم‌تصمیم سالم است)، اما «آخری‌برنده» یک رفتار ضمنی و غیرمصمم است — فلسفه‌ی این تابع fail-closed است، پس هر شکل ناهنجاری باید به deny قطعی ختم شود، نه به overwrite خاموش.
-- توجه: مسیر تولیدی فعلی (`buildAccessCandidates`) خروجی Map تولید می‌کند و عملاً ورودی تکراری نمی‌سازد — این هاردنینگ دفاع در عمق برای فراخوان‌های آینده است.
+**تایید می‌شود — بدون عیب مسدودکننده، بدون نیاز به هیچ اصلاح کدی.**
 
-## ۲. محدوده‌ی مجاز (AUTHORIZATION_SCOPE: IMPLEMENT_AC2_DUPLICATE_DECISION_HARDENING_ONLY)
+## ۲. شواهد راستی‌آزمایی‌شده‌ی مستقیم
 
-فقط این فایل: `implementation/foundation/access-decision/ac2-decision-port.ts` + فایل تست مربوطه. قواعد هدف:
+| # | ادعا در گزارش | راستی‌آزمایی مستقل بازبین | نتیجه |
+|---|---|---|---|
+| ۱ | تطبیق TARGET قبل از اجرا | مقایسه‌ی مستقل `HANDOFF_STATE.md` وقت بازبینی با هدر دستور (`8bb22440...`) | ✅ |
+| ۲ | چک‌سام ۳ فایل تغییر (تولیدی + ۲ تست) | محاسبه‌ی مستقیم SHA-256: `14ebce3b...`، `f31738bb...`، `9dc3334d...` | ✅ هر ۳ دقیقاً منطبق |
+| ۳ | SHA-256 گزارش (`844b4595...`) | محاسبه‌ی مستقیم | ✅ منطبق با `HANDOFF_STATE.md` |
+| ۴ | Drift صفر دو فایل منجمد | محاسبه‌ی مستقیم: `35d21806...` / `84d138c2...` | ✅ منطبق با مرجع تاریخی |
+| ۵ | ۱۳۰/۱۳۰ تست روی Postgres واقعی | اجرای مستقل `npm test` توسط بازبین | ✅ **13 Suites / 130 Tests passed** — یک اجرا، بدون Retry |
+| ۶ | `tsc --noEmit` تمیز | اجرای مستقل | ✅ CLEAN |
+| ۷ | Commit دوم روی origin/main (`becf9858...`) | `git ls-remote` مستقل بازبین: دقیقاً همان Hash روی `refs/heads/main` | ✅ |
 
-1. **خروجی تکراری Port:** اگر `port.evaluate` بیش از یک تصمیم برای یک `opportunity_correlation_id` برگرداند، آن کاندیدا **deny** شود (fail-closed قطعی — نه آخری‌برنده). این باید در کامنت تابع هم مستند شود.
-2. **ورودی تکراری:** اگر آرایه‌ی `candidates` ورودی شامل دو کاندیدا با یک `opportunity_correlation_id` باشد، **همه‌ی کاندیداهای تکراری deny** شوند (خود پیش‌فرض ورودی = fail-closed).
-3. **هیچ تغییر رفتار دیگری در ماتریس fail-closed موجود** (throw/غیرآرایه/کاندیدای گم/allow نامعتبر/subject خالی/فیلتر تزریق Evidence) — همه‌ی آن‌ها عیناً حفظ شوند.
+## ۳. بازخوانی فنی کد
 
-## ۳. ممنوعیت‌های همیشگی
+1. **قاعده‌ی ۱ (خروجی تکراری Port):** شمارش `outputIdCounts` روی آرایه‌ی خام Port؛ هر id با count > 1 به‌کلی از `byId` حذف می‌شود → کاندیدا در مسیر «کاندیدای گم‌شده» (قاعده‌ی از‌پیش‌موجود) deny می‌شود. انتخاب معماری هوشمندانه‌ای است: به‌جای شاخه‌ی deny جدید، رفتار «دو تصمیم مبهم» با «بدون تصمیم» یکسان‌سازی شده — هر دو fail-closed قطعی، مستقل از ترتیب. ✅
+2. **قاعده‌ی ۲ (ورودی تکراری):** شمارش `inputIdCounts` قبل از هر چیز؛ کاندیداهای هم‌id تکراری **بدون تماس با Port** deny می‌شوند و از `validCandidates` حذف می‌گردند — نه فقط deny، بلکه عدم‌افشای حتی زمینه‌ی تصمیم به Port. دفاع در عمق صحیح. ✅
+3. **ماتریس fail-closed موجود:** بازخوانی خط‌به‌خط — throw/غیرآرایه/subject خالی/allow نامعتبر/فیلتر تزریق Evidence/گارد `Array.isArray` — همگی عیناً حفظ شده‌اند. ✅
+4. **مستندسازی:** دو قاعده‌ی جدید در JSDoc بخش Guarantees دقیقاً طبق بند ۳ دستور درج شده. ✅
+5. **۴ تست جدید** (بیش از حداقل ۳): allow+allow / allow+deny / deny+allow (اثبات استقلال از ترتیب) / ورودی تکراری با اثبات `port.calls.length === 0`. سناریوی ممنوعه‌ی دستور (بند ۴.۱: «هیچ Evidence افشا نمی‌شود») در تست اول پوشش داده شده. ✅
+6. **شمول `fake-ac2-decision-port.ts`:** توجیه‌شده و درست — دستور «فایل تست مربوطه» را مجاز کرده بود و افزودن گزینه‌ی `duplicateDecisionPair` به Mock، دقیقاً همان الگوی مصوب self-review قبلی (`malformedAuthorizedEvidenceRefs`) است. ✅
 
-- `shared-contracts/types.ts` و `prisma/schema.prisma`: ممنوع مطلق مگر با CCR رسمی.
-- هیچ تغییری در سایر فایل‌های foundation، Features، `SituationLookupInterface`، یا `jest.config.js`.
-- هیچ Import بین‌Featureای، هیچ دسترسی Prisma خارج از `foundation/`.
+## ۴. راستی‌آزمایی ادعای «موجی/V2 بدون تماس با V1»
 
-## ۴. تست الزامی (تعریف Done)
+- `git ls-remote` تایید می‌کند HEAD فعلی (`becf9858...`) روی origin/main است و Commit کد این پاس (`fe1bdf08...`) با rebase روی `b4a5d5a` (تحویل V2) سوار شده.
+- از سمت V1: هر ۶ چک‌سام کلیدی V1 (دو فایل منجمد + سه فایل تغییر این پاس + گزارش) توسط بازبین محاسبه شد و همگی با مراجع منطبق‌اند — یعنی تحویل V2 هیچ فایل V1 را تغییر نداده. ✅
+- **یادداشت حاکمیتی (بدون اقدام):** V2 (موجی) اکنون یک تحویل واقعی در همین Remote دارد. طبق سند `MLINO_V2_INTRODUCTION`، «Opportunity» در V1 و V2 دو معنای جدا دارند (PA-09). توصیه می‌شود فرآیند بازبینی مستقل V2 نیز در پروتکل جداگانه‌ای تعریف شود تا مسیرهای بازبینی V1/V2 قاطی نشوند — تصمیم با مالک محصول.
 
-1. حداقل سه تست رگرسیون جدید (در `test/foundation/opportunity-read/opportunity-read.spec.ts` یا Suite جدید در همان مسیر):
-   - Port دو تصمیم allow با یک correlation_id برمی‌گرداند → کاندیدا deny (و هیچ Evidence افشا نمی‌شود).
-   - Port دو تصمیم با یک correlation_id (یکی deny یکی allow، به هر ترتیب) → کاندیدا deny — قطعی، مستقل از ترتیب.
-   - کاندیداهای ورودی با correlation_id تکراری → همه‌ی موارد تکراری deny.
-2. کل `npm test`: همه‌ی ۱۲۶ تست قبلی بدون Regression + تست‌های جدید — روی Postgres واقعی، یک اجرا، بدون Retry.
-3. `npx tsc --noEmit` تمیز.
+## ۵. گپ‌های باز (بدون تغییر)
 
-## ۵. تحویل و گزارش
+R4 (BLOCKED) — R5-Concurrency (OPEN عمدی) — Adapter واقعی AC-2 — RETRACTION برای F-01/F-03.
 
-1. فهرست فایل‌های تغییر + چک‌سام SHA-256 هرکدام در گزارش.
-2. اثبات Drift صفر دو فایل منجمد (چک‌سام قبل/بعد) در گزارش.
-3. گزارش کامل در `AI_HANDOFF/CLAUDE_REPORTS/` با `HANDOFF_ID` جدید، کپی در `CLAUDE_LATEST_REPORT.md`، به‌روزرسانی `HANDOFF_STATE.md`، سپس Push با Hash واقعی Commit در پاسخ نهایی به کاربر (الگوی دو-Commit پذیرفتنی است).
-4. اگر به تناقضی با سطوح ۱ تا ۵ اقتدار رسیدی: متوقف شو، CCR/ACR بنویس — حدس نزن.
-5. **شرط توقف:** بعد از گزارش + Push، کاملاً متوقف شو — بازبینی مستقل این فاز را ممد جداگانه انجام می‌دهد.
+## ۶. دستور به یونس (Claude)
+
+1. **هیچ اصلاح کدی لازم نیست.**
+2. **شروع هر کار جدید: مجاز نیست — منتظر بمان** تا مالک محصول فاز بعد را انتخاب کند.
+3. Push این دستور + گزارش بازبینی طبق الگوی همیشگی، با Hash واقعی در پاسخ نهایی به کاربر.
+4. **شرط توقف:** بعد از Push، کاملاً متوقف شو.
 
 ---
-*بازبین: ممد (GLM 5.3 Flash) — R4 (BLOCKED)، Adapter واقعی AC-2، R5-Concurrency، و RETRACTION برای F-01/F-03 همچنان خارج از دامنه و منتظر تصمیم مالک‌اند.*
+*بازبین: ممد (GLM 5.3 Flash) — هاردنینگ دقیقاً طبق محدوده، تحویل تمیز.*

@@ -1,13 +1,13 @@
-HANDOFF_ID: HANDOFF-20260904-AC2-DUP-HARDENING
+HANDOFF_ID: HANDOFF-20260904-AC2HARDENING-REVIEW-ACK
 AUTHOR: CLAUDE
-PHASE: AC2_DUPLICATE_DECISION_HARDENING
-STATUS: DELIVERED_AWAITING_INDEPENDENT_REVIEW
-REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260904_AC2_DUP_HARDENING_REPORT.md
-REPORT_SHA256: 844b45959f92403e85a435ddf4890322d3533b05c211e7003c42c1a042491f51
+PHASE: AC2HARDENING_REVIEW_ACKNOWLEDGEMENT
+STATUS: INDEPENDENTLY_REVIEWED_AND_APPROVED
+REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260904_AC2HARDENING_REVIEW_ACKNOWLEDGEMENT.md
+REPORT_SHA256: 62b5d20827a8aee17a0e9c84552d66f115da239f2c37246beda8e7667bae3dcf
 ZIP_PATH: (none built this pass)
-CREATED_AT: 2026-09-04T17:10:00
-NEXT_ACTION: WAIT — stop condition per Mamad's instruction (CODEX-20260904-1647-AC2-DUP-HARDENING-AUTH, bond 5.5). Independent review of this delivery is Mamad's next step; no new phase begins without explicit product-owner decision.
+CREATED_AT: 2026-09-04T18:20:00
+NEXT_ACTION: WAIT — stop condition per Mamad's instruction (CODEX-20260904-1805-AC2HARDENING-REVIEW, bond 6). Independent review of V2 will happen in a separate session with Mamad; no new V1 phase begins without explicit product-owner decision.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260904-RETRACTION-REVIEW-ACK
-EXECUTED_INSTRUCTION_ID: CODEX-20260904-1647-AC2-DUP-HARDENING-AUTH
-NOTE: F-1 hardening implemented exactly per authorized scope — evaluateAC2FailClosed now denies (a) any candidate sharing a duplicated opportunity_correlation_id in the INPUT array, before ever calling the Port, and (b) any candidate for which the Port returns >1 AC2Decision for the same opportunity_correlation_id, regardless of order/content (never "last one wins"). Existing fail-closed matrix (throw/non-array/missing/invalid-allow/empty subject refs/evidence-injection filter/malformed authorized_evidence_refs) unchanged. Only 3 files touched: ac2-decision-port.ts (production) + opportunity-read.spec.ts + fake-ac2-decision-port.ts (test infra, same file touched in the prior self-review pass for the analogous malformed-evidence scenario). 4 new regression tests (exceeds the required 3). 130/130 tests pass on real Postgres (126 previous + 4 new, zero regressions), tsc clean, zero drift on both frozen files (types.ts, schema.prisma — checksums match the RETRACTION review's reference values exactly). Code commit fe1bdf08df32a76553cff730bc513922258a30f3 pushed to origin/main (rebased cleanly onto Moji's independent, non-overlapping mlino2/ Phase 1 delivery b4a5d5a). This HANDOFF_STATE update + report is pushed in a second, separate commit per the two-commit evidence pattern. Open gaps unchanged: R4 (BLOCKED), R5-Concurrency (OPEN by design), real AC-2 Adapter (not built), RETRACTION for F-01/F-03 (out of scope). Independent review of this delivery is Mamad's next step.
+PREVIOUS_HANDOFF_ID: HANDOFF-20260904-AC2-DUP-HARDENING
+EXECUTED_INSTRUCTION_ID: CODEX-20260904-1805-AC2HARDENING-REVIEW
+NOTE: Mamad independently reviewed the F-1 (AC2 duplicate-decision hardening) delivery and approved it, zero blocking findings, zero code fixes required. Independently re-verified: checksum matches on all 3 changed files (ac2-decision-port.ts, opportunity-read.spec.ts, fake-ac2-decision-port.ts) and the report, zero drift on the two frozen files, 130/130 tests on real Postgres, tsc clean, and independently confirmed via its own git ls-remote that the second commit (becf9858...) really landed on origin/main. Reviewer also independently re-verified (separately from V1) that Moji's parallel V2 delivery (b4a5d5a) touched zero V1 files, by recomputing checksums on all 6 key V1 files. Governance note recorded (non-actioned): a separate independent-review protocol for V2 was proposed — decision remains with the product owner; per this instruction, V2's independent review will happen in a separate session with Mamad, out of scope here. Open gaps unchanged: R4 (BLOCKED), R5-Concurrency (OPEN by design), real AC-2 Adapter (not built), RETRACTION for F-01/F-03 (out of scope). No code changed, no new V1 or V2 phase started, no mlino2/ files touched, per explicit prohibition in this instruction.
