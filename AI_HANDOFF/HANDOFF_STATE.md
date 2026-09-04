@@ -1,13 +1,13 @@
-HANDOFF_ID: HANDOFF-20260904-POSTREVIEW-CLEANUP
+HANDOFF_ID: HANDOFF-20260904-F02-RETRACTION
 AUTHOR: CLAUDE
-PHASE: POST_REVIEW_FOLLOWUP_CLEANUP
-STATUS: MINOR_FOLLOWUP_COMPLETE_NO_NEW_MAMAD_INSTRUCTION
-REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260904_POST_REVIEW_FOLLOWUP_CLEANUP.md
-REPORT_SHA256: e9aecdd41ac8bceeb702af0c802378f746c15bd695bf49c52186d2367cb0316c
+PHASE: F02_RETRACTION_PATH
+STATUS: DELIVERED_AWAITING_INDEPENDENT_REVIEW
+REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260904_F02_RETRACTION_IMPLEMENTATION_REPORT.md
+REPORT_SHA256: 78acfe5a0f318d8a2d9fdfcb2443745ebbe5c55a407a796a727cdda693a3aba5
 ZIP_PATH: (none built this pass)
-CREATED_AT: 2026-09-04T13:20:00
-NEXT_ACTION: WAIT — no new phase authorized. Two items closed per user's direct instruction, itself framed as closing loose ends under the already-executed CODEX-20260904-1246-FIVEDELIVERY-FULLLINE-REVIEW instruction (no new INSTRUCTION_ID from Mamad this pass).
+CREATED_AT: 2026-09-04T13:55:00
+NEXT_ACTION: WAIT_FOR_INDEPENDENT_REVIEW — Mamad will review this delivery separately, per the stop condition in CODEX-20260904-1341-RETRACTION-F02-AUTH bond 9.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260904-INDEPENDENT-REVIEW-ACK
-EXECUTED_INSTRUCTION_ID: CODEX-20260904-1246-FIVEDELIVERY-FULLLINE-REVIEW (closing two follow-up items, not a new instruction cycle)
-NOTE: (1) Doc clarification in MUSE_SPARK_DEVELOPER_ONBOARDING.md — pushed as commit 5f179c74c73516d85be9d3353593c4c07db4001b, independently confirmed on origin/main via git ls-remote. (2) The user's premise that the prior push "had not happened yet" was incorrect — commit 8bc82a5 (from HANDOFF-20260904-INDEPENDENT-REVIEW-ACK) was already confirmed on origin/main before this pass; this was noted honestly in the report rather than silently accepted. Zero code changes. shared-contracts/types.ts and prisma/schema.prisma untouched. No new phase started.
+PREVIOUS_HANDOFF_ID: HANDOFF-20260904-POSTREVIEW-CLEANUP
+EXECUTED_INSTRUCTION_ID: CODEX-20260904-1341-RETRACTION-F02-AUTH
+NOTE: F-02 RETRACTION path implemented — real rebook (wasRebooked true) on an ACTIVE Opportunity submits a RETRACTION targeting it via SituationLookupInterface; no matching ACTIVE Opportunity -> nothing submitted. Re-detection after RETRACTION correctly produces a new independent OCCURRENCE (CR-03 unchanged, no merge). admission-validator.ts and compute-projection.ts required zero changes (verified, not assumed, that both already handle RETRACTION correctly). 4 new tests, 126/126 total passing, zero regression. Zero drift on shared-contracts/types.ts and prisma/schema.prisma. F-01/F-03 untouched. Pushed as two real commits: 30d7a4ebf0b773a6a7edf3798e61cdadb0e98d56 (code+tests) then a second bookkeeping commit for this report (hash reported to the user directly, not embeddable in the report itself). Open gaps unchanged: R4 (BLOCKED), R5-Concurrency (OPEN by design), no real AC-2 Governance Adapter, no RETRACTION path for F-01/F-03 (out of scope, future product-owner decision).
