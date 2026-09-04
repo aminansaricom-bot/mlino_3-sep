@@ -3,6 +3,8 @@ import { seedV1CoreProducerRegistry } from '../../../foundation/producer-registr
 import { eventAdmissionService } from '../../../foundation/event-admission/event-admission.service';
 import { CancellationDetectorService } from '../../../value-engines/cancellation/cancellation-detector.service';
 import { InMemoryCancellationRepository } from '../../../value-engines/cancellation/cancellation-repository';
+import { SituationLookupService } from '../../../foundation/opportunity-projection/situation-lookup.service';
+import { rebuildOrganizationProjection } from '../../../foundation/opportunity-projection/rebuild-projection.service';
 
 const ORG = 'org-cancellation-test';
 
@@ -38,7 +40,7 @@ describe('F-02 — Cancellation/No-show Intelligence detector', () => {
         wasRebooked: false,
       },
     ]);
-    const detector = new CancellationDetectorService(repo, eventAdmissionService);
+    const detector = new CancellationDetectorService(repo, eventAdmissionService, new SituationLookupService());
     const produced = await detector.runDetectionCycle(ORG);
 
     expect(produced.length).toBe(1);
@@ -59,7 +61,7 @@ describe('F-02 — Cancellation/No-show Intelligence detector', () => {
         wasRebooked: true,
       },
     ]);
-    const detector = new CancellationDetectorService(repo, eventAdmissionService);
+    const detector = new CancellationDetectorService(repo, eventAdmissionService, new SituationLookupService());
     const produced = await detector.runDetectionCycle(ORG);
 
     expect(produced.length).toBe(0);
@@ -94,7 +96,7 @@ describe('F-02 — Cancellation/No-show Intelligence detector', () => {
         wasRebooked: false,
       },
     ]);
-    await new CancellationDetectorService(repo, eventAdmissionService).runDetectionCycle(ORG);
+    await new CancellationDetectorService(repo, eventAdmissionService, new SituationLookupService()).runDetectionCycle(ORG);
     const row = await prisma.eventLog.findFirst({ where: { domainTag: 'opportunity.cancellation', organizationId: ORG } });
     const { computeSituationKey } = require('../../../foundation/event-admission/situation-key');
     expect(row?.situationKey).toBe(computeSituationKey('value-engine:cancellation', [ORG, 'appt-r5-1']));
@@ -106,9 +108,58 @@ describe('F-02 — Cancellation/No-show Intelligence detector', () => {
       { eventId: 'ev-r5-2', organizationId: ORG, entityRef: 'patient-r5b', appointmentId: 'appt-r5-2', kind: 'cancelled', occurredAt: '2026-08-20T10:00:00.000Z', wasRebooked: false },
       { eventId: 'ev-r5-3', organizationId: ORG, entityRef: 'patient-r5b', appointmentId: 'appt-r5-3', kind: 'cancelled', occurredAt: '2026-08-21T10:00:00.000Z', wasRebooked: false },
     ]);
-    await new CancellationDetectorService(repo, eventAdmissionService).runDetectionCycle(ORG);
+    await new CancellationDetectorService(repo, eventAdmissionService, new SituationLookupService()).runDetectionCycle(ORG);
     const rows = await prisma.eventLog.findMany({ where: { domainTag: 'opportunity.cancellation', organizationId: ORG } });
     expect(rows.length).toBe(2);
     expect(rows[0].situationKey).not.toBe(rows[1].situationKey);
+  });
+
+  describe('SituationLookupInterface wiring (R5_STABLE_SITUATION_IDENTITY_SPEC.md §F-02)', () => {
+    it('a re-detection of the SAME unrebooked appointment, once Projection is materialized, is submitted as an AMENDMENT — never a second OCCURRENCE (no expires_at, so ACTIVE persists until explicitly retracted)', async () => {
+      await seedEntity('patient-lookup-1');
+      const situationLookup = new SituationLookupService();
+
+      const repo1 = new InMemoryCancellationRepository([
+        { eventId: 'ev-lk-1a', organizationId: ORG, entityRef: 'patient-lookup-1', appointmentId: 'appt-lookup-1', kind: 'noshow', occurredAt: '2026-09-01T10:00:00.000Z', wasRebooked: false },
+      ]);
+      await new CancellationDetectorService(repo1, eventAdmissionService, situationLookup).runDetectionCycle(ORG);
+      await rebuildOrganizationProjection(ORG, '2026-09-02T00:00:00.000Z');
+
+      const first = await prisma.eventLog.findFirst({ where: { domainTag: 'opportunity.cancellation', organizationId: ORG, eventType: 'OCCURRENCE' } });
+      expect(first).not.toBeNull();
+
+      // Second cycle sees the SAME appointment still unprocessed/unrebooked (a real re-run).
+      const repo2 = new InMemoryCancellationRepository([
+        { eventId: 'ev-lk-1a', organizationId: ORG, entityRef: 'patient-lookup-1', appointmentId: 'appt-lookup-1', kind: 'noshow', occurredAt: '2026-09-01T10:00:00.000Z', wasRebooked: false },
+      ]);
+      await new CancellationDetectorService(repo2, eventAdmissionService, situationLookup).runDetectionCycle(ORG);
+
+      const allRows = await prisma.eventLog.findMany({ where: { domainTag: 'opportunity.cancellation', organizationId: ORG } });
+      const occurrences = allRows.filter((r) => r.eventType === 'OCCURRENCE');
+      const amendments = allRows.filter((r) => r.eventType === 'AMENDMENT');
+      expect(occurrences.length).toBe(1);
+      expect(amendments.length).toBe(1);
+      expect(amendments[0].amendsEventId).toBe(first!.id);
+      expect(amendments[0].situationKey).toBeNull(); // OCCURRENCE-only field
+    });
+
+    it('a different appointmentId for the same patient, even after Projection is rebuilt, always submits its own independent OCCURRENCE', async () => {
+      await seedEntity('patient-lookup-2');
+      const situationLookup = new SituationLookupService();
+
+      const repo1 = new InMemoryCancellationRepository([
+        { eventId: 'ev-lk-2a', organizationId: ORG, entityRef: 'patient-lookup-2', appointmentId: 'appt-lookup-2a', kind: 'cancelled', occurredAt: '2026-09-03T10:00:00.000Z', wasRebooked: false },
+      ]);
+      await new CancellationDetectorService(repo1, eventAdmissionService, situationLookup).runDetectionCycle(ORG);
+      await rebuildOrganizationProjection(ORG, '2026-09-04T00:00:00.000Z');
+
+      const repo2 = new InMemoryCancellationRepository([
+        { eventId: 'ev-lk-2b', organizationId: ORG, entityRef: 'patient-lookup-2', appointmentId: 'appt-lookup-2b', kind: 'cancelled', occurredAt: '2026-09-05T10:00:00.000Z', wasRebooked: false },
+      ]);
+      await new CancellationDetectorService(repo2, eventAdmissionService, situationLookup).runDetectionCycle(ORG);
+
+      const rows = await prisma.eventLog.findMany({ where: { domainTag: 'opportunity.cancellation', organizationId: ORG } });
+      expect(rows.filter((r) => r.eventType === 'OCCURRENCE').length).toBe(2); // different situation_key, never an AMENDMENT of each other
+    });
   });
 });

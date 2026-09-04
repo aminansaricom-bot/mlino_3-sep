@@ -3,6 +3,8 @@ import { seedV1CoreProducerRegistry } from '../../../foundation/producer-registr
 import { eventAdmissionService } from '../../../foundation/event-admission/event-admission.service';
 import { FollowupDetectorService } from '../../../value-engines/followup/followup-detector.service';
 import { InMemoryFollowupRepository } from '../../../value-engines/followup/followup-repository';
+import { SituationLookupService } from '../../../foundation/opportunity-projection/situation-lookup.service';
+import { rebuildOrganizationProjection } from '../../../foundation/opportunity-projection/rebuild-projection.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -33,7 +35,7 @@ describe('F-03 — Follow-up Intelligence detector', () => {
     const repo = new InMemoryFollowupRepository([
       { eventId: 'ev-1', organizationId: ORG, patientEntityRef: 'patient-1', lastInteractionAt: '2025-12-01T00:00:00.000Z' },
     ]);
-    const detector = new FollowupDetectorService(repo, eventAdmissionService, 180, () => NOW);
+    const detector = new FollowupDetectorService(repo, eventAdmissionService, new SituationLookupService(), 180, () => NOW);
     const produced = await detector.runDetectionCycle(ORG);
 
     expect(produced.length).toBe(1);
@@ -47,7 +49,7 @@ describe('F-03 — Follow-up Intelligence detector', () => {
     const repo = new InMemoryFollowupRepository([
       { eventId: 'ev-2', organizationId: ORG, patientEntityRef: 'patient-2', lastInteractionAt: recentDate },
     ]);
-    const detector = new FollowupDetectorService(repo, eventAdmissionService, 180, () => NOW);
+    const detector = new FollowupDetectorService(repo, eventAdmissionService, new SituationLookupService(), 180, () => NOW);
     const produced = await detector.runDetectionCycle(ORG);
 
     expect(produced.length).toBe(0);
@@ -58,7 +60,7 @@ describe('F-03 — Follow-up Intelligence detector', () => {
     const repo = new InMemoryFollowupRepository([
       { eventId: 'ev-3', organizationId: ORG, patientEntityRef: 'patient-3', lastInteractionAt: '2025-01-01T00:00:00.000Z' },
     ]);
-    const detector = new FollowupDetectorService(repo, eventAdmissionService, 180, () => NOW);
+    const detector = new FollowupDetectorService(repo, eventAdmissionService, new SituationLookupService(), 180, () => NOW);
     await detector.runDetectionCycle(ORG);
 
     const row = await prisma.eventLog.findFirst({ where: { domainTag: 'opportunity.followup' } });
@@ -90,7 +92,7 @@ describe('F-03 — Follow-up Intelligence detector', () => {
     const repo = new InMemoryFollowupRepository([
       { eventId: 'ev-r5-1', organizationId: ORG, patientEntityRef: 'patient-r5', lastInteractionAt: '2025-06-01T00:00:00.000Z' },
     ]);
-    await new FollowupDetectorService(repo, eventAdmissionService, 180, () => NOW).runDetectionCycle(ORG);
+    await new FollowupDetectorService(repo, eventAdmissionService, new SituationLookupService(), 180, () => NOW).runDetectionCycle(ORG);
     const row = await prisma.eventLog.findFirst({ where: { domainTag: 'opportunity.followup', organizationId: ORG } });
     const { computeSituationKey } = require('../../../foundation/event-admission/situation-key');
     expect(row?.situationKey).toBe(
@@ -103,16 +105,69 @@ describe('F-03 — Follow-up Intelligence detector', () => {
     const repo = new InMemoryFollowupRepository([
       { eventId: 'ev-r5-2', organizationId: ORG, patientEntityRef: 'patient-r5b', lastInteractionAt: '2025-01-01T00:00:00.000Z' },
     ]);
-    await new FollowupDetectorService(repo, eventAdmissionService, 180, () => NOW).runDetectionCycle(ORG);
+    await new FollowupDetectorService(repo, eventAdmissionService, new SituationLookupService(), 180, () => NOW).runDetectionCycle(ORG);
     const firstRow = await prisma.eventLog.findFirst({ where: { domainTag: 'opportunity.followup', organizationId: ORG } });
 
     await prisma.eventLog.deleteMany({ where: { organizationId: ORG } });
     const repo2 = new InMemoryFollowupRepository([
       { eventId: 'ev-r5-3', organizationId: ORG, patientEntityRef: 'patient-r5b', lastInteractionAt: '2025-06-01T00:00:00.000Z' },
     ]);
-    await new FollowupDetectorService(repo2, eventAdmissionService, 180, () => NOW).runDetectionCycle(ORG);
+    await new FollowupDetectorService(repo2, eventAdmissionService, new SituationLookupService(), 180, () => NOW).runDetectionCycle(ORG);
     const secondRow = await prisma.eventLog.findFirst({ where: { domainTag: 'opportunity.followup', organizationId: ORG } });
 
     expect(firstRow?.situationKey).not.toBe(secondRow?.situationKey);
+  });
+
+  describe('SituationLookupInterface wiring (R5_STABLE_SITUATION_IDENTITY_SPEC.md §F-03)', () => {
+    it('a re-detection of the SAME {patient, lastInteractionAt} period, once Projection is materialized, is submitted as an AMENDMENT — never a second OCCURRENCE (no expires_at; the gap only ends when lastInteractionAt itself changes)', async () => {
+      await seedEntity('patient-lookup-1');
+      const situationLookup = new SituationLookupService();
+
+      const repo1 = new InMemoryFollowupRepository([
+        { eventId: 'ev-lk-1a', organizationId: ORG, patientEntityRef: 'patient-lookup-1', lastInteractionAt: '2025-06-01T00:00:00.000Z' },
+      ]);
+      await new FollowupDetectorService(repo1, eventAdmissionService, situationLookup, 180, () => NOW).runDetectionCycle(ORG);
+      await rebuildOrganizationProjection(ORG, new Date(NOW.getTime() + 1000).toISOString());
+
+      const first = await prisma.eventLog.findFirst({ where: { domainTag: 'opportunity.followup', organizationId: ORG, eventType: 'OCCURRENCE' } });
+      expect(first).not.toBeNull();
+
+      // A later detection run — same patient, SAME lastInteractionAt (no new interaction yet),
+      // just more days elapsed (higher materiality_score) — a real re-assessment.
+      const LATER = new Date(NOW.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const repo2 = new InMemoryFollowupRepository([
+        { eventId: 'ev-lk-1a', organizationId: ORG, patientEntityRef: 'patient-lookup-1', lastInteractionAt: '2025-06-01T00:00:00.000Z' },
+      ]);
+      await new FollowupDetectorService(repo2, eventAdmissionService, situationLookup, 180, () => LATER).runDetectionCycle(ORG);
+
+      const allRows = await prisma.eventLog.findMany({ where: { domainTag: 'opportunity.followup', organizationId: ORG } });
+      const occurrences = allRows.filter((r) => r.eventType === 'OCCURRENCE');
+      const amendments = allRows.filter((r) => r.eventType === 'AMENDMENT');
+      expect(occurrences.length).toBe(1);
+      expect(amendments.length).toBe(1);
+      expect(amendments[0].amendsEventId).toBe(first!.id);
+      expect(amendments[0].situationKey).toBeNull(); // OCCURRENCE-only field
+    });
+
+    it('a NEW lastInteractionAt for the same patient (a real new interaction happened) always submits its own independent OCCURRENCE, even after Projection is rebuilt', async () => {
+      await seedEntity('patient-lookup-2');
+      const situationLookup = new SituationLookupService();
+
+      const repo1 = new InMemoryFollowupRepository([
+        { eventId: 'ev-lk-2a', organizationId: ORG, patientEntityRef: 'patient-lookup-2', lastInteractionAt: '2025-01-01T00:00:00.000Z' },
+      ]);
+      await new FollowupDetectorService(repo1, eventAdmissionService, situationLookup, 180, () => NOW).runDetectionCycle(ORG);
+      await rebuildOrganizationProjection(ORG, new Date(NOW.getTime() + 1000).toISOString());
+
+      // Patient had a genuinely new interaction — a different lastInteractionAt, hence a
+      // different situation_key (still past the threshold for this new period).
+      const repo2 = new InMemoryFollowupRepository([
+        { eventId: 'ev-lk-2b', organizationId: ORG, patientEntityRef: 'patient-lookup-2', lastInteractionAt: '2025-02-01T00:00:00.000Z' },
+      ]);
+      await new FollowupDetectorService(repo2, eventAdmissionService, situationLookup, 180, () => NOW).runDetectionCycle(ORG);
+
+      const rows = await prisma.eventLog.findMany({ where: { domainTag: 'opportunity.followup', organizationId: ORG } });
+      expect(rows.filter((r) => r.eventType === 'OCCURRENCE').length).toBe(2);
+    });
   });
 });
