@@ -1,0 +1,298 @@
+{
+  "contract_version": "draft-1",
+  "generated_at": "2026-09-04T09:00:00.000Z",
+  "records": [
+    {
+      "business_id": "biz_mock_dental_01",
+      "organization_id": "org_mock_001",
+      "name": "کلینیک دندان‌پزشکی لبخند پارس",
+      "category": "dental_clinic",
+      "location": {
+        "latitude": 35.7997,
+        "longitude": 51.4344,
+        "floor_level": null,
+        "building_id": null
+      },
+      "products": [
+        {
+          "product_id": "prd_d01_01",
+          "name": "جرم‌گیری و بروساژ کامل",
+          "description": "جرم‌گیری کامل با اولتراسونیک به همراه پالیش",
+          "price": 850000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_d01_02",
+          "name": "پرکاری کامپوزیت",
+          "description": "پرکاری دندان با کامپوزیت هم‌رنگ دندان",
+          "price": 1200000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_d01_03",
+          "name": "بلیچینگ لیزری",
+          "description": "سفید کردن دندان با لیزر در یک جلسه",
+          "price": 3200000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_d01_04",
+          "name": "کاشت ایمپلنت (برند کره)",
+          "description": "ایمپلنت دیجیتال با گارانتی ۵ ساله",
+          "price": 28000000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": false
+        }
+      ],
+      "offers": [
+        {
+          "offer_id": "off_d01_01",
+          "title": "۲۰٪ تخفیف جرم‌گیری برای اولین مراجعه",
+          "description": "ویژه‌ی بیماران جدید تا پایان ماه",
+          "discount_percent": 20,
+          "valid_from": "2026-09-01T00:00:00.000Z",
+          "valid_until": "2026-09-30T23:59:59.000Z"
+        }
+      ],
+      "last_synced_at": "2026-09-04T08:45:00.000Z"
+    },
+    {
+      "business_id": "biz_mock_beauty_01",
+      "organization_id": "org_mock_002",
+      "name": "کلینیک زیبایی رز سفید",
+      "category": "beauty_clinic",
+      "location": {
+        "latitude": 35.7942,
+        "longitude": 51.4453,
+        "floor_level": null,
+        "building_id": null
+      },
+      "products": [
+        {
+          "product_id": "prd_b01_01",
+          "name": "ژل تزریقی لب",
+          "description": "ژل اورجینال با لیفت و حجم‌دهی",
+          "price": 6500000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_b01_02",
+          "name": "بوتاکس پیشانی",
+          "description": "بوتاکس اورجینال با تضمین اصالت",
+          "price": 4800000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_b01_03",
+          "name": "پاکسازی پوست عمیق",
+          "description": "پاکسازی تخصصی با ماسک و ماساژ صورت",
+          "price": 1500000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        }
+      ],
+      "offers": [
+        {
+          "offer_id": "off_b01_01",
+          "title": "پکیج پاکسازی + هیدرودرم",
+          "description": "پکیج بهداشتی با ۱۵٪ تخفیف",
+          "discount_percent": 15,
+          "valid_from": "2026-09-02T00:00:00.000Z",
+          "valid_until": null
+        }
+      ],
+      "last_synced_at": "2026-09-04T08:50:00.000Z"
+    },
+    {
+      "business_id": "biz_mock_dental_02",
+      "organization_id": "org_mock_003",
+      "name": "دندان‌پزشکی کودک شادی",
+      "category": "dental_clinic",
+      "location": {
+        "latitude": 35.7885,
+        "longitude": 51.4194,
+        "floor_level": null,
+        "building_id": null
+      },
+      "products": [
+        {
+          "product_id": "prd_d02_01",
+          "name": "معاینه‌ی رایگان کودک زیر ۶ سال",
+          "description": "معاینه و مشاوره‌ی تغذیه‌ی دندانی",
+          "price": 0,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_d02_02",
+          "name": "فلوراید تراپی",
+          "description": "ویژه‌ی کودکان و نوجوانان",
+          "price": 700000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        }
+      ],
+      "offers": [],
+      "last_synced_at": "2026-09-04T08:40:00.000Z"
+    },
+    {
+      "business_id": "biz_mock_beauty_02",
+      "organization_id": "org_mock_004",
+      "name": "مرکز زیبایی آرتا — طبقه‌ی اول",
+      "category": "beauty_clinic",
+      "location": {
+        "latitude": 35.7602,
+        "longitude": 51.4099,
+        "floor_level": 1,
+        "building_id": "bldg_mock_pasazh_vanak"
+      },
+      "products": [
+        {
+          "product_id": "prd_b02_01",
+          "name": "لیزر موهای زائد فول‌بادی",
+          "description": "۶ جلسه با دستگاه کولیز الکساندرایت",
+          "price": 9500000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_b02_02",
+          "name": "مزوتراپی صورت",
+          "description": "آبرسانی و شفاف‌سازی پوست",
+          "price": 2200000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        }
+      ],
+      "offers": [
+        {
+          "offer_id": "off_b02_01",
+          "title": "اولین جلسه‌ی لیزر نصف قیمت",
+          "description": "فقط برای ثبت‌نام‌های این هفته",
+          "discount_percent": 50,
+          "valid_from": "2026-09-03T00:00:00.000Z",
+          "valid_until": "2026-09-10T23:59:59.000Z"
+        }
+      ],
+      "last_synced_at": "2026-09-04T08:55:00.000Z"
+    },
+    {
+      "business_id": "biz_mock_dental_03",
+      "organization_id": "org_mock_005",
+      "name": "کلینیک دندان‌پزشکی آرتا — طبقه‌ی دوم",
+      "category": "dental_clinic",
+      "location": {
+        "latitude": 35.7604,
+        "longitude": 51.4101,
+        "floor_level": 2,
+        "building_id": "bldg_mock_pasazh_vanak"
+      },
+      "products": [
+        {
+          "product_id": "prd_d03_01",
+          "name": "ارتودنسی نامرئی",
+          "description": "مشاوره‌ی اولیه رایگان + طرح درمان",
+          "price": 85000000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_d03_02",
+          "name": "عصب‌کشی تک‌کانال",
+          "description": "با روتاری و بی‌حسی کامل",
+          "price": 2800000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        }
+      ],
+      "offers": [],
+      "last_synced_at": "2026-09-04T08:55:00.000Z"
+    },
+    {
+      "business_id": "biz_mock_beauty_03",
+      "organization_id": "org_mock_006",
+      "name": "سالن زیبایی دخترانه آتریسا — منفی یک",
+      "category": "beauty_clinic",
+      "location": {
+        "latitude": 35.7600,
+        "longitude": 51.4097,
+        "floor_level": -1,
+        "building_id": "bldg_mock_pasazh_vanak"
+      },
+      "products": [
+        {
+          "product_id": "prd_b03_01",
+          "name": "کوتاهی و لایه‌ی تخصصی مو",
+          "description": "با مشاوره‌ی فرم چهره",
+          "price": 900000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_b03_02",
+          "name": "کرатین مو",
+          "description": "صافی مو برای موهای فر و وز",
+          "price": 3800000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        }
+      ],
+      "offers": [
+        {
+          "offer_id": "off_b03_01",
+          "title": "کراتین + ترمیم، ۲۵٪ تخفیف",
+          "description": "ویژه‌ی روزهای ابتدای هفته",
+          "discount_percent": 25,
+          "valid_from": "2026-08-30T00:00:00.000Z",
+          "valid_until": "2026-09-07T23:59:59.000Z"
+        }
+      ],
+      "last_synced_at": "2026-09-04T08:58:00.000Z"
+    },
+    {
+      "business_id": "biz_mock_beauty_04",
+      "organization_id": "org_mock_007",
+      "name": "کلینیک پوست و مو نیلا",
+      "category": "beauty_clinic",
+      "location": {
+        "latitude": 35.7448,
+        "longitude": 51.4838,
+        "floor_level": null,
+        "building_id": null
+      },
+      "products": [
+        {
+          "product_id": "prd_b04_01",
+          "name": "هایفو صورت و گردن",
+          "description": "لیفت بدون جراحی با دستگاه کره‌ای",
+          "price": 12000000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        }
+      ],
+      "offers": [],
+      "last_synced_at": "2026-09-04T08:42:00.000Z"
+    }
+  ]
+}
