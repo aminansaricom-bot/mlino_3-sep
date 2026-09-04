@@ -3,9 +3,18 @@
 // باید دقیقاً شکل قرارداد را داشته باشد — داده‌ی خراب هرگز وارد Cache نمی‌شود.
 
 import type {
+  V2BusinessCategory,
   V2BusinessDirectoryExport,
   V2BusinessDirectoryRecord,
 } from './contract';
+
+const KNOWN_CATEGORIES: ReadonlySet<string> = new Set<V2BusinessCategory>([
+  'dental_clinic',
+  'beauty_clinic',
+  'cafe',
+  'restaurant',
+  'retail_shop',
+]);
 
 export class DirectoryValidationError extends Error {
   constructor(message: string) {
@@ -91,7 +100,12 @@ function validateRecord(rec: unknown): V2BusinessDirectoryRecord {
   requireString(rec, 'business_id');
   requireString(rec, 'organization_id');
   requireString(rec, 'name');
-  requireString(rec, 'category');
+  const category = requireString(rec, 'category');
+  if (!KNOWN_CATEGORIES.has(category)) {
+    throw new DirectoryValidationError(
+      `unknown category "${category}" — not in contract draft-1 whitelist`,
+    );
+  }
   validateLocation(rec['location']);
   validateProducts(rec['products']);
   validateOffers(rec['offers']);

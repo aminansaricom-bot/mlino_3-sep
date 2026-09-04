@@ -18,7 +18,7 @@ beforeAll(async () => {
 describe('BusinessDirectoryService — مسیر واقعی فایل Export', () => {
   it('Snapshot Mock از فایل واقعی، بدون خطا وارد Cache می‌شود', () => {
     expect(service.isLoaded).toBe(true);
-    expect(service.getAll().length).toBe(7);
+    expect(service.getAll().length).toBe(10);
   });
 
   it('هر رکورد شکل کامل قرارداد draft-1 را دارد', () => {
@@ -36,13 +36,13 @@ describe('BusinessDirectoryService — مسیر واقعی فایل Export', () 
     }
   });
 
-  it('ساختمان چندطبقه با سه کسب‌وکار در طبقات مختلف ثبت شده', () => {
+  it('ساختمان چندطبقه با کسب‌وکارها در طبقات مختلف ثبت شده', () => {
     const bldg = service
       .getAll()
       .filter((r) => r.location.building_id === 'bldg_mock_pasazh_vanak');
-    expect(bldg.length).toBe(3);
+    expect(bldg.length).toBe(4);
     const floors = bldg.map((r) => r.location.floor_level).sort();
-    expect(floors).toEqual([-1, 1, 2]);
+    expect(floors).toEqual([-1, 0, 1, 2]);
   });
 
   it('getById رکورد درست را برمی‌گرداند', () => {
@@ -58,8 +58,8 @@ describe('BusinessDirectoryService — مسیر واقعی فایل Export', () 
       longitude: 51.41,
       radiusMeters: 600,
     });
-    // هر سه شعبه‌ی داخل پاساژ باید بیایند، با ترتیب فاصله صعودی
-    expect(results.length).toBe(3);
+    // چهار شعبه‌ی داخل پاساژ + رستوران پاستا لند (~۵۰۰م) در شعاع ۶۰۰ متری
+    expect(results.length).toBe(5);
     const dists = results.map((r) => r.distanceMeters);
     expect(dists).toEqual([...dists].sort((a, b) => a - b));
   });
@@ -130,6 +130,17 @@ describe('validateExportSnapshot — رد داده‌ی خراب', () => {
         contract_version: 'draft-1',
         generated_at: '2026-09-04T00:00:00.000Z',
         records: [baseRecord, baseRecord],
+      }),
+    ).toThrow(DirectoryValidationError);
+  });
+
+  it('category خارج از whitelist قرارداد رد می‌شود (یافته‌ی بازبینی فاز ۱)', () => {
+    const svc = new BusinessDirectoryService();
+    expect(() =>
+      svc.loadSnapshot({
+        contract_version: 'draft-1',
+        generated_at: '2026-09-04T00:00:00.000Z',
+        records: [{ ...baseRecord, category: 'space_station' }],
       }),
     ).toThrow(DirectoryValidationError);
   });

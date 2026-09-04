@@ -293,6 +293,126 @@
       ],
       "offers": [],
       "last_synced_at": "2026-09-04T08:42:00.000Z"
+    },
+    {
+      "business_id": "biz_mock_cafe_01",
+      "organization_id": "org_mock_008",
+      "name": "کافه مکث — همکف",
+      "category": "cafe",
+      "location": {
+        "latitude": 35.7603,
+        "longitude": 51.4098,
+        "floor_level": 0,
+        "building_id": "bldg_mock_pasazh_vanak"
+      },
+      "products": [
+        {
+          "product_id": "prd_c01_01",
+          "name": "اسپرسو دوبل",
+          "description": "دانه‌ی ترکیبی تازه‌برشت",
+          "price": 95000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_c01_02",
+          "name": "کاپوچینو",
+          "description": "با شیر و لاته‌آرت",
+          "price": 140000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_c01_03",
+          "name": "کیک شکلاتی خانگی",
+          "description": "برش روز",
+          "price": 180000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        }
+      ],
+      "offers": [
+        {
+          "offer_id": "off_c01_01",
+          "title": "دومین فنجان نصف‌قیمت",
+          "description": "ویژه‌ی ساعات ۱۶ تا ۱۸",
+          "discount_percent": 50,
+          "valid_from": "2026-09-01T00:00:00.000Z",
+          "valid_until": null
+        }
+      ],
+      "last_synced_at": "2026-09-04T09:05:00.000Z"
+    },
+    {
+      "business_id": "biz_mock_restaurant_01",
+      "organization_id": "org_mock_009",
+      "name": "رستوران ایتالیایی پاستا لند",
+      "category": "restaurant",
+      "location": {
+        "latitude": 35.7574,
+        "longitude": 51.4058,
+        "floor_level": null,
+        "building_id": null
+      },
+      "products": [
+        {
+          "product_id": "prd_r01_01",
+          "name": "پاستا آلفردو با مرغ",
+          "description": "سس خامه‌ای با پارمزان",
+          "price": 680000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_r01_02",
+          "name": "پیتزا پپرونی",
+          "description": "متوسط — ۸ تکه",
+          "price": 550000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        }
+      ],
+      "offers": [],
+      "last_synced_at": "2026-09-04T09:06:00.000Z"
+    },
+    {
+      "business_id": "biz_mock_retail_01",
+      "organization_id": "org_mock_010",
+      "name": "فروشگاه ارگانیک سبز",
+      "category": "retail_shop",
+      "location": {
+        "latitude": 35.8028,
+        "longitude": 51.4402,
+        "floor_level": null,
+        "building_id": null
+      },
+      "products": [
+        {
+          "product_id": "prd_s01_01",
+          "name": "عسل طبیعی کوهستان",
+          "description": "۱۸۰ گرم، با آزمایش اصالت",
+          "price": 950000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        },
+        {
+          "product_id": "prd_s01_02",
+          "name": "روغن زیتون فرابکر",
+          "description": "یک لیتری، تولید داخلی",
+          "price": 620000,
+          "currency": "IRR",
+          "image_url": null,
+          "is_active": true
+        }
+      ],
+      "offers": [],
+      "last_synced_at": "2026-09-04T09:07:00.000Z"
     }
   ]
 }

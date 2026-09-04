@@ -212,3 +212,184 @@ html, body, #root {
     max-height: 45vh;
   }
 }
+
+/* ---- تب‌ها ---- */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.tabs button {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 7px 0;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.tabs button.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 700;
+}
+
+/* ---- دستیار ---- */
+.assistant {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 110px);
+  min-height: 320px;
+}
+
+.search-point {
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+
+.sp-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 4px 0;
+  flex-wrap: wrap;
+}
+
+.sp-row button {
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.sp-row button.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.sp-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sp-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.chat {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 2px;
+}
+
+.msg {
+  display: flex;
+}
+
+.msg.user {
+  justify-content: flex-start;
+}
+
+.msg.assistant {
+  justify-content: flex-end;
+}
+
+.bubble {
+  max-width: 92%;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.msg.user .bubble {
+  background: var(--accent-soft);
+  border: 1px solid var(--panel-border);
+}
+
+.msg.assistant .bubble {
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+}
+
+.msg-understood {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+  border-top: 1px dashed var(--panel-border);
+  padding-top: 4px;
+}
+
+.match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.match-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: right;
+  cursor: pointer;
+  width: 100%;
+  color: var(--text);
+}
+
+.match-card:hover {
+  border-color: var(--offer);
+}
+
+.match-card .product-row:last-child {
+  border-bottom: none;
+}
+
+.chat-input {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.chat-input input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.chat-input input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.chat-input button {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0 16px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
