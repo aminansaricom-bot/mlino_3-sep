@@ -35,16 +35,49 @@ export class CancellationDetectorService {
     const produced: CancellationRecord[] = [];
 
     for (const record of records) {
-      // A cancellation/no-show that was already rebooked is not a lost
-      // opportunity — no signal worth surfacing.
-      if (record.wasRebooked) continue;
-
       // R5: stable dimensions only — organization+appointmentId. `kind`/
       // `wasRebooked`/`occurredAt` excluded (see spec §F-02).
       const situationKey = computeSituationKey(PRODUCER_ID, [organizationId, record.appointmentId]);
 
       const lookup = await this.situationLookup.getSituationState(organizationId, 'opportunity.cancellation', situationKey);
       const targetActive = lookup.found && lookup.state === 'ACTIVE';
+
+      if (record.wasRebooked) {
+        // The slot was filled — this is no longer a lost opportunity. If an
+        // ACTIVE Opportunity exists for this situation, close it via a real
+        // RETRACTION Event (never a direct Projection write — RETRACTION is
+        // an Event like any other, and compute-projection.ts's existing
+        // RETRACTION→EXPIRED rule, CR-07 Rule 5, handles the rest
+        // unchanged). If none is ACTIVE (never detected, or already
+        // closed), there is nothing to retract — a rebooked appointment
+        // must never itself create a new Opportunity.
+        if (!targetActive) continue;
+
+        const retraction: EventCandidateDTO = {
+          producer_id: PRODUCER_ID,
+          domain_tag: 'opportunity.cancellation',
+          organization_id: organizationId,
+          core_entity_refs: [record.entityRef],
+          event_type: 'RETRACTION',
+          opportunity_correlation_id: lookup.opportunity_correlation_id,
+          payload: {
+            evidence_refs: [{ event_id: record.eventId, description: `appointment ${record.appointmentId} rebooked — slot filled` }],
+            materiality_score: 0,
+            materiality_basis: `Appointment ${record.appointmentId} was rebooked on ${record.occurredAt} — no longer a lost opportunity`,
+            intended_audience: 'receptionist_coordinator',
+          },
+          producer_timestamp: new Date().toISOString(),
+          confidence_level: 1.0,
+          kernel_version: 'v1.3',
+          // situation_key is OCCURRENCE-only (R5_STABLE_SITUATION_IDENTITY_SPEC.md).
+        };
+
+        const retractionResult = await this.submission.submitEventCandidate(retraction);
+        if (retractionResult.admission_result === 'accepted') {
+          produced.push(record);
+        }
+        continue;
+      }
 
       const candidate: EventCandidateDTO = {
         producer_id: PRODUCER_ID,

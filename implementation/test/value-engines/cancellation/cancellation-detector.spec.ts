@@ -162,4 +162,122 @@ describe('F-02 — Cancellation/No-show Intelligence detector', () => {
       expect(rows.filter((r) => r.eventType === 'OCCURRENCE').length).toBe(2); // different situation_key, never an AMENDMENT of each other
     });
   });
+
+  describe('RETRACTION path — rebook closes the Opportunity via a real Event (CODEX-20260904-1341-RETRACTION-F02-AUTH)', () => {
+    it('a real rebook (wasRebooked flips to true) on an ACTIVE Opportunity submits a RETRACTION, which Projection reflects as state: EXPIRED with latestEventId pointing at the RETRACTION itself', async () => {
+      await seedEntity('patient-retract-1');
+      const situationLookup = new SituationLookupService();
+
+      // Cycle 1: real cancellation detected, still unrebooked.
+      const repo1 = new InMemoryCancellationRepository([
+        { eventId: 'ev-rt-1a', organizationId: ORG, entityRef: 'patient-retract-1', appointmentId: 'appt-retract-1', kind: 'cancelled', occurredAt: '2026-09-10T10:00:00.000Z', wasRebooked: false },
+      ]);
+      await new CancellationDetectorService(repo1, eventAdmissionService, situationLookup).runDetectionCycle(ORG);
+      await rebuildOrganizationProjection(ORG, '2026-09-10T12:00:00.000Z');
+
+      const founding = await prisma.eventLog.findFirst({ where: { domainTag: 'opportunity.cancellation', organizationId: ORG, eventType: 'OCCURRENCE' } });
+      expect(founding).not.toBeNull();
+      const projectionBefore = await prisma.opportunityCurrentState.findUnique({ where: { opportunityCorrelationId: founding!.id } });
+      expect(projectionBefore?.state).toBe('ACTIVE');
+
+      // Cycle 2: the SAME appointment, now rebooked — a real transition, not a duplicate submission.
+      const repo2 = new InMemoryCancellationRepository([
+        { eventId: 'ev-rt-1a', organizationId: ORG, entityRef: 'patient-retract-1', appointmentId: 'appt-retract-1', kind: 'cancelled', occurredAt: '2026-09-10T10:00:00.000Z', wasRebooked: true },
+      ]);
+      const produced = await new CancellationDetectorService(repo2, eventAdmissionService, situationLookup).runDetectionCycle(ORG);
+      expect(produced.length).toBe(1); // the RETRACTION was submitted and accepted
+
+      const retractionEvent = await prisma.eventLog.findFirst({ where: { domainTag: 'opportunity.cancellation', organizationId: ORG, eventType: 'RETRACTION' } });
+      expect(retractionEvent).not.toBeNull();
+      expect(retractionEvent!.amendsEventId).toBe(founding!.id);
+
+      await rebuildOrganizationProjection(ORG, '2026-09-10T13:00:00.000Z');
+      const projectionAfter = await prisma.opportunityCurrentState.findUnique({ where: { opportunityCorrelationId: founding!.id } });
+      expect(projectionAfter?.state).toBe('EXPIRED');
+      expect(projectionAfter?.latestEventId).toBe(retractionEvent!.id);
+
+      // Only ONE OCCURRENCE ever existed for this appointment — RETRACTION never creates a new one.
+      const allRows = await prisma.eventLog.findMany({ where: { domainTag: 'opportunity.cancellation', organizationId: ORG } });
+      expect(allRows.filter((r) => r.eventType === 'OCCURRENCE').length).toBe(1);
+      expect(allRows.filter((r) => r.eventType === 'RETRACTION').length).toBe(1);
+    });
+
+    it('after a RETRACTION, re-detecting the SAME appointmentId (e.g. cancelled again later) submits a NEW independent OCCURRENCE — never an AMENDMENT of the retracted one, never a merge (CR-03)', async () => {
+      await seedEntity('patient-retract-2');
+      const situationLookup = new SituationLookupService();
+
+      const repo1 = new InMemoryCancellationRepository([
+        { eventId: 'ev-rt-2a', organizationId: ORG, entityRef: 'patient-retract-2', appointmentId: 'appt-retract-2', kind: 'cancelled', occurredAt: '2026-09-11T10:00:00.000Z', wasRebooked: false },
+      ]);
+      await new CancellationDetectorService(repo1, eventAdmissionService, situationLookup).runDetectionCycle(ORG);
+      await rebuildOrganizationProjection(ORG, '2026-09-11T12:00:00.000Z');
+
+      const repo2 = new InMemoryCancellationRepository([
+        { eventId: 'ev-rt-2a', organizationId: ORG, entityRef: 'patient-retract-2', appointmentId: 'appt-retract-2', kind: 'cancelled', occurredAt: '2026-09-11T10:00:00.000Z', wasRebooked: true },
+      ]);
+      await new CancellationDetectorService(repo2, eventAdmissionService, situationLookup).runDetectionCycle(ORG);
+      await rebuildOrganizationProjection(ORG, '2026-09-11T13:00:00.000Z');
+
+      // Sanity: Lookup now reports EXPIRED for this situation_key.
+      const { computeSituationKey } = require('../../../foundation/event-admission/situation-key');
+      const sk = computeSituationKey('value-engine:cancellation', [ORG, 'appt-retract-2']);
+      const lookupResult = await situationLookup.getSituationState(ORG, 'opportunity.cancellation', sk);
+      expect(lookupResult.found).toBe(true);
+      if (lookupResult.found) expect(lookupResult.state).toBe('EXPIRED');
+
+      // Same appointmentId cancelled again (e.g. the replacement booking itself later fell through)
+      // — a NEW, independent situation, never merged into the retracted one.
+      const repo3 = new InMemoryCancellationRepository([
+        { eventId: 'ev-rt-2b', organizationId: ORG, entityRef: 'patient-retract-2', appointmentId: 'appt-retract-2', kind: 'noshow', occurredAt: '2026-09-20T10:00:00.000Z', wasRebooked: false },
+      ]);
+      await new CancellationDetectorService(repo3, eventAdmissionService, situationLookup).runDetectionCycle(ORG);
+
+      const rows = await prisma.eventLog.findMany({ where: { domainTag: 'opportunity.cancellation', organizationId: ORG } });
+      const occurrences = rows.filter((r) => r.eventType === 'OCCURRENCE');
+      const amendments = rows.filter((r) => r.eventType === 'AMENDMENT');
+      expect(occurrences.length).toBe(2); // two fully independent OCCURRENCEs
+      expect(amendments.length).toBe(0); // never an AMENDMENT of the already-retracted one
+    });
+
+    it('a rebook with NO matching ACTIVE Opportunity (never detected, or already closed) submits nothing — a rebooked appointment must never create a new Opportunity', async () => {
+      await seedEntity('patient-retract-3');
+      const situationLookup = new SituationLookupService();
+
+      // No prior OCCURRENCE was ever detected for this appointment (e.g. it was rebooked
+      // before ever surfacing as an Opportunity, or the repository never returned it unrebooked).
+      const repo = new InMemoryCancellationRepository([
+        { eventId: 'ev-rt-3a', organizationId: ORG, entityRef: 'patient-retract-3', appointmentId: 'appt-retract-3', kind: 'cancelled', occurredAt: '2026-09-12T10:00:00.000Z', wasRebooked: true },
+      ]);
+      const produced = await new CancellationDetectorService(repo, eventAdmissionService, situationLookup).runDetectionCycle(ORG);
+
+      expect(produced.length).toBe(0);
+      const rows = await prisma.eventLog.count({ where: { domainTag: 'opportunity.cancellation', organizationId: ORG } });
+      expect(rows).toBe(0);
+    });
+
+    it('architecture invariant (fail-closed, existing Admission boundary): a RETRACTION with a non-existent opportunity_correlation_id is rejected, never silently accepted', async () => {
+      await seedEntity('patient-retract-4');
+      const malformedRetraction = {
+        producer_id: 'value-engine:cancellation',
+        domain_tag: 'opportunity.cancellation',
+        organization_id: ORG,
+        core_entity_refs: ['patient-retract-4'],
+        event_type: 'RETRACTION',
+        opportunity_correlation_id: '00000000-0000-0000-0000-000000000000', // does not exist
+        payload: {
+          evidence_refs: [],
+          materiality_score: 0,
+          materiality_basis: 'test',
+          intended_audience: 'receptionist_coordinator',
+        },
+        producer_timestamp: new Date().toISOString(),
+        confidence_level: 1.0,
+        kernel_version: 'v1.3',
+      } as const;
+
+      const result = await eventAdmissionService.submitEventCandidate(malformedRetraction as never);
+      expect(result.admission_result).toBe('rejected');
+      expect((result as { rejection_reason?: string }).rejection_reason).toBe('OPPORTUNITY_CORRELATION_ID_INVALID');
+    });
+  });
 });
