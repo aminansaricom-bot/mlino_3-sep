@@ -1,13 +1,13 @@
-HANDOFF_ID: HANDOFF-20260904-F02-RETRACTION
+HANDOFF_ID: HANDOFF-20260904-RETRACTION-REVIEW-ACK
 AUTHOR: CLAUDE
-PHASE: F02_RETRACTION_PATH
-STATUS: DELIVERED_AWAITING_INDEPENDENT_REVIEW
-REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260904_F02_RETRACTION_IMPLEMENTATION_REPORT.md
-REPORT_SHA256: 78acfe5a0f318d8a2d9fdfcb2443745ebbe5c55a407a796a727cdda693a3aba5
+PHASE: RETRACTION_REVIEW_ACKNOWLEDGEMENT
+STATUS: INDEPENDENTLY_REVIEWED_AND_APPROVED
+REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260904_RETRACTION_REVIEW_ACKNOWLEDGEMENT.md
+REPORT_SHA256: 8bb22440fb2c77cbf1f25550dd2b11920813ef38d66f5bb407fbe8858e4f52e9
 ZIP_PATH: (none built this pass)
-CREATED_AT: 2026-09-04T13:55:00
-NEXT_ACTION: WAIT_FOR_INDEPENDENT_REVIEW — Mamad will review this delivery separately, per the stop condition in CODEX-20260904-1341-RETRACTION-F02-AUTH bond 9.
+CREATED_AT: 2026-09-04T14:15:00
+NEXT_ACTION: WAIT — stop condition per Mamad's instruction (CODEX-20260904-1403-F02RETRACTION-REVIEW, bond 5.4). No next phase begins without explicit product-owner decision.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260904-POSTREVIEW-CLEANUP
-EXECUTED_INSTRUCTION_ID: CODEX-20260904-1341-RETRACTION-F02-AUTH
-NOTE: F-02 RETRACTION path implemented — real rebook (wasRebooked true) on an ACTIVE Opportunity submits a RETRACTION targeting it via SituationLookupInterface; no matching ACTIVE Opportunity -> nothing submitted. Re-detection after RETRACTION correctly produces a new independent OCCURRENCE (CR-03 unchanged, no merge). admission-validator.ts and compute-projection.ts required zero changes (verified, not assumed, that both already handle RETRACTION correctly). 4 new tests, 126/126 total passing, zero regression. Zero drift on shared-contracts/types.ts and prisma/schema.prisma. F-01/F-03 untouched. Pushed as two real commits: 30d7a4ebf0b773a6a7edf3798e61cdadb0e98d56 (code+tests) then a second bookkeeping commit for this report (hash reported to the user directly, not embeddable in the report itself). Open gaps unchanged: R4 (BLOCKED), R5-Concurrency (OPEN by design), no real AC-2 Governance Adapter, no RETRACTION path for F-01/F-03 (out of scope, future product-owner decision).
+PREVIOUS_HANDOFF_ID: HANDOFF-20260904-F02-RETRACTION
+EXECUTED_INSTRUCTION_ID: CODEX-20260904-1403-F02RETRACTION-REVIEW
+NOTE: Mamad independently reviewed the F-02 RETRACTION delivery and approved it, zero blocking findings, zero code fixes required. Independently re-verified: checksum matches on both changed files and the report, zero drift on frozen contract/schema, 126/126 tests on real Postgres, tsc clean, zero cross-feature imports, and — notably — independently confirmed via its own git ls-remote that both prior commits (30d7a4e, e3303c8) really landed on origin/main. Full review evidence in AI_HANDOFF/CODEX_INSTRUCTIONS/ (archival copy) and this handoff's CODEX_NEXT_INSTRUCTION.md body at time of execution. Open gaps unchanged: R4 (BLOCKED), R5-Concurrency (OPEN by design), evaluateAC2FailClosed duplicate-decision hardening (non-blocking, noted), no RETRACTION path for F-01/F-03. Next phase requires explicit product-owner authorization.
