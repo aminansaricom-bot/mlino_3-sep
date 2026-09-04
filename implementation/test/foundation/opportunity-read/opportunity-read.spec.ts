@@ -5,6 +5,7 @@ import { rebuildOrganizationProjection } from '../../../foundation/opportunity-p
 import { OpportunityReadService } from '../../../foundation/opportunity-read/opportunity-read.service';
 import { OpportunityFeedService } from '../../../feed/opportunity-feed.service';
 import { FakeAC2DecisionPort } from '../../mocks/fake-ac2-decision-port';
+import { evaluateAC2FailClosed, OpportunityAccessCandidate } from '../../../foundation/access-decision/ac2-decision-port';
 import { ActorContext, EventCandidateDTO } from '../../../shared-contracts/types';
 
 const ORG_A = 'org-read-A';
@@ -156,6 +157,70 @@ describe('FP-02 — OpportunityReadService (real IC14ReadInterface, real Postgre
       // Both opportunities (one manager-only, one reception-only) were presented to AC-2 —
       // proving AC-2 runs on the org-scoped set BEFORE the audience filter narrows it.
       expect(port.calls[0].candidates.length).toBe(2);
+    });
+  });
+
+  describe('AC-2 duplicate-decision hardening (F-1) — never "last one wins", always deny', () => {
+    it('Port returns two "allow" decisions for the same opportunity_correlation_id: the candidate is denied, no evidence is exposed', async () => {
+      await seedEntity('entity-read-1');
+      const occ = await seedOccurrence({
+        payload: { evidence_refs: [{ event_id: 'ev-a' }], materiality_score: 0.8, materiality_basis: 'x', intended_audience: 'both' },
+      });
+      await rebuildOrganizationProjection(ORG_A, '2026-08-16T00:00:00.000Z');
+
+      const port = new FakeAC2DecisionPort({ duplicateDecisionPair: ['allow', 'allow'] });
+      const service = new OpportunityReadService(port);
+      const dto = await service.getOpportunityById(occ.opportunity_correlation_id!, managerA);
+      expect(dto).toBeNull(); // denied — an ambiguous double-allow is never resolved by picking either one
+
+      const feed = await service.getOpportunityFeed({ actor: managerA });
+      expect(Object.values(feed.opportunities_by_family).flat().length).toBe(0);
+    });
+
+    it('Port returns "allow" then "deny" for the same opportunity_correlation_id: the candidate is still denied — order does not let the allow win', async () => {
+      await seedEntity('entity-read-1');
+      const occ = await seedOccurrence({
+        payload: { evidence_refs: [], materiality_score: 0.8, materiality_basis: 'x', intended_audience: 'both' },
+      });
+      await rebuildOrganizationProjection(ORG_A, '2026-08-16T00:00:00.000Z');
+
+      const port = new FakeAC2DecisionPort({ duplicateDecisionPair: ['allow', 'deny'] });
+      const service = new OpportunityReadService(port);
+      expect(await service.getOpportunityById(occ.opportunity_correlation_id!, managerA)).toBeNull();
+    });
+
+    it('Port returns "deny" then "allow" for the same opportunity_correlation_id: the candidate is still denied — order does not let the allow win', async () => {
+      await seedEntity('entity-read-1');
+      const occ = await seedOccurrence({
+        payload: { evidence_refs: [], materiality_score: 0.8, materiality_basis: 'x', intended_audience: 'both' },
+      });
+      await rebuildOrganizationProjection(ORG_A, '2026-08-16T00:00:00.000Z');
+
+      const port = new FakeAC2DecisionPort({ duplicateDecisionPair: ['deny', 'allow'] });
+      const service = new OpportunityReadService(port);
+      expect(await service.getOpportunityById(occ.opportunity_correlation_id!, managerA)).toBeNull();
+    });
+
+    it('input candidates array with a duplicate opportunity_correlation_id: every duplicated entry is denied outright, never sent to the Port', async () => {
+      const dupId = 'dup-correlation-id-f1-hardening';
+      const candidateA: OpportunityAccessCandidate = {
+        organization_id: ORG_A,
+        opportunity_correlation_id: dupId,
+        subject_core_entity_refs: ['entity-read-1'],
+        evidence_refs: [{ event_id: 'ev-a' }],
+      };
+      const candidateB: OpportunityAccessCandidate = {
+        organization_id: ORG_A,
+        opportunity_correlation_id: dupId,
+        subject_core_entity_refs: ['entity-read-2'],
+        evidence_refs: [{ event_id: 'ev-b' }],
+      };
+
+      const port = new FakeAC2DecisionPort();
+      const result = await evaluateAC2FailClosed(port, managerA, [candidateA, candidateB]);
+
+      expect(result.get(dupId)).toEqual({ opportunity_correlation_id: dupId, access: 'deny', authorized_evidence_refs: [] });
+      expect(port.calls.length).toBe(0); // the ambiguous pair was never even sent to the Port
     });
   });
 

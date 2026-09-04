@@ -62,6 +62,16 @@ export interface AC2DecisionPort {
  *    an event_id not present in the
  *    candidate's own evidence_refs     -> that entry is silently dropped
  *    (Port can never inject evidence the candidate didn't already carry).
+ *  - Input `candidates` contains >1
+ *    entry with the same
+ *    opportunity_correlation_id        -> every one of those duplicated entries
+ *    denied outright, never sent to the Port (which candidate's context would
+ *    even be the "real" one is itself ambiguous — fail-closed, not first/last-wins).
+ *  - Port returns >1 `AC2Decision` for
+ *    the same opportunity_correlation_id -> that candidate denied. Never
+ *    "last one wins" — a non-deterministic/ambiguous Port result is treated
+ *    as no decision at all, which the existing "missing from result" rule
+ *    already denies.
  */
 export async function evaluateAC2FailClosed(
   port: AC2DecisionPort,
@@ -76,10 +86,32 @@ export async function evaluateAC2FailClosed(
 
   if (candidates.length === 0) return new Map();
 
-  const validCandidates = candidates.filter((c) => c.subject_core_entity_refs.length > 0);
-  const invalidCandidates = candidates.filter((c) => c.subject_core_entity_refs.length === 0);
-
   const result = new Map<OpportunityCorrelationId, AC2Decision>();
+
+  // Duplicate opportunity_correlation_id in the INPUT array is a structural
+  // anomaly, not a normal case — the current production call site
+  // (buildAccessCandidates) always produces a Map-deduplicated list and never
+  // triggers this branch; this is defense-in-depth for future callers. Every
+  // candidate sharing a duplicated id is denied outright and excluded from
+  // being sent to the Port at all.
+  const inputIdCounts = new Map<OpportunityCorrelationId, number>();
+  for (const c of candidates) {
+    inputIdCounts.set(c.opportunity_correlation_id, (inputIdCounts.get(c.opportunity_correlation_id) ?? 0) + 1);
+  }
+  const dedupedCandidates: OpportunityAccessCandidate[] = [];
+  for (const c of candidates) {
+    if ((inputIdCounts.get(c.opportunity_correlation_id) ?? 0) > 1) {
+      result.set(c.opportunity_correlation_id, denyOf(c));
+    } else {
+      dedupedCandidates.push(c);
+    }
+  }
+
+  if (dedupedCandidates.length === 0) return result;
+
+  const validCandidates = dedupedCandidates.filter((c) => c.subject_core_entity_refs.length > 0);
+  const invalidCandidates = dedupedCandidates.filter((c) => c.subject_core_entity_refs.length === 0);
+
   for (const c of invalidCandidates) {
     result.set(c.opportunity_correlation_id, denyOf(c));
   }
@@ -99,7 +131,22 @@ export async function evaluateAC2FailClosed(
     return result;
   }
 
-  const byId = new Map(raw.map((d) => [d.opportunity_correlation_id, d]));
+  // A Port returning more than one decision for the same opportunity_correlation_id
+  // is itself a non-deterministic/ambiguous result — fail-closed here means "deny",
+  // never "take the last one" (building the Map directly from `raw`, as before,
+  // silently did that). Any id appearing more than once in `raw` is excluded from
+  // `byId` entirely, so the lookup below treats it as "no decision" — already
+  // denied by the existing missing-candidate rule.
+  const outputIdCounts = new Map<OpportunityCorrelationId, number>();
+  for (const d of raw) {
+    outputIdCounts.set(d.opportunity_correlation_id, (outputIdCounts.get(d.opportunity_correlation_id) ?? 0) + 1);
+  }
+  const byId = new Map<OpportunityCorrelationId, AC2Decision>();
+  for (const d of raw) {
+    if (outputIdCounts.get(d.opportunity_correlation_id) === 1) {
+      byId.set(d.opportunity_correlation_id, d);
+    }
+  }
   for (const c of validCandidates) {
     const d = byId.get(c.opportunity_correlation_id);
     if (!d || d.access !== 'allow') {

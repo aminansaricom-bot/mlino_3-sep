@@ -25,6 +25,14 @@ export interface FakeAC2DecisionPortOptions {
   injectForeignEvidenceRef?: EvidenceRef;
   /** Simulates a buggy Port returning a malformed (non-array) authorized_evidence_refs on an otherwise well-formed 'allow' decision — must not crash the consumer, must be treated as empty. */
   malformedAuthorizedEvidenceRefs?: boolean;
+  /**
+   * Simulates a buggy Port returning TWO AC2Decision entries for the same
+   * opportunity_correlation_id (one per requested access value, in the given
+   * order) instead of exactly one — the consumer must deny the affected
+   * candidate outright, regardless of order or content, never "last one wins".
+   * Only meaningful with a single candidate in the call.
+   */
+  duplicateDecisionPair?: ['allow' | 'deny', 'allow' | 'deny'];
 }
 
 export class FakeAC2DecisionPort implements AC2DecisionPort {
@@ -40,6 +48,16 @@ export class FakeAC2DecisionPort implements AC2DecisionPort {
     }
     if (this.options.returnEmpty) {
       return [];
+    }
+    if (this.options.duplicateDecisionPair) {
+      const [first, second] = this.options.duplicateDecisionPair;
+      const c = candidates[0];
+      const mk = (access: 'allow' | 'deny'): AC2Decision => ({
+        opportunity_correlation_id: c.opportunity_correlation_id,
+        access,
+        authorized_evidence_refs: access === 'allow' ? [...c.evidence_refs] : [],
+      });
+      return [mk(first), mk(second)];
     }
 
     return candidates.map((c) => {
