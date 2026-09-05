@@ -2,7 +2,7 @@
 // همه‌ی نتایج باید قابل‌ردیابی به دایرکتوری واقعی باشند (بدون اختراع).
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { RuleBasedIntentParser } from './IntentParser';
+import { RuleBasedIntentParser, extractRadiusMeters } from './IntentParser';
 import { MatchingService } from './MatchingService';
 import { BusinessDirectoryService } from '../directory/BusinessDirectoryService';
 import { loadMockSnapshotRaw } from '../directory/loader';
@@ -56,6 +56,31 @@ describe('RuleBasedIntentParser — تعیین‌کننده بودن', () => {
   it('درخواست تخفیف را به‌عنوان modifier ثبت می‌کند', () => {
     const intent = parser.parse('دنبال تخفیف برای جرمگیری');
     expect(intent.modifiers.wantsOffer).toBe(true);
+  });
+});
+
+describe('رفع یافته‌های بازبینی ممد (M-1 و I-1)', () => {
+  it('M-1: جمله‌ی خالی → category null (نه حدس اولین دسته)', () => {
+    expect(parser.parse('').category).toBeNull();
+    expect(parser.parse('').keywords).toEqual([]);
+  });
+
+  it('M-1: جمله‌ی فقط-Stopword → category null', () => {
+    const intent = parser.parse('می که را رو از با و تا');
+    expect(intent.category).toBeNull();
+  });
+
+  it('I-1: «۲ کیلومتر» با رقم فارسی → ۲۰۰۰ متر', () => {
+    expect(extractRadiusMeters('تا ۲ کیلومتر')).toBe(2000);
+  });
+
+  it('I-1: «۵۰۰ متر» با رقم فارسی → ۵۰۰ متر', () => {
+    expect(extractRadiusMeters('تا ۵۰۰ متر')).toBe(500);
+  });
+
+  it('I-1: ارقام لاتین همچنان کار می‌کنند (رفتار قبلی حفظ)', () => {
+    expect(extractRadiusMeters('تا 2 km')).toBe(2000);
+    expect(extractRadiusMeters('تا 750 متر')).toBe(750);
   });
 });
 

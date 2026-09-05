@@ -8,6 +8,8 @@ import type { V2BusinessDirectoryRecord } from './directory/contract';
 import { intentParser, extractRadiusMeters } from './matching/IntentParser';
 import { matchingService } from './matching/container';
 import type { MatchItem } from './matching/MatchingService';
+import ArVitrineView from './ar/ArVitrineView';
+import { categoryLabel, floorLabel, formatDistance, formatIso, formatPrice } from './uiFormat';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
 
@@ -24,42 +26,6 @@ const matchMarkerIcon = L.divIcon({
   iconSize: [18, 18],
   iconAnchor: [9, 9],
 });
-
-function categoryLabel(cat: string): string {
-  const map: Record<string, string> = {
-    dental_clinic: 'دندان‌پزشکی',
-    beauty_clinic: 'زیبایی',
-    cafe: 'کافه',
-    restaurant: 'رستوران',
-    retail_shop: 'فروشگاه',
-  };
-  return map[cat] ?? cat;
-}
-
-function floorLabel(floor: number | null, buildingId: string | null): string | null {
-  if (floor === null || buildingId === null) return null;
-  if (floor === 0) return 'همکف';
-  if (floor < 0) return `طبقه ${Math.abs(floor)}-`;
-  return `طبقه ${floor}`;
-}
-
-function formatPrice(price: number | null, currency: string | null): string {
-  if (price === null) return 'بدون قیمت';
-  const num = price.toLocaleString('fa-IR');
-  return currency === 'IRR' ? `${num} ریال` : num;
-}
-
-function formatIso(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString('fa-IR');
-  } catch {
-    return iso;
-  }
-}
-
-function formatDistance(meters: number): string {
-  return meters >= 1000 ? `${(meters / 1000).toFixed(1)} کیلومتر` : `${Math.round(meters)} متر`;
-}
 
 function FlyToSelected({ target }: { target: [number, number] | null }) {
   const map = useMap();
@@ -88,7 +54,7 @@ function isOfferActive(validUntil: string | null, now: number): boolean {
   return Number.isNaN(t) ? true : t >= now;
 }
 
-type Tab = 'list' | 'assistant';
+type Tab = 'list' | 'assistant' | 'ar';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -287,6 +253,9 @@ export default function App() {
           </button>
           <button className={tab === 'assistant' ? 'active' : ''} onClick={() => setTab('assistant')}>
             دستیار
+          </button>
+          <button className={tab === 'ar' ? 'active' : ''} onClick={() => setTab('ar')}>
+            ویترین AR
           </button>
         </div>
 
@@ -497,6 +466,17 @@ export default function App() {
               <button onClick={send}>ارسال</button>
             </div>
           </div>
+        )}
+        {tab === 'ar' && (
+          <ArVitrineView
+            searchPoint={searchPoint}
+            searchPointLabel={searchPointLabel}
+            radiusMeters={radiusMeters}
+            onSelectBusiness={(businessId) => {
+              setSelectedId(businessId);
+              setTab('list');
+            }}
+          />
         )}
       </aside>
     </div>

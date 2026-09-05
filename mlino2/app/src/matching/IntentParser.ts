@@ -35,9 +35,16 @@ export interface ParsedIntent {
   modifiers: IntentModifiers;
 }
 
+/** ارقام فارسی/عربی → لاتین (یافته‌ی I-1 بازبینی: کاربر فارسی‌زبان «۲ کیلومتر» می‌نویسد) */
+export function toLatinDigits(text: string): string {
+  return text
+    .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+    .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+}
+
 /** شعاع جست‌وجو اگر مشتری عبارت مکانی گفته باشد (متر) */
 export function extractRadiusMeters(text: string): number | null {
-  const m = text.match(/(\d+)\s*(متر|کیلومتر|km)/);
+  const m = toLatinDigits(text).match(/(\d+)\s*(متر|کیلومتر|km)/);
   if (!m) return null;
   const value = parseInt(m[1] ?? '0', 10);
   if (!Number.isFinite(value) || value <= 0) return null;
@@ -58,10 +65,14 @@ export class RuleBasedIntentParser {
     const joined = stems.join(' ');
 
     let category: V2BusinessCategory | null = null;
-    for (const [cat, keywords] of CATEGORY_KEYWORDS) {
-      if (includesAny(stems, keywords) || joined.length === 0) {
-        category = cat;
-        break;
+    // NOTE(review M-1): جمله‌ی خالی/فقط-Stopword هرگز دسته نمی‌گیرد —
+    // «مطمئن نیست» یعنی null و جست‌وجوی متنی کامل، نه حدس اولین دسته.
+    if (joined.length > 0) {
+      for (const [cat, keywords] of CATEGORY_KEYWORDS) {
+        if (includesAny(stems, keywords)) {
+          category = cat;
+          break;
+        }
       }
     }
 
