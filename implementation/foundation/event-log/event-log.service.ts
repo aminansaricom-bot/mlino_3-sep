@@ -67,6 +67,14 @@ export async function persistEvent(
         organizationId: candidate.organization_id,
         payload: candidate.payload as object,
         situationKey: candidate.situation_key ?? null, // R5
+        // CCR «نوع مالکیت» — فاز ۱ مصوب (Admission-fill): مالکیت اینجا، در مرز
+        // پذیرش، صریح تعیین می‌شود — نه توسط Producer (که هیچ اطلاعات اضافه‌ای
+        // برای این تصمیم ندارد چون تنها مقدار ممکن ORGANIZATIONAL است) و نه با
+        // اتکای خاموش به @default دیتابیس. صراحت اینجا عمدی است: Kernel §۱۰
+        // «تعیین در لحظه‌ی تولید» را ایده‌آل می‌داند و مرز Admission نزدیک‌ترین
+        // نقطه‌ی قابل‌دسترس به آن در V1 است. فاز ۲ (فعال‌شدن INDIVIDUAL) این را
+        // به Producer منتقل می‌کند — با CCR جداگانه.
+        ownershipType: 'ORGANIZATIONAL',
         coreEntities: {
           connect: candidate.core_entity_refs.map((id) => ({ id })),
         },

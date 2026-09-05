@@ -41,6 +41,25 @@ export type DomainTag = (typeof ALLOWED_DOMAIN_TAGS)[number];
 export type IntendedAudience = 'owner_manager' | 'receptionist_coordinator' | 'both';
 
 /**
+ * نوع مالکیت داده — CCR مصوب مالک محصول (۵ سپتامبر ۲۰۲۶):
+ * implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_OWNERSHIP_TYPE.md
+ *
+ * این تنها تغییر مجاز و منتظَر در این فایل منجمد است — Drift این پاس عمدی و
+ * توجیه‌شده است، نه Drift ناخواسته.
+ *
+ * عمداً تک‌مقداری: `INDIVIDUAL` و `AGGREGATE` (Kernel §۱۰) در V1 تعریف نمی‌شوند،
+ * حتی به‌عنوان مقدار غیرفعال — جلوگیری از تعمیم زودهنگام در سطح Type (درس CR-02).
+ * فعال‌سازی آینده: `INDIVIDUAL` مشروط به R8-a (Consent)، `AGGREGATE` مشروط به
+ * R8-b (لایه‌ی دانش) — هرکدام با CCR جداگانه.
+ *
+ * فاز ۱ مصوب (Admission-fill): این مقدار توسط مرز Admission پر می‌شود، نه توسط
+ * Producer — پس عمداً روی `EventCandidateDTO` قرار نمی‌گیرد. همچنین عمداً به هیچ
+ * DTO خروجی (مثل `OpportunityProjectionDTO`) اضافه نمی‌شود، چون هیچ مصرف‌کننده‌ای
+ * بیرون از مرز AC-2 به آن نیاز ندارد و افزودنش گسترش دامنه‌ی CCR بود.
+ */
+export type OwnershipType = 'ORGANIZATIONAL';
+
+/**
  * CRITICAL SEMANTIC LIMITATION (Phase 5A.2 amendment, R4 remains OPEN):
  * `event_id` is currently an OPAQUE evidence reference. Its presence on a
  * payload does NOT mean this Shared Contract guarantees persistence,

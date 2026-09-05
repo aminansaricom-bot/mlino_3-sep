@@ -4,6 +4,7 @@ import {
   EvidenceRef,
   OpportunityCorrelationId,
   OrganizationId,
+  OwnershipType,
 } from '../../shared-contracts/types';
 
 /**
@@ -32,6 +33,20 @@ export interface OpportunityAccessCandidate {
   subject_core_entity_refs: CoreEntityId[];
   /** Exactly as stored in the Opportunity's payload — opaque, unresolved (see EvidenceRef's contract-level limitation). */
   evidence_refs: EvidenceRef[];
+  /**
+   * Recorded ownership of THIS Opportunity, carried from its Projection row
+   * (which in turn carries it from the founding event, filled at the Admission
+   * boundary). Added by the approved ownership-type CCR §5 — this file is not
+   * frozen, so no contract change was needed for it.
+   *
+   * Optional on purpose: a candidate built from a row that predates the
+   * column, or by a future caller that fails to populate it, must be DENIED
+   * (policy v1.1 rule 3 — unknown ownership never means "assume allowed"),
+   * not silently treated as ORGANIZATIONAL. Making it non-optional would have
+   * moved that failure to compile time and hidden the runtime fail-closed path
+   * the policy actually requires.
+   */
+  ownership_type?: OwnershipType;
 }
 
 export interface AC2Decision {

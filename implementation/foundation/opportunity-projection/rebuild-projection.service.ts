@@ -1,5 +1,5 @@
 import { prisma } from '../prisma-client';
-import { ISOTimestamp } from '../../shared-contracts/types';
+import { ISOTimestamp, OwnershipType } from '../../shared-contracts/types';
 import { computeBusinessProjection, computeInteractionStates, partitionChains } from './compute-projection';
 
 /**
@@ -51,6 +51,7 @@ export async function rebuildOrganizationProjection(
     expiresAt: Date | null;
     latestEventId: string;
     lastComputedAt: Date;
+    ownershipType: OwnershipType;
   }[] = [];
 
   const interactionStateRows: {
@@ -79,6 +80,10 @@ export async function rebuildOrganizationProjection(
       expiresAt: business.expiresAt ? new Date(business.expiresAt) : null,
       latestEventId: business.latestEventId,
       lastComputedAt: computedAt,
+      // CCR «نوع مالکیت»: Projection مقدار را از رویداد بنیان‌گذار *حمل* می‌کند،
+      // نه اینکه مستقلاً دوباره تصمیم بگیرد یا به @default جدول تکیه کند — تا
+      // مقدار واقعاً از مرز Admission تا Projection «جریان» داشته باشد.
+      ownershipType: founding.ownershipType,
     });
 
     const interactionStates = computeInteractionStates(interactionChain);

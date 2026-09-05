@@ -1,5 +1,5 @@
 import { prisma } from '../prisma-client';
-import { EvidenceRef, OpportunityCorrelationId } from '../../shared-contracts/types';
+import { EvidenceRef, OpportunityCorrelationId, OwnershipType } from '../../shared-contracts/types';
 import { OpportunityAccessCandidate } from '../access-decision/ac2-decision-port';
 
 /**
@@ -16,7 +16,18 @@ import { OpportunityAccessCandidate } from '../access-decision/ac2-decision-port
  * (ADR-00AC), so a single findMany on event_log resolves all of them.
  */
 export async function buildAccessCandidates(
-  rows: { opportunityCorrelationId: string; organizationId: string; evidenceRefs: unknown }[],
+  rows: {
+    opportunityCorrelationId: string;
+    organizationId: string;
+    evidenceRefs: unknown;
+    /**
+     * Recorded ownership from the Projection row (approved ownership-type CCR).
+     * Optional in this signature so a caller holding a row that predates the
+     * column still type-checks — but such a candidate reaches the Port with
+     * ownership undefined and is DENIED there (policy v1.1 rule 3).
+     */
+    ownershipType?: OwnershipType;
+  }[],
 ): Promise<Map<OpportunityCorrelationId, OpportunityAccessCandidate>> {
   const ids = rows.map((r) => r.opportunityCorrelationId);
   const foundingEvents =
@@ -36,6 +47,7 @@ export async function buildAccessCandidates(
       opportunity_correlation_id: row.opportunityCorrelationId,
       subject_core_entity_refs: founding ? founding.coreEntities.map((e) => e.id) : [],
       evidence_refs: (row.evidenceRefs as EvidenceRef[] | null) ?? [],
+      ownership_type: row.ownershipType,
     });
   }
   return result;
