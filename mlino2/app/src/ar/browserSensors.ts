@@ -4,6 +4,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
+import { headingFromCompassEvent } from './arOrientation';
 
 export type CameraState =
   | { kind: 'idle' }
@@ -80,15 +81,25 @@ interface OrientationEventIOS extends DeviceOrientationEvent {
   webkitCompassHeading?: number;
 }
 
-/** قطب‌نما: iOS (webkitCompassHeading) و اندروید/استاندارد (alpha) */
+/**
+ * قطب‌نما — رفع یافته‌ی A-1 بازبینی فاز ۳:
+ * - iOS: webkitCompassHeading (واقعاً جهت جغرافیایی).
+ * - اندروید/استاندارد: فقط رویداد absolute (deviceorientationabsolute یا absolute=true)
+ *   معتبر است و با تبدیل «360 − alpha» (پادساعتگرد → ساعتگرد).
+ * - اگر فقط رویداد غیر-absolute بیاید، صادقانه «notAbsolute» اعلام می‌شود و
+ *   UI باید به «جهت دستی» برگردد — هرگز alpha نسبی به‌عنوان شمال تفسیر نمی‌شود.
+ */
 export function useDeviceHeading(enabled: boolean): {
   headingDeg: number | null;
   simulated: boolean;
+  /** وضعیت منبع heading — برای نوار وضعیت صادقانه UI */
+  source: 'none' | 'compass' | 'manual' | 'notAbsolute';
   setSimulatedHeading: (deg: number) => void;
   request: () => void;
 } {
   const [headingDeg, setHeadingDeg] = useState<number | null>(null);
   const [simulated, setSimulated] = useState(false);
+  const [source, setSource] = useState<'none' | 'compass' | 'manual' | 'notAbsolute'>('none');
   const simulatedRef = useRef(false);
 
   const request = useCallback(() => {
@@ -105,20 +116,39 @@ export function useDeviceHeading(enabled: boolean): {
     const handler = (event: Event) => {
       if (simulatedRef.current) return;
       const e = event as OrientationEventIOS;
-      // iOS: جهت واقعی قطب‌نما؛ بقیه: alpha (بر اساس شمال در اکثر دستگاه‌های موبایل)
-      const heading =
-        typeof e.webkitCompassHeading === 'number' ? e.webkitCompassHeading : e.alpha;
-      if (typeof heading === 'number') setHeadingDeg(((heading % 360) + 360) % 360);
+      const result = headingFromCompassEvent({
+        webkitCompassHeading: e.webkitCompassHeading,
+        alpha: typeof e.alpha === 'number' ? e.alpha : null,
+        absolute: e.absolute === true,
+      });
+      switch (result.kind) {
+        case 'ok':
+          setHeadingDeg(result.headingDeg);
+          setSource('compass');
+          break;
+        case 'not-absolute':
+          // صادقانه: مرجع این رویداد شمال نیست — UI به جهت دستی برمی‌گردد
+          setSource('notAbsolute');
+          break;
+        default:
+          break;
+      }
     };
+    // چنل absolute اولویت دارد؛ چنل معمولی فقط وقتی absolute=true است مقدار می‌دهد (داخل handler گارد هست)
+    window.addEventListener('deviceorientationabsolute', handler, true);
     window.addEventListener('deviceorientation', handler, true);
-    return () => window.removeEventListener('deviceorientation', handler, true);
+    return () => {
+      window.removeEventListener('deviceorientationabsolute', handler, true);
+      window.removeEventListener('deviceorientation', handler, true);
+    };
   }, [enabled]);
 
   const setSimulatedHeading = useCallback((deg: number) => {
     simulatedRef.current = true;
     setSimulated(true);
+    setSource('manual');
     setHeadingDeg(((deg % 360) + 360) % 360);
   }, []);
 
-  return { headingDeg, simulated, setSimulatedHeading, request };
+  return { headingDeg, simulated, source, setSimulatedHeading, request };
 }

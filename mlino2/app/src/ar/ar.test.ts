@@ -5,6 +5,8 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import {
   angularDifference,
   bearingDegrees,
+  headingFromAlpha,
+  headingFromCompassEvent,
   normalizeHeading,
   placeOverlay,
 } from './arOrientation';
@@ -78,6 +80,35 @@ describe('placeOverlay — جایگذاری روی صحنه', () => {
   it('فاصله‌ی زیاد → bucket «far»', () => {
     const p = placeOverlay(45, 45, 2000);
     expect(p?.scaleBucket).toBe('far');
+  });
+});
+
+describe('رفع یافته‌ی A-1 — قطب‌نمای اندروید (alpha → heading)', () => {
+  it('alpha پادساعتگرد است؛ heading قطب‌نما ساعتگرد: 360 − alpha', () => {
+    expect(headingFromAlpha(0)).toBe(0);
+    expect(headingFromAlpha(270)).toBe(90); // دستگاه ساعتگرد ۹۰° → شرق
+    expect(headingFromAlpha(90)).toBe(270); // پادساعتگرد ۹۰° → غرب
+    expect(headingFromAlpha(180)).toBe(180);
+  });
+
+  it('رویداد غیر-absolute هرگز به‌عنوان شمال تفسیر نمی‌شود', () => {
+    const r = headingFromCompassEvent({ alpha: 120, absolute: false });
+    expect(r.kind).toBe('not-absolute');
+  });
+
+  it('رویداد absolute با تبدیل 360−alpha هد می‌دهد', () => {
+    const r = headingFromCompassEvent({ alpha: 270, absolute: true });
+    expect(r).toEqual({ kind: 'ok', headingDeg: 90 });
+  });
+
+  it('iOS: webkitCompassHeading اولویت دارد و ساعتگرد است (بدون تبدیل)', () => {
+    const r = headingFromCompassEvent({ webkitCompassHeading: 45, alpha: 315, absolute: false });
+    expect(r).toEqual({ kind: 'ok', headingDeg: 45 });
+  });
+
+  it('بدون داده‌ی معتبر → no-data (نه حدس)', () => {
+    const r = headingFromCompassEvent({ alpha: null, absolute: true });
+    expect(r.kind).toBe('no-data');
   });
 });
 

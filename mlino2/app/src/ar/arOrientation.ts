@@ -60,6 +60,47 @@ export function placeOverlay(
   const halfFov = fovDeg / 2;
   if (Math.abs(signed) > halfFov) return null;
   const screenXPercent = 50 + (signed / halfFov) * 50;
-  const scaleBucket = distanceMeters <= 200 ? 'near' : distanceMeters <= 1000 ? 'mid' : 'far';
-  return { relativeBearingDeg: signed, screenXPercent, scaleBucket };
+    const scaleBucket = distanceMeters <= 200 ? 'near' : distanceMeters <= 1000 ? 'mid' : 'far';
+    return { relativeBearingDeg: signed, screenXPercent, scaleBucket };
+  }
+
+/**
+ * تبدیل alpha سنسور به Heading قطب‌نمایی (شمال=۰، ساعتگرد).
+ * یافته‌ی A-1 بازبینی فاز ۳: alpha در deviceorientation پادساعتگرد و نسبت به
+ * جهت اولیه‌ی دستگاه است؛ Heading قطب‌نما ساعتگرد است — روی دستگاه‌های
+ * استاندارد (اندروید/Chrome) تبدیل درست «360 − alpha» است.
+ * فقط وقتی معتبر است که رویداد absolute باشد (deviceorientationabsolute یا absolute=true)؛
+ * در غیر این صورت تماس‌گیرنده باید صادقانه به «جهت دستی» برگردد، نه حدس.
+ */
+export function headingFromAlpha(alphaDeg: number): number {
+  return normalizeHeading(360 - alphaDeg);
+}
+
+export interface CompassEventInput {
+  /** مقدار iOS — واقعاً جهت جغرافیایی شمال (ساعتگرد) — اگر موجود بود اولویت دارد */
+  webkitCompassHeading?: number;
+  /** مقدار استاندارد alpha (پادساعتگرد، نسبت به مرجع رویداد) */
+  alpha: number | null;
+  /** رویداد نسبت به شمال واقعی است؟ (deviceorientationabsolute / absolute=true) */
+  absolute: boolean;
+}
+
+export type HeadingResult =
+  | { kind: 'ok'; headingDeg: number }
+  | { kind: 'not-absolute' }
+  | { kind: 'no-data' };
+
+/** ورودی رویداد قطب‌نما (iOS یا استاندارد) → Heading معتبر یا دلیل صریح رد */
+export function headingFromCompassEvent(event: CompassEventInput): HeadingResult {
+  if (typeof event.webkitCompassHeading === 'number') {
+    return { kind: 'ok', headingDeg: normalizeHeading(event.webkitCompassHeading) };
+  }
+  if (event.alpha === null || typeof event.alpha !== 'number') {
+    return { kind: 'no-data' };
+  }
+  // یافته‌ی A-1: alpha غیر-absolute مرجع نامعلوم دارد — هرگز به‌عنوان شمال تفسیر نمی‌شود
+  if (!event.absolute) {
+    return { kind: 'not-absolute' };
+  }
+  return { kind: 'ok', headingDeg: headingFromAlpha(event.alpha) };
 }

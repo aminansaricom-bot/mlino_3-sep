@@ -8,8 +8,6 @@ import { cameraErrorMessage, useCameraStream, useDeviceHeading } from './browser
 import type { ArViewResponse } from './ArOverlayService';
 import { categoryLabel, floorLabel, formatDistance, formatPrice } from '../uiFormat';
 
-const USER_ALT_TOLERANCE_M = 30;
-
 function categoryLabelLocal(cat: string): string {
   return categoryLabel(cat);
 }
@@ -97,7 +95,6 @@ export default function ArVitrineView({
   }
 
   const simulatedCamera = camera.state.kind !== 'active';
-  const simulatedCompass = heading.headingDeg === null;
 
   return (
     <div className="ar-root">
@@ -160,58 +157,45 @@ export default function ArVitrineView({
           {cameraErrorMessage(camera.state) && (
             <span className="ar-badge warn">{cameraErrorMessage(camera.state)}</span>
           )}
-          {simulatedCompass && <span className="ar-badge warn">قطب‌نما در دسترس نیست — اسلایدر زیر را بچرخان</span>}
-          {!simulatedCompass && !heading.simulated && <span className="ar-badge ok">قطب‌نمای واقعی فعال</span>}
-          {heading.simulated && <span className="ar-badge warn">جهت دستی (شبیه‌سازی)</span>}
+          {heading.source === 'notAbsolute' && (
+            <span className="ar-badge warn">
+              قطب‌نمای دستگاه مرجع شمال ندارد (رویداد غیر-absolute) — جهت دستی زیر را بچرخان
+            </span>
+          )}
+          {heading.source === 'none' && (
+            <span className="ar-badge warn">قطب‌نما در دسترس نیست — اسلایدر زیر را بچرخان</span>
+          )}
+          {heading.source === 'compass' && <span className="ar-badge ok">قطب‌نمای واقعی (absolute) فعال</span>}
+          {heading.source === 'manual' && <span className="ar-badge warn">جهت دستی (شبیه‌سازی)</span>}
           {(() => {
             const df = view?.declaredFloor ?? null;
             const db = view?.declaredBuildingId ?? null;
             const fl = df !== null && db !== null ? floorLabel(df, db) : null;
             return fl !== null ? <span className="ar-badge ok">طبقه‌ی انتخابی تو: {fl}</span> : null;
           })()}
-          <span className="ar-badge">
-            {USER_ALT_TOLERANCE_M > 0 ? `نقطه: ${searchPointLabel}` : ''}
-          </span>
+          <span className="ar-badge">نقطه: {searchPointLabel}</span>
         </div>
       </div>
 
       {/* کنترل‌ها */}
       <div className="ar-controls">
-        {!simulatedCompass && (
-          <div className="sp-row">
-            <span className="sp-label">جهت دستی (اگر قطب‌نما نادرست است):</span>
-            <input
-              type="range"
-              min={0}
-              max={359}
-              value={manualHeading}
-              onChange={(e) => {
-                const v = Number(e.target.value);
-                setManualHeading(v);
-                heading.setSimulatedHeading(v);
-              }}
-            />
-            <span className="sp-label">{manualHeading}°</span>
-          </div>
-        )}
-
-        {simulatedCompass && (
-          <div className="sp-row">
-            <span className="sp-label">شبیه‌سازی چرخش گوشی:</span>
-            <input
-              type="range"
-              min={0}
-              max={359}
-              value={manualHeading}
-              onChange={(e) => {
-                const v = Number(e.target.value);
-                setManualHeading(v);
-                heading.setSimulatedHeading(v);
-              }}
-            />
-            <span className="sp-label">{manualHeading}°</span>
-          </div>
-        )}
+        <div className="sp-row">
+          <span className="sp-label">
+            {heading.source === 'compass' ? 'جهت دستی (اگر قطب‌نما نادرست است):' : 'شبیه‌سازی چرخش گوشی:'}
+          </span>
+          <input
+            type="range"
+            min={0}
+            max={359}
+            value={manualHeading}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setManualHeading(v);
+              heading.setSimulatedHeading(v);
+            }}
+          />
+          <span className="sp-label">{manualHeading}°</span>
+        </div>
 
         {nearbyBuildings.length > 0 && (
           <div className="sp-row ar-floor-row">
