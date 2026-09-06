@@ -73,6 +73,7 @@ export class MatchingService {
 
     const maxDist = near.length > 0 ? Math.max(...near.map((n) => n.distanceMeters)) : 1;
     const items: MatchItem[] = [];
+    let maxKeywordScore = 0;
 
     for (const { record, distanceMeters } of near) {
       const nameStems = stemFaTokens(record.name);
@@ -85,6 +86,7 @@ export class MatchingService {
         ...productStems.map((p) => textScore(p.stems, intent.keywords)),
         0,
       );
+      maxKeywordScore = Math.max(maxKeywordScore, keywordScore);
 
       const activeOffer = record.offers.find(
         (o) => o.valid_until === null || Date.parse(o.valid_until) >= Date.now(),
@@ -121,8 +123,14 @@ export class MatchingService {
       });
     }
 
-    // اگر پارسر دسته را حدس زد اما کسی در آن دسته نتیجه‌ی متنی نداشت،
-    // همان دسته به‌صورت کامل برگردانده می‌شود (نزدیک‌ترین گزینه‌های موجود).
+    // تصمیم مالک محصول (سپتامبر ۲۰۲۶): وقتی هیچ تطبیق متنی واقعی وجود ندارد و
+    // پارسر هم دسته‌ی صریحی حدس نزده، پاسخ صادقانه «خالی» است — هرگز نزدیک‌ترین
+    // رکورد بی‌ربط (کارت جغرافیایی صرف) به کاربر نشان داده نمی‌شود.
+    // اگر دسته صریح باشد، همان دسته (نزدیک‌ترین‌های موجودش) همچنان معتبر است.
+    if (maxKeywordScore === 0 && intent.category === null) {
+      return { items: [], interpreted: intent };
+    }
+
     items.sort((a, b) => b.score - a.score || a.distanceMeters - b.distanceMeters);
 
     return { items, interpreted: intent };

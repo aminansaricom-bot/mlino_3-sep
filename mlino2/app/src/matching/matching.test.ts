@@ -163,3 +163,68 @@ describe('MatchingService — تطبیق با دایرکتوری واقعی', ()
     }
   });
 });
+
+describe('تصمیم مالک: بدون تطبیق واقعی → پاسخ صادقانه خالی (نه رکورد بی‌ربط)', () => {
+  it('۱ — «عصرانه با چای ایرانی»: دسته null + بدون تطبیق متنی → items خالی (قبلاً نزدیک‌ترین بی‌ربط بود)', () => {
+    const intent = parser.parse('سرو عصرانه با چای ایرانی برای دو نفر');
+    expect(intent.category).toBeNull();
+    const res = matching.match(intent, {
+      latitude: 35.7603,
+      longitude: 51.41,
+      radiusMeters: 5000,
+    });
+    expect(res.items).toEqual([]);
+  });
+
+  it('۲ — جمله‌ی کاملاً بی‌تطبیق: دسته null + هیچ کلیدواژه‌ای در دایرکتوری نیست → items خالی', () => {
+    // جمله‌ای که هیچ کلیدواژه‌اش (حتی به‌صورت زیررشته) در نام/توضیح محصولات نیست
+    const intent = parser.parse('یه چیز خیلی خاص و عجیب برای هدیه‌ی ستاره‌شناسی');
+    expect(intent.category).toBeNull();
+    const res = matching.match(intent, {
+      latitude: 35.7603,
+      longitude: 51.41,
+      radiusMeters: 5000,
+    });
+    expect(res.items).toEqual([]);
+  });
+
+  it('۲-جانبه — «جلسه‌ی کاری با وای‌فای»: تطبیق متنی واقعی دارد (کلمه‌ی «جلسه» در توضیحات لیزر دایرکتوری هست) → خالی نمی‌شود', () => {
+    // توضیح: در باتری زنده‌ی قبلی این جمله نزدیک‌ترین رکورد بی‌ربط می‌گرفت؛
+    // اما بازبینی دقیق نشان داد کلمه‌ی «جلسه» واقعاً در توضیحات محصولات هست
+    // («لیزر در یک جلسه»، «۶ جلسه») — پس تطبیق متنی واقعی است و طبق تصمیم
+    // مالک (خالی فقط وقتی هیچ تطبیق متنی نباشد) همچنان نتیجه برمی‌گردد.
+    const intent = parser.parse('محلی برای جلسه‌ی کاری با فضای آرام و وای‌فای قوی');
+    expect(intent.category).toBeNull();
+    const res = matching.match(intent, {
+      latitude: 35.7603,
+      longitude: 51.41,
+      radiusMeters: 5000,
+    });
+    expect(res.items.length).toBeGreaterThan(0);
+  });
+
+  it('۳ — مرز رفتار: همان کلیدواژه‌های بی‌تطبیق با دسته‌ی صریح (نیت LLM) همچنان نتیجه‌ی دسته می‌دهد', () => {
+    // همان جمله‌ی عصرانه، ولی این بار LLM دسته‌ی cafe را صریحاً اعلام کرده
+    const res = matching.match(
+      { category: 'cafe', keywords: ['عصرانه', 'چای', 'ایرانی'], modifiers: {} },
+      { latitude: 35.7603, longitude: 51.41, radiusMeters: 5000 },
+    );
+    expect(res.items.length).toBeGreaterThan(0);
+    expect(res.items[0].record.business_id).toBe('biz_mock_cafe_01');
+  });
+
+  it('۴ — رگرسیون: تطبیق متنی و دسته‌ی صریح همچنان کار می‌کنند', () => {
+    const textMatch = matching.match(parser.parse('جرم گیری دندان میخوام'), {
+      latitude: 35.7603,
+      longitude: 51.41,
+      radiusMeters: 5000,
+    });
+    expect(textMatch.items.length).toBeGreaterThan(0);
+
+    const categoryOnly = matching.match(
+      { category: 'cafe', keywords: [], modifiers: {} },
+      { latitude: 35.7603, longitude: 51.41, radiusMeters: 5000 },
+    );
+    expect(categoryOnly.items.length).toBeGreaterThan(0);
+  });
+});

@@ -191,7 +191,9 @@ export default function App() {
         const top = res.items.slice(0, 4);
         let reply: string;
         if (top.length === 0) {
-          reply = 'چیزی در این شعاع پیدا نکردم. شعاع را بیشتر کن یا مکان را عوض کن.';
+          // تصمیم مالک: هرگز کارت بی‌ربط — صادقانه «چیزی پیدا نشد» + راهنمای جایگزین
+          reply =
+            'چیزی پیدا نشد. می‌توانی شعاع را بیشتر کنی، مکان را عوض کنی، یا نیازت را با کلمات دیگری بنویسی (مثلاً «کافه»، «جرم‌گیری دندان»، «پیتزا»).';
         } else {
           const names = top
             .map((i) => `${i.record.name} (${formatDistance(i.distanceMeters)})`)
