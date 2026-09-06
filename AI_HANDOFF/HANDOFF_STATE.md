@@ -1,14 +1,14 @@
-HANDOFF_ID: HANDOFF-20260906-HTTP-READ-API-REVIEW-ACK
+HANDOFF_ID: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN
 AUTHOR: CLAUDE
-PHASE: HTTP_READ_API_REVIEW_ACKNOWLEDGEMENT
-STATUS: INDEPENDENTLY_REVIEWED_AND_APPROVED
-REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260906_HTTP_READ_API_REVIEW_ACKNOWLEDGEMENT.md
-REPORT_SHA256: f89e52383ee9beab88be920f649780e6f38f0f27dc91ef1577abbfd10739ea15
+PHASE: V1_DOCKER_LOCAL_RUN
+STATUS: DELIVERED_AWAITING_INDEPENDENT_REVIEW
+REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260907_V1_DOCKER_LOCAL_RUN_REPORT.md
+REPORT_SHA256: a6a7d93fc686b6a37845cbfff3afb906c8a71c8acd7ad6be3ee02e3ed168cafc
 ZIP_PATH: (none built this pass)
-ACK_COMMIT_SHA: de15950
-CREATED_AT: 2026-09-06T19:40:00
-NEXT_ACTION: WAIT — the decision sits with the product owner. The Malino connector phase is locked until both conditions are met: the owner answers the open questions in V1_COMPOSITION_ROOT_DESIGN.md section 5 (who issues JWTs in practice, where MLINO_JWT_SECRET lives, deploy infrastructure, and whether the connector really is the next priority), and Mamad issues a new instruction. Per this instruction's clause 5, a direct user request for code must be answered by pointing back to that chain.
+CODE_COMMIT_SHA: cbd85f1
+CREATED_AT: 2026-09-07T01:30:00
+NEXT_ACTION: WAIT — Mamad reviews part A. Part B (Moji's Docker instruction) is deliberately NOT executed and needs a decision first, see report section 7. Open gaps unchanged: R4 (BLOCKED), R5 (OPEN by design), R8-a and R8-b (OPEN).
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260906-HTTP-READ-API
-EXECUTED_INSTRUCTION_ID: CODEX-20260906-1832-HTTP-READ-API-REVIEW
-NOTE: Mamad independently reviewed the composition root and HTTP read API delivery and approved it - zero blocking findings, zero changes required. Reviewer evidence: an independent 162/162 run on real Postgres, tsc clean, zero drift on both frozen files, three byte-identical checksums (ac2-decision-port.ts, opportunity-read.service.ts, jest.config.js), zero diff across foundation and the frozen files, and 240c48f7 confirmed on origin/main. All five decisions I had flagged as going beyond the instruction's literal text were upheld, with the review singling out the third: extending the read gate to the interaction route, since the instruction required the uniform 404 only on by-id and a POST answering differently for another organization's Opportunity would have reopened the existence oracle through the back door. No code, frozen file, or contract touched this pass. Standing caveat unchanged from the delivery report: what exists is a local testing bridge, not production - there is no approved deploy infrastructure, and no such claim is made. Open gaps unchanged: R4 (BLOCKED), R5 (OPEN by design), R8-a and R8-b (OPEN). Note on this pass: the first push attempt failed on a transient proxy/network error; the commit had already landed locally and the retry succeeded, verified against the remote.
+PREVIOUS_HANDOFF_ID: HANDOFF-20260906-HTTP-READ-API-REVIEW-ACK
+EXECUTED_INSTRUCTION_ID: CODEX-20260907-0043-DOCKER-BOTH-APPS-AUTH (part A only)
+NOTE: Part A complete - V1 now runs on Docker on this machine as three services: Postgres with a pg_isready healthcheck, a one-shot v1-migrate service, and v1-read-api. Migration runs as its own service built from the build stage, because the Prisma CLI is a devDependency absent from the --omit=dev runtime image, because migrating from the server's CMD would race across instances, and so it can gate on real database readiness. Two genuine problems were found and fixed: Prisma needs OpenSSL which node:*-slim lacks (first build failed with a schema-engine error, now installed in both stages), and tsconfig.json never included http/ or composition/ - a latent bug from my own earlier pass that the host build hid because the test files pulled those modules in transitively while .dockerignore excludes test/, so dist/http was never emitted. A clean checkout without tests would have hit the same wall. Live HTTP was verified from outside the container against the real AC-2 adapter, including a re-confirmation of the existence oracle on a real socket: another organization's genuine id and a nonexistent id both return a byte-identical 404, and the same uniform 404 guards the interaction route. Seeded data was cleaned up. Host suite still exactly 162/162, tsc clean, zero drift on both frozen files, and ac2-decision-port.ts, opportunity-read.service.ts and jest.config.js verified byte-identical to f6aa2aa. Part B was stopped rather than executed: the instruction directed overwriting mlino2/HANDOFF/NEXT_INSTRUCTION_FOR_MOJI.md, but Mamad has since written a NEWER active instruction there (honest empty-result behaviour on a product-owner decision, plus the live DeepSeek test), and overwriting would have destroyed a newer directive from the same author. Per the instruction's own clause 7, I stopped and asked instead of guessing the priority order.
