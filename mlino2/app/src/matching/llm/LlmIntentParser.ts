@@ -68,6 +68,7 @@ export class LlmIntentParser implements IntentResolver {
   private readonly ruleParser: RuleBasedIntentParser;
   private readonly planId: string;
   private readonly timeoutMs: number;
+  private lastUsage: { promptTokens: number; completionTokens: number } | null = null;
 
   constructor(private readonly options: LlmIntentParserOptions) {
     this.ruleParser = options.ruleParser ?? new RuleBasedIntentParser();
@@ -115,7 +116,7 @@ export class LlmIntentParser implements IntentResolver {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
-      const text = await this.options.client.complete(
+      const completion = await this.options.client.complete(
         {
           systemPrompt: INTENT_SYSTEM_PROMPT,
           // حریم خصوصی (الزام ۳): فقط همین جمله — بدون شناسه/موقعیت/تاریخچه
@@ -125,12 +126,18 @@ export class LlmIntentParser implements IntentResolver {
         },
         controller.signal,
       );
-      const validated = validateParsedIntent(extractJsonPayload(text));
+      this.lastUsage = completion.usage;
+      const validated = validateParsedIntent(extractJsonPayload(completion.text));
       if (!validated.ok) throw new Error(`llm intent rejected: ${validated.reason}`);
       return validated.intent;
     } finally {
       clearTimeout(timer);
     }
+  }
+
+  /** مصرف توکن آخرین فراخوانی موفق LLM — null یعنی LLM صدا نشد یا شکست خورد */
+  get usage(): { promptTokens: number; completionTokens: number } | null {
+    return this.lastUsage ?? null;
   }
 }
 

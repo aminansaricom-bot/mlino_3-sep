@@ -13,12 +13,23 @@ export interface LlmChatRequest {
   maxTokens?: number;
 }
 
+/** مصرف توکن گزارش‌شده‌ی سرویس — برای داده‌ی تصمیم پلن‌بندی (هزینه) */
+export interface LlmUsage {
+  promptTokens: number;
+  completionTokens: number;
+}
+
+export interface LlmCompletion {
+  text: string;
+  usage: LlmUsage | null;
+}
+
 export interface LlmChatClient {
   /** شناسه‌ی سرویس — در پاسخ ثبت می‌شود تا مسیر نتیجه مشخص باشد (الزام ۲) */
   readonly serviceId: 'deepseek' | 'gemini';
   /** نام مدل (مثلاً deepseek-chat) */
   readonly model: string;
-  complete(request: LlmChatRequest, signal?: AbortSignal): Promise<string>;
+  complete(request: LlmChatRequest, signal?: AbortSignal): Promise<LlmCompletion>;
 }
 
 export class LlmClientError extends Error {
@@ -73,6 +84,19 @@ function readText(data: unknown, pick: (d: Record<string, unknown>) => unknown):
   return text;
 }
 
+function readUsage(data: unknown, pick: (d: Record<string, unknown>) => unknown): LlmUsage | null {
+  const rec = data as Record<string, unknown> | null;
+  if (typeof rec !== 'object' || rec === null) return null;
+  const u = pick(rec);
+  if (typeof u !== 'object' || u === null) return null;
+  const usage = u as Record<string, unknown>;
+  const prompt = usage['promptTokens'] ?? usage['prompt_tokens'] ?? usage['promptTokenCount'];
+  const completion =
+    usage['completionTokens'] ?? usage['completion_tokens'] ?? usage['candidatesTokenCount'];
+  if (typeof prompt !== 'number' || typeof completion !== 'number') return null;
+  return { promptTokens: prompt, completionTokens: completion };
+}
+
 /**
  * DeepSeek — API سازگار با OpenAI Chat Completions.
  * کلید فقط در هدر Authorization (نه در URL — URL ممکن است در لاگ بماند).
@@ -85,7 +109,7 @@ export class DeepSeekChatClient implements LlmChatClient {
     private readonly baseUrl: string = 'https://api.deepseek.com',
   ) {}
 
-  async complete(request: LlmChatRequest, signal?: AbortSignal): Promise<string> {
+  async complete(request: LlmChatRequest, signal?: AbortSignal): Promise<LlmCompletion> {
     const data = await postJson(
       this.serviceId,
       `${this.baseUrl}/chat/completions`,
@@ -102,15 +126,18 @@ export class DeepSeekChatClient implements LlmChatClient {
       },
       signal,
     );
-    return readText(data, (d) => {
-      const choices = d['choices'];
-      if (!Array.isArray(choices) || choices.length === 0) return undefined;
-      const first = choices[0];
-      if (typeof first !== 'object' || first === null) return undefined;
-      const message = (first as Record<string, unknown>)['message'];
-      if (typeof message !== 'object' || message === null) return undefined;
-      return (message as Record<string, unknown>)['content'];
-    });
+    return {
+      text: readText(data, (d) => {
+        const choices = d['choices'];
+        if (!Array.isArray(choices) || choices.length === 0) return undefined;
+        const first = choices[0];
+        if (typeof first !== 'object' || first === null) return undefined;
+        const message = (first as Record<string, unknown>)['message'];
+        if (typeof message !== 'object' || message === null) return undefined;
+        return (message as Record<string, unknown>)['content'];
+      }),
+      usage: readUsage(data, (d) => d['usage']),
+    };
   }
 }
 
@@ -126,7 +153,7 @@ export class GeminiChatClient implements LlmChatClient {
     private readonly baseUrl: string = 'https://generativelanguage.googleapis.com',
   ) {}
 
-  async complete(request: LlmChatRequest, signal?: AbortSignal): Promise<string> {
+  async complete(request: LlmChatRequest, signal?: AbortSignal): Promise<LlmCompletion> {
     const data = await postJson(
       this.serviceId,
       `${this.baseUrl}/v1beta/models/${encodeURIComponent(this.model)}:generateContent`,
@@ -141,18 +168,21 @@ export class GeminiChatClient implements LlmChatClient {
       },
       signal,
     );
-    return readText(data, (d) => {
-      const candidates = d['candidates'];
-      if (!Array.isArray(candidates) || candidates.length === 0) return undefined;
-      const first = candidates[0];
-      if (typeof first !== 'object' || first === null) return undefined;
-      const content = (first as Record<string, unknown>)['content'];
-      if (typeof content !== 'object' || content === null) return undefined;
-      const parts = (content as Record<string, unknown>)['parts'];
-      if (!Array.isArray(parts) || parts.length === 0) return undefined;
-      const firstPart = parts[0];
-      if (typeof firstPart !== 'object' || firstPart === null) return undefined;
-      return (firstPart as Record<string, unknown>)['text'];
-    });
+    return {
+      text: readText(data, (d) => {
+        const candidates = d['candidates'];
+        if (!Array.isArray(candidates) || candidates.length === 0) return undefined;
+        const first = candidates[0];
+        if (typeof first !== 'object' || first === null) return undefined;
+        const content = (first as Record<string, unknown>)['content'];
+        if (typeof content !== 'object' || content === null) return undefined;
+        const parts = (content as Record<string, unknown>)['parts'];
+        if (!Array.isArray(parts) || parts.length === 0) return undefined;
+        const firstPart = parts[0];
+        if (typeof firstPart !== 'object' || firstPart === null) return undefined;
+        return (firstPart as Record<string, unknown>)['text'];
+      }),
+      usage: readUsage(data, (d) => d['usageMetadata']),
+    };
   }
 }

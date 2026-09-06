@@ -36,7 +36,7 @@ function fakeClient(content: string | 'throw', serviceId: 'deepseek' | 'gemini' 
       async complete(request: LlmChatRequest) {
         requests.push(request);
         if (content === 'throw') throw new LlmClientError('boom', serviceId, 'http');
-        return content;
+        return { text: content, usage: { promptTokens: 10, completionTokens: 5 } };
       },
     },
   };
@@ -152,6 +152,7 @@ describe('LlmIntentParser — Edge-first و fallback (الزام ۲)', () => {
     const res = await parser.resolve('سلام خسته نباشید');
     expect(res.source).toBe('rule-based');
     expect(res.fellBackToRule).toBe(true);
+    expect(parser.usage).toBeNull();
   });
 
   it('code fence در پاسخ مدل پذیرفته می‌شود (تاب‌آوری JSON)', async () => {
@@ -200,8 +201,14 @@ describe('آداپتورهای سرویس — شکل درخواست و جای ک
       captured.body = JSON.parse(String(init?.body));
       captured.json =
         captured.url.includes('deepseek')
-          ? { choices: [{ message: { content: VALID_LLM_JSON } }] }
-          : { candidates: [{ content: { parts: [{ text: VALID_LLM_JSON }] } }] };
+          ? {
+              choices: [{ message: { content: VALID_LLM_JSON } }],
+              usage: { prompt_tokens: 120, completion_tokens: 30 },
+            }
+          : {
+              candidates: [{ content: { parts: [{ text: VALID_LLM_JSON }] } }],
+              usageMetadata: { promptTokenCount: 130, candidatesTokenCount: 28 },
+            };
       return new Response(JSON.stringify(captured.json), { status: 200 });
     });
     vi.stubGlobal('fetch', fetchMock);
@@ -215,8 +222,9 @@ describe('آداپتورهای سرویس — شکل درخواست و جای ک
   it('DeepSeek: کلید فقط در هدر Bearer، URL بدون کلید، پیام system/user جدا', async () => {
     const cap = stubFetchCapture();
     const c = new DeepSeekChatClient('sk-test-key-123');
-    const text = await c.complete({ systemPrompt: 'SYS', userPrompt: 'USER-TEXT' });
-    expect(text).toBe(VALID_LLM_JSON);
+    const res = await c.complete({ systemPrompt: 'SYS', userPrompt: 'USER-TEXT' });
+    expect(res.text).toBe(VALID_LLM_JSON);
+    expect(res.usage).toEqual({ promptTokens: 120, completionTokens: 30 });
     expect(cap.headers.authorization).toBe('Bearer sk-test-key-123');
     expect(cap.url).not.toContain('sk-test-key-123');
     expect(cap.url).toContain('api.deepseek.com');
@@ -231,8 +239,9 @@ describe('آداپتورهای سرویس — شکل درخواست و جای ک
   it('Gemini: کلید فقط در هدر x-goog-api-key، URL بدون کلید', async () => {
     const cap = stubFetchCapture();
     const c = new GeminiChatClient('gm-test-key-456');
-    const text = await c.complete({ systemPrompt: 'SYS', userPrompt: 'USER-TEXT' });
-    expect(text).toBe(VALID_LLM_JSON);
+    const res = await c.complete({ systemPrompt: 'SYS', userPrompt: 'USER-TEXT' });
+    expect(res.text).toBe(VALID_LLM_JSON);
+    expect(res.usage).toEqual({ promptTokens: 130, completionTokens: 28 });
     expect(cap.headers.goog).toBe('gm-test-key-456');
     expect(cap.url).not.toContain('gm-test-key-456');
     expect(cap.url).toContain('generativelanguage.googleapis.com');

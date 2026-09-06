@@ -10,6 +10,9 @@ export default defineConfig(({ command, mode }) => {
   const httpsMode = mode === 'https' || process.env.V2_DEV_HTTPS === '1'
   return {
     plugins: httpsMode ? [react(), basicSsl()] : [react()],
+    // کلیدها/پلن فقط از env (الزام ۴ دستور LLM) — پیشوند V2_ عمداً جدا از VITE_ است
+    // تا از تصادفی‌بودن خروجی‌های کلاینتی تفکیک بماند؛ هرگز در ریپو Commit نمی‌شوند.
+    envPrefix: ['VITE_', 'V2_'],
     server: httpsMode
       ? {
           host: true, // دسترسی از گوشی در LAN
