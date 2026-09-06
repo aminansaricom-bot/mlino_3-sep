@@ -1,68 +1,87 @@
-INSTRUCTION_ID: CODEX-20260906-1800-COMPOSITION-HTTP-READ-AUTH
+INSTRUCTION_ID: CODEX-20260906-1832-HTTP-READ-API-REVIEW
 AUTHOR: CODEX
 STATUS: EXECUTED
 EXECUTED_BY: CLAUDE
-EXECUTED_AT: 2026-09-06T19:15:00
-RESULTING_HANDOFF_ID: HANDOFF-20260906-HTTP-READ-API
-TARGET_HANDOFF_ID: HANDOFF-20260906-COMPOSITION-ROOT-DESIGN
-TARGET_REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260906_COMPOSITION_ROOT_DESIGN_REPORT.md
-TARGET_REPORT_SHA256: 4e01b081cad3a2f9e2e77b0a1c31581f983b06b680d45e60f1cfdfe2acee19de
+EXECUTED_AT: 2026-09-06T19:40:00
+RESULTING_HANDOFF_ID: HANDOFF-20260906-HTTP-READ-API-REVIEW-ACK
+TARGET_HANDOFF_ID: HANDOFF-20260906-HTTP-READ-API
+TARGET_REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260906_HTTP_READ_API_COMPOSITION_ROOT_REPORT.md
+TARGET_REPORT_SHA256: 57ade5c3724f058f8473f4afefe96e8067a5933c0d84b23bf2b21a422f3c990e
 TARGET_ZIP_PATH: (none)
 TARGET_ZIP_SHA256: (n/a)
-REVIEW_COMPLETED_AT: 2026-09-06T18:00:00
-AUTHORIZATION_SCOPE: IMPLEMENT_OPTION4_HTTP_READ_SIDE_ONLY_JWT_FROM_MALINO_NO_DETECTION_NO_CONNECTOR
+REVIEW_COMPLETED_AT: 2026-09-06T18:32:00
+AUTHORIZATION_SCOPE: HTTP_READ_API_APPROVED_NO_CHANGES_REQUIRED_NEXT_PHASE_CONNECTOR_DESIGN_AWAITS_OWNER
 
 ---
 
-# مجوز فاز: پیاده‌سازی گزینه ۴ — لایه‌ی ورود HTTP فقط-خواندن، JWT از Malino
+# نتیجه‌ی بازبینی مستقل — Composition Root + لایه‌ی ورود HTTP فقط-خواندن (گزینه ۴)
 
-**صادرکننده:** ممد (بازبین مستقل، GLM 5.3 Flash) — بر پایه‌ی تصمیم صریح مالک محصول (۶ سپتامبر ۲۰۲۶): گزینه ۴ سند تو + JWT از Malino + اولویت بعدی = طراحی Connector.
+**بازبین:** ممد (بازبین مستقل، GLM 5.3 Flash)
+**تاریخ بازبینی:** ۶ سپتامبر ۲۰۲۶
+**تحویل بازبینی‌شده:** `HANDOFF-20260906-HTTP-READ-API` (اجرا طبق `CODEX-20260906-1800-COMPOSITION-HTTP-READ-AUTH`)
+**تعارض منافع:** صفر — کد توسط یونس (Claude) تولید شده.
 
-## ۰. تصمیمات مصوب مالک محصول
+## ۱. Verdict
 
-1. **گزینه ۴:** لایه‌ی ورود HTTP فقط-خواندن (Feed + By-Id) حالا؛ مسیر تشخیص بعد از ساخت Connector Malino.
-2. **صادرکننده‌ی JWT = Malino؛ V1 فقط تایید می‌کند** (`resolveActorContext`). V1 هیچ صفحه‌ی ورود/صدور توکنی ندارد — ساخت آن دامنه‌ی جدید است و بدون تصمیم جداگانه شروع نمی‌شود.
-3. اولویت بعدی پس از این فاز: طراحی Connector Malino (دستور جداگانه).
-4. سوالات Secret/بسامد/Deploy به مرحله‌ی خودشان موکول شد.
+**تایید می‌شود — بدون عیب مسدودکننده، بدون نیاز به اصلاح.** لحظه‌ی تاریخی این تحویل: **Adapter واقعی AC-2 دیگر کد مرده نیست** — از همین پاس، فرصت‌ها از پشت یک مرز HTTP با امنیت واقعی fail-closed سرو می‌شوند.
 
-## ۱. محدوده‌ی مجاز این فاز
+## ۲. شواهد راستی‌آزمایی‌شده‌ی مستقیم
 
-### ۱.۱. Composition Root + لایه‌ی HTTP فقط-خواندن
-- دقیقاً طبق §۲.۱ سند طراحی (ترتیب تایید‌شده): HTTP + Authorization header → `resolveActorContext` (خطا → 401 بدون افشای دلیل) → `new OpportunityReadService(orgMembershipAC2DecisionPort)` یک‌بار در Composition Root → `getOpportunityFeed` / `getOpportunityById` → پاسخ.
-- مصرف‌کنندگان: `OpportunityFeedService` (برای ثبت تعامل)، `ProactiveBriefingService` (aiSummarizer اختیاری) — اگر در این فاز سیم‌کشی شدند، همان الگو؛ اگر نه، صریح بگو چه چیزی به فاز بعد موکول شد.
-- **Existence Oracle — الزام امنیتی:** `getOpportunityById` برای «وجود ندارد» و «مجاز نیستی» هر دو null می‌دهد؛ مرز HTTP **هر دو را 404 یکسان** می‌دهد. 403 فقط برای خطای Authorization متمایز از وجود. تست الزامی دارد.
-- نگاشت خطا: AuthenticationError → 401؛ AuthorizationError → 403؛ ناشناخته → 500 بدون جزئیات داخلی.
-- Composition Root یک ماژول تک‌نقطه‌ای (نه new پراکنده) + پیکربندی env (`DATABASE_URL`، `MLINO_JWT_SECRET` fail-closed موجود، پورت) + graceful shutdown برای Prisma.
-- **وابستگی:** کمترین وابستگی ممکن — ترجیح بازبین: `node:http` داخلی بدون فریم‌ورک جدید (API فقط‌خواندنی کوچک است). اگر فریم‌ورک خواستی، استدلال در گزارش + تایید بازبینی.
-- فقط مسیرهای خواندن + ثبت تعامل (که IC-13/IC-14 را کامل می‌کند). **هیچ مسیر تشخیص/Scheduler/Worker** — آن پس از Connector با دستور جداگانه.
+| # | ادعا | راستی‌آزمایی مستقل بازبین | نتیجه |
+|---|---|---|---|
+| ۱ | تطبیق TARGET قبل از اجرا | مقایسه با `HANDOFF_STATE.md` (`4e01b081...`) | ✅ |
+| ۲ | چک‌سام گزارش (`57ade5c3...`) | محاسبه‌ی مستقیم | ✅ منطبق با HANDOFF_STATE |
+| ۳ | ۱۶۲/۱۶۲ روی Postgres و سوکت واقعی | اجرای مستقل `npm test` | ✅ **16 Suites / 162 Tests** — یک اجرا، بدون Retry (۱۴۶ + ۱۶ جدید) |
+| ۴ | `tsc --noEmit` تمیز | اجرای مستقل | ✅ CLEAN |
+| ۵ | Drift صفر دو فایل منجمد | محاسبه‌ی مستقیم: `bc0ca61e...` / `673b8220...` | ✅ منطبق با مرجع پس-CCR |
+| ۶ | ac2-decision-port / opportunity-read / jest.config بایت‌به‌بایت برابر `72954e2` | چک‌سام مستقیم هر سه: `a05d87fe...` / `2360a074...` / `5d812785...` | ✅ (دو اولی = مقادیر ثبت‌شده‌ی تحویل قبلی؛ jest.config = مقدار از Wave 1) |
+| ۷ | Commit کد فقط فایل‌های مجاز | `git diff f6aa2aa~1..f6aa2aa` روی foundation/ + frozen + jest.config: **صفر خط** | ✅ |
+| ۸ | Commit دوم روی origin/main | `git ls-remote` مستقل: `240c48f7...` | ✅ دقیقاً منطبق |
 
-### ۱.۲. تست الزامی (Postgres واقعی + تست HTTP واقعی)
-- 401 با توکن غایب/نامعتبر/منقضی.
-- Feed فقط فرصت‌های همان سازمان + فقط عبورکرده از AC-2 + فیلتر audience + ترتیب گروه/مرتب‌سازی درست.
-- By-Id: 404 یکسان برای «ناموجود» و «سازمان دیگر» (تست Existence Oracle — هر دو دقیقاً 404).
-- 403 فقط برای AuthorizationError متمایز؛ 500 بدون افشای جزئیات.
-- مرحله‌ی تعامل (SEEN/ACKNOWLEDGED/DISMISSED) از مسیر HTTP کار کند.
-- graceful shutdown تست شود.
-- کل `npm test`: ۱۴۶ قبلی بدون Regression + جدیدها — یک اجرا، بدون Retry.
+## ۳. بازخوانی فنی
 
-## ۲. ممنوعیت‌ها
+### ۳.۱. Composition Root (container.ts)
+- تک‌نقطه‌ای، یک‌بار در Startup نه per-request؛ ساختار V1Container شفاف.
+- **پرنسپل کلیدی درست پیاده شده:** Handlerها هرگز `new` نمی‌زنند — یعنی هیچ مسیری برای دورزدن Adapter واقعی وجود ندارد (بایپس «با تصادف» غیرممکن شد).
+- `aiSummarizer` عمداً تزریق نشده (بررسی‌شده: هیچ پیاده‌سازی واقعی در کدبیس نیست) — صداقت، نه کوتاهی. ✅
+- بخش «What is deliberately absent» (نبود Repositoryهای تشخیص) دقیقاً مطابق یافته‌ی سند طراحی. ✅
 
-- هیچ مسیر تشخیص/Scheduler/Worker/Connector در این فاز.
-- دو فایل منجمد: دست‌نخورده (Composition نیاز CCR ندارد — تشخیص سند تایید شد؛ اگر خلاف ثابت شد: CCR نه پچ).
-- `evaluateAC2FailClosed`، `OpportunityReadService`، Featureها، `jest.config.js`، `mlino2/` — دست‌نخورده.
-- هیچ Secret واقعی در ریپو؛ MLINO_JWT_SECRET فقط env.
-- هیچ ادعای «تولیدی امن» — بدون Deploy مصوب این پل localhost/آزمایشی است (بند ۴ سند).
+### ۳.۲. مرز HTTP (read-api.ts)
+1. **Existence Oracle — گیت اصلی:** By-Id هر دو «ناموجود» و «سازمان دیگر» → **404 بایت‌به‌بایت یکسان** (با `toEqual` تست شده). ✅
+2. **گیت روی مسیر تعامل — تصمیم فرامرزی ۳ تایید می‌شود:** POST تعامل ابتدا همان گیت خواندن را اجرا می‌کند؛ اگر Actor حق دیدن ندارد → همان 404 یکسان **و هیچ رویدادی نوشته نمی‌شود** (تست جدا دارد). بدون این، Oracle از در پشتی POST باز می‌شد — یونس خودش این حفره را دید و بست. ✅ (و این سخت‌گیری اضافه، خارج از متن دستور بود ولی در روح الزام امنیتی دستور.)
+3. 401 یکنواخت بی‌دلیل (تست صریح: بدنه‌ی 401 هیچ توضیحی ندارد)؛ 403 فقط برای AuthorizationError درباره‌ی توکن خود کاربر؛ 500 با تزریق خطای حاوی SQL و مسیر فایل تست شده — هیچ نشتی. ✅
+4. سه هاردنینگ فرامرزی (no-store، nosniff، سقف 4KB بدنه) — تایید؛ هر سه کم‌هزینه و درست. ✅
+5. `node:http` بدون فریم‌ورک — دقیقاً طبق ترجیح اعلامی بازبین؛ استدلال (هر وابستگی = یک چیز بیشتر برای Audit قبل از Deploy) در گزارش ثبت. ✅
+6. `/v1/briefing` مسیر اضافه‌ی منطقی (خواندنی بود و در طراحی آمده بود) — در محدوده. ✅
+7. `domain_tag` ناشناخته → 400 نه نتیجه‌ی خالی — تایید (تصمیم فرامرزی ۴؛ مجموعه‌ی مجاز public contract است پس افشا نمی‌کند). ✅
+8. هدر صادقانه «NOT PRODUCTION-SAFE — local/testing bridge» در هر دو فایل HTTP — دقیقاً طبق بند ۲ دستور. ✅
 
-## ۳. تعریف Done
+### ۳.۵. قضاوت پنج تصمیم فرامرزی
+۱. script `start` — تایید (بدونش نقطه‌ی اجرا راه اجرا نداشت؛ فهرست ممنوعه نبود). ۲. Briefing سیم‌کشی بدون aiSummarizer — تایید (صداقت). ۳. گیت خواندن روی مسیر تعامل — تایید و تحسین (بستن Oracle از در پشتی). ۴. 400 برای domain_tag ناشناخته — تایید. ۵. سه هاردنینگ — تایید. **هیچ‌کدام خارج از روح دستور؛ همه مستند.**
 
-- همه‌ی تست‌های بند ۱.۲ + `tsc --noEmit` تمیز + کل مجموعه سبز.
-- گزارش کامل: فایل‌های تغییر + چک‌سام + Drift صفر دو فایل منجمد (مرجع: `bc0ca61e...`/`673b8220...`) + استدلال وابستگی HTTP + صراحت آنچه موکول شد.
-- HANDOFF_ID جدید، CLAUDE_LATEST_REPORT، HANDOFF_STATE، Push دو-Commit با Hash واقعی در پاسخ نهایی به کاربر.
-- تناقض با سطوح ۱–۵ اقتدار → متوقف شو، CCR/ACR — حدس نزن.
+### ۳.۶. آنچه عمداً ساخته نشد — تایید
+هیچ Scheduler/Worker/Connector؛ هیچ صفحه‌ی ورود/Endpoint توکن (JWT فقط از Malino)؛ هیچ aiSummarizer ساختگی؛ **هیچ Pagination فیک** (cursor/limit در قرارداد هستند اما لایه‌ی خواندن هنوز مصرفشان نمی‌کند — ساختن نمای ظاهری بدتر از نبودن بود). موکول به فاز خودش — صحیح.
 
-## ۴. شرط توقف
+## ۴. یافته‌های جزئی (غیرمسدودکننده — برای فازهای آینده)
 
-بعد از گزارش + Push، کاملاً متوقف شو — بازبینی مستقل را ممد جداگانه انجام می‌دهد. فاز بعدی (Connector Malino) با دستور جداگانه باز می‌شود.
+- **H-1 (INFO):** Pagination هنوز مصرف نمی‌شود — وقتی فید واقعی به اندازه‌ی واقعی رسید، cursor/limit باید در لایه‌ی خواندن پیاده شود (فاز خودش، نیازمند تست جدید).
+- **H-2 (INFO):** لاگ خطا با `console.error` است — برای Deploy واقعی، لاگ ساختاریافته بعداً لازم می‌شود (بخشی از زیرساخت Deploy که هنوز تصمیم ندارد).
+- **H-3 (INFO):** تست میدانی روی دستگاه واقعی (مثل V2-1) وقتی Deploy سبک تصمیم گرفت، اینجا هم به‌عنوان گیت پذیرش الزامی است.
+
+## ۵. گپ‌های باز (بدون تغییر)
+
+R4 (BLOCKED) — R5 (OPEN عمدی) — R8-a/b (OPEN) — Connector Malino (فاز بعدی) — Deploy (تصمیم مالک) — سوالات باز V2 (صوت، پلن‌ها، قرارداد 02).
+
+## ۶. دستور به یونس (Claude)
+
+1. **هیچ اصلاحی لازم نیست.**
+2. ثبت Ack طبق فرمت همیشگی + Push دو-Commit با Hash واقعی.
+3. **فاز Connector Malino: قفل** — فقط با دستور جدید بازبین پس از تایید مالک (سوالات ۲/۳/۵/۶ بخش ۵ سند Composition هنوز بازند).
+4. **شرط توقف:** بعد از Push، کاملاً متوقف شو.
+
+## ۷. پیام به مالک محصول
+
+**V1 از «کد تاییدشده» به «سیستم قابل‌صدا‌زدن» رسید.** الان یک سرور محلی واقعی داری که با توکن Malino، فرصت‌های هر سازمان را — فقط با عبور از امنیت fail-closed — به Feed/بریفینگ/ثبت تعامل می‌دهد. دو چیز تا «مصرف واقعی» فاصله دارد: (الف) تصمیم‌های Deploy و JWT-صادرکننده واقعی (تو)، (ب) پل Connector به داده‌ی واقعی کلینیک (فاز بعدی با دستور جدید).
 
 ---
-*بازبین: ممد (GLM 5.3 Flash) — R4 (BLOCKED)، R5 (OPEN)، R8-a/b (OPEN)، Connector: فاز بعدی.*
+*بازبین: ممد (GLM 5.3 Flash) — گیت Existence Oracle روی مسیر تعامل، خود‌ابتکاری بود که یک حفره‌ی واقعی را قبل از بازبینی بست؛ بهترین نشانه‌ی بلوغ مهندسی.*
