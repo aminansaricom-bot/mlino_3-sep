@@ -5,8 +5,9 @@ import 'leaflet/dist/leaflet.css';
 import { directoryService } from './directory/BusinessDirectoryService';
 import { loadMockSnapshotRaw } from './directory/loader';
 import type { V2BusinessDirectoryRecord } from './directory/contract';
-import { intentParser, extractRadiusMeters } from './matching/IntentParser';
+import { extractRadiusMeters } from './matching/IntentParser';
 import { matchingService } from './matching/container';
+import { buildIntentResolver } from './matching/llm/factory';
 import type { MatchItem } from './matching/MatchingService';
 import ArVitrineView from './ar/ArVitrineView';
 import { categoryLabel, floorLabel, formatDistance, formatIso, formatPrice } from './uiFormat';
@@ -82,6 +83,21 @@ export default function App() {
   ]);
   const [input, setInput] = useState('');
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const [sendBusy, setSendBusy] = useState(false);
+
+  // مسیریابی نیت از env (کلید فقط env؛ بدون کلید → قاعده‌محور Edge-first)
+  const { resolver: intentResolver, info: resolverInfo } = useMemo(() => {
+    const { resolver, buildInfo } = buildIntentResolver(import.meta.env.V2_PLAN_ID ?? null);
+    const info =
+      buildInfo.reason === 'plan' && buildInfo.engine !== 'rule-based'
+        ? `LLM فعال (${buildInfo.engine}${buildInfo.model ? ` · ${buildInfo.model}` : ''} · پلن آزمایشی ${buildInfo.planId})`
+        : buildInfo.reason === 'no-key'
+          ? 'پلن LLM تعیین شده ولی کلید API در env نیست — قاعده‌محور روی دستگاه'
+          : buildInfo.reason === 'unknown-plan'
+            ? 'پلن اعلامی شناخته نشد — پلن پایه (قاعده‌محور)'
+            : 'قاعده‌محور روی دستگاه (Edge-first)';
+    return { resolver, info };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -136,45 +152,62 @@ export default function App() {
 
   function send() {
     const text = input.trim();
-    if (text.length === 0) return;
+    if (text.length === 0 || sendBusy) return;
     setInput('');
+    setSendBusy(true);
 
-    const intent = intentParser.parse(text);
-    const radius = extractRadiusMeters(text) ?? radiusMeters;
-    const res = matchingService.match(intent, {
-      latitude: searchPoint[0],
-      longitude: searchPoint[1],
-      radiusMeters: radius,
-    });
+    void (async () => {
+      try {
+        // Edge-first: resolver از factory — قاعده‌محور پیش‌فرض؛ LLM فقط طبق config/کلید
+        const resolution = await intentResolver.resolve(text);
 
-    const understoodParts: string[] = [];
-    understoodParts.push(
-      res.interpreted.category !== null
-        ? `دسته: ${categoryLabel(res.interpreted.category)}`
-        : 'دسته: نامطمئن (جست‌وجوی متنی)',
-    );
-    if (res.interpreted.keywords.length > 0) {
-      understoodParts.push(`کلیدواژه‌ها: ${res.interpreted.keywords.join('، ')}`);
-    }
-    if (res.interpreted.modifiers.wantsOffer) understoodParts.push('دنبال تخفیف');
-    understoodParts.push(`شعاع: ${formatDistance(radius)}`);
+        const radius = extractRadiusMeters(text) ?? radiusMeters;
+        const res = matchingService.match(resolution, {
+          latitude: searchPoint[0],
+          longitude: searchPoint[1],
+          radiusMeters: radius,
+        });
 
-    const top = res.items.slice(0, 4);
-    let reply: string;
-    if (top.length === 0) {
-      reply = 'چیزی در این شعاع پیدا نکردم. شعاع را بیشتر کن یا مکان را عوض کن.';
-    } else {
-      const names = top
-        .map((i) => `${i.record.name} (${formatDistance(i.distanceMeters)})`)
-        .join('، ');
-      reply = `${top.length === 1 ? 'یک گزینه' : `${top.length.toLocaleString('fa-IR')} گزینه`} پیدا کردم: ${names}. نتیجه‌ها روی نقشه با نشان طلایی مشخص‌اند.`;
-    }
+        const understoodParts: string[] = [];
+        understoodParts.push(
+          res.interpreted.category !== null
+            ? `دسته: ${categoryLabel(res.interpreted.category)}`
+            : 'دسته: نامطمئن (جست‌وجوی متنی)',
+        );
+        if (res.interpreted.keywords.length > 0) {
+          understoodParts.push(`کلیدواژه‌ها: ${res.interpreted.keywords.join('، ')}`);
+        }
+        if (res.interpreted.modifiers.wantsOffer) understoodParts.push('دنبال تخفیف');
+        understoodParts.push(`شعاع: ${formatDistance(radius)}`);
+        // الزام ۲ دستور LLM: مسیر نتیجه همیشه مشخص باشد
+        understoodParts.push(
+          resolution.source === 'llm'
+            ? `موتور: LLM (${resolution.engineModel})`
+            : resolution.fellBackToRule
+              ? `موتور: قاعده‌محور (fallback از LLM)`
+              : 'موتور: قاعده‌محور روی دستگاه',
+        );
 
-    setChat((prev) => [
-      ...prev,
-      { role: 'user', text },
-      { role: 'assistant', text: reply, items: top, understood: understoodParts.join(' · ') },
-    ]);
+        const top = res.items.slice(0, 4);
+        let reply: string;
+        if (top.length === 0) {
+          reply = 'چیزی در این شعاع پیدا نکردم. شعاع را بیشتر کن یا مکان را عوض کن.';
+        } else {
+          const names = top
+            .map((i) => `${i.record.name} (${formatDistance(i.distanceMeters)})`)
+            .join('، ');
+          reply = `${top.length === 1 ? 'یک گزینه' : `${top.length.toLocaleString('fa-IR')} گزینه`} پیدا کردم: ${names}. نتیجه‌ها روی نقشه با نشان طلایی مشخص‌اند.`;
+        }
+
+        setChat((prev) => [
+          ...prev,
+          { role: 'user', text },
+          { role: 'assistant', text: reply, items: top, understood: understoodParts.join(' · ') },
+        ]);
+      } finally {
+        setSendBusy(false);
+      }
+    })();
   }
 
   function useMyLocation() {
@@ -369,6 +402,11 @@ export default function App() {
         {tab === 'assistant' && (
           <div className="assistant">
             <div className="search-point">
+              <div className="sp-row">
+                <span className="sp-label" title="مسیریابی نیت طبق config — اعمال پلن سمت کلاینت (UX، نه امنیت)">
+                  موتور فهم نیت: {resolverInfo}
+                </span>
+              </div>
               <div className="section-title" style={{ marginTop: 0 }}>
                 نقطه‌ی جست‌وجو
               </div>
@@ -463,7 +501,9 @@ export default function App() {
                   if (e.key === 'Enter') send();
                 }}
               />
-              <button onClick={send}>ارسال</button>
+              <button onClick={send} disabled={sendBusy}>
+                {sendBusy ? 'در حال پردازش…' : 'ارسال'}
+              </button>
             </div>
           </div>
         )}
