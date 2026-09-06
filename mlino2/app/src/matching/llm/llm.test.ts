@@ -252,11 +252,13 @@ describe('آداپتورهای سرویس — شکل درخواست و جای ک
 });
 
 describe('planRouting — config محور، بدون پلن جعلی (اصل ۲.۱)', () => {
-  it('پلن شناخته‌شده → مسیر همان پلن', () => {
+  it('پلن شناخته‌شده → مسیر همان پلن (Gemini = پیش‌فرض LLM طبق تقسیم کار مصوب)', () => {
     const r = resolvePlanRoute('plan_mock_pro');
-    expect(r.engine).toBe('llm-deepseek');
-    expect(r.model).toBe('deepseek-chat');
+    expect(r.engine).toBe('llm-gemini');
+    expect(r.model).toBe('gemini-2.0-flash');
     expect(r.fellBackToDefault).toBe(false);
+    const max = resolvePlanRoute('plan_mock_max');
+    expect(max.engine).toBe('llm-deepseek'); // DeepSeek = رزرو تحلیلی
   });
 
   it('پلن ناشناخته/غایب → پلن پایه‌ی قاعده‌محور (بدون حدس)', () => {

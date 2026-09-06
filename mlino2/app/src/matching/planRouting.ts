@@ -22,13 +22,16 @@ export interface PlanRoute {
 
 /**
  * جدول مسیریابی پلن‌ها — داده‌ی قابل‌تعویض، نه منطق پراکنده.
+ * تقسیم کار مصوب (دستور Dual-Provider بند ۲.۲، پیشنهاد ممد):
+ *   - Gemini Flash = فهم نیت روزمره (سریع/ارزان) → مسیر پیش‌فرض پلن‌های دارای LLM
+ *   - DeepSeek = کاربرد تحلیلی/پیچیده‌تر → رزرو (فعلاً هیچ مصرف‌کننده‌ای ندارد)
  * ⚠️ داده‌ی آزمایشی (MOCK): نام پلن‌ها ساختگی‌اند تا شکل config روشن شود؛
  * ساختار واقعی پلن‌ها هنوز تصمیم مالک محصول است.
  */
 export const PLAN_ROUTES: Readonly<Record<string, PlanRoute>> = {
   plan_mock_free: { engine: 'rule-based' },
-  plan_mock_pro: { engine: 'llm-deepseek', model: 'deepseek-chat' },
-  plan_mock_max: { engine: 'llm-gemini', model: 'gemini-2.0-flash' },
+  plan_mock_pro: { engine: 'llm-gemini', model: 'gemini-2.0-flash' },
+  plan_mock_max: { engine: 'llm-deepseek', model: 'deepseek-chat' },
 };
 
 /** پلن پایه‌ی Edge-first — وقتی پلنی اعلام نشده یا ناشناخته است */
