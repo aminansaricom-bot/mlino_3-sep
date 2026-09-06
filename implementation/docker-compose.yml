@@ -1,7 +1,18 @@
-# اجرای یک Postgres محلی فقط برای توسعه/تست Wave 1 — بدون نیاز به سرویس آنلاین.
-# استفاده: docker compose up -d
-# سپس در .env: DATABASE_URL="postgresql://mlino:mlino_dev_local@localhost:5435/mlino_v1?schema=public"
-# (پورت 5435 عمداً انتخاب شد تا با نمونه‌های موجود سیستم — 5433 در Malino، 5434 در پروژه‌ی دیگر — تداخل نداشته باشد)
+# اجرای محلی V1 روی Docker — Postgres + سرویس مهاجرت + API فقط-خواندن.
+#
+# ⚠️ فقط اجرای محلی روی همین سیستم — Deploy عمومی نیست. بدون HTTPS عمومی،
+# بدون دامنه، بدون Secret manager. هیچ‌کدام از این سرویس‌ها نباید در معرض
+# شبکه‌ی عمومی قرار بگیرد.
+#
+# استفاده:
+#   docker compose up -d --build
+#   (سرویس v1-migrate یک‌بار اجرا می‌شود و خارج می‌شود؛ سپس v1-read-api بالا می‌آید)
+#
+# هیچ Secret واقعی اینجا نیست: مقادیر زیر مقادیر توسعه‌ی محلی‌اند. برای هر
+# مقدار دیگری از متغیر محیطی میزبان استفاده کن، مثلاً:
+#   MLINO_JWT_SECRET=... docker compose up -d
+# (پورت 5435 عمداً انتخاب شد تا با نمونه‌های موجود سیستم — 5433 در Malino،
+#  5434 در پروژه‌ی دیگر — تداخل نداشته باشد)
 
 services:
   db:
@@ -16,6 +27,50 @@ services:
       - "5435:5432"
     volumes:
       - mlino_v1_local_db_data:/var/lib/postgresql/data
+    healthcheck:
+      # v1-migrate باید تا آماده‌شدن واقعی Postgres صبر کند، نه فقط تا بالا آمدن کانتینر.
+      test: ["CMD-SHELL", "pg_isready -U mlino -d mlino_v1"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # مهاجرت Schema — یک‌بار اجرا می‌شود و خارج می‌شود (restart: no).
+  # عمداً از stage «build» ساخته می‌شود، نه runtime: مهاجرت به CLI پریزما نیاز
+  # دارد که یک devDependency است و در Image نهایی (--omit=dev) وجود ندارد.
+  # اجرای مهاجرت به‌عنوان سرویس جدا (نه در CMD سرور) یعنی سرور هرگز هم‌زمان با
+  # مهاجرت بالا نمی‌آید و دو نمونه‌ی سرور هم مهاجرت را موازی اجرا نمی‌کنند.
+  v1-migrate:
+    build:
+      context: .
+      target: build
+    container_name: mlino-v1-migrate
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://mlino:mlino_dev_local@db:5432/mlino_v1?schema=public
+    command: ["npx", "prisma", "migrate", "deploy"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  v1-read-api:
+    build:
+      context: .
+      target: runtime
+    container_name: mlino-v1-read-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://mlino:mlino_dev_local@db:5432/mlino_v1?schema=public
+      # مقدار توسعه‌ی محلی. اگر متغیر محیطی میزبان تنظیم شده باشد، همان استفاده
+      # می‌شود. auth-adapter بدون این مقدار fail-closed است و اصلاً بالا نمی‌آید.
+      MLINO_JWT_SECRET: ${MLINO_JWT_SECRET:-local-dev-only-not-a-real-secret}
+      PORT: "3000"
+    ports:
+      - "${V1_API_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      v1-migrate:
+        condition: service_completed_successfully
 
 volumes:
   mlino_v1_local_db_data:

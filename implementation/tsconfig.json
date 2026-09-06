@@ -14,6 +14,6 @@
     "sourceMap": true,
     "moduleResolution": "node"
   },
-  "include": ["shared-contracts/**/*.ts", "foundation/**/*.ts", "value-engines/**/*.ts", "feed/**/*.ts", "briefing/**/*.ts", "test/**/*.ts"],
+  "include": ["shared-contracts/**/*.ts", "foundation/**/*.ts", "value-engines/**/*.ts", "feed/**/*.ts", "briefing/**/*.ts", "composition/**/*.ts", "http/**/*.ts", "test/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
