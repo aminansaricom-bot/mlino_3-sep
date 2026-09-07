@@ -1,13 +1,25 @@
-import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
+import { useEffect, useRef } from 'react';
+import L from '@neshan-maps-platform/leaflet';
+import '@neshan-maps-platform/leaflet/dist/leaflet.css';
 import type { V2BusinessDirectoryRecord } from '../directory/contract';
 
 /**
- * لایه‌ی نقشه — تمام‌صفحه، با مارکرهای دسته‌بندی‌شده و وضعیت‌های بارگذاری/خطا.
+ * لایه‌ی نقشه — روی SDK نشان.
  *
- * فقط ارائه است: هیچ تصمیم داده‌ای اینجا گرفته نمی‌شود. رکوردهایی که می‌گیرد،
- * همان‌هایی‌اند که App طبق منطق موجود (فیلتر طبقه) حساب کرده.
+ * چرا نشان: سبک پیش‌فرض OSM برای یک اپ مصرف‌کننده‌ی فارسی مناسب نبود — جاده‌های
+ * اشباع، و مهم‌تر، پلاک شماره‌ی راه که داخل خودِ تصویر کاشی پخته شده و با هیچ
+ * فیلتری پاک نمی‌شود. سرویس‌های تمیز جهانی (CARTO و…) یا کلید تجاری می‌خواهند
+ * یا برای تهران برچسب فارسی ندارند. نشان هر دو را دارد و داخل ایران سریع است.
+ *
+ * چرا این «مهاجرت کتابخانه» نیست: SDK نشان خودش روی همان Leaflet 1.9.4 ساخته
+ * شده. تنها چیزی که عوض شد، استفاده‌ی امری به‌جای react-leaflet در همین فایل
+ * است — چون `L.Map` نشان کلید را به‌عنوان option می‌گیرد و `key` در React یک
+ * prop رزرو‌شده است و هرگز به سازنده نمی‌رسد. react-leaflet فقط در همین یک
+ * فایل استفاده می‌شد.
+ *
+ * کلید: فقط از env. کلید `web.` نشان محدود به دامنه است، پس حضورش در باندل
+ * مرورگر طبق طراحی خودِ نشان بی‌خطر است — برخلاف کلید `service.` که هرگز نباید
+ * سمت کلاینت بیاید (با آن می‌شود مسیریابی و جست‌وجو صدا زد و سهمیه را سوزاند).
  */
 
 const CATEGORY_GLYPH: Record<string, string> = {
@@ -17,6 +29,10 @@ const CATEGORY_GLYPH: Record<string, string> = {
   restaurant: '🍽',
   retail_shop: '🛍',
 };
+
+const NESHAN_KEY = import.meta.env.V2_NESHAN_MAP_KEY as string | undefined;
+/** استایل نشان: dreamy روشن و خلوت است — نزدیک‌ترین به چیزی که مالک محصول خواست */
+const NESHAN_MAPTYPE = (import.meta.env.V2_NESHAN_MAPTYPE as string | undefined) ?? 'dreamy';
 
 function pinIcon(category: string, isMatch: boolean, isSelected: boolean): L.DivIcon {
   const state = isMatch ? ' is-match' : isSelected ? ' is-selected' : '';
@@ -35,61 +51,6 @@ const meIcon = L.divIcon({
   iconAnchor: [8, 8],
 });
 
-function FlyTo({ target }: { target: [number, number] | null }) {
-  const map = useMap();
-  useEffect(() => {
-    if (target) map.flyTo(target, 16, { duration: 0.8 });
-  }, [target, map]);
-  return null;
-}
-
-function DoubleClickPicker({ onPick }: { onPick: (lat: number, lng: number) => void }) {
-  useMapEvents({
-    dblclick(e) {
-      onPick(e.latlng.lat, e.latlng.lng);
-    },
-  });
-  return null;
-}
-
-/**
- * کنترل‌های سفارشی بیرون از MapContainer به نمونه‌ی نقشه نیاز دارند.
- *
- * `invalidateSize` اینجا اجباری است، نه احتیاط: Leaflet اندازه‌ی ظرف را یک‌بار
- * موقع ساخت می‌خواند. چون نقشه در چیدمان جدید داخل یک ظرف مطلق و تمام‌صفحه است
- * که ارتفاعش بعد از اولین Paint نهایی می‌شود، آن اندازه کهنه می‌ماند و Leaflet
- * فقط برای همان مستطیل کوچک اولیه Tile می‌گیرد — بقیه‌ی صفحه خاکستری می‌ماند.
- * (همین باگ در اسکرین‌شات تست دیده شد.) با هر تغییر اندازه هم دوباره لازم است.
- */
-function MapHandle({ onReady }: { onReady: (map: L.Map) => void }) {
-  const map = useMap();
-  useEffect(() => {
-    onReady(map);
-
-    const refresh = () => map.invalidateSize();
-    // بعد از نهایی‌شدن چیدمان اولیه
-    const raf = requestAnimationFrame(refresh);
-    const settle = setTimeout(refresh, 250);
-
-    const ro = new ResizeObserver(refresh);
-    ro.observe(map.getContainer());
-    window.addEventListener('orientationchange', refresh);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(settle);
-      ro.disconnect();
-      window.removeEventListener('orientationchange', refresh);
-    };
-  }, [map, onReady]);
-  return null;
-}
-
-/**
- * وضعیت Tileها. Leaflet برای هر Tile رویداد می‌دهد؛ ما فقط سه حالت را
- * تفکیک می‌کنیم: در حال بارگذاری، آماده، و خطا (شبکه/فیلتر/آفلاین).
- * بدون این، نقشه در حالت خطا فقط خاکستری می‌ماند و کاربر دلیلش را نمی‌داند.
- */
 export type TileStatus = 'loading' | 'ready' | 'error';
 
 interface MapViewProps {
@@ -99,7 +60,6 @@ interface MapViewProps {
   center: [number, number];
   myPoint: [number, number] | null;
   flyTarget: [number, number] | null;
-  /** تغییرش TileLayer را از نو می‌سازد — مسیر «تلاش دوباره» بعد از خطای شبکه */
   tileRetryKey: number;
   onSelect: (id: string) => void;
   onPickPoint: (lat: number, lng: number) => void;
@@ -120,35 +80,115 @@ export default function MapView({
   onMapReady,
   onTileStatus,
 }: MapViewProps) {
-  return (
-    <div className="map-layer">
-      <MapContainer center={center} zoom={13} zoomControl={false} style={{ height: '100%', width: '100%' }}>
-        <MapHandle onReady={onMapReady} />
-        <DoubleClickPicker onPick={onPickPoint} />
-        <TileLayer
-          key={tileRetryKey}
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          eventHandlers={{
-            loading: () => onTileStatus('loading'),
-            load: () => onTileStatus('ready'),
-            tileerror: () => onTileStatus('error'),
-          }}
-        />
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  const meMarkerRef = useRef<L.Marker | null>(null);
+  /** آخرین مقدارهای callback، تا ساخت نقشه به تغییر آن‌ها وابسته نشود */
+  const cbRef = useRef({ onSelect, onPickPoint, onMapReady, onTileStatus });
+  cbRef.current = { onSelect, onPickPoint, onMapReady, onTileStatus };
 
-        {records.map((r) => (
-          <Marker
-            key={r.business_id}
-            position={[r.location.latitude, r.location.longitude]}
-            icon={pinIcon(r.category, matchIds.has(r.business_id), selectedId === r.business_id)}
-            eventHandlers={{ click: () => onSelect(r.business_id) }}
-          />
-        ))}
+  // ساخت نقشه — دقیقاً یک‌بار
+  useEffect(() => {
+    const host = hostRef.current;
+    if (host === null || mapRef.current !== null) return;
 
-        {myPoint && <Marker position={myPoint} icon={meIcon} />}
+    if (NESHAN_KEY === undefined || NESHAN_KEY.length === 0) {
+      // بدون کلید چیزی جعل نمی‌کنیم — وضعیت خطا به بالادست گزارش می‌شود
+      cbRef.current.onTileStatus('error');
+      return;
+    }
 
-        <FlyTo target={flyTarget} />
-      </MapContainer>
-    </div>
-  );
+    const map = new L.Map(host, {
+      key: NESHAN_KEY,
+      maptype: NESHAN_MAPTYPE,
+      center,
+      zoom: 13,
+      zoomControl: false,
+      poi: false,
+      traffic: false,
+    } as L.MapOptions);
+
+    mapRef.current = map;
+    cbRef.current.onMapReady(map);
+    cbRef.current.onTileStatus('ready');
+
+    map.on('dblclick', (e: L.LeafletMouseEvent) => {
+      cbRef.current.onPickPoint(e.latlng.lat, e.latlng.lng);
+    });
+
+    /**
+     * Leaflet اندازه‌ی ظرف را یک‌بار موقع ساخت می‌خواند. در چیدمان تمام‌صفحه‌ی
+     * ما ارتفاع بعد از اولین Paint نهایی می‌شود، پس آن اندازه کهنه می‌ماند و
+     * نقشه فقط برای یک مستطیل کوچک کاشی می‌گیرد — این باگ واقعاً دیده شد.
+     */
+    const refresh = () => map.invalidateSize();
+    const raf = requestAnimationFrame(refresh);
+    const settle = setTimeout(refresh, 250);
+    const ro = new ResizeObserver(refresh);
+    ro.observe(host);
+    window.addEventListener('orientationchange', refresh);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(settle);
+      ro.disconnect();
+      window.removeEventListener('orientationchange', refresh);
+      map.remove();
+      mapRef.current = null;
+      markersRef.current.clear();
+      meMarkerRef.current = null;
+    };
+    // عمداً فقط یک‌بار: مرکز اولیه و کلید بعد از ساخت تغییر نمی‌کنند
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tileRetryKey]);
+
+  // همگام‌سازی مارکرهای کسب‌وکار
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map === null) return;
+
+    const wanted = new Set(records.map((r) => r.business_id));
+
+    for (const [id, marker] of markersRef.current) {
+      if (!wanted.has(id)) {
+        marker.remove();
+        markersRef.current.delete(id);
+      }
+    }
+
+    for (const r of records) {
+      const icon = pinIcon(r.category, matchIds.has(r.business_id), selectedId === r.business_id);
+      const existing = markersRef.current.get(r.business_id);
+      if (existing) {
+        existing.setIcon(icon);
+        existing.setLatLng([r.location.latitude, r.location.longitude]);
+      } else {
+        const m = L.marker([r.location.latitude, r.location.longitude], { icon })
+          .addTo(map)
+          .on('click', () => cbRef.current.onSelect(r.business_id));
+        markersRef.current.set(r.business_id, m);
+      }
+    }
+  }, [records, matchIds, selectedId]);
+
+  // نقطه‌ی «من»
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map === null) return;
+    if (myPoint === null) {
+      meMarkerRef.current?.remove();
+      meMarkerRef.current = null;
+      return;
+    }
+    if (meMarkerRef.current) meMarkerRef.current.setLatLng(myPoint);
+    else meMarkerRef.current = L.marker(myPoint, { icon: meIcon }).addTo(map);
+  }, [myPoint]);
+
+  // پرواز به مورد انتخاب‌شده
+  useEffect(() => {
+    if (flyTarget !== null) mapRef.current?.flyTo(flyTarget, 16, { duration: 0.8 });
+  }, [flyTarget]);
+
+  return <div className="map-layer" ref={hostRef} />;
 }

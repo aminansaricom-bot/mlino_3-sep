@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@neshan-maps-platform/leaflet": "^1.0.8",
     "leaflet": "^1.9.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

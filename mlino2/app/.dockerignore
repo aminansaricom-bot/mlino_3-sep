@@ -11,3 +11,6 @@ scripts
 Dockerfile
 docker-compose.yml
 .dockerignore
+
+# .npmrc باید در context بماند: رجیستری نشان برای npm ci لازم است (کلیدی داخلش نیست)
+!.npmrc

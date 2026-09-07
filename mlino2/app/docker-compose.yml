@@ -10,6 +10,10 @@ services:
       context: .
       args:
         NPM_REGISTRY: https://registry.yarnpkg.com
+        # کلید نمایش نقشه از محیط میزبان خوانده می‌شود — هیچ مقداری اینجا Commit نمی‌شود.
+        # اجرا:  V2_NESHAN_MAP_KEY=web.xxx docker compose up --build -d
+        V2_NESHAN_MAP_KEY: ${V2_NESHAN_MAP_KEY:-}
+        V2_NESHAN_MAPTYPE: ${V2_NESHAN_MAPTYPE:-dreamy}
     ports:
       - "8443:8443"
     volumes:

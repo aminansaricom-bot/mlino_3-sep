@@ -17,7 +17,22 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 ARG NPM_REGISTRY=https://registry.yarnpkg.com
-COPY package.json package-lock.json ./
+
+# کلید نمایش نقشه‌ی نشان — عمداً از طریق build-arg، نه فایل env.
+#
+# چرا این با قاعده‌ی «هیچ کلیدی در image» تناقض ندارد: کلید `web.` نشان از
+# جنس کلیدهای LLM نیست. طبق طراحی خودِ نشان محدود به دامنه است و برای
+# نمایش در مرورگر ساخته شده — مثل کلید عمومی نقشه در هر اپ نقشه‌محور.
+# آنچه همچنان مطلقاً ممنوع است: کلید `service.` نشان (مسیریابی/جست‌وجو) و
+# کلیدهای LLM؛ آن‌ها سمت کلاینت نمی‌آیند و `.dockerignore` جلوی `.env*` را
+# می‌گیرد. بدون این ARG، اپ ساخته می‌شود ولی نقشه صادقانه حالت خطا می‌دهد.
+ARG V2_NESHAN_MAP_KEY=
+ARG V2_NESHAN_MAPTYPE=dreamy
+ENV V2_NESHAN_MAP_KEY=$V2_NESHAN_MAP_KEY
+ENV V2_NESHAN_MAPTYPE=$V2_NESHAN_MAPTYPE
+
+# .npmrc برای رجیستری نشان لازم است و باید پیش از npm ci حاضر باشد
+COPY package.json package-lock.json .npmrc ./
 # فقط URLهای lockfile به رجیستری انتخابی هدایت می‌شوند؛ integrityها دست‌نخورده و verify می‌شوند
 RUN sed -i "s#https://registry.npmjs.org/#${NPM_REGISTRY}/#g" package-lock.json && npm ci
 COPY . .
