@@ -1,0 +1,13 @@
+# هیچ کلید API وارد image نمی‌شود (الزام دستور):
+# .env*/  *.local/  scripts/ (اسکریپت‌های زنده+خروجی‌ها) همگی از build context خارج‌اند.
+# توجه: nginx.conf و Dockerfile/compose در context می‌مانند (Dockerfile آنها را COPY/استفاده می‌کند)
+node_modules
+dist
+*.local
+.env*
+tsconfig.tsbuildinfo
+scripts
+.git
+Dockerfile
+docker-compose.yml
+.dockerignore

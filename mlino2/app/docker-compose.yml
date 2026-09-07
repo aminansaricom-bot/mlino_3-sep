@@ -1,0 +1,19 @@
+# اجرای تست میدانی روی همان سیستم (یونس/مالک):
+#   docker compose up --build -d
+# گوشی (همان Wi-Fi): https://<IP-LAN-میزبان>:8443  → پذیرش هشدار گواهی (راهنما در گزارش)
+#
+# این ماشین registry.npmjs.org را فیلتر می‌کند؛ پیش‌فرض yarnpkg (همان بسته‌ها).
+# در محیط عادی: NPM_REGISTRY را https://registry.npmjs.org بگذارید.
+services:
+  mlino2-web:
+    build:
+      context: .
+      args:
+        NPM_REGISTRY: https://registry.yarnpkg.com
+    ports:
+      - "8443:8443"
+    volumes:
+      # گواهی بین rebuildها می‌ماند → پذیرش هشدار روی گوشی فقط یک بار
+      - mlino2-certs:/etc/nginx/certs
+volumes:
+  mlino2-certs:
