@@ -50,6 +50,14 @@ const CATEGORY_GLYPH: Record<string, string> = {
   retail_shop: '🛍',
 };
 
+const FILTER_CATEGORIES: V2BusinessCategory[] = [
+  'restaurant',
+  'cafe',
+  'beauty_clinic',
+  'dental_clinic',
+  'retail_shop',
+];
+
 function isOfferActive(validUntil: string | null, now: number): boolean {
   if (validUntil === null) return true;
   const t = Date.parse(validUntil);
@@ -73,6 +81,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [floorFilter, setFloorFilter] = useState<number | 'all'>('all');
   const [categoryChip, setCategoryChip] = useState<V2BusinessCategory | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [now] = useState(() => Date.now());
 
   const [overlay, setOverlay] = useState<Overlay>('none');
@@ -103,6 +112,16 @@ export default function App() {
       window.removeEventListener('offline', down);
     };
   }, []);
+
+  const availableFloors = useMemo(() => {
+    const floors = new Set<number>();
+    for (const record of records) {
+      if (record.location.building_id !== null && record.location.floor_level !== null) {
+        floors.add(record.location.floor_level);
+      }
+    }
+    return [...floors].sort((a, b) => a - b);
+  }, [records]);
   const [tileRetryKey, setTileRetryKey] = useState(0);
   const mapRef = useRef<L.Map | null>(null);
 
@@ -435,17 +454,57 @@ export default function App() {
           </button>
         </div>
 
-        {(categoryChip !== null || floorFilter !== 'all') && (
-          <button
-            className="active-filter-pill"
-            onClick={() => {
-              setCategoryChip(null);
-              setFloorFilter('all');
-              setSearchWasEmpty(false);
-            }}
-          >
-            فیلتر فعال روی نقشه · پاک‌کردن
+        <div className="map-filter-row">
+          <button className="filter-toggle" onClick={() => setFiltersOpen((open) => !open)}>
+            ⚲ فیلترها{categoryChip !== null || floorFilter !== 'all' ? ' · فعال' : ''}
           </button>
+          {(categoryChip !== null || floorFilter !== 'all') && (
+            <button
+              className="active-filter-pill"
+              onClick={() => {
+                setCategoryChip(null);
+                setFloorFilter('all');
+                setSearchWasEmpty(false);
+              }}
+            >
+              پاک‌کردن فیلتر
+            </button>
+          )}
+        </div>
+        {filtersOpen && (
+          <div className="chips" aria-label="فیلترهای نقشه">
+            {FILTER_CATEGORIES.map((category) => (
+              <button
+                key={category}
+                className={`chip${categoryChip === category ? ' active' : ''}`}
+                onClick={() => {
+                  setCategoryChip(categoryChip === category ? null : category);
+                  setSearchWasEmpty(false);
+                }}
+              >
+                <span aria-hidden="true">{CATEGORY_GLYPH[category]}</span> {categoryLabel(category)}
+              </button>
+            ))}
+            {availableFloors.length > 0 && (
+              <>
+                <button
+                  className={`chip${floorFilter === 'all' ? ' active' : ''}`}
+                  onClick={() => setFloorFilter('all')}
+                >
+                  همه‌ی طبقات
+                </button>
+                {availableFloors.map((floor) => (
+                  <button
+                    key={floor}
+                    className={`chip${floorFilter === floor ? ' active' : ''}`}
+                    onClick={() => setFloorFilter(floor)}
+                  >
+                    {floorLabel(floor, null)}
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
         )}
       </div>
 
