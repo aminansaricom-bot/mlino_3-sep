@@ -334,13 +334,18 @@ function ArPrimaryCard({
 }) {
   return (
     <button
-      className="ar-primary"
+      className={`ar-primary${item.activeOffer ? ' has-offer' : ''}`}
       style={{ left: `${leftPercent}%` }}
       onClick={() => onSelect(item.businessId)}
     >
       <span className={`ar-coin ar-coin-${item.category}`} aria-hidden="true">
         {categoryGlyph(item.category)}
       </span>
+      {item.activeOffer && (
+        <span className="ar-offer-pulse" aria-label="پیشنهاد فعال">
+          <i>٪</i><i>✦</i><i>٪</i>
+        </span>
+      )}
       <span className="ar-primary-copy">
         <span className="ar-primary-name">{item.name}</span>
         <span className="ar-primary-meta">
