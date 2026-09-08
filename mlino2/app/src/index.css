@@ -234,21 +234,24 @@ button { font-family: inherit; }
 .primary-actions {
   position: absolute;
   z-index: 480;
-  right: 12px;
-  bottom: calc(var(--sheet-peek) + 16px);
+  left: 50%;
+  bottom: calc(var(--sheet-peek) + 18px);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  align-items: flex-end;
+  gap: 12px;
+  align-items: center;
+  transform: translateX(-50%);
 }
 .action-fab {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  height: 46px;
-  padding: 0 16px;
+  width: 58px;
+  height: 58px;
+  padding: 0;
   border: none;
-  border-radius: var(--r-pill);
+  border-radius: 50%;
   color: #fff;
   font-size: 14px;
   font-weight: 600;
@@ -258,6 +261,11 @@ button { font-family: inherit; }
 .action-fab.assistant { background: linear-gradient(135deg, var(--accent), var(--violet)); }
 .action-fab.vitrine { background: linear-gradient(135deg, var(--navy-700), var(--navy-800)); }
 .action-fab:active { transform: translateY(1px); }
+.action-fab-icon { font-size: 25px; line-height: 1; }
+.action-fab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.action-fab.vitrine { position: absolute; right: -74px; bottom: 66px; width: 50px; height: 50px; }
+.action-fab.vitrine .action-fab-icon { font-size: 22px; }
+.active-filter-pill { align-self: flex-start; border: 1px solid var(--border); background: rgba(255,255,255,.88); color: var(--ink-soft); border-radius: var(--r-pill); padding: 6px 11px; font-size: 11px; box-shadow: var(--sh-1); }
 
 /* ───────────────────────── مارکرها ───────────────────────── */
 
@@ -778,7 +786,7 @@ button { font-family: inherit; }
   position: absolute;
   top: 38%;
   transform: translateX(-50%);
-  width: 220px;
+  width: 224px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -795,6 +803,15 @@ button { font-family: inherit; }
   z-index: 8;
   transition: left .28s cubic-bezier(.22,.61,.36,1);
 }
+.ar-primary::after { content: ''; position: absolute; left: 50%; bottom: -34px; width: 2px; height: 34px; background: linear-gradient(var(--gold), transparent); opacity: .75; }
+.ar-primary-copy { display: flex; flex-direction: column; gap: 2px; }
+.ar-coin, .ar-bubble-coin { display: grid; place-items: center; border-radius: 50%; color: #fff; border: 2px solid rgba(255,255,255,.9); box-shadow: inset 0 2px 5px rgba(255,255,255,.28), 0 7px 18px rgba(0,0,0,.32); font-weight: 800; }
+.ar-coin { width: 58px; height: 58px; align-self: center; font-size: 25px; background: linear-gradient(145deg, #ffd56a, #b97913); }
+.ar-coin-dental_clinic { background: linear-gradient(145deg, #55b8ff, #2670c7); }
+.ar-coin-beauty_clinic { background: linear-gradient(145deg, #f48ac7, #ac397e); }
+.ar-coin-cafe { background: linear-gradient(145deg, #e6a34b, #89501e); }
+.ar-coin-restaurant { background: linear-gradient(145deg, #ff9272, #b33f2c); }
+.ar-coin-retail_shop { background: linear-gradient(145deg, #72d092, #31805d); }
 .ar-primary-name { font-weight: 700; font-size: 15px; }
 .ar-primary-meta { font-size: 12px; color: rgba(255,255,255,.78); }
 .ar-primary-offer {
@@ -837,6 +854,7 @@ button { font-family: inherit; }
   transform-origin: center bottom;
   transition: left .28s cubic-bezier(.22,.61,.36,1), transform .28s cubic-bezier(.22,.61,.36,1);
 }
+.ar-bubble-coin { width: 30px; height: 30px; font-size: 13px; margin-bottom: 2px; }
 /* دو ردیف عمودی — راهِ گریز وقتی دو حباب افقی به هم می‌رسند */
 .ar-bubble.ar-lane-0 { top: 22%; }
 .ar-bubble.ar-lane-1 { top: 62%; }

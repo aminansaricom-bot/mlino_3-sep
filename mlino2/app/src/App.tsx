@@ -42,15 +42,6 @@ function matchReason(item: MatchItem, interpretedCategory: string | null): strin
   return parts.join(' · ');
 }
 
-/** چیپ‌های دسته — فقط دسته‌هایی که واقعاً در قرارداد داده وجود دارند */
-const CATEGORY_CHIPS: { id: V2BusinessCategory; label: string; glyph: string }[] = [
-  { id: 'restaurant', label: 'غذا', glyph: '🍽' },
-  { id: 'cafe', label: 'کافه', glyph: '☕' },
-  { id: 'beauty_clinic', label: 'زیبایی', glyph: '💠' },
-  { id: 'dental_clinic', label: 'درمان', glyph: '🦷' },
-  { id: 'retail_shop', label: 'خرید', glyph: '🛍' },
-];
-
 const CATEGORY_GLYPH: Record<string, string> = {
   dental_clinic: '🦷',
   beauty_clinic: '💠',
@@ -164,17 +155,6 @@ export default function App() {
   useEffect(() => {
     if (overlay === 'assistant') chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chat, overlay]);
-
-  const buildings = useMemo(() => {
-    const map = new Map<string, number[]>();
-    for (const r of records) {
-      if (r.location.building_id === null || r.location.floor_level === null) continue;
-      const floors = map.get(r.location.building_id) ?? [];
-      if (!floors.includes(r.location.floor_level)) floors.push(r.location.floor_level);
-      map.set(r.location.building_id, floors);
-    }
-    return map;
-  }, [records]);
 
   /** فیلتر طبقه (رفتار موجود، دست‌نخورده) + فیلتر چیپ دسته (فقط نمایشی) */
   const visibleRecords = useMemo(() => {
@@ -455,45 +435,18 @@ export default function App() {
           </button>
         </div>
 
-        <div className="chips">
-          {CATEGORY_CHIPS.map((c) => (
-            <button
-              key={c.id}
-              className={`chip${categoryChip === c.id ? ' active' : ''}`}
-              onClick={() => {
-                setCategoryChip(categoryChip === c.id ? null : c.id);
-                setSearchWasEmpty(false);
-              }}
-            >
-              <span aria-hidden="true">{c.glyph}</span>
-              {c.label}
-            </button>
-          ))}
-          {buildings.size > 0 && (
-            <>
-              <button
-                className={`chip${floorFilter === 'all' ? ' active' : ''}`}
-                onClick={() => setFloorFilter('all')}
-              >
-                همه‌ی طبقات
-              </button>
-              {[...buildings.entries()].flatMap(([bId, floors]) =>
-                floors
-                  .slice()
-                  .sort((a, b) => a - b)
-                  .map((f) => (
-                    <button
-                      key={`${bId}_${f}`}
-                      className={`chip${floorFilter === f ? ' active' : ''}`}
-                      onClick={() => setFloorFilter(f)}
-                    >
-                      {floorLabel(f, bId)}
-                    </button>
-                  )),
-              )}
-            </>
-          )}
-        </div>
+        {(categoryChip !== null || floorFilter !== 'all') && (
+          <button
+            className="active-filter-pill"
+            onClick={() => {
+              setCategoryChip(null);
+              setFloorFilter('all');
+              setSearchWasEmpty(false);
+            }}
+          >
+            فیلتر فعال روی نقشه · پاک‌کردن
+          </button>
+        )}
       </div>
 
       <span className="mock-badge badge-float" title="داده‌ی واقعی هنوز منتشر نشده است">
@@ -520,10 +473,12 @@ export default function App() {
 
       <div className="primary-actions">
         <button className="action-fab assistant" onClick={() => setOverlay('assistant')}>
-          <span aria-hidden="true">✨</span> دستیار هوشمند
+          <span className="action-fab-icon" aria-hidden="true">✦</span>
+          <span className="action-fab-label">دستیار هوشمند</span>
         </button>
         <button className="action-fab vitrine" onClick={() => setOverlay('vitrine')}>
-          <span aria-hidden="true">📷</span> ویترین زنده
+          <span className="action-fab-icon" aria-hidden="true">◉</span>
+          <span className="action-fab-label">ویترین زنده</span>
         </button>
       </div>
 

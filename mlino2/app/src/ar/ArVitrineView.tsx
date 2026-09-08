@@ -338,9 +338,14 @@ function ArPrimaryCard({
       style={{ left: `${leftPercent}%` }}
       onClick={() => onSelect(item.businessId)}
     >
-      <span className="ar-primary-name">{item.name}</span>
-      <span className="ar-primary-meta">
-        {categoryLabel(item.category)} · {formatDistance(item.distanceMeters)}
+      <span className={`ar-coin ar-coin-${item.category}`} aria-hidden="true">
+        {categoryGlyph(item.category)}
+      </span>
+      <span className="ar-primary-copy">
+        <span className="ar-primary-name">{item.name}</span>
+        <span className="ar-primary-meta">
+          {categoryLabel(item.category)} · {formatDistance(item.distanceMeters)}
+        </span>
       </span>
       {item.activeOffer && (
         <span className="ar-primary-offer">
@@ -386,9 +391,23 @@ function ArBubble({
       onClick={() => onSelect(item.businessId)}
       title={`${item.name} — ${formatDistance(item.distanceMeters)}`}
     >
+      <span className={`ar-bubble-coin ar-coin-${item.category}`} aria-hidden="true">
+        {categoryGlyph(item.category)}
+      </span>
       <span className="ar-bubble-name">{item.name}</span>
       <span className="ar-bubble-dist">{formatDistance(item.distanceMeters)}</span>
       {item.activeOffer && <span className="ar-bubble-dot" aria-label="پیشنهاد فعال" />}
     </button>
   );
+}
+
+function categoryGlyph(category: string): string {
+  const glyphs: Record<string, string> = {
+    dental_clinic: '✚',
+    beauty_clinic: '✦',
+    cafe: '☕',
+    restaurant: '⌁',
+    retail_shop: '◇',
+  };
+  return glyphs[category] ?? '•';
 }
