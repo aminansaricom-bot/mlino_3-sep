@@ -15,6 +15,9 @@ import BottomSheet, { type SheetState } from './components/BottomSheet';
 import BusinessCard from './components/BusinessCard';
 import SettingsPanel from './components/SettingsPanel';
 import { categoryLabel, floorFilterLabel, floorLabel, formatDistance, formatIso, formatPrice } from './uiFormat';
+import { Icon, CategoryCoin } from './design/Icon';
+import ExperiencePanel from './experience/ExperiencePanel';
+import { feedback, useLocalExperience } from './experience/useLocalExperience';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
 
@@ -73,7 +76,7 @@ interface ChatMessage {
   interpretedCategory?: V2BusinessCategory | null;
 }
 
-type Overlay = 'none' | 'assistant' | 'vitrine' | 'settings' | 'detail';
+type Overlay = 'none' | 'assistant' | 'vitrine' | 'settings' | 'detail' | 'experience';
 
 export default function App() {
   const [loaded, setLoaded] = useState(false);
@@ -83,6 +86,7 @@ export default function App() {
   const [categoryChip, setCategoryChip] = useState<V2BusinessCategory | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [now] = useState(() => Date.now());
+  const experience = useLocalExperience();
 
   const [overlay, setOverlay] = useState<Overlay>('none');
   const [sheet, setSheet] = useState<SheetState>('peek');
@@ -186,8 +190,8 @@ export default function App() {
     if (categoryChip !== null) {
       out = out.filter((r) => r.category === categoryChip);
     }
-    return out;
-  }, [records, floorFilter, categoryChip]);
+    return out.filter((r) => !experience.data.hidden.includes(r.business_id));
+  }, [records, floorFilter, categoryChip, experience.data.hidden]);
 
   const selected = useMemo(
     () => (selectedId === null ? null : directoryService.getById(selectedId)),
@@ -233,8 +237,9 @@ export default function App() {
 
   const openDetail = useCallback((id: string) => {
     setSelectedId(id);
+    experience.viewed(id);
     setOverlay('detail');
-  }, []);
+  }, [experience]);
 
   function runSearch(text: string) {
     const q = text.trim();
@@ -449,8 +454,12 @@ export default function App() {
             className="icon-btn"
             onClick={() => setOverlay('settings')}
             aria-label="تنظیمات و وضعیت"
+            title="تنظیمات و وضعیت"
           >
-            ⚙
+            <Icon name="settings" />
+          </button>
+          <button className="profile-btn" onClick={() => setOverlay('experience')} aria-label="فضای من" title="فضای من">
+            <Icon name="bookmark" />
           </button>
         </div>
 
@@ -607,9 +616,7 @@ export default function App() {
           </div>
           <div className="panel-body">
             <div className="detail-head">
-              <div className="biz-thumb" aria-hidden="true">
-                {CATEGORY_GLYPH[selected.category] ?? '📍'}
-              </div>
+              <CategoryCoin category={selected.category} offer={selected.offers.length > 0} />
               <div>
                 <h2 className="detail-title">{selected.name}</h2>
                 <div className="biz-meta">
@@ -636,6 +643,18 @@ export default function App() {
                   )}
                 </div>
               </div>
+            </div>
+
+            <div className="detail-actions">
+              <button className={experience.data.saved.includes(selected.business_id) ? 'active' : ''} onClick={() => { experience.toggle('saved', selected.business_id); feedback(experience.data); }}>
+                <Icon name="bookmark" /> {experience.data.saved.includes(selected.business_id) ? 'ذخیره شد' : 'ذخیره'}
+              </button>
+              <button className={experience.data.later.includes(selected.business_id) ? 'active' : ''} onClick={() => { experience.toggle('later', selected.business_id); feedback(experience.data); }}>
+                <Icon name="clock" /> بعداً ببینم
+              </button>
+              <button onClick={() => { experience.toggle('hidden', selected.business_id); setOverlay('none'); }}>
+                <Icon name="hide" /> کمتر نشان بده
+              </button>
             </div>
 
             <div className="section-title">محصولات / خدمات</div>
@@ -761,6 +780,19 @@ export default function App() {
             </button>
           </div>
         </div>
+      )}
+
+      {overlay === 'experience' && (
+        <ExperiencePanel
+          data={experience.data}
+          records={records}
+          storageFailed={experience.storageFailed}
+          onClose={() => setOverlay('none')}
+          onOpen={openDetail}
+          onChange={experience.setData}
+          onToggle={experience.toggle}
+          onDiagnostics={() => setOverlay('settings')}
+        />
       )}
 
       {overlay === 'vitrine' && (

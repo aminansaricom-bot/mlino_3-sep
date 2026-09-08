@@ -156,6 +156,9 @@ button { font-family: inherit; }
   color: var(--ink-soft);
 }
 .icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+.profile-btn { flex: 0 0 auto; width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.7); border-radius: 50%; background: var(--navy-800); color: #fff; box-shadow: var(--sh-2); cursor: pointer; }
+.profile-btn:hover { background: var(--accent); }
+.ml-icon { width: 20px; height: 20px; display: block; }
 
 /* چیپ دسته‌ها */
 .chips {
@@ -280,7 +283,8 @@ button { font-family: inherit; }
   border: 2px solid #fff;
   box-shadow: 0 2px 6px rgba(13, 21, 38, .35);
 }
-.pin > span { transform: rotate(45deg); font-size: 14px; line-height: 1; }
+.pin > span { transform: rotate(45deg); font-size: 14px; line-height: 1; display: grid; place-items: center; }
+.pin > span svg { width: 15px; height: 15px; stroke: #fff; }
 .pin.cat-dental_clinic { background: #2f8fd8; }
 .pin.cat-beauty_clinic { background: #d857a8; }
 .pin.cat-cafe { background: #b3762f; }
@@ -605,6 +609,41 @@ button { font-family: inherit; }
 
 .detail-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 4px; }
 .detail-head .biz-thumb { width: 56px; height: 56px; font-size: 24px; }
+.category-coin { width: 58px; height: 58px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; color: #fff; background: linear-gradient(145deg, #55b8ff, #2670c7); box-shadow: inset 0 2px 5px #fff6, 0 8px 18px #0d152633; }
+.category-coin .ml-icon { width: 28px; height: 28px; }
+.coin-beauty_clinic { background: linear-gradient(145deg, #f48ac7, #ac397e); }
+.coin-cafe { background: linear-gradient(145deg, #e6a34b, #89501e); }
+.coin-restaurant { background: linear-gradient(145deg, #ff9272, #b33f2c); }
+.coin-retail_shop { background: linear-gradient(145deg, #72d092, #31805d); }
+.coin-offer { outline: 3px solid rgba(245,165,36,.28); }
+.detail-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin: 14px 0 4px; }
+.detail-actions button { min-height: 42px; display: flex; align-items: center; justify-content: center; gap: 5px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink-soft); font-size: 11px; cursor: pointer; }
+.detail-actions button.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.personal-panel { background: var(--surface); }
+.personal-intro { padding: 14px; border-radius: var(--r-lg); background: linear-gradient(135deg, var(--navy-800), #263f76); color: #fff; }
+.personal-intro .ml-icon { color: #8bb0ff; width: 30px; height: 30px; }
+.personal-intro h2 { margin: 8px 0 3px; font-size: 20px; }
+.personal-intro p { margin: 0; color: #d5def3; font-size: 12px; }
+.collection-section, .discovery-tasks, .local-settings { margin-top: 18px; }
+.collection-section h3, .discovery-tasks h3, .local-settings h3 { margin: 0 0 8px; font-size: 14px; }
+.muted { color: var(--muted); font-size: 12px; }
+.collection-row, .task-row, .setting-row { display: flex; align-items: center; gap: 9px; min-height: 48px; border-bottom: 1px solid var(--border); }
+.collection-row > button:first-child { flex: 1; display: flex; align-items: center; gap: 9px; border: 0; background: transparent; text-align: right; cursor: pointer; color: var(--ink); font: inherit; }
+.collection-row > button:last-child { border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.collection-row .category-coin { width: 32px; height: 32px; }
+.collection-row .category-coin .ml-icon { width: 17px; height: 17px; }
+.collection-row small { display: block; color: var(--muted); font-size: 10px; margin-top: 2px; }
+.discovery-tasks progress { width: 100%; accent-color: var(--accent); height: 7px; margin: 4px 0 8px; }
+.task-row { font-size: 12px; }
+.task-row .ml-icon { color: var(--accent); }
+.task-row span { flex: 1; }
+.task-row small { color: var(--muted); }
+.setting-row { width: 100%; border: 0; background: transparent; color: var(--ink); font: inherit; text-align: right; cursor: pointer; }
+.setting-row span { flex: 1; }
+.setting-row strong { color: var(--accent); font-size: 12px; }
+.setting-row input { accent-color: var(--accent); }
+.diagnostics-link, .restore-row { margin-top: 14px; border: 0; background: transparent; color: var(--accent); cursor: pointer; font: inherit; }
+.inline-note { padding: 8px 10px; border-radius: var(--r-sm); background: var(--gold-soft); color: #8a5a00; font-size: 11px; }
 .detail-title { font-size: 17px; font-weight: 700; margin: 0 0 4px; }
 
 .section-title {

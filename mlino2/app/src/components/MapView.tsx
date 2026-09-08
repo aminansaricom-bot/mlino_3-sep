@@ -3,6 +3,7 @@ import L from '@neshan-maps-platform/leaflet';
 import '@neshan-maps-platform/leaflet/dist/leaflet.css';
 import type { V2BusinessDirectoryRecord } from '../directory/contract';
 import { clusterByScreenCell } from './clusterMarkers';
+import { categoryIcon, iconMarkup } from '../design/Icon';
 
 /**
  * لایه‌ی نقشه — روی SDK نشان.
@@ -23,14 +24,6 @@ import { clusterByScreenCell } from './clusterMarkers';
  * سمت کلاینت بیاید (با آن می‌شود مسیریابی و جست‌وجو صدا زد و سهمیه را سوزاند).
  */
 
-const CATEGORY_GLYPH: Record<string, string> = {
-  dental_clinic: '🦷',
-  beauty_clinic: '💠',
-  cafe: '☕',
-  restaurant: '🍽',
-  retail_shop: '🛍',
-};
-
 const NESHAN_KEY = import.meta.env.V2_NESHAN_MAP_KEY as string | undefined;
 /** استایل نشان: dreamy روشن و خلوت است — نزدیک‌ترین به چیزی که مالک محصول خواست */
 const NESHAN_MAPTYPE = (import.meta.env.V2_NESHAN_MAPTYPE as string | undefined) ?? 'dreamy';
@@ -39,7 +32,7 @@ function pinIcon(category: string, isMatch: boolean, isSelected: boolean): L.Div
   const state = isMatch ? ' is-match' : isSelected ? ' is-selected' : '';
   return L.divIcon({
     className: `pin-wrap${state}`,
-    html: `<div class="pin cat-${category}"><span>${CATEGORY_GLYPH[category] ?? '📍'}</span></div>`,
+    html: `<div class="pin cat-${category}"><span>${category in categoryIcon ? iconMarkup(categoryIcon[category as keyof typeof categoryIcon]) : iconMarkup('compass')}</span></div>`,
     iconSize: [30, 30],
     iconAnchor: [15, 15],
   });
