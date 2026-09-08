@@ -20,6 +20,13 @@ export function floorLabel(floor: number | null, buildingId: string | null): str
   return `طبقه ${floor.toLocaleString('fa-IR')}`;
 }
 
+/** برچسب فیلتر طبقه؛ برای فهرست عمومی طبقات، بدون نیاز به building_id. */
+export function floorFilterLabel(floor: number): string {
+  if (floor === 0) return 'همکف';
+  if (floor < 0) return `طبقه منفی ${Math.abs(floor).toLocaleString('fa-IR')}`;
+  return `طبقه ${floor.toLocaleString('fa-IR')}`;
+}
+
 export function formatPrice(price: number | null, currency: string | null): string {
   if (price === null) return 'بدون قیمت';
   const num = price.toLocaleString('fa-IR');

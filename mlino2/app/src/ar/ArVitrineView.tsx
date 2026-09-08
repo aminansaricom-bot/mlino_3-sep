@@ -401,7 +401,7 @@ function ArBubble({
       </span>
       <span className="ar-bubble-name">{item.name}</span>
       <span className="ar-bubble-dist">{formatDistance(item.distanceMeters)}</span>
-      {item.activeOffer && <span className="ar-bubble-dot" aria-label="پیشنهاد فعال" />}
+      {item.activeOffer && <span className="ar-bubble-dot" aria-hidden="true" />}
     </button>
   );
 }

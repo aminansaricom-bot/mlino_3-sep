@@ -14,7 +14,7 @@ import MapView, { type TileStatus } from './components/MapView';
 import BottomSheet, { type SheetState } from './components/BottomSheet';
 import BusinessCard from './components/BusinessCard';
 import SettingsPanel from './components/SettingsPanel';
-import { categoryLabel, floorLabel, formatDistance, formatIso, formatPrice } from './uiFormat';
+import { categoryLabel, floorFilterLabel, floorLabel, formatDistance, formatIso, formatPrice } from './uiFormat';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
 
@@ -499,7 +499,7 @@ export default function App() {
                     className={`chip${floorFilter === floor ? ' active' : ''}`}
                     onClick={() => setFloorFilter(floor)}
                   >
-                    {floorLabel(floor, null)}
+                    {floorFilterLabel(floor)}
                   </button>
                 ))}
               </>
