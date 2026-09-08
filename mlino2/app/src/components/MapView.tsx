@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import L from '@neshan-maps-platform/leaflet';
 import '@neshan-maps-platform/leaflet/dist/leaflet.css';
 import type { V2BusinessDirectoryRecord } from '../directory/contract';
+import { clusterByScreenCell } from './clusterMarkers';
 
 /**
  * لایه‌ی نقشه — روی SDK نشان.
@@ -41,6 +42,17 @@ function pinIcon(category: string, isMatch: boolean, isSelected: boolean): L.Div
     html: `<div class="pin cat-${category}"><span>${CATEGORY_GLYPH[category] ?? '📍'}</span></div>`,
     iconSize: [30, 30],
     iconAnchor: [15, 15],
+  });
+}
+
+/** نشان خوشه — عدد واقعی اعضا، بدون گرد کردن یا «+» مبهم */
+function clusterIcon(count: number, hasMatch: boolean): L.DivIcon {
+  const size = count >= 10 ? 46 : count >= 5 ? 40 : 34;
+  return L.divIcon({
+    className: `cluster-wrap${hasMatch ? ' is-match' : ''}`,
+    html: `<div class="cluster" style="width:${size}px;height:${size}px"><span>${count.toLocaleString('fa-IR')}</span></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   });
 }
 
@@ -84,6 +96,7 @@ export default function MapView({
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
   const meMarkerRef = useRef<L.Marker | null>(null);
+  const [zoom, setZoom] = useState(13);
   /** آخرین مقدارهای callback، تا ساخت نقشه به تغییر آن‌ها وابسته نشود */
   const cbRef = useRef({ onSelect, onPickPoint, onMapReady, onTileStatus });
   cbRef.current = { onSelect, onPickPoint, onMapReady, onTileStatus };
@@ -143,34 +156,77 @@ export default function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tileRetryKey]);
 
-  // همگام‌سازی مارکرهای کسب‌وکار
+  /**
+   * خوشه‌بندی به Zoom وابسته است، پس Zoom باید یک state واقعی باشد و نه چیزی
+   * که فقط داخل Leaflet زندگی می‌کند — وگرنه خوشه‌ها با نزدیک‌شدن باز نمی‌شوند.
+   */
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map === null) return;
+    const sync = () => setZoom(map.getZoom());
+    sync();
+    map.on('zoomend', sync);
+    return () => {
+      map.off('zoomend', sync);
+    };
+  }, [tileRetryKey]);
+
+  const clusters = useMemo(
+    () =>
+      clusterByScreenCell(
+        records.map((r) => ({
+          id: r.business_id,
+          latitude: r.location.latitude,
+          longitude: r.location.longitude,
+          record: r,
+        })),
+        zoom,
+      ),
+    [records, zoom],
+  );
+
+  // همگام‌سازی مارکرها — از روی خوشه‌ها، نه تک‌تک رکوردها
   useEffect(() => {
     const map = mapRef.current;
     if (map === null) return;
 
-    const wanted = new Set(records.map((r) => r.business_id));
+    const wanted = new Set(clusters.map((c) => c.key));
 
-    for (const [id, marker] of markersRef.current) {
-      if (!wanted.has(id)) {
+    for (const [key, marker] of markersRef.current) {
+      if (!wanted.has(key)) {
         marker.remove();
-        markersRef.current.delete(id);
+        markersRef.current.delete(key);
       }
     }
 
-    for (const r of records) {
-      const icon = pinIcon(r.category, matchIds.has(r.business_id), selectedId === r.business_id);
-      const existing = markersRef.current.get(r.business_id);
+    for (const c of clusters) {
+      const isCluster = c.members.length > 1;
+      const hasMatch = c.members.some((m) => matchIds.has(m.id));
+      const icon = isCluster
+        ? clusterIcon(c.members.length, hasMatch)
+        : pinIcon(c.members[0].record.category, hasMatch, selectedId === c.members[0].id);
+
+      const existing = markersRef.current.get(c.key);
       if (existing) {
         existing.setIcon(icon);
-        existing.setLatLng([r.location.latitude, r.location.longitude]);
+        existing.setLatLng([c.latitude, c.longitude]);
       } else {
-        const m = L.marker([r.location.latitude, r.location.longitude], { icon })
+        const m = L.marker([c.latitude, c.longitude], { icon })
           .addTo(map)
-          .on('click', () => cbRef.current.onSelect(r.business_id));
-        markersRef.current.set(r.business_id, m);
+          .on('click', () => {
+            if (isCluster) {
+              // باز کردن خوشه = نزدیک‌تر شدن؛ در Zoom بالاتر خودش می‌شکند
+              map.flyTo([c.latitude, c.longitude], Math.min(map.getZoom() + 2, 19), {
+                duration: 0.6,
+              });
+            } else {
+              cbRef.current.onSelect(c.members[0].id);
+            }
+          });
+        markersRef.current.set(c.key, m);
       }
     }
-  }, [records, matchIds, selectedId]);
+  }, [clusters, matchIds, selectedId]);
 
   // نقطه‌ی «من»
   useEffect(() => {

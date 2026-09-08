@@ -9,6 +9,7 @@ import { matchingService } from './matching/container';
 import { buildIntentResolver } from './matching/llm/factory';
 import type { MatchItem } from './matching/MatchingService';
 import ArVitrineView from './ar/ArVitrineView';
+import { haversineDistanceMeters } from './directory/geo';
 import MapView, { type TileStatus } from './components/MapView';
 import BottomSheet, { type SheetState } from './components/BottomSheet';
 import BusinessCard from './components/BusinessCard';
@@ -16,6 +17,30 @@ import SettingsPanel from './components/SettingsPanel';
 import { categoryLabel, floorLabel, formatDistance, formatIso, formatPrice } from './uiFormat';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
+
+/**
+ * دلیل انتخاب یک نتیجه — فقط از شواهدی که خودِ `MatchingService` برگردانده
+ * ساخته می‌شود: محصول منطبق، آفر منطبق، و فاصله. هیچ چیزی اینجا تولید یا حدس
+ * زده نمی‌شود؛ اگر شاهدی نبود، جمله‌ی مبهم هم ساخته نمی‌شود.
+ */
+function matchReason(item: MatchItem, interpretedCategory: string | null): string {
+  const parts: string[] = [];
+  if (interpretedCategory !== null && item.record.category === interpretedCategory) {
+    parts.push(`دسته‌ی مطابق: ${categoryLabel(interpretedCategory)}`);
+  }
+  if (item.matchedProducts.length > 0) {
+    parts.push(`محصول منطبق: ${item.matchedProducts.map((p) => p.name).join('، ')}`);
+  }
+  if (item.matchedOffer !== null) {
+    parts.push(
+      item.matchedOffer.discount_percent !== null
+        ? `پیشنهاد فعال ${item.matchedOffer.discount_percent.toLocaleString('fa-IR')}٪`
+        : 'پیشنهاد فعال',
+    );
+  }
+  parts.push(`فاصله ${formatDistance(item.distanceMeters)}`);
+  return parts.join(' · ');
+}
 
 /** چیپ‌های دسته — فقط دسته‌هایی که واقعاً در قرارداد داده وجود دارند */
 const CATEGORY_CHIPS: { id: V2BusinessCategory; label: string; glyph: string }[] = [
@@ -45,6 +70,8 @@ interface ChatMessage {
   text: string;
   items?: MatchItem[];
   understood?: string;
+  /** دسته‌ای که موتور فهم نیت تشخیص داد — برای نمایش دلیل هر نتیجه */
+  interpretedCategory?: V2BusinessCategory | null;
 }
 
 type Overlay = 'none' | 'assistant' | 'vitrine' | 'settings' | 'detail';
@@ -67,6 +94,24 @@ export default function App() {
   const [radiusMeters, setRadiusMeters] = useState(5000);
 
   const [tileStatus, setTileStatus] = useState<TileStatus>('loading');
+  /** دقت واقعی GPS بر حسب متر — وقتی بد است پنهانش نمی‌کنیم */
+  const [accuracyMeters, setAccuracyMeters] = useState<number | null>(null);
+  const [locError, setLocError] = useState<string | null>(null);
+  const [online, setOnline] = useState(() =>
+    typeof navigator === 'undefined' ? true : navigator.onLine,
+  );
+
+  // وضعیت آفلاین — اپ با داده‌ی محلی کار می‌کند ولی نقشه نه؛ این را می‌گوییم
+  useEffect(() => {
+    const up = () => setOnline(true);
+    const down = () => setOnline(false);
+    window.addEventListener('online', up);
+    window.addEventListener('offline', down);
+    return () => {
+      window.removeEventListener('online', up);
+      window.removeEventListener('offline', down);
+    };
+  }, []);
   const [tileRetryKey, setTileRetryKey] = useState(0);
   const mapRef = useRef<L.Map | null>(null);
 
@@ -156,10 +201,12 @@ export default function App() {
   );
 
   /** آخرین نتیجه‌های دستیار — روی نقشه با هاله‌ی طلایی */
-  const lastMatch = useMemo(() => {
-    const last = [...chat].reverse().find((m) => m.role === 'assistant' && m.items);
-    return last?.items ?? [];
-  }, [chat]);
+  const lastAssistant = useMemo(
+    () => [...chat].reverse().find((m) => m.role === 'assistant' && m.items),
+    [chat],
+  );
+  const lastMatch = useMemo(() => lastAssistant?.items ?? [], [lastAssistant]);
+  const lastCategory = lastAssistant?.interpretedCategory ?? null;
 
   const lastMatchIds = useMemo(
     () => new Set(lastMatch.map((i) => i.record.business_id)),
@@ -173,14 +220,17 @@ export default function App() {
         record: m.record,
         distanceMeters: m.distanceMeters as number | undefined,
         hasOffer: Boolean(m.matchedOffer),
+        reason: matchReason(m, lastCategory) as string | undefined,
       }));
     }
     return visibleRecords.map((r) => ({
       record: r,
       distanceMeters: undefined as number | undefined,
       hasOffer: r.offers.length > 0,
+      // مرور اطراف جست‌وجو نیست — دلیلی هم برای نمایش وجود ندارد
+      reason: undefined as string | undefined,
     }));
-  }, [lastMatch, visibleRecords]);
+  }, [lastMatch, visibleRecords, lastCategory]);
 
   const openDetail = useCallback((id: string) => {
     setSelectedId(id);
@@ -241,7 +291,13 @@ export default function App() {
         setChat((prev) => [
           ...prev,
           { role: 'user', text: q },
-          { role: 'assistant', text: reply, items: top, understood: understoodParts.join(' · ') },
+          {
+            role: 'assistant',
+            text: reply,
+            items: top,
+            understood: understoodParts.join(' · '),
+            interpretedCategory: res.interpreted.category,
+          },
         ]);
         setSearchWasEmpty(top.length === 0);
         setSheet('half');
@@ -251,26 +307,44 @@ export default function App() {
     })();
   }
 
+  /**
+   * موقعیت‌یابی با پیام صادقانه به‌ازای هر علت شکست. مرورگر سه علت متفاوت
+   * برمی‌گرداند و «دسترسی رد شد» برای هر سه، دروغ است: کاربری که GPS‌اش خاموش
+   * است باید GPS را روشن کند، نه دنبال تنظیمات مجوز بگردد.
+   */
   function useMyLocation() {
     if (!('geolocation' in navigator)) {
-      setSearchPointLabel('مرورگر از موقعیت‌یابی پشتیبانی نمی‌کند');
+      setLocError('مرورگر این دستگاه اصلاً از موقعیت‌یابی پشتیبانی نمی‌کند — روی نقشه دابل‌کلیک کن.');
+      setSearchPointLabel('موقعیت‌یابی پشتیبانی نمی‌شود');
       return;
     }
     setLocating(true);
+    setLocError(null);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const p: [number, number] = [pos.coords.latitude, pos.coords.longitude];
         setSearchPoint(p);
         setMyPoint(p);
+        setAccuracyMeters(
+          Number.isFinite(pos.coords.accuracy) ? Math.round(pos.coords.accuracy) : null,
+        );
         setSearchPointLabel('موقعیت من');
         mapRef.current?.flyTo(p, 15, { duration: 0.8 });
         setLocating(false);
       },
-      () => {
-        setSearchPointLabel('دسترسی به موقعیت رد شد — روی نقشه دابل‌کلیک کن');
+      (err) => {
+        setAccuracyMeters(null);
+        setLocError(
+          err.code === err.PERMISSION_DENIED
+            ? 'دسترسی به موقعیت رد شد. برای استفاده از AR و «اطراف من» باید از تنظیمات مرورگر اجازه بدهی — یا فعلاً روی نقشه دابل‌کلیک کن.'
+            : err.code === err.POSITION_UNAVAILABLE
+              ? 'موقعیت در دسترس نیست — احتمالاً GPS خاموش است یا سیگنال نمی‌رسد. GPS را روشن کن یا روی نقشه دابل‌کلیک کن.'
+              : 'موقعیت‌یابی طول کشید و به نتیجه نرسید. دوباره تلاش کن یا روی نقشه دابل‌کلیک کن.',
+        );
+        setSearchPointLabel('موقعیت نامشخص');
         setLocating(false);
       },
-      { timeout: 8000 },
+      { timeout: 8000, enableHighAccuracy: true },
     );
   }
 
@@ -323,6 +397,28 @@ export default function App() {
             و فهرست کسب‌وکارها بدون نقشه هم کار می‌کنند.
           </p>
           <button onClick={() => setTileRetryKey((k) => k + 1)}>تلاش دوباره</button>
+        </div>
+      )}
+
+      {!online && (
+        <div className="app-banner warn" role="status">
+          آفلاین هستی — نقشه به‌روز نمی‌شود. جست‌وجو و فهرست کسب‌وکارها از داده‌ی محلی کار می‌کنند.
+        </div>
+      )}
+
+      {locError !== null && (
+        <div className="app-banner warn" role="alert">
+          {locError}
+          <button className="banner-x" onClick={() => setLocError(null)} aria-label="بستن">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {accuracyMeters !== null && accuracyMeters > 50 && (
+        <div className="app-banner" role="status">
+          دقت موقعیت حدود {accuracyMeters.toLocaleString('fa-IR')} متر است — برای ویترین AR کم است.
+          کمی در فضای باز بایست تا GPS دقیق‌تر شود.
         </div>
       )}
 
@@ -460,6 +556,7 @@ export default function App() {
               record={it.record}
               distanceMeters={it.distanceMeters}
               hasOffer={it.hasOffer}
+              reason={it.reason}
               selected={selectedId === it.record.business_id}
               onOpen={() => openDetail(it.record.business_id)}
               onRoute={() => {
@@ -503,6 +600,18 @@ export default function App() {
                 <h2 className="detail-title">{selected.name}</h2>
                 <div className="biz-meta">
                   <span>{categoryLabel(selected.category)}</span>
+                  <i className="dot" />
+                  <span>
+                    {formatDistance(
+                      haversineDistanceMeters(
+                        searchPoint[0],
+                        searchPoint[1],
+                        selected.location.latitude,
+                        selected.location.longitude,
+                      ),
+                    )}{' '}
+                    از {searchPointLabel}
+                  </span>
                   {floorLabel(selected.location.floor_level, selected.location.building_id) && (
                     <>
                       <i className="dot" />
@@ -522,7 +631,10 @@ export default function App() {
                 className={`product-row${p.is_active ? '' : ' inactive'}`}
                 title={p.is_active ? p.description ?? '' : 'غیرفعال — نمایش‌داده‌نشده برای مشتری'}
               >
-                <span>
+                <span className="product-name">
+                  {p.image_url !== null && (
+                    <img className="product-thumb" src={p.image_url} alt="" loading="lazy" />
+                  )}
                   {p.name}
                   {!p.is_active && ' (غیرفعال)'}
                 </span>
@@ -608,6 +720,7 @@ export default function App() {
                             record={item.record}
                             distanceMeters={item.distanceMeters}
                             hasOffer={Boolean(item.matchedOffer)}
+                            reason={matchReason(item, m.interpretedCategory ?? null)}
                             onOpen={() => openDetail(item.record.business_id)}
                           />
                         ))}
@@ -648,7 +761,7 @@ export default function App() {
             <ArVitrineView
               searchPoint={searchPoint}
               searchPointLabel={searchPointLabel}
-              radiusMeters={radiusMeters}
+              preferredCategory={categoryChip}
               onSelectBusiness={(businessId) => openDetail(businessId)}
             />
           </div>

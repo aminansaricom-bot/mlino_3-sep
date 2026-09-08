@@ -24,6 +24,11 @@ interface BusinessCardProps {
   selected?: boolean;
   /** آفر فعالی که موتور تطبیق پیدا کرده — اگر باشد نشان تخفیف می‌آید */
   hasOffer?: boolean;
+  /**
+   * دلیل انتخاب این کارت توسط دستیار. فقط از شواهد واقعیِ موتور تطبیق ساخته
+   * می‌شود (محصول منطبق، آفر منطبق، فاصله) — هیچ توضیح تولیدشده‌ای اینجا نیست.
+   */
+  reason?: string;
   onOpen: () => void;
   onRoute?: () => void;
 }
@@ -33,6 +38,7 @@ export default function BusinessCard({
   distanceMeters,
   selected,
   hasOffer,
+  reason,
   onOpen,
   onRoute,
 }: BusinessCardProps) {
@@ -71,6 +77,10 @@ export default function BusinessCard({
             <span className="tag">{activeProducts.toLocaleString('fa-IR')} محصول</span>
           )}
         </div>
+
+        {reason !== undefined && reason.length > 0 && (
+          <div className="biz-reason">چرا پیشنهاد شد: {reason}</div>
+        )}
 
         <div className="biz-actions">
           <button className="primary" onClick={onOpen}>

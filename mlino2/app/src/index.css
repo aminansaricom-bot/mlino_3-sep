@@ -277,6 +277,23 @@ button { font-family: inherit; }
 .pin.cat-restaurant { background: #e0603a; }
 .pin.cat-retail_shop { background: #4f9d69; }
 
+/* خوشه — عدد واقعی اعضا؛ با نزدیک‌شدن باز می‌شود */
+.cluster {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(59, 108, 255, .92);
+  border: 2px solid #fff;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(13, 21, 38, .35);
+}
+.cluster-wrap.is-match .cluster {
+  background: rgba(245, 165, 36, .95);
+  color: #2b1c00;
+}
+
 .pin-wrap.is-match .pin { border-color: var(--gold); }
 .pin-wrap.is-match::after {
   content: '';
@@ -751,40 +768,121 @@ button { font-family: inherit; }
     repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 1px, transparent 1px 40px),
     linear-gradient(180deg, #141a20, #0d1116);
 }
-.ar-vitrine {
+/* ───────── صحنه‌ی AR: یک کارت اصلی + حباب‌های فرعی ─────────
+ * چیدمان از `composeArScene` می‌آید (screenXPercent, laneIndex, sizeScale).
+ * ترنزیشن روی left/transform است تا با چرخش گوشی کارت‌ها بلغزند نه بپرند —
+ * پرش، دقیقاً چیزی بود که در ویدئوی تست میدانی آزاردهنده بود.
+ */
+
+.ar-primary {
   position: absolute;
-  top: 42%;
+  top: 38%;
   transform: translateX(-50%);
-  width: 190px;
+  width: 220px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.28);
-  background: rgba(16, 20, 24, .62);
+  gap: 5px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.4);
+  background: rgba(11, 18, 32, .74);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 34px rgba(0,0,0,.45);
+  color: #fff;
+  text-align: right;
+  cursor: pointer;
+  z-index: 8;
+  transition: left .28s cubic-bezier(.22,.61,.36,1);
+}
+.ar-primary-name { font-weight: 700; font-size: 15px; }
+.ar-primary-meta { font-size: 12px; color: rgba(255,255,255,.78); }
+.ar-primary-offer {
+  font-size: 12px;
+  color: #ffd47f;
+  background: rgba(255, 176, 32, .16);
+  border-radius: 7px;
+  padding: 3px 7px;
+}
+.ar-primary-products { display: flex; flex-direction: column; gap: 2px; }
+.ar-primary-product { font-size: 11px; color: rgba(255,255,255,.85); }
+.ar-primary-cta {
+  align-self: stretch;
+  margin-top: 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 0;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: #fff;
+}
+
+.ar-bubble {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  max-width: 130px;
+  padding: 6px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(255,255,255,.26);
+  background: rgba(16, 20, 24, .58);
   backdrop-filter: blur(6px);
   color: #fff;
   text-align: right;
   cursor: pointer;
   z-index: 5;
+  transform-origin: center bottom;
+  transition: left .28s cubic-bezier(.22,.61,.36,1), transform .28s cubic-bezier(.22,.61,.36,1);
 }
-.ar-vitrine:hover { border-color: rgba(255,255,255,.55); }
-.ar-scale-near { width: 210px; }
-.ar-scale-mid { width: 170px; opacity: .92; }
-.ar-scale-far { width: 140px; opacity: .8; font-size: 12px; }
-.ar-vitrine-name { font-weight: 700; font-size: 13px; }
-.ar-vitrine-meta { font-size: 11px; color: rgba(255,255,255,.75); }
-.ar-vitrine-offer {
+/* دو ردیف عمودی — راهِ گریز وقتی دو حباب افقی به هم می‌رسند */
+.ar-bubble.ar-lane-0 { top: 22%; }
+.ar-bubble.ar-lane-1 { top: 62%; }
+.ar-bubble-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+.ar-bubble-dist { font-size: 10px; color: rgba(255,255,255,.7); }
+.ar-bubble-dot {
+  position: absolute;
+  top: -3px; left: -3px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 1px solid rgba(0,0,0,.35);
+}
+
+.ar-overflow {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 7;
   font-size: 11px;
-  color: #ffd47f;
-  background: rgba(255, 176, 32, .14);
-  border-radius: 6px;
-  padding: 2px 6px;
+  color: rgba(255,255,255,.82);
+  background: rgba(16,20,24,.6);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+  white-space: nowrap;
 }
-.ar-vitrine-products { display: flex; flex-direction: column; gap: 2px; }
-.ar-vitrine-product { font-size: 11px; color: rgba(255,255,255,.85); }
+
+/* انتخاب شعاع نمایش */
+.ar-radius { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.ar-radius button {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-soft);
+  border-radius: var(--r-pill);
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ar-radius button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .ar-empty {
   position: absolute;
   inset: 0;
@@ -818,3 +916,61 @@ button { font-family: inherit; }
 .ar-badge.ok { background: rgba(72,187,120,.16); color: #9be7b8; border-color: rgba(72,187,120,.4); }
 .ar-controls { display: flex; flex-direction: column; gap: 8px; }
 .ar-floor-row { flex-wrap: wrap; }
+
+/* بنر وضعیت — بالای صفحه، زیر نوار جست‌وجو */
+.app-banner {
+  position: absolute;
+  z-index: 520;
+  top: 112px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--sh-2);
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.app-banner.warn {
+  background: var(--gold-soft);
+  border-color: rgba(245, 165, 36, .45);
+  color: #7a4a00;
+}
+.app-banner + .app-banner { top: 168px; }
+.banner-x {
+  margin-inline-start: auto;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+/* تصویر محصول — فقط وقتی قرارداد `02` واقعاً مقداری دارد */
+.product-name { display: inline-flex; align-items: center; gap: 8px; }
+.product-thumb {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+/* استدلال دستیار — چرا این نتیجه پیشنهاد شد */
+.biz-reason {
+  margin-top: 6px;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  background: var(--accent-soft);
+  border-radius: var(--r-sm);
+  padding: 6px 8px;
+}

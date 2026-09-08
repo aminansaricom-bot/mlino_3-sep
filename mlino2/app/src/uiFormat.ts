@@ -15,8 +15,9 @@ export function categoryLabel(cat: string): string {
 export function floorLabel(floor: number | null, buildingId: string | null): string | null {
   if (floor === null || buildingId === null) return null;
   if (floor === 0) return 'همکف';
-  if (floor < 0) return `طبقه ${Math.abs(floor)}-`;
-  return `طبقه ${floor}`;
+  // رقم فارسی، و «منفی» به‌جای خط تیره‌ی چسبیده که در RTL بد خوانده می‌شد
+  if (floor < 0) return `طبقه منفی ${Math.abs(floor).toLocaleString('fa-IR')}`;
+  return `طبقه ${floor.toLocaleString('fa-IR')}`;
 }
 
 export function formatPrice(price: number | null, currency: string | null): string {
@@ -34,5 +35,8 @@ export function formatIso(iso: string): string {
 }
 
 export function formatDistance(meters: number): string {
-  return meters >= 1000 ? `${(meters / 1000).toFixed(1)} کیلومتر` : `${Math.round(meters)} متر`;
+  // رقم فارسی، هماهنگ با بقیه‌ی اعداد اپ (تعداد نتایج، درصد تخفیف)
+  return meters >= 1000
+    ? `${(meters / 1000).toLocaleString('fa-IR', { maximumFractionDigits: 1 })} کیلومتر`
+    : `${Math.round(meters).toLocaleString('fa-IR')} متر`;
 }

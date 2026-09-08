@@ -10,6 +10,14 @@ import {
   normalizeHeading,
   placeOverlay,
 } from './arOrientation';
+import {
+  composeArScene,
+  AR_MAX_SECONDARY,
+  AR_DEFAULT_RADIUS,
+  AR_RADIUS_OPTIONS,
+  type ArVitrineItem,
+  type ArViewResponse,
+} from './ArOverlayService';
 import { ArOverlayService } from './ArOverlayService';
 import { BusinessDirectoryService } from '../directory/BusinessDirectoryService';
 import { loadMockSnapshotRaw } from '../directory/loader';
@@ -204,5 +212,106 @@ describe('ArOverlayService — ویترین از دایرکتوری واقعی',
     });
     expect(view.items).toEqual([]);
     expect(view.behindCount).toBe(0);
+  });
+});
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * صحنه‌ی AR — سناریوهای الزامی مالک محصول (۸ سپتامبر ۲۰۲۶)
+ * انگیزه: تست میدانی نشان داد کارت‌ها روی هم می‌افتند و کسب‌وکار ۲.۶ کیلومتری
+ * هم در AR ظاهر می‌شود.
+ * ──────────────────────────────────────────────────────────────────────────── */
+describe('صحنه‌ی AR — یک کارت اصلی، حباب‌های فرعی، بدون هم‌پوشانی', () => {
+  const mk = (
+    id: string,
+    relBearing: number,
+    dist: number,
+    extra: Partial<ArVitrineItem> = {},
+  ): ArVitrineItem => ({
+    businessId: id,
+    name: id,
+    category: 'cafe',
+    distanceMeters: dist,
+    activeProducts: [],
+    activeOffer: null,
+    placement: {
+      relativeBearingDeg: relBearing,
+      screenXPercent: 50 + (relBearing / 30) * 50,
+      scaleBucket: dist < 30 ? 'near' : dist < 60 ? 'mid' : 'far',
+    },
+    ...extra,
+  });
+
+  const viewOf = (items: ArVitrineItem[], behind = 0): ArViewResponse => ({
+    items,
+    behindCount: behind,
+    declaredFloor: null,
+    declaredBuildingId: null,
+  });
+
+  it('۱ — با ۱۰ کسب‌وکار در میدان دید: دقیقاً یک کارت اصلی و حداکثر ۵ حباب', () => {
+    const items = Array.from({ length: 10 }, (_, i) => mk(`b${i}`, -28 + i * 6, 10 + i * 5));
+    const scene = composeArScene(viewOf(items), 100);
+    expect(scene.primary).not.toBeNull();
+    expect(scene.secondary.length).toBeLessThanOrEqual(AR_MAX_SECONDARY);
+    expect(scene.overflowCount).toBeGreaterThan(0);
+  });
+
+  it('۴ — حباب نزدیک‌تر بزرگ‌تر از حباب دورتر است', () => {
+    const scene = composeArScene(viewOf([mk('near', -20, 10), mk('far', 20, 90)]), 100);
+    const all = [scene.primary!, ...scene.secondary];
+    const near = all.find((i) => i.businessId === 'near')!;
+    const far = all.find((i) => i.businessId === 'far')!;
+    // کارت اصلی همیشه ۱ است؛ مقایسه‌ی اندازه روی مقدار خام فاصله انجام می‌شود
+    expect(near.sizeScale).toBeGreaterThanOrEqual(far.sizeScale);
+  });
+
+  it('۵ — هیچ دو موردی روی هم قرار نمی‌گیرند (فاصله‌ی افقی یا ردیف متفاوت)', () => {
+    const items = Array.from({ length: 8 }, (_, i) => mk(`b${i}`, -14 + i * 4, 20 + i));
+    const scene = composeArScene(viewOf(items), 100);
+    const placed = [scene.primary!, ...scene.secondary];
+    for (let i = 0; i < placed.length; i++) {
+      for (let j = i + 1; j < placed.length; j++) {
+        const sameLane = placed[i].laneIndex === placed[j].laneIndex;
+        const gap = Math.abs(placed[i].screenXPercent - placed[j].screenXPercent);
+        if (sameLane) expect(gap).toBeGreaterThanOrEqual(14);
+      }
+    }
+  });
+
+  it('نزدیک‌ترین همیشه اصلی نیست — موردِ وسطِ میدان دید بر نزدیکِ لبه ترجیح دارد', () => {
+    const edgeButClose = mk('edge', 29, 8);
+    const centredFarther = mk('centre', 1, 25);
+    const scene = composeArScene(viewOf([edgeButClose, centredFarther]), 100, {
+      headingReliable: true,
+    });
+    expect(scene.primary!.businessId).toBe('centre');
+  });
+
+  it('وقتی جهت‌یابی قابل‌اعتماد نیست، فاصله وزن بیشتری می‌گیرد', () => {
+    const edgeButClose = mk('edge', 29, 8);
+    const centredFarther = mk('centre', 1, 25);
+    const scene = composeArScene(viewOf([edgeButClose, centredFarther]), 100, {
+      headingReliable: false,
+    });
+    expect(scene.primary!.businessId).toBe('edge');
+  });
+
+  it('تطابق دسته با نیاز کاربر در انتخاب اصلی اثر دارد', () => {
+    const a = mk('cafe-one', 5, 30);
+    const b = mk('dental-one', 5, 30, { category: 'dental_clinic' });
+    const scene = composeArScene(viewOf([a, b]), 100, { preferredCategory: 'dental_clinic' });
+    expect(scene.primary!.businessId).toBe('dental-one');
+  });
+
+  it('۳ — چیزی که خارج از میدان دید است اصلاً به صحنه نمی‌رسد (شمارش پشت سر)', () => {
+    const scene = composeArScene(viewOf([], 9), 30);
+    expect(scene.primary).toBeNull();
+    expect(scene.secondary).toHaveLength(0);
+    expect(scene.behindCount).toBe(9);
+  });
+
+  it('شعاع پیش‌فرض ۳۰ متر است و گزینه‌ها همان چهار مقدار مصوب‌اند', () => {
+    expect(AR_DEFAULT_RADIUS).toBe(30);
+    expect([...AR_RADIUS_OPTIONS]).toEqual([15, 30, 50, 100]);
   });
 });
