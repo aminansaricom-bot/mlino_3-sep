@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { freshExperience, parseExperience } from './useLocalExperience';
+import { freshExperience, parseExperience, toggleExperience } from './useLocalExperience';
 
 describe('local MLINO experience state', () => {
   it('starts empty and never trusts malformed browser data', () => {
@@ -17,5 +17,42 @@ describe('local MLINO experience state', () => {
     expect(state.viewed).toEqual([]);
     expect(state.liked).toEqual([]);
     expect(state.sound).toBe(false);
+  });
+});
+
+
+describe('personal collection exclusions', () => {
+  it('repairs conflicting persisted choices without discarding viewing history', () => {
+    const state = parseExperience(JSON.stringify({version: 1, saved: ['a', 'b'], later: ['a'], liked: ['a', 'c'], hidden: ['a'], viewed: ['a']}));
+    expect(state.saved).toEqual(['b']);
+    expect(state.later).toEqual([]);
+    expect(state.liked).toEqual(['c']);
+    expect(state.viewed).toEqual(['a']);
+  });
+  it('hiding removes all personal selections while preserving other records and history', () => {
+    const before = {...freshExperience(), saved: ['a', 'b'], later: ['a'], liked: ['a', 'c'], viewed: ['a']};
+    const after = toggleExperience(before, 'hidden', 'a');
+    expect(after.hidden).toEqual(['a']);
+    expect(after.saved).toEqual(['b']);
+    expect(after.later).toEqual([]);
+    expect(after.liked).toEqual(['c']);
+    expect(after.viewed).toEqual(['a']);
+    expect(before.saved).toEqual(['a', 'b']);
+  });
+  it.each(['saved', 'later', 'liked'] as const)('selecting %s restores a hidden place', key => {
+    const after = toggleExperience({...freshExperience(), hidden: ['a', 'b']}, key, 'a');
+    expect(after[key]).toEqual(['a']);
+    expect(after.hidden).toEqual(['b']);
+  });
+  it('unliking preserves saved places and does not hide them', () => {
+    const after = toggleExperience({...freshExperience(), saved: ['a'], liked: ['a']}, 'liked', 'a');
+    expect(after.liked).toEqual([]);
+    expect(after.saved).toEqual(['a']);
+    expect(after.hidden).toEqual([]);
+  });
+  it('restoring does not silently recreate previous preferences', () => {
+    const restored = toggleExperience(toggleExperience({...freshExperience(), liked: ['a']}, 'hidden', 'a'), 'hidden', 'a');
+    expect(restored.hidden).toEqual([]);
+    expect(restored.liked).toEqual([]);
   });
 });

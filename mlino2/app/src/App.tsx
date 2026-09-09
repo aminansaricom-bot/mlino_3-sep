@@ -652,6 +652,9 @@ export default function App() {
               <button className={experience.data.later.includes(selected.business_id) ? 'active' : ''} onClick={() => { experience.toggle('later', selected.business_id); feedback(experience.data); }}>
                 <Icon name="clock" /> بعداً ببینم
               </button>
+              <button aria-pressed={experience.data.liked.includes(selected.business_id)} className={experience.data.liked.includes(selected.business_id) ? 'active' : ''} onClick={() => { experience.toggle('liked', selected.business_id); feedback(experience.data); }}>
+                <Icon name="heart" /> مناسب من
+              </button>
               <button onClick={() => { experience.toggle('hidden', selected.business_id); setOverlay('none'); }}>
                 <Icon name="hide" /> کمتر نشان بده
               </button>

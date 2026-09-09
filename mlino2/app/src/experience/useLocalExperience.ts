@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 export const EXPERIENCE_KEY = 'mlino.v2.experience.v1';
-export type Collection = 'saved' | 'later';
+export type Collection = 'saved' | 'later' | 'liked';
 export interface LocalExperience {
   version: 1;
   theme: 'light' | 'dark';
@@ -23,11 +23,29 @@ export function parseExperience(raw: string | null): LocalExperience {
     for (const key of ['saved','later','liked','hidden','viewed'] as const) {
       if (Array.isArray(data[key])) base[key] = [...new Set<string>(data[key].filter((id: unknown) => typeof id === 'string'))].slice(0, 1000);
     }
+    // Existing hidden choices take precedence when repairing older browser state.
+    for (const key of ['saved', 'later', 'liked'] as const) {
+      base[key] = base[key].filter(id => !base.hidden.includes(id));
+    }
     base.theme = data.theme === 'dark' ? 'dark' : 'light';
     base.sound = data.sound === true;
     base.haptics = data.haptics === true;
   } catch { /* Invalid browser state is discarded, never a reason to stop discovery. */ }
   return base;
+}
+
+/** Personal browser collections only; never passed to matching or the directory. */
+export function toggleExperience(prev: LocalExperience, key: Collection | 'hidden', id: string): LocalExperience {
+  if (prev[key].includes(id)) return {...prev, [key]: prev[key].filter(x => x !== id)};
+  const next = {...prev, [key]: [...prev[key], id]};
+  if (key === 'hidden') {
+    for (const collection of ['saved', 'later', 'liked'] as const) {
+      next[collection] = prev[collection].filter(x => x !== id);
+    }
+  } else {
+    next.hidden = prev.hidden.filter(x => x !== id);
+  }
+  return next;
 }
 
 export function useLocalExperience() {
@@ -37,11 +55,14 @@ export function useLocalExperience() {
   });
   const [storageFailed, setStorageFailed] = useState(false);
   useEffect(() => {
+    document.documentElement.dataset.theme = data.theme;
+  }, [data.theme]);
+  useEffect(() => {
     try { localStorage.setItem(EXPERIENCE_KEY, JSON.stringify(data)); setStorageFailed(false); }
     catch { setStorageFailed(true); }
   }, [data]);
-  function toggle(key: Collection | 'liked' | 'hidden', id: string) {
-    setData(prev => ({...prev, [key]: prev[key].includes(id) ? prev[key].filter(x => x !== id) : [...prev[key], id]}));
+  function toggle(key: Collection | 'hidden', id: string) {
+    setData(prev => toggleExperience(prev, key, id));
   }
   function viewed(id: string) {
     setData(prev => prev.viewed.includes(id) ? prev : {...prev, viewed: [...prev.viewed, id]});
