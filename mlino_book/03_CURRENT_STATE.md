@@ -32,7 +32,7 @@
 | R4 — یکپارچگی شواهد | 🔒 | BLOCKED |
 | R5 — همزمانی | ⏸ | OPEN by design |
 | **قرارداد مشترک پیشنهاد v1.0** | ✅ **IMPLEMENTED / VALIDATED** | تعریف نوع + راستی‌آزمایی fail-closed در `foundation/recommendation/` · ۳۱ تست · بدون ذخیره‌سازی و بدون مصرف‌کننده (عمدی) |
-| **تست‌ها** | ✅ | **۲۱۰/۲۱۰** (۱۶۲ پایه + ۳۱ قرارداد + ۱۷ نگاشت — صفر رگرسیون) |
+| **تست‌ها** | ✅ | **۲۴۹/۲۴۹** (۱۶۲ پایه + ۳۱ قرارداد پیشنهاد + ۱۷ نگاشت + ۳۹ زمینه — صفر رگرسیون) |
 
 ## Content & Social Intelligence Module (Content Studio)
 
@@ -98,7 +98,8 @@ Secret   : صفر
 
 | لایه | وضعیت | مانع |
 |---|---|---|
-| ۱ Business Brain | 📋 **DESIGNED** | مدل زمینه‌ی کسب‌وکار طراحی شد (۱۲ موجودیت) — `contracts/BUSINESS_CONTEXT_MODEL.md` · بدون شِما و بدون کد · نیازمند CCR |
+| ۱ Business Brain — فاز ۱ | ✅ **IMPLEMENTED / VALIDATED** | قراردادهای دامنه‌ی `Fact` `Goal` `KPI` `Capability` در `foundation/business-context/` · ۳۹ تست · **بدون شِما، بدون migration، بدون Repository** |
+| ۱ Business Brain — فاز ۲ و ۳ | 📋 **PLANNED** | `Observation` `Signal` `Decision` سپس تکامل دانش · طراحی آماده |
 | ۲ دستیارهای نقش‌محور | 📋 | نقش‌ها در V1 تعریف نشده‌اند |
 | ۳ موتور اقدام روزانه | 🟡 | **قرارداد C پیاده و تست شد**؛ Adapterها نوشته نشده‌اند |
 | ۴ صدای مشتری | 🔒 | **سیاست R8-a تصویب نشده** |
