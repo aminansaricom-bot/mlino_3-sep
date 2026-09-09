@@ -90,7 +90,7 @@ button { font-family: inherit; }
   position: relative;
   height: 100dvh;
   width: 100%;
-  overflow: hidden;
+  overflow: clip; /* Prevent focus from horizontally scrolling the fixed app shell. */
   background: var(--surface-2);
 }
 
@@ -1065,3 +1065,17 @@ button { font-family: inherit; }
   border-radius: var(--r-sm);
   padding: 6px 8px;
 }
+
+/* Explicit discovery and text sharing; use the existing light/dark surfaces. */
+.nearby-discovery { margin-top: 18px; padding: 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); }
+.nearby-discovery h3 { font-size: 14px; margin: 0 0 8px; }
+.suggestion-command { width: 100%; padding: 12px; border: 0; border-radius: var(--r-sm); background: var(--accent); color: #fff; cursor: pointer; }
+.suggestion-empty { font-size: 13px; line-height: 1.9; }
+.suggestion-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.suggestion-options button { padding: 9px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--ink); cursor: pointer; }
+.suggestion-options button:disabled, .detail-actions button:disabled { opacity: .6; cursor: default; }
+.detail-actions .share-action, .share-result { grid-column: 1 / -1; }
+.share-result { margin: 4px 0; font-size: 12px; line-height: 1.9; color: var(--ink-soft); }
+.share-result textarea { display: block; width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink); font: inherit; resize: vertical; }
+.offer-card[data-offer-status]:not([data-offer-status="active"]) { background: var(--surface-2); color: var(--ink-soft); border-color: var(--border); }
+.offer-card[data-offer-status]:not([data-offer-status="active"]) .discount { color: inherit; }

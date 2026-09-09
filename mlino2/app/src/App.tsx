@@ -18,6 +18,9 @@ import { categoryLabel, floorFilterLabel, floorLabel, formatDistance, formatIso,
 import { Icon, CategoryCoin } from './design/Icon';
 import ExperiencePanel from './experience/ExperiencePanel';
 import { feedback, useLocalExperience } from './experience/useLocalExperience';
+import { isOfferActiveAt, offerStatus } from './offers';
+import { pickSuggestion, type SuggestionResult } from './experience/pickSuggestion';
+import ShareBusinessAction from './experience/ShareBusinessAction';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
 
@@ -26,7 +29,7 @@ const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
  * ساخته می‌شود: محصول منطبق، آفر منطبق، و فاصله. هیچ چیزی اینجا تولید یا حدس
  * زده نمی‌شود؛ اگر شاهدی نبود، جمله‌ی مبهم هم ساخته نمی‌شود.
  */
-function matchReason(item: MatchItem, interpretedCategory: string | null): string {
+function matchReason(item: MatchItem, interpretedCategory: string | null, now: number): string {
   const parts: string[] = [];
   if (interpretedCategory !== null && item.record.category === interpretedCategory) {
     parts.push(`دسته‌ی مطابق: ${categoryLabel(interpretedCategory)}`);
@@ -34,7 +37,7 @@ function matchReason(item: MatchItem, interpretedCategory: string | null): strin
   if (item.matchedProducts.length > 0) {
     parts.push(`محصول منطبق: ${item.matchedProducts.map((p) => p.name).join('، ')}`);
   }
-  if (item.matchedOffer !== null) {
+  if (item.matchedOffer !== null && item.record.offers.some(o => o.offer_id === item.matchedOffer?.offer_id && isOfferActiveAt(o.valid_from, o.valid_until, now))) {
     parts.push(
       item.matchedOffer.discount_percent !== null
         ? `پیشنهاد فعال ${item.matchedOffer.discount_percent.toLocaleString('fa-IR')}٪`
@@ -61,12 +64,6 @@ const FILTER_CATEGORIES: V2BusinessCategory[] = [
   'retail_shop',
 ];
 
-function isOfferActive(validUntil: string | null, now: number): boolean {
-  if (validUntil === null) return true;
-  const t = Date.parse(validUntil);
-  return Number.isNaN(t) ? true : t >= now;
-}
-
 interface ChatMessage {
   role: 'user' | 'assistant';
   text: string;
@@ -85,7 +82,17 @@ export default function App() {
   const [floorFilter, setFloorFilter] = useState<number | 'all'>('all');
   const [categoryChip, setCategoryChip] = useState<V2BusinessCategory | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [now] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now());
+  // Refresh at offer boundaries, rather than polling or freezing at app startup.
+  useEffect(() => {
+    const current = Date.now();
+    const boundaries = records.flatMap(r => r.offers.flatMap(o => [Date.parse(o.valid_from), o.valid_until === null ? NaN : Date.parse(o.valid_until) + 1]));
+    const next = Math.min(...boundaries.filter(t => Number.isFinite(t) && t > now));
+    const timer = Number.isFinite(next) ? window.setTimeout(() => setNow(Date.now()), Math.min(2147483647, Math.max(0, next - current))) : undefined;
+    const refresh = () => { if (!document.hidden) setNow(Date.now()); };
+    document.addEventListener('visibilitychange', refresh);
+    return () => { window.clearTimeout(timer); document.removeEventListener('visibilitychange', refresh); };
+  }, [records, now]);
   const experience = useLocalExperience();
 
   const [overlay, setOverlay] = useState<Overlay>('none');
@@ -96,6 +103,10 @@ export default function App() {
   const [myPoint, setMyPoint] = useState<[number, number] | null>(null);
   const [locating, setLocating] = useState(false);
   const [radiusMeters, setRadiusMeters] = useState(5000);
+  const [suggestionResult, setSuggestionResult] = useState<SuggestionResult | null>(null);
+  const [pointHint, setPointHint] = useState(false);
+  const filtersApplied = categoryChip !== null || floorFilter !== 'all';
+  useEffect(() => { setSuggestionResult(null); }, [radiusMeters, searchPoint, categoryChip, floorFilter, experience.data.hidden]);
 
   const [tileStatus, setTileStatus] = useState<TileStatus>('loading');
   /** دقت واقعی GPS بر حسب متر — وقتی بد است پنهانش نمی‌کنیم */
@@ -223,23 +234,31 @@ export default function App() {
         record: m.record,
         distanceMeters: m.distanceMeters as number | undefined,
         hasOffer: Boolean(m.matchedOffer),
-        reason: matchReason(m, lastCategory) as string | undefined,
+        reason: matchReason(m, lastCategory, now) as string | undefined,
       }));
     }
     return visibleRecords.map((r) => ({
       record: r,
       distanceMeters: undefined as number | undefined,
-      hasOffer: r.offers.length > 0,
+      hasOffer: r.offers.some(o => isOfferActiveAt(o.valid_from, o.valid_until, now)),
       // مرور اطراف جست‌وجو نیست — دلیلی هم برای نمایش وجود ندارد
       reason: undefined as string | undefined,
     }));
-  }, [lastMatch, visibleRecords, lastCategory]);
+  }, [lastMatch, visibleRecords, lastCategory, now]);
 
   const openDetail = useCallback((id: string) => {
     setSelectedId(id);
     experience.viewed(id);
     setOverlay('detail');
   }, [experience]);
+
+  function findSuggestion(radius = radiusMeters) {
+    const current = Date.now();
+    setNow(current);
+    const result = pickSuggestion(visibleRecords, searchPoint, radius, current, filtersApplied);
+    setSuggestionResult(result);
+    if ('businessId' in result) openDetail(result.businessId);
+  }
 
   function runSearch(text: string) {
     const q = text.trim();
@@ -386,6 +405,7 @@ export default function App() {
         onPickPoint={(lat, lng) => {
           setSearchPoint([lat, lng]);
           setSearchPointLabel('نقطه‌ی انتخابی روی نقشه');
+          setPointHint(false);
         }}
         onMapReady={(m) => {
           mapRef.current = m;
@@ -403,6 +423,8 @@ export default function App() {
           <button onClick={() => setTileRetryKey((k) => k + 1)}>تلاش دوباره</button>
         </div>
       )}
+
+      {pointHint && <div className="app-banner" role="status">برای تغییر نقطهٔ جست‌وجو، روی نقشه دوبار بزن؛ سپس از «فضای من» دوباره پیشنهاد بخواه.<button className="banner-x" onClick={() => setPointHint(false)} aria-label="بستن راهنمای نقطه">✕</button></div>}
 
       {!online && (
         <div className="app-banner warn" role="status">
@@ -579,6 +601,7 @@ export default function App() {
               record={it.record}
               distanceMeters={it.distanceMeters}
               hasOffer={it.hasOffer}
+              now={now}
               reason={it.reason}
               selected={selectedId === it.record.business_id}
               onOpen={() => openDetail(it.record.business_id)}
@@ -616,7 +639,7 @@ export default function App() {
           </div>
           <div className="panel-body">
             <div className="detail-head">
-              <CategoryCoin category={selected.category} offer={selected.offers.length > 0} />
+              <CategoryCoin category={selected.category} offer={selected.offers.some(o => isOfferActiveAt(o.valid_from, o.valid_until, now))} />
               <div>
                 <h2 className="detail-title">{selected.name}</h2>
                 <div className="biz-meta">
@@ -658,6 +681,7 @@ export default function App() {
               <button onClick={() => { experience.toggle('hidden', selected.business_id); setOverlay('none'); }}>
                 <Icon name="hide" /> کمتر نشان بده
               </button>
+              <ShareBusinessAction key={selected.business_id} record={selected} />
             </div>
 
             <div className="section-title">محصولات / خدمات</div>
@@ -682,19 +706,21 @@ export default function App() {
             <div className="section-title">پیشنهادها</div>
             {selected.offers.length === 0 && <div className="empty">پیشنهادی ثبت نشده</div>}
             {selected.offers.map((o) => {
-              const active = isOfferActive(o.valid_until, now);
+              const status = offerStatus(o.valid_from, o.valid_until, now);
               return (
                 <div
                   key={o.offer_id}
                   className="offer-card"
-                  style={active ? undefined : { opacity: 0.45 }}
+                  data-offer-status={status}
                 >
                   <div>
                     <span className="discount">
                       {o.discount_percent !== null ? `${o.discount_percent}٪ تخفیف — ` : ''}
                     </span>
                     {o.title}
-                    {!active && ' (منقضی)'}
+                    {status === 'upcoming' && ' (هنوز شروع نشده)'}
+                    {status === 'expired' && ' (منقضی)'}
+                    {status === 'invalid' && ' (تاریخ اعتبار نامعتبر)'}
                   </div>
                   {o.description && <div>{o.description}</div>}
                   <div style={{ fontSize: 11, opacity: 0.8 }}>
@@ -756,7 +782,8 @@ export default function App() {
                             record={item.record}
                             distanceMeters={item.distanceMeters}
                             hasOffer={Boolean(item.matchedOffer)}
-                            reason={matchReason(item, m.interpretedCategory ?? null)}
+                            now={now}
+                            reason={matchReason(item, m.interpretedCategory ?? null, now)}
                             onOpen={() => openDetail(item.record.business_id)}
                           />
                         ))}
@@ -795,6 +822,15 @@ export default function App() {
           onChange={experience.setData}
           onToggle={experience.toggle}
           onDiagnostics={() => setOverlay('settings')}
+          onSuggest={() => findSuggestion()}
+          suggestionEmpty={suggestionResult !== null && 'reason' in suggestionResult}
+          radiusLabel={formatDistance(radiusMeters)}
+          pointLabel={searchPointLabel}
+          filtersApplied={filtersApplied}
+          onWiden={radiusMeters < 10000 ? () => { setRadiusMeters(radiusMeters < 5000 ? 5000 : 10000); } : undefined}
+          onChangePoint={() => { setOverlay('none'); setPointHint(true); }}
+          onUseLocation={() => { setSuggestionResult(null); useMyLocation(); }}
+          locating={locating}
         />
       )}
 

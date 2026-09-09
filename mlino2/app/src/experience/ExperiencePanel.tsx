@@ -12,8 +12,17 @@ interface Props {
   onChange: (next: LocalExperience) => void;
   onToggle: (key: Collection | 'hidden', id: string) => void;
   onDiagnostics: () => void;
+  onSuggest: () => void;
+  suggestionEmpty: boolean;
+  radiusLabel: string;
+  pointLabel: string;
+  filtersApplied: boolean;
+  onWiden?: () => void;
+  onChangePoint: () => void;
+  onUseLocation: () => void;
+  locating: boolean;
 }
-export default function ExperiencePanel({data, records, storageFailed, onClose, onOpen, onChange, onToggle, onDiagnostics}: Props) {
+export default function ExperiencePanel({data, records, storageFailed, onClose, onOpen, onChange, onToggle, onDiagnostics, onSuggest, suggestionEmpty, radiusLabel, pointLabel, filtersApplied, onWiden, onChangePoint, onUseLocation, locating}: Props) {
   const viewed = records.filter(r => data.viewed.includes(r.business_id));
   const tasks = [
     {label: 'یک مکان را برای بعد نگه دار', done: records.some(r => data.saved.includes(r.business_id) || data.later.includes(r.business_id))},
@@ -25,6 +34,17 @@ export default function ExperiencePanel({data, records, storageFailed, onClose, 
     <div className="panel-body">
       <div className="personal-intro"><Icon name="compass"/><h2>شهرِ تو، انتخابِ تو</h2><p>مجموعه‌ها و پیشرفت کشف، روی همین مرورگر ذخیره می‌شوند. «مناسب من» فقط انتخاب شخصی توست؛ امتیاز عمومی نیست و ترتیب نتایج را تغییر نمی‌دهد.</p></div>
       {storageFailed && <p role="status" className="inline-note">ذخیره در مرورگر ممکن نیست؛ انتخاب‌ها فقط تا بستن این صفحه می‌مانند.</p>}
+      <section className="nearby-discovery" aria-label="کشف با درخواست تو">
+        <h3>یک کشف کوچک، به انتخاب تو</h3>
+        <p className="muted">نزدیک‌ترین مکان دارای پیشنهاد فعال، تا {radiusLabel} از {pointLabel}.</p>
+        {filtersApplied && <p className="muted">فیلتر دسته یا طبقه فعال است؛ پیشنهاد هم این فیلترها را رعایت می‌کند.</p>}
+        <button className="suggestion-command" onClick={onSuggest}>یک پیشنهاد نزدیک پیدا کن</button>
+        {suggestionEmpty && <div className="suggestion-empty"><p role="status">الان پیشنهاد فعالی در این محدوده و با این فیلترها نیست.</p><div className="suggestion-options">
+          {onWiden && <button onClick={onWiden}>افزایش شعاع</button>}
+          <button onClick={onChangePoint}>تغییر نقطه روی نقشه</button>
+          <button disabled={locating} onClick={onUseLocation}>{locating ? 'در حال موقعیت‌یابی…' : 'استفاده از موقعیت من'}</button>
+        </div></div>}
+      </section>
       {(['saved','later','liked'] as const).map(key => <section key={key} className="collection-section"><h3>{key === 'saved' ? 'مکان‌های من' : key === 'later' ? 'بعداً ببینم' : 'مناسب من'}</h3>
         {records.filter(r => data[key].includes(r.business_id)).map(r => <div className="collection-row" key={r.business_id}><button onClick={() => onOpen(r.business_id)}><CategoryCoin category={r.category}/><span>{r.name}<small>{categoryLabel(r.category)}</small></span></button><button aria-label={`حذف ${r.name} از مجموعه`} onClick={() => onToggle(key,r.business_id)}><Icon name="close"/></button></div>)}
         {!records.some(r => data[key].includes(r.business_id)) && <p className="muted">هنوز مکانی در این مجموعه نیست.</p>}

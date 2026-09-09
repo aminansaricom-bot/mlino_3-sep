@@ -6,6 +6,7 @@
 
 import type { BusinessDirectoryService } from '../directory/BusinessDirectoryService';
 import { bearingDegrees, placeOverlay } from './arOrientation';
+import { isOfferActiveAt } from '../offers';
 
 export interface ArQuery {
   /** موقعیت افقی کاربر (GPS) */
@@ -45,12 +46,6 @@ export interface ArViewResponse {
   /** طبقه‌ی اعلام‌شده — در پاسخ برمی‌گردد تا UI صادقانه نمایش دهد */
   declaredFloor: number | null;
   declaredBuildingId: string | null;
-}
-
-function isOfferActiveNow(validUntil: string | null, now: number): boolean {
-  if (validUntil === null) return true;
-  const t = Date.parse(validUntil);
-  return Number.isNaN(t) ? true : t >= now;
 }
 
 export class ArOverlayService {
@@ -96,7 +91,7 @@ export class ArOverlayService {
           currency: p.currency,
         }));
 
-      const activeOfferRecord = record.offers.find((o) => isOfferActiveNow(o.valid_until, now));
+      const activeOfferRecord = record.offers.find((o) => isOfferActiveAt(o.valid_from, o.valid_until, now));
 
       items.push({
         businessId: record.business_id,

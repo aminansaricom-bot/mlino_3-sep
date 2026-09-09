@@ -1,5 +1,6 @@
 import type { V2BusinessDirectoryRecord } from '../directory/contract';
 import { categoryLabel, floorLabel, formatDistance } from '../uiFormat';
+import { isOfferActiveAt } from '../offers';
 
 /**
  * کارت کسب‌وکار — نمای مصرف‌کننده.
@@ -24,6 +25,7 @@ interface BusinessCardProps {
   selected?: boolean;
   /** آفر فعالی که موتور تطبیق پیدا کرده — اگر باشد نشان تخفیف می‌آید */
   hasOffer?: boolean;
+  now: number;
   /**
    * دلیل انتخاب این کارت توسط دستیار. فقط از شواهد واقعیِ موتور تطبیق ساخته
    * می‌شود (محصول منطبق، آفر منطبق، فاصله) — هیچ توضیح تولیدشده‌ای اینجا نیست.
@@ -38,13 +40,14 @@ export default function BusinessCard({
   distanceMeters,
   selected,
   hasOffer,
+  now,
   reason,
   onOpen,
   onRoute,
 }: BusinessCardProps) {
   const activeProducts = record.products.filter((p) => p.is_active).length;
   const floor = floorLabel(record.location.floor_level, record.location.building_id);
-  const offer = hasOffer ?? record.offers.length > 0;
+  const offer = (hasOffer ?? true) && record.offers.some(o => isOfferActiveAt(o.valid_from, o.valid_until, now));
 
   return (
     <div className={`biz-card${selected ? ' selected' : ''}`}>
