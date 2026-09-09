@@ -47,28 +47,36 @@
 | بومی‌سازی تصویر | 🟡 | هنوز وصل/تست نشده |
 | **تست‌ها** | ✅ | ۳۹۸ backend + ۵۸ frontend (در آخرین Commit) |
 
-### ⚠️ کار تثبیت‌نشده در Content Studio — یافته‌ی مهم
+### ✅ Stabilization انجام شد — ۹ سپتامبر ۲۰۲۶
 
-`git status` در `C:\CONTENT STUDIO` نشان می‌دهد **حجم زیادی کار Commit‌نشده** روی درخت کاری هست (تاریخ فایل‌ها ۳۰ اوت ۲۰۲۶):
+کار تثبیت‌نشده‌ی پیشین (۳۵ فایل تغییریافته + ۱۲ مسیر جدید) بررسی، راستی‌آزمایی و Commit شد: **`f6946a8`**.
 
-| مورد | وضعیت |
-|---|---|
-| **ماژول Planner** (`service/app/planner/`) | Commit نشده — `candidate_builder`، `scoring`، `diversification`، `constraints` + هفت فایل تست |
-| Migration `026_content_planner.sql` | Commit نشده — جدول‌های `content_plans` و `content_plan_items` |
-| **ماژول Assistant** (`service/app/assistant/`) | تغییرات Commit‌نشده — `rules/registry`، `snapshot`، `planner_health` |
-| `recommendation_quality` | گسترش Commit‌نشده |
-| `AGENTS.md` | فایل جدید Commit‌نشده |
-| رابط کاربری Planner و AssistantOrb | Commit نشده |
+| گروه | محتوا | وضعیت |
+|---|---|---|
+| **ماژول Planner** | `candidate_builder` · `scoring` · `diversification` · `constraints` + ۷ فایل تست + migration `026` + رابط کاربری | ✅ Commit شد |
+| **ماژول Assistant** | `rules/registry` · `snapshot` · `planner_health` · `AssistantOrb` | ✅ Commit شد |
+| **recommendation_quality** | گسترش `aggregation` و `service` | ✅ Commit شد |
+| **دارایی برند** | `frontend/public/melino/` | ✅ Commit شد |
+| **مستندات** | `AGENTS.md` (نسخه‌ی نزدیک به `CLAUDE.md`، ۸ خط تفاوت) | ✅ Commit شد |
 
-جمعاً ۳۵ فایل تغییریافته (~۷۰۰ خط افزوده) و ۱۲ مسیر جدید.
+**راستی‌آزمایی واقعی، نه ادعا:**
 
-**چرا این مهم است:**
+```
+Backend  : ۶۳۸ تست موفق   (روی Postgres یک‌بارمصرف)
+Frontend : ۸۸ تست موفق    (از ۵۸ — یعنی ۳۰ تست جدید)
+Build    : موفق
+Secret   : صفر
+```
 
-۱. **ماژول `assistant` مستقیماً به بند ۲ چشم‌انداز (دستیارهای نقش‌محور) مربوط است** و در ممیزی اولیه‌ی من — که بر پایه‌ی تاریخچه‌ی Commit بود — دیده نشد.
-۲. **Planner یک «برنامه‌ریز مبتنی بر شواهد» است** که به حلقه‌ی یادگیری وصل می‌شود؛ یعنی بند ۳ چشم‌انداز از آنچه فکر می‌کردم جلوتر است.
-۳. **ریسک از دست رفتن.** این کار فقط روی دیسک این ماشین است. همین الگو یک‌بار در V2 اتفاق افتاد و دو Commit تثبیت‌نشده برای همیشه از بین رفتند.
+**سه نکته‌ی روشی که ثبت می‌شود:**
 
-**توصیه:** پیش از هر کار یکپارچه‌سازی، وضعیت این کار تعیین تکلیف و Commit شود.
+۱. **Suite روی volume موجود اجرا نشد.** فیکسچرهای تست همه‌ی جدول‌ها را `TRUNCATE` می‌کنند و خودِ اسکریپت init مخزن ثبت کرده که همین اشتباه یک‌بار یک workspace واقعی را نابود کرده. یک Postgres یک‌بارمصرف روی پورت دیگر ساخته شد.
+
+۲. **سه شکست اولیه، نقص محیط بود نه کد.** seed `content_strategies` اعمال نشده بود و `default_config` خالی برمی‌گشت. پس از seed، هر سه سبز شدند.
+
+۳. **یک تست همزمانی زیر بار کامل ناپایدار است** (قفل advisory در poller تعامل). در اجرای منفرد ۶ از ۶ بار سبز است، هم در این نسخه و هم در Commit قبلی — یعنی **از قبل موجود، نه ناشی از این کار**.
+
+⚠️ **ریسک باز:** مخزن Content Studio **هیچ remote ندارد**؛ این Commit فقط روی دیسک این ماشین است. → OD-09
 
 ## MLINO V2
 
