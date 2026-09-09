@@ -56,6 +56,62 @@ enum OwnershipType {
   ORGANIZATIONAL
 }
 
+// CCR «ExternalWorkspaceLink» — مصوب مالک محصول (۱۰ سپتامبر ۲۰۲۶)
+// مرجع: implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_EXTERNAL_WORKSPACE_LINK.md
+// معماری: mlino_book/adr/ADR-0004-workspace-organization-mapping.md
+//
+// نگاشت هویت کسب‌وکار بین V1 و سیستم‌های بیرونی. V1 منبع حقیقت متعارف است؛
+// سیستم بیرونی هیچ ستون مالکیتی نمی‌گیرد و نگاشت فقط اینجا زندگی می‌کند.
+
+// عمداً تک‌مقداری — همان درس CR-02: تعمیم زودهنگام در سطح Type ممنوع.
+// افزودن سیستم بعدی، CCR جداگانه می‌خواهد.
+enum ExternalSystem {
+  CONTENT_STUDIO
+}
+
+// فقط دو حالت. `SUSPENDED` در بازبینی OD-10 حذف شد — حالت گمانه‌ای بدون
+// سناریوی واقعی اضافه نمی‌شود. `REVOKED` نهایی است: وصل دوباره یعنی رکورد جدید.
+enum ExternalLinkStatus {
+  ACTIVE
+  REVOKED
+}
+
+// فهرست بسته (تصمیم OD-10 بند ۴). گسترش این طبقه‌بندی، CCR جداگانه می‌خواهد.
+enum ExternalLinkBasis {
+  MANUAL
+  SYSTEM_MIGRATION
+  ADMIN_ACTION
+  INTEGRATION
+}
+
+// ناوردای هویت تاریخی: ردیف لغوشده هرگز حذف یا بازنویسی نمی‌شود، چون سیستم
+// باید بتواند جواب بدهد «در زمان T این workspace به کدام سازمان وصل بود؟».
+// به همین دلیل هم linkedAt و هم revokedAt ثبت می‌شوند — بدون هر دو، بازه‌ی
+// زمانی هر پیوند مشخص نیست.
+//
+// قید «حداکثر یک پیوند فعال به‌ازای هر workspace» با یک ایندکس یکتای *جزئی*
+// اجبار می‌شود که Prisma بومی بیانش نمی‌کند؛ در همان migration با SQL خام
+// ساخته شده. جزئیات و دلیل: migration 20260910_add_external_workspace_link.
+model ExternalWorkspaceLink {
+  id                  String         @id @default(uuid())
+  organizationId      String         @map("organization_id")
+  system              ExternalSystem
+  externalWorkspaceId String         @map("external_workspace_id")
+
+  status ExternalLinkStatus @default(ACTIVE)
+  basis  ExternalLinkBasis
+
+  linkedAt         DateTime  @map("linked_at")
+  linkedByActorId  String    @map("linked_by_actor_id")
+  revokedAt        DateTime? @map("revoked_at")
+  revokedByActorId String?   @map("revoked_by_actor_id")
+  note             String?
+
+  @@index([organizationId])
+  @@index([system, externalWorkspaceId])
+  @@map("external_workspace_links")
+}
+
 model CoreEntity {
   id             String   @id @default(uuid())
   organizationId String   @map("organization_id")

@@ -26,12 +26,13 @@
 | Composition Root | ✅ | یک‌بار در startup ساخته می‌شود |
 | اجرای Docker | ✅ | Postgres + سرویس migrate + read-api؛ زنده از بیرون کانتینر تست شد |
 | **موتورهای تشخیص فرصت** | 🟡 | منطق `cancellation`، `capacity`، `followup` نوشته و تست شده — **ولی هر سه Repository آن In-Memory است و به دیتابیس وصل نیست** |
-| نگاشت `workspace ⇄ organization` | 📋 **PROPOSED** | CCR نسخه‌ی ۲ پس از OD-10 · صفر تغییر در `schema.prisma` · منتظر تصویب نهایی · یک ابهام اجرایی باز → OD-11 |
+| **نگاشت `workspace ⇄ organization`** | ✅ **IMPLEMENTED / VALIDATED** | CCR ‏**APPROVED** · مدل `ExternalWorkspaceLink` + migration + سرویس دامنه · ۱۷ تست · ایندکس یکتای جزئی در دیتابیس تایید شد |
+| سیاست حذف `workspace` | 📋 **POLICY DEFINED / ENFORCEMENT DEFERRED** | قاعده مستند است ولی هیچ سازوکاری اجبارش نمی‌کند → OD-12 |
 | Connector و JWT | ⏸ | منتظر تصمیم مالک: صادرکننده‌ی JWT، محل `MLINO_JWT_SECRET`، زیرساخت دیپلوی |
 | R4 — یکپارچگی شواهد | 🔒 | BLOCKED |
 | R5 — همزمانی | ⏸ | OPEN by design |
 | **قرارداد مشترک پیشنهاد v1.0** | ✅ **IMPLEMENTED / VALIDATED** | تعریف نوع + راستی‌آزمایی fail-closed در `foundation/recommendation/` · ۳۱ تست · بدون ذخیره‌سازی و بدون مصرف‌کننده (عمدی) |
-| **تست‌ها** | ✅ | **۱۹۳/۱۹۳** (۱۶۲ قبلی + ۳۱ جدید — صفر رگرسیون) |
+| **تست‌ها** | ✅ | **۲۱۰/۲۱۰** (۱۶۲ پایه + ۳۱ قرارداد + ۱۷ نگاشت — صفر رگرسیون) |
 
 ## Content & Social Intelligence Module (Content Studio)
 
