@@ -1,8 +1,8 @@
 # MLINO V2 — بستهٔ بازبینی پس از مرحلهٔ ۲
 
-تاریخ: ۲۰۲۶-۰۹-۱۰  
-شاخه: `astra/visual-system-local-experience`  
-وضعیت مرحلهٔ ۲: `VALIDATED`  
+تاریخ: ۲۰۲۶-۰۹-۱۰
+شاخه: `astra/visual-system-local-experience`
+وضعیت مرحلهٔ ۲: `VALIDATED`
 commit تحویل مرحلهٔ ۲: `3784e4f61c8d273355ce19bb8bcaddef4e23ba97`
 
 این بسته برای بازبینی مستقل کلاد است و آغاز milestone بعدی محسوب نمی‌شود.
