@@ -95,11 +95,13 @@
 
 ---
 
-## گام ۶ — Business Brain، لایه‌ی نازک
+## گام ۶ — Business Context / Business Brain
 
-**چه:** فاز ۱ مدل دانش — فقط دانش اعلام‌شده: `Fact`، `Goal`، `Policy`، `Decision`، `UserKnowledge`.
+**طراحی انجام شد** → [`contracts/BUSINESS_CONTEXT_MODEL.md`](contracts/BUSINESS_CONTEXT_MODEL.md) — دوازده موجودیت، مدل منشأ، مدل تازگی و اطمینان. **بدون شِما، بدون کد.**
 
-**پیش‌نیاز:** تصویب مدل دانش (OD-02) + CCR
+**چه:** فاز اول پیشنهادی — فقط `Business Fact`، `Goal` و `KPI`؛ سپس `Decision`.
+
+**پیش‌نیاز:** تصمیم OD-14 (نقطه‌ی شروع) + CCR طبق OD-17
 **نکته:** بدون این، `objective` در قرارداد پیشنهاد همیشه خالی می‌ماند.
 
 ---
