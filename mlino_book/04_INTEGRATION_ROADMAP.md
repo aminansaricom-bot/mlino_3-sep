@@ -56,7 +56,9 @@
 
 **قید مصوب:** **هیچ تغییر دیتابیسی در Content Studio** فقط برای افزودن `organization_id`. نگاشت یک‌طرفه در V1 زندگی می‌کند.
 
-**پیش‌نیاز:** **CCR مصوب** برای `prisma/schema.prisma`
+**پیش‌نیاز:** **CCR مصوب** برای `prisma/schema.prisma` — **CCR آماده و منتظر تصویب است**:
+`implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_EXTERNAL_WORKSPACE_LINK.md`
+چهار پرسش باز پیش از تصویب → OD-10
 **ریسک:** فنی کم، حاکمیتی حساس — نقطه‌ای که دو سیستم برای اولین بار هویت مشترک پیدا می‌کنند
 **ارزش مستقل:** ✅ ممیزی‌پذیری هویت، حتی بدون گام بعدی
 

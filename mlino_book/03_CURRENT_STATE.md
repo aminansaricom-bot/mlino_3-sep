@@ -26,6 +26,7 @@
 | Composition Root | ✅ | یک‌بار در startup ساخته می‌شود |
 | اجرای Docker | ✅ | Postgres + سرویس migrate + read-api؛ زنده از بیرون کانتینر تست شد |
 | **موتورهای تشخیص فرصت** | 🟡 | منطق `cancellation`، `capacity`، `followup` نوشته و تست شده — **ولی هر سه Repository آن In-Memory است و به دیتابیس وصل نیست** |
+| نگاشت `workspace ⇄ organization` | 📋 **PROPOSED** | CCR آماده، تصویب‌نشده · صفر تغییر در `schema.prisma` · چهار پرسش باز → OD-10 |
 | Connector و JWT | ⏸ | منتظر تصمیم مالک: صادرکننده‌ی JWT، محل `MLINO_JWT_SECRET`، زیرساخت دیپلوی |
 | R4 — یکپارچگی شواهد | 🔒 | BLOCKED |
 | R5 — همزمانی | ⏸ | OPEN by design |
