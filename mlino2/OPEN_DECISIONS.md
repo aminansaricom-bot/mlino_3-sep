@@ -8,6 +8,21 @@ The current governing reference is [INTENT_CONTEXT_CONTRACT_REDESIGN.md](HANDOFF
 
 No unresolved conceptual decision blocks further **Experience Matching design** for the approved local, single-session, experimental-data scope. This status does not authorize implementation, schema, API, live V1 integration, or production deployment.
 
+## Experience Matching design — pending review
+
+The current proposal is [EXPERIENCE_MATCHING_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_DESIGN.md). It defines an Experience as a transient, explainable opportunity tied to one confirmed Intent revision and evidence-backed Business Capability. Eligibility is decided before relevance ordering; business payment, proximity, engagement, or an offer cannot repair failed eligibility.
+
+The following decisions remain open before any bounded implementation instruction:
+
+1. Adopt or revise the eligibility-before-ordering model, four relevance outcomes, explanation boundary, and business-influence limits.
+2. Choose the first delivery mode: Discovery with relevant offer awareness only, or a separately bounded Guided Shopping step.
+3. Approve the exact mock evidence matrix and list every unsupported claim in the experimental directory.
+4. Approve user-ordered optional preferences and the proposed distance/stable-identity fallback when the user gives no preference order.
+5. Approve the minimum explanation: relevance reason, source/test-data label, unknowns, unmet optional preferences, validity limit, and supported next action.
+6. Complete an architecture gate against the finalized Intent Contract and protected V1/V2 boundary.
+
+This proposal does not authorize a scoring algorithm, schema, API, code change, live V1 connection, persistent measurement, or sponsored ranking.
+
 ## Future expansion decisions — still open
 
 1. Versioned read-only V1→V2 projection for capability, knowledge, offers, availability, provenance, freshness, withdrawal, unknowns, tenant boundaries, and compatibility.

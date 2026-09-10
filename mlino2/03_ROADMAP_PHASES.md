@@ -8,12 +8,14 @@
 
 دامنهٔ فعلی فقط محیط محلی، یک task در یک نشست foreground، دادهٔ آزمایشی/mock و context دستی است. سقف نشست ۳۰ دقیقه بی‌فعالیتی و ۲ ساعت مطلق است؛ یک clarification برای هر درخواست مجاز است؛ رد آن سکوت را در همان task الزام می‌کند؛ و بازگشت tab/app هیچ Intent signal یا شروع خودکاری ایجاد نمی‌کند.
 
+طراحی پیشنهادی این لایه در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_DESIGN.md` ثبت شده است. milestone فعال اکنون بازبینی محصول و معماری این طراحی است؛ هیچ پیاده‌سازی آغاز نشده است.
+
 ترتیب بعدی Stage 3:
 
-1. طراحی Experience Matching بر پایهٔ revision تأییدشده، constraintهای سخت، preferenceهای مرتب‌شده توسط کاربر و business evidence.
-2. تعریف رفتار supported، unsupported، unknown و no-match بدون ساخت schema یا API اجرایی.
-3. بازبینی مستقل طراحی relevance، توضیح نتیجه، freshness و جلوگیری از نفوذ تبلیغاتی.
-4. تصمیم و Gate جدا پیش از هر پیاده‌سازی، اتصال عملیاتی V1 یا توسعهٔ storefront.
+1. Gate طراحی Experience Matching: تعریف Experience، eligibility، relevance ordering، explanation، privacy و مرز نفوذ کسب‌وکار.
+2. تصمیم محصول دربارهٔ mode اولیه: Discovery همراه offer awareness مرتبط، با تصمیم جدا برای هر Guided Shopping محدود.
+3. تأیید evidence matrix دادهٔ آزمایشی و رفتار supported، unsupported، unknown و no-match.
+4. تصمیم و Gate جدا پیش از هر پیاده‌سازی، schema/API، اتصال عملیاتی V1 یا توسعهٔ storefront.
 
 Stage 3 هنوز مجوز پیاده‌سازی ندارد. production scale، حافظهٔ بلندمدت، استنتاج میان نشست‌ها، GPS/passive context، external AI، telemetry/outcome writeback و live V1 integration تصمیم‌های آینده‌اند. مرحله نباید با اعلان، رتبه‌بندی پنهان، پروفایل حساس یا تکرار منطق business intelligence در V2 پیش برود.
 
