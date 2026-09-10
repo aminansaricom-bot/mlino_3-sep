@@ -2,7 +2,7 @@
 
 **`Observation` · `Signal` · `Decision`** — به‌همراه `Evidence` به‌عنوان بُعد پشتیبان
 
-**نسخه:** ۰٫۴ — **طراحی، پیاده‌سازی نشده** · **تاریخ:** ۱۰ سپتامبر ۲۰۲۶
+**نسخه:** ۰٫۵ — **طراحی، پیاده‌سازی نشده** · **تاریخ:** ۱۰ سپتامبر ۲۰۲۶
 **وضعیت:** `DESIGN / DECISIONS_APPLIED` — در انتظار بازبینی مستندات
 **مرجع بالادست:** [`BUSINESS_CONTEXT_MODEL.md`](BUSINESS_CONTEXT_MODEL.md) · [`../adr/ADR-0005`](../adr/ADR-0005-recommendation-lifecycle-entity-separation.md) · [`../adr/ADR-0006`](../adr/ADR-0006-provenance-versus-confirmation.md)
 
@@ -436,7 +436,7 @@ Goal.createdByDecision?   DecisionId   ← اختیاری
 - استناد به ارزیابی = `basisKind: 'recorded_context'`
 - موضع تصمیم (تقویت یا معکوس) در `rationale`؛ رابطه‌ی تایپ‌شده ساخته نمی‌شود (D-34)
 
-⛔ **پیاده‌سازی مسدود است تا `EvaluationRecord` شناسه‌ی خودش را داشته باشد** → OD-32.
+✅ **مسدودیت در سطح مفهومی برداشته شد** — `EvaluationRecord` در D-50 شناسه‌ی مستقل گرفت → [`EVALUATION_MODEL_ALIGNMENT.md`](EVALUATION_MODEL_ALIGNMENT.md). پیاده‌سازی با قرارداد پیشنهاد v1.1.
 
 → [`LEARNING_LOOP_ALIGNMENT.md`](LEARNING_LOOP_ALIGNMENT.md)
 
@@ -608,7 +608,7 @@ Goal.createdByDecision?   DecisionId   ← اختیاری
 | `basedOn` و `evidence` به آیتم‌های **موجود** اشاره کنند | تمامیت ارجاعی نیازمند مخزن است |
 | `measuredBy` به KPI **موجود** اشاره کند | همان |
 | `Goal.createdByDecision` به تصمیم **موجود** اشاره کند | همان |
-| `basedOn` به `EvaluationRecord` **موجود** اشاره کند | همان — و امروز حتی شناسه‌ای برای ارجاع وجود ندارد (OD-32) |
+| `basedOn` به `EvaluationRecord` **موجود** اشاره کند | همان — شناسه در D-50 تعیین شد؛ وجود مرجع همچنان تعهد فاز ذخیره‌سازی است |
 | `supersedes` حلقه نسازد | نیازمند پیمایش گراف |
 | سقف اطمینان از زنجیره‌ی مبنا | نیازمند خواندن آیتم‌های مرتبط |
 

@@ -2,6 +2,7 @@
 
 **نسخه:** ۱٫۰ · **تاریخ:** ۱۰ سپتامبر ۲۰۲۶
 **وضعیت:** `DECIDED` — OD-31 بسته شد → **D-49** · **صفر خط کد، بدون شِما، بدون موجودیت جدید**
+**به‌روزرسانی:** مسدودیت پیاده‌سازی (OD-32) در سطح مفهومی برداشته شد → **D-50** · [`EVALUATION_MODEL_ALIGNMENT.md`](EVALUATION_MODEL_ALIGNMENT.md)
 **مرجع:** [`KNOWLEDGE_LOOP_ALIGNMENT.md`](KNOWLEDGE_LOOP_ALIGNMENT.md) · [`BUSINESS_CONTEXT_PHASE2_DESIGN.md`](BUSINESS_CONTEXT_PHASE2_DESIGN.md) · [`../adr/ADR-0005`](../adr/ADR-0005-recommendation-lifecycle-entity-separation.md)
 
 ---
@@ -144,6 +145,8 @@ export interface EvaluationRecord {
 
 پس B دقیقاً اصل ۲ را نقض می‌کند — نه به‌خاطر خام بودن داده، به‌خاطر **انتساب قضاوت‌نشده‌ای که با آن می‌آید**.
 
+> **دقیق‌تر در D-50:** پیوند نتیجه به اقدام خودش ادعای علیت **نیست**، یک **ارتباط** زمانی و دامنه‌ای است — و همان ارتباط است که با علیت اشتباه گرفته می‌شود. نتیجه‌ی D-49 عوض نمی‌شود؛ فقط دلیلش دقیق‌تر بیان شد. → [`EVALUATION_MODEL_ALIGNMENT.md`](EVALUATION_MODEL_ALIGNMENT.md) بند ۲٫۱
+
 ### گزینه‌ی C — موجودیت جدید `Learning`
 
 **با D-48 تناقض دارد** — که یک پاس پیش `Learning` را **فرایند** تعیین کرد، نه موجودیت. ورودی آن فرایند (`Evaluation`) و هر سه خروجی‌اش از قبل موجودند.
@@ -272,7 +275,7 @@ export interface EvaluationRecord {
 ## آنچه این سند تصمیم نمی‌گیرد
 
 - **شِما، migration، کد** — طبق قید صریح
-- **شکل دقیق شناسه، منشأ و انتساب در `EvaluationRecord`** — OD-32
+- **شکل دقیق شناسه، منشأ و انتساب در `EvaluationRecord`** — ✅ D-50 → [`EVALUATION_MODEL_ALIGNMENT.md`](EVALUATION_MODEL_ALIGNMENT.md)
 - **مبدأ اقدام‌های بدون پیشنهاد** — OD-33
 - **ردپای یادگیری روی `Fact` · `KPI` · `Capability`** — طراحی فاز ۳
 - **هر چیزی درباره‌ی یادگیری بین کسب‌وکارها** — OD-07

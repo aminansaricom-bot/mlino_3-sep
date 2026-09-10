@@ -117,7 +117,7 @@
 
 **حلقه‌ی دانش هم‌تراز شد ✅** (OD-30 → D-48) → [`contracts/KNOWLEDGE_LOOP_ALIGNMENT.md`](contracts/KNOWLEDGE_LOOP_ALIGNMENT.md) — `Reality` مرز است، `Knowledge` لایه‌ی دانش پایدار، `Learning` فرایند. **هیچ موجودیت جدیدی لازم نشد.**
 
-**فاز ۳:** تکامل دانش، یادگیری، استنتاج — یعنی همان فرایند `Learning`. حلقه‌ی یادگیری هم‌تراز شد ✅ (OD-31 → D-49) → [`contracts/LEARNING_LOOP_ALIGNMENT.md`](contracts/LEARNING_LOOP_ALIGNMENT.md). **پیش‌نیازهای طراحی فاز ۳:** OD-32 (شناسه، منشأ و انتساب در `EvaluationRecord` — مسدودکننده‌ی D-49؛ همراه OD-27 در قرارداد پیشنهاد v1.1، پیش از گام ۳) · OD-33 (اقدام‌های بدون پیشنهاد).
+**فاز ۳:** تکامل دانش، یادگیری، استنتاج — یعنی همان فرایند `Learning`. حلقه‌ی یادگیری هم‌تراز شد ✅ (OD-31 → D-49) → [`contracts/LEARNING_LOOP_ALIGNMENT.md`](contracts/LEARNING_LOOP_ALIGNMENT.md). مدل ارزیابی هم‌تراز شد ✅ (OD-32 → D-50) → [`contracts/EVALUATION_MODEL_ALIGNMENT.md`](contracts/EVALUATION_MODEL_ALIGNMENT.md) — اثربخشی جدا از انتساب. **قرارداد پیشنهاد v1.1** = OD-27 (در انتظار) + D-50 — یک بازنگری، پیش از گام ۳. **پیش‌نیاز باقی‌مانده‌ی طراحی فاز ۳:** OD-33 (فقط مبدأ اقدام).
 
 ⛔ **شروع نمی‌شود:** ذخیره‌سازی دیتابیس · یکپارچه‌سازی پیشنهاد · پیاده‌سازی داده‌ی مشتری
 
