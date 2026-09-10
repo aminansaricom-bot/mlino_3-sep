@@ -2,6 +2,7 @@
 
 **نسخه:** ۱٫۰ · **تاریخ:** ۱۰ سپتامبر ۲۰۲۶
 **وضعیت:** `DECIDED` — OD-29 بسته شد → **D-52** · **صفر خط کد، بدون شِما، بدون migration، بدون موجودیت جدید**
+**به‌روزرسانی:** مدل آفر تعیین شد → **D-53** · [`OFFER_OWNERSHIP_ALIGNMENT.md`](OFFER_OWNERSHIP_ALIGNMENT.md) — مرز انتشار این سند را به ارث می‌برد
 **مرجع:** [`BUSINESS_CONTEXT_MODEL.md`](BUSINESS_CONTEXT_MODEL.md) بند A.۱۰ · [`KNOWLEDGE_LOOP_ALIGNMENT.md`](KNOWLEDGE_LOOP_ALIGNMENT.md) بند ۷ · [`BUSINESS_CONTEXT_PHASE2_DESIGN.md`](BUSINESS_CONTEXT_PHASE2_DESIGN.md) بند B · [`../adr/ADR-0006`](../adr/ADR-0006-provenance-versus-confirmation.md)
 
 ---
@@ -362,7 +363,7 @@ V2:  این به تو مربوط است · این‌طور نشانش می‌د�
 
 - **شِما، migration، کد** — طبق قید صریح
 - **مدل دسترس‌پذیری** — OD-34
-- **مدل آفر** — OD-26؛ فقط مرز انتشار را به ارث می‌برد
+- **مدل آفر** — ✅ D-53 → [`OFFER_OWNERSHIP_ALIGNMENT.md`](OFFER_OWNERSHIP_ALIGNMENT.md)
 - **واژگان دسته‌ی هر صنف** — مال ماژول‌های صنفی
 - **فرایند تایید پلتفرمی** — امروز فقط خوداظهاری وجود دارد
 - **سازوکار انتقال به V2** — قرارداد `02` و OD-05
