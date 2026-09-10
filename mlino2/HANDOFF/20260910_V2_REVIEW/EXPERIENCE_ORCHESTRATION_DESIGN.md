@@ -58,7 +58,7 @@ The initial scope uses `Discovering`, `Asking` when necessary, `Matching`, `Pres
 
 ## 3. Assistant Layer Concept
 
-The MLINO Assistant is a persistent interface layer across MLINO experiences and modules. “Persistent” describes its coordination role across an authorized session; it does not grant indefinite memory, background sensing, or authority to infer the user.
+The MLINO Assistant is a persistent interface layer across MLINO experiences and modules. The focused [Assistant Ownership Decision](ASSISTANT_OWNERSHIP_DECISION.md) recommends **Option A: a Core-owned Assistant with module-scoped capability providers**. “Persistent” describes its coordination role across an authorized session; it does not grant indefinite memory, background sensing, or authority to infer the user.
 
 ### 3.1 Responsibilities
 

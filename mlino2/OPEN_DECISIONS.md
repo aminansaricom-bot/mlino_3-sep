@@ -27,7 +27,7 @@ OD-30 therefore requires no new entity, schema, API, migration, storage layer, o
 | Area | Current decision or proposal | Status |
 |---|---|---|
 | Experience lifecycle | Discovering, Asking, Matching, Presenting, Comparing, Acting, Completed, Abandoned, Expired; initial slice excludes Comparing until separately approved. | Product review required. |
-| Assistant | Cross-module orchestration and guidance within authorized session; no hidden inference, business ranking, autonomous action, or ownership of module truth. | Product/architecture review required. |
+| Assistant | Recommended Option A: Core-owned cross-module orchestration with module-scoped capability providers; no hidden inference, business ranking, autonomous action, or ownership of module truth. | Ownership decision documented; product approval required. |
 | Core vs Modules | Core owns shared Intent, privacy, lifecycle, evidence, explanation, and handoff policy; Modules own domain data, capability, rules, and actions. | Product/architecture review required. |
 | AR / Virtual Storefront | Future modes requiring authoritative projection, option-level applicability, spatial/privacy governance, interaction contracts, and evaluation. | Deferred; dependencies open. |
 

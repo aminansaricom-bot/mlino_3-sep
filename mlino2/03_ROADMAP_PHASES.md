@@ -8,7 +8,7 @@ OD-30 در [KNOWLEDGE_LOOP_ALIGNMENT.md](HANDOFF/20260910_V2_REVIEW/KNOWLEDGE_LO
 
 ## وضعیت طراحی Experience Orchestration
 
-طراحی [EXPERIENCE_ORCHESTRATION_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_ORCHESTRATION_DESIGN.md) آمادهٔ product review است. این milestone چرخهٔ Experience، نقش Assistant، مرز MLINO Core و Modules و وابستگی‌های AR/Virtual Storefront را تعریف می‌کند؛ implementation، schema، API و activation هیچ‌کدام شروع نشده‌اند. تا پذیرش محصول، scope معتبر همان Intent-Guided Local Discovery محلی و تک‌نشسته است.
+طراحی [EXPERIENCE_ORCHESTRATION_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_ORCHESTRATION_DESIGN.md) آمادهٔ product review است. تصمیم متمرکز [ASSISTANT_OWNERSHIP_DECISION.md](HANDOFF/20260910_V2_REVIEW/ASSISTANT_OWNERSHIP_DECISION.md) گزینهٔ A را پیشنهاد می‌کند: Assistant در Core و providerهای محدود در Modules. این milestone چرخهٔ Experience، نقش Assistant، مرز MLINO Core و Modules و وابستگی‌های AR/Virtual Storefront را تعریف می‌کند؛ implementation، schema، API و activation هیچ‌کدام شروع نشده‌اند. تا پذیرش محصول، scope معتبر همان Intent-Guided Local Discovery محلی و تک‌نشسته است.
 
 ## وضعیت جاری پس از نهایی‌سازی Experience Matching
 
