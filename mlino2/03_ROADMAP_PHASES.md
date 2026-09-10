@@ -4,11 +4,11 @@
 
 ## وضعیت فعال نقشهٔ راه — Stage 3 Intent Layer
 
-مرحلهٔ فعال V2 از این پس «Intent Detection & Context Understanding» است؛ این مرحله فعلاً طراحی است و تا تصویب `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DECISIONS.md` و تصمیم‌های `OPEN_DECISIONS.md` وارد پیاده‌سازی نمی‌شود.
+مرحلهٔ فعال V2 از این پس «Intent Detection & Context Understanding» است؛ تصمیم‌های مالکیت و حریم خصوصی تصویب شده‌اند، اما قرارداد مفهومی داده در `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DATA_CONTRACT.md` باید بازبینی شود و این مرحله تا تصویب آن و تصمیم‌های `OPEN_DECISIONS.md` وارد پیاده‌سازی نمی‌شود.
 
 ترتیب تصمیمی Stage 3:
 
-1. تصویب مالکیت Intent، lifecycle، confidence/confirmation، مرز پرسش، business influence و privacy.
+1. بازبینی قرارداد مفهومی Intent: entity، source، lifecycle، confidence/confirmation، retention و relationship با context.
 2. تعریف مفهومی gateway خواندنی V1↔V2 و evidence مورد نیاز برای capability، بدون schema یا API اجرایی.
 3. ارزیابی محدود intent روی context و دادهٔ موجود، با confirmation روشن، expiration و empty state.
 4. بازبینی مستقل تجربه، relevance و حریم خصوصی پیش از هر اتصال عملیاتی یا توسعهٔ storefront.

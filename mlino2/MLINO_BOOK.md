@@ -14,8 +14,8 @@ MLINO V2 لایهٔ هوشمند تجربهٔ دنیای واقعی است؛ ن�
 
 ## گام بعد
 
-مرحلهٔ سوم اکنون در وضعیت طراحی Intent و Context است و هنوز پیاده‌سازی نشده است. تصمیم‌های بنیادین در `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DECISIONS.md` ثبت شده‌اند: Intent متعلق به کاربر است؛ سیگنال و confidence جای confirmation را نمی‌گیرند؛ پیشنهاد implicit هرگز بدون تأیید فعال نمی‌شود؛ کسب‌وکار فقط capability و evidence می‌دهد؛ و اعلان‌های تبلیغاتی خودکار مجاز نیستند.
+مرحلهٔ سوم اکنون در وضعیت طراحی قرارداد Intent و Context است و هنوز پیاده‌سازی نشده است. تصمیم‌های بنیادین در `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DECISIONS.md` ثبت شده‌اند و قرارداد مفهومی آن در `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DATA_CONTRACT.md` آمده است: Intent متعلق به کاربر است؛ سیگنال و confidence جای confirmation را نمی‌گیرند؛ پیشنهاد implicit هرگز بدون تأیید فعال نمی‌شود؛ کسب‌وکار فقط capability و evidence می‌دهد؛ و اعلان‌های تبلیغاتی خودکار مجاز نیستند.
 
-اجرای Stage 3 تا بازبینی و تصویب همین تصمیم‌ها، فهرست `OPEN_DECISIONS.md` و مرز خواندنی V1↔V2 آغاز نمی‌شود. هیچ schema، API یا اتصال V1 در این مرحله ساخته نشده است.
+اجرای Stage 3 تا بازبینی و تصویب قرارداد داده، فهرست `OPEN_DECISIONS.md` و مرز خواندنی V1↔V2 آغاز نمی‌شود. این سند schema یا API نیست و هیچ schema، API یا اتصال V1 در این مرحله ساخته نشده است.
 
-گام پیشنهادی بعد از تصویب: طراحی و ارزیابی محدود Intent Detection & Context Understanding روی دادهٔ موجود، با empty state صادقانه و بدون تغییر پنهان در ranking V1. توسعهٔ storefront، AR و گفت‌وگوی کسب‌وکار به وابستگی‌های داده و governance خودشان نیاز دارند.
+گام پیشنهادی بعد از تصویب: طراحی و ارزیابی محدود Intent Detection & Context Understanding روی دادهٔ موجود، با empty state صادقانه و بدون تغییر پنهان در ranking V1. توسعهٔ storefront، AR و گفت‌وگوی کسب‌وکار به قراردادهای داده و governance خودشان نیاز دارند.

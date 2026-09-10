@@ -28,5 +28,6 @@ Stage 2 did not add V1 integration, a backend, ranking changes, deep links, inve
 6. [Intent and context design](INTENT_CONTEXT_DESIGN.md)
 7. [Intent context decisions](INTENT_CONTEXT_DECISIONS.md)
 8. [V2 open decisions register](../../OPEN_DECISIONS.md)
+9. [Intent context data contract](INTENT_CONTEXT_DATA_CONTRACT.md)
 
 Delivery reference: Stage 2 implementation commit `3784e4f61c8d273355ce19bb8bcaddef4e23ba97`; branch `astra/visual-system-local-experience`.
