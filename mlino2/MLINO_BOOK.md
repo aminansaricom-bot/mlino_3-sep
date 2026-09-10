@@ -14,8 +14,8 @@ MLINO V2 لایهٔ هوشمند تجربهٔ دنیای واقعی است؛ ن�
 
 ## گام بعد
 
-مرحلهٔ سوم اکنون در وضعیت طراحی قرارداد Intent و Context است و هنوز پیاده‌سازی نشده است. تصمیم‌های بنیادین در `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DECISIONS.md` ثبت شده‌اند و قرارداد مفهومی آن در `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DATA_CONTRACT.md` آمده است: Intent متعلق به کاربر است؛ سیگنال و confidence جای confirmation را نمی‌گیرند؛ پیشنهاد implicit هرگز بدون تأیید فعال نمی‌شود؛ کسب‌وکار فقط capability و evidence می‌دهد؛ و اعلان‌های تبلیغاتی خودکار مجاز نیستند.
+مرحلهٔ سوم هنوز پیاده‌سازی نشده است. مرجع جاری و حاکم Intent Layer، `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_CONTRACT_REDESIGN.md` است؛ نتیجهٔ Gate نهایی در `INTENT_CONTEXT_FINAL_GATE_REVIEW.md` وضعیت B، یعنی «تأیید با تغییرات جزئی»، را ثبت کرد و `INTENT_CONTEXT_FINALIZATION.md` بسته‌شدن همان موارد را مستند می‌کند. اسناد `INTENT_CONTEXT_DECISIONS.md` و `INTENT_CONTEXT_DATA_CONTRACT.md` برای تاریخچه حفظ شده‌اند، اما هر فرض ناسازگار آن‌ها دربارهٔ Strength، تأیید نسخه، consent، lifecycle، retention یا outcome با Redesign جایگزین شده است.
 
-اجرای Stage 3 تا بازبینی و تصویب قرارداد داده، فهرست `OPEN_DECISIONS.md` و مرز خواندنی V1↔V2 آغاز نمی‌شود. این سند schema یا API نیست و هیچ schema، API یا اتصال V1 در این مرحله ساخته نشده است.
+دامنهٔ تصویب‌شده فقط محیط محلی، یک task در یک نشست foreground و دادهٔ آزمایشی/mock است. پردازش محلی باید انتخاب صریح کاربر داشته باشد؛ Intent ماندگار نمی‌شود؛ بازگشت از background یا hidden به‌تنهایی سیگنال Intent یا مجوز ادامهٔ matching نیست؛ سقف نشست ۳۰ دقیقه بی‌فعالیتی و ۲ ساعت مطلق است؛ و پس از رد یا بستن clarification پرسش تکرار نمی‌شود. مقیاس production، حافظهٔ بلندمدت کاربر، استنتاج رفتاری میان نشست‌ها، GPS/passive context، اتصال زندهٔ V1 و پردازش بیرونی تصویب نشده‌اند.
 
-گام پیشنهادی بعد از تصویب: طراحی و ارزیابی محدود Intent Detection & Context Understanding روی دادهٔ موجود، با empty state صادقانه و بدون تغییر پنهان در ranking V1. توسعهٔ storefront، AR و گفت‌وگوی کسب‌وکار به قراردادهای داده و governance خودشان نیاز دارند.
+گام بعدی فقط طراحی Experience Matching بر پایهٔ همین قرارداد است. این بسته مجوز کدنویسی، schema، API، اتصال V1 یا تغییر ranking نیست؛ آغاز پیاده‌سازی به دستور و Gate جدا نیاز دارد. توسعهٔ storefront، AR و گفت‌وگوی کسب‌وکار نیز به قراردادهای داده و governance خودشان نیاز دارند.

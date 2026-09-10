@@ -4,16 +4,18 @@
 
 ## وضعیت فعال نقشهٔ راه — Stage 3 Intent Layer
 
-مرحلهٔ فعال V2 از این پس «Intent Detection & Context Understanding» است؛ تصمیم‌های مالکیت و حریم خصوصی تصویب شده‌اند، اما قرارداد مفهومی داده در `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DATA_CONTRACT.md` باید بازبینی شود و این مرحله تا تصویب آن و تصمیم‌های `OPEN_DECISIONS.md` وارد پیاده‌سازی نمی‌شود.
+قرارداد مفهومی Intent برای دامنهٔ محدود Stage 3 از Gate نهایی با وضعیت B عبور کرده و موارد جزئی آن در `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_FINALIZATION.md` بسته شده‌اند. مرجع جاری `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_CONTRACT_REDESIGN.md` است. اسناد قدیمی‌تر Decisions و Data Contract به‌عنوان تاریخچه باقی می‌مانند و در تعارض‌های مشخص‌شده مرجع اجرایی نیستند.
 
-ترتیب تصمیمی Stage 3:
+دامنهٔ فعلی فقط محیط محلی، یک task در یک نشست foreground، دادهٔ آزمایشی/mock و context دستی است. سقف نشست ۳۰ دقیقه بی‌فعالیتی و ۲ ساعت مطلق است؛ یک clarification برای هر درخواست مجاز است؛ رد آن سکوت را در همان task الزام می‌کند؛ و بازگشت tab/app هیچ Intent signal یا شروع خودکاری ایجاد نمی‌کند.
 
-1. بازبینی قرارداد مفهومی Intent: entity، source، lifecycle، confidence/confirmation، retention و relationship با context.
-2. تعریف مفهومی gateway خواندنی V1↔V2 و evidence مورد نیاز برای capability، بدون schema یا API اجرایی.
-3. ارزیابی محدود intent روی context و دادهٔ موجود، با confirmation روشن، expiration و empty state.
-4. بازبینی مستقل تجربه، relevance و حریم خصوصی پیش از هر اتصال عملیاتی یا توسعهٔ storefront.
+ترتیب بعدی Stage 3:
 
-Stage 3 نباید با اعلان، رتبه‌بندی پنهان، پروفایل حساس، یا تکرار منطق business intelligence در V2 پیش برود.
+1. طراحی Experience Matching بر پایهٔ revision تأییدشده، constraintهای سخت، preferenceهای مرتب‌شده توسط کاربر و business evidence.
+2. تعریف رفتار supported، unsupported، unknown و no-match بدون ساخت schema یا API اجرایی.
+3. بازبینی مستقل طراحی relevance، توضیح نتیجه، freshness و جلوگیری از نفوذ تبلیغاتی.
+4. تصمیم و Gate جدا پیش از هر پیاده‌سازی، اتصال عملیاتی V1 یا توسعهٔ storefront.
+
+Stage 3 هنوز مجوز پیاده‌سازی ندارد. production scale، حافظهٔ بلندمدت، استنتاج میان نشست‌ها، GPS/passive context، external AI، telemetry/outcome writeback و live V1 integration تصمیم‌های آینده‌اند. مرحله نباید با اعلان، رتبه‌بندی پنهان، پروفایل حساس یا تکرار منطق business intelligence در V2 پیش برود.
 
 ## فاز ۱ — پایه: نقشه + پروفایل کسب‌وکار (بدون AI پیچیده، بدون AR)
 

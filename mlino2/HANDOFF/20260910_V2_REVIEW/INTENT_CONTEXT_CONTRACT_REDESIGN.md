@@ -4,7 +4,7 @@ Author: Codex, Principal Product Architect role.
 
 Baseline: `fc95857070a74e3557615f820e28fd645857060b`. This document repairs the nine blockers in [the architecture gate review](INTENT_CONTEXT_DATA_CONTRACT_REVIEW.md). It is conceptual product/architecture design only: no code, schema, migration, API, or implementation is created or authorized.
 
-Decision posture: the rules below are concrete redesign decisions proposed for adoption. They are not claims that existing software already behaves this way. The product owner must approve the revised semantics and bounded scope, followed by a repeat architecture gate. The previous C verdict remains the recorded verdict until that gate is rerun.
+Decision posture: these rules were proposed at `267bb81a753c6b99594519e0c5c4e146bd202a74`, then received the B — Approved with minor changes verdict in [the final gate review](INTENT_CONTEXT_FINAL_GATE_REVIEW.md). The three conditions from that gate are closed in [the finalization record](INTENT_CONTEXT_FINALIZATION.md), including the session-resume clarification now incorporated in §3.3. The redesign is the current conceptual authority for the adopted bounded scope. It is not a claim that existing software behaves this way and does not authorize implementation.
 
 Upon adoption, this document governs the conflicting Intent semantics in [the original decisions](INTENT_CONTEXT_DECISIONS.md) and [the data contract](INTENT_CONTEXT_DATA_CONTRACT.md): Strength, version-specific confirmation, retention consent, intent expiry, archival, and outcome data direction. Those documents remain historical evidence in this delivery. The protected V1/V2 integration contract and V1 ownership rules are not superseded or amended here.
 
@@ -49,7 +49,7 @@ Context → Signals → Hypothesis → User Confirmation → Active Intent → C
 
 Processing permission is a prerequisite across this flow, not a consequence of confirmation. Confidence can inform clarification before confirmation; it is not another authority gate capable of overriding the user.
 
-### 2.2 Initial implementation scope proposed for adoption
+### 2.2 Adopted bounded scope for a future initial implementation
 
 The first slice is **one foreground task in one tab, local interpretation and matching over the existing mock directory**, with a clear test-data label. It supports an explicit need, user-chosen area/radius and optional category/floor, a visible interpretation, confirmation, evidence-backed results, correction, rejection, and ending the task.
 
@@ -117,9 +117,13 @@ No-match or expired offer does not move an Active goal to Ended/Expired. Paused 
 
 ### 3.3 Concrete session and expiration rule
 
-For the proposed initial slice, a processing session starts when the user accepts local task processing. It ends at the earliest of: explicit end/delete/permission withdrawal; reload/navigation away/tab close; 30 minutes without direct task interaction; or 2 hours after session start. These are proposed product caps, not measured optimal values or legal retention periods. They must be visible in the processing notice and approved as part of adopting this document.
+For the adopted bounded slice, a processing session starts when the user accepts local task processing. It ends at the earliest of: explicit end/delete/permission withdrawal; reload/navigation away/tab close; 30 minutes without direct task interaction; or 2 hours after session start. These are adopted prototype product caps, not measured optimal values or legal retention periods. They must be visible in the processing notice; production retention remains a separate future decision.
 
-Only deliberate user interactions with the task reset the inactivity timer. Re-rendering, background events, data refresh, or business changes do not reset it. No activity extends the two-hour maximum. Hiding the tab pauses processing; the existing deadline continues, and any return rechecks validity before showing results. There is no background work or notification.
+Only deliberate user interactions with the task reset the inactivity timer. Re-rendering, background events, data refresh, or business changes do not reset it. No activity extends the two-hour maximum.
+
+Hiding the tab or moving the app to the background moves the task to Paused and stops matching and actionable Intent experiences. Making the app or tab visible again is an environmental event only: **app resume is not a user action and is not an Intent signal**. Visibility, focus, `pageshow`, automatic refresh, re-rendering, clock changes, and business-data changes cannot restart matching or reactivate an experience.
+
+On return, V2 may perform only the checks needed to decide whether a resume control can be offered: session deadline, processing permission, current interpretation revision, confirmation validity, and essential context/evidence freshness. Matching resumes only after a deliberate task action: the user selects an explicit Resume/Continue control, submits an edited need or context, or starts a fresh Intent task. An explicit Resume may reuse the current confirmation only when the exact confirmed revision and its material context remain unchanged and all prerequisites are valid. A material change creates a new revision and requires confirmation again. If permission was withdrawn or the session/task expired while hidden, the old task cannot resume; a fresh task requires applicable processing permission and confirmation. Time spent hidden continues to count toward both the 30-minute inactivity limit and the two-hour absolute cap. There is no background work or notification.
 
 Each goal also ends at its explicitly confirmed deadline if earlier than the session cap. The initial slice supports current-session goals only. A request for tomorrow or durable “today” tracking receives an unsupported-scope explanation and may become a current-session search only if the user edits and confirms it. It is never silently converted or scheduled.
 
@@ -271,21 +275,21 @@ Outcome learning in the broader vision means learning from valid, purpose-author
 
 ## 9. Remaining Decisions
 
-### 9.1 Readiness answer
+### 9.1 Readiness answer after finalization
 
-**Ready as a proposed conceptual foundation for the bounded local/session-only slice: yes. Authorized for implementation now: no. Ready for the full live MLINO Intent Layer: no.**
+**Approved as the conceptual foundation for the bounded local/session-only slice: yes. Authorized for implementation now: no. Ready for the full live MLINO Intent Layer: no.**
 
-This redesign supplies concrete semantic resolutions for R1–R9 in that scope, rather than leaving implementers to guess authority, retention, or fallback. This is an author assessment, not an independent PASS. The first C gate is not automatically replaced. Adoption of the rules below and a repeat gate are required before any coding instruction.
+This redesign supplies concrete semantic resolutions for R1–R9 in that scope, rather than leaving implementers to guess authority, retention, or fallback. The original C review remains historical evidence about the earlier contract. The repeat gate returned B and required M1–M3; [the finalization record](INTENT_CONTEXT_FINALIZATION.md) closes those conditions. Architecture acceptance still does not start coding: the product owner must issue a separate implementation instruction, followed later by runtime and delivery validation.
 
-The remaining first-slice approval decisions are explicit and finite:
+The previously proposed first-slice decisions were resolved as follows:
 
-| Decision | Proposed answer in this redesign | Who must accept it | Blocking effect |
+| Decision | Adopted answer | Closure record | Remaining effect |
 |---|---|---|---|
-| Adopt revised semantics | Version-specific confirmation; independent consent and lifecycles; retired ambiguous Strength; no automatic archive/writeback. | Product owner and V2 architecture reviewer. | Blocks implementation until adopted and the next gate accepts R1–R3/R8 resolution. |
-| Accept bounded product scope | One task/tab, local processing, mock directory, manual context, no durable intent or remote inference. | Product owner, V2 architecture and privacy reviewer. | Blocks first-slice approval; rejecting an exclusion requires revisiting its architecture dependency. |
-| Accept session/asking policy | 30-minute inactivity, 2-hour maximum, task/session disposal, one clarification per request, dismissal silence. | Product owner and privacy reviewer. | Blocks first-slice approval. These are proposed decisions, not claims of an already approved policy. |
-| Accept capability support and relevance policy | Hard constraints need evidence; unknown fails mandatory eligibility; preferences are user-ordered; no invented weights or claims. | Product owner, V2 reviewer; V1 owner where a projection boundary is affected. | Blocks future matcher integration approval; existing ranking remains untouched now. |
-| Accept conformance evidence | All authority/privacy scenarios below must have the stated result; supported fixtures trace every match to actual data. | Independent reviewer and product owner. | Blocks implementation authorization until the design is accepted; later runtime verification remains mandatory. |
+| Revised semantics | Version-specific confirmation; independent consent and lifecycles; retired ambiguous Strength; no automatic archive/writeback. | Final gate §§2–3 and Finalization M2. | Future implementation must prove conformance. |
+| Bounded product scope | One task/tab/session, local processing, mock directory, manual context, no durable intent or remote inference. | Finalization M3 and §4. | Any expansion reopens its dependency gate. |
+| Session/asking policy | 30-minute inactivity, 2-hour maximum, task/session disposal, one clarification per request, dismissal silence, and explicit resume after hidden state. | Finalization M1/M3 and this document §3.3. | Production limits and usability still need later validation. |
+| Capability support and relevance policy | Hard constraints need evidence; unknown fails mandatory eligibility; preferences are user-ordered; no invented weights or claims. | Finalization M3. | Experience Matching still needs its own design; existing ranking remains untouched. |
+| Conformance scenarios | The scenarios below are accepted requirements for later verification. | Finalization M3. | Runtime evidence remains mandatory after any separately authorized implementation. |
 
 No additional field names, schema, transport, numeric confidence score, or database choice is necessary to evaluate this semantic proposal.
 
@@ -302,7 +306,7 @@ No additional field names, schema, transport, numeric confidence score, or datab
 
 If the product owner requires any expansion in the initial milestone, these become real blockers for that milestone. They cannot be bypassed by calling the work a prototype.
 
-### 9.3 Acceptance scenarios for the next architecture gate
+### 9.3 Conformance scenarios for a future implementation gate
 
 These are product/architecture scenarios, not executable tests or implementation artifacts. They state required behavior for a future implementation.
 
@@ -320,6 +324,7 @@ These are product/architecture scenarios, not executable tests or implementation
 | User requests a dentist or lower price. | Match only the explicit generic service/price intent; no diagnosis, emotional or financial profile. |
 | User saves a business using the pre-existing feature. | No new intent confirmation, archival permission, or cross-session inference. |
 | User dismisses clarification or reaches session cap. | No repeat prompt in the task; no passive renewal or background notification. |
+| A valid task's tab becomes hidden and later visible. | It remains Paused; visibility alone starts no matching and shows no actionable stale experience. Explicit Resume may continue only the unchanged confirmed revision after permission, deadline, context, and evidence checks. A material change needs a new revision and confirmation; expiry while hidden requires a fresh task. |
 | Local interpretation fails while an LLM resolver exists elsewhere. | Editable ambiguous/unsupported state; no remote fallback from this slice. |
 | An unknown stock claim or “show everyone my offer” arrives in business data. | No fabricated availability, confirmation bypass, feed, or new write path. |
 | User opens a detail or navigation, then reports “done.” | Interactions are not verified outcomes; explicit closure is labelled user-reported, not a proven purchase/visit. |
@@ -329,6 +334,6 @@ Before later runtime delivery, the reviewer must verify every supported scenario
 
 ### 9.4 Delivery and scope
 
-This delivery creates only `INTENT_CONTEXT_CONTRACT_REDESIGN.md`. Historical documents, the prior gate verdict, V1, Backend, main, directory contracts, and implementation are unchanged. No independent review or runtime validation is claimed. A subsequent approved documentation step should reconcile the old wording and roadmap with the adopted redesign before implementation begins.
+The original redesign delivery created only `INTENT_CONTEXT_CONTRACT_REDESIGN.md`; that history remains true for commit `267bb81a753c6b99594519e0c5c4e146bd202a74`. The later Gate and Finalization revisions record review, adoption, the hidden-tab clarification, and documentation alignment. V1, Backend, main, directory contracts, schema, API, and implementation remain unchanged. No runtime validation or independent external approval is claimed. A separate product-owner instruction is required before implementation begins.
 
 من کدکس هستم

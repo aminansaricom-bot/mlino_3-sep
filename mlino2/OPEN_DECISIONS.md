@@ -2,11 +2,32 @@
 
 This register lists decisions that block implementation or require product/architecture approval. It complements the V2 HANDOFF reports and does not replace V1 contracts.
 
-## Intent and context layer — Stage 3
+## Current Intent contract status
 
-The governing proposal is [INTENT_CONTEXT_DECISIONS.md](HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DECISIONS.md).
+The current governing reference is [INTENT_CONTEXT_CONTRACT_REDESIGN.md](HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_CONTRACT_REDESIGN.md). The [final gate review](HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_FINAL_GATE_REVIEW.md) returned **B — Approved with minor changes**. [INTENT_CONTEXT_FINALIZATION.md](HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_FINALIZATION.md) closes the session-resume rule, document alignment, and bounded product-scope adoption required by that gate.
 
-The formal conceptual contract is [INTENT_CONTEXT_DATA_CONTRACT.md](HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DATA_CONTRACT.md). It is a semantic contract only; it does not authorize a schema, API, storage model, or implementation.
+No unresolved conceptual decision blocks further **Experience Matching design** for the approved local, single-session, experimental-data scope. This status does not authorize implementation, schema, API, live V1 integration, or production deployment.
+
+## Future expansion decisions — still open
+
+1. Versioned read-only V1→V2 projection for capability, knowledge, offers, availability, provenance, freshness, withdrawal, unknowns, tenant boundaries, and compatibility.
+2. Production privacy, legal, consent, deletion, backup, audit, and retention policy by jurisdiction.
+3. Durable, future, archived, concurrent, cross-tab, cross-session, or cross-device Intent ownership and conflict behavior.
+4. GPS, movement, passive context, accessibility context, precision, freshness, permission-denied, and offline behavior.
+5. External AI/model recipients, minimization, provider retention, deletion, sensitive-domain limits, and failure behavior.
+6. Outcome measurement, telemetry, aggregate learning, business messaging, and any V2→V1 or other outbound data direction.
+7. Public sponsored-experience policy and evidence proving that business influence cannot override user relevance.
+8. Production matching evaluation, capability evidence thresholds, model/version rollout, observability, and scale limits.
+
+Each item above needs a separate owner, decision record, and architecture/privacy review before it enters scope.
+
+## Historical register before redesign — preserved
+
+The following entries record questions raised by the earlier design and review. They are retained for traceability. For the bounded local/session-only slice, conflicting assumptions about Strength, version-specific confirmation, confirmation versus consent, intent/offer/experience lifecycles, automatic archival, and outcome data direction are superseded by the governing Redesign and Finalization documents.
+
+The earlier governing proposal was [INTENT_CONTEXT_DECISIONS.md](HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DECISIONS.md).
+
+The earlier formal conceptual contract was [INTENT_CONTEXT_DATA_CONTRACT.md](HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_DATA_CONTRACT.md). It remains historical evidence and never authorized a schema, API, storage model, or implementation.
 
 1. Exact retention windows for session, day-bound, future, and saved intent.
 2. Question cooldowns across map, assistant, detail, and AR surfaces, including cross-device behavior.
@@ -18,7 +39,7 @@ The formal conceptual contract is [INTENT_CONTEXT_DATA_CONTRACT.md](HANDOFF/2026
 8. Jurisdiction-specific treatment of location, movement, accessibility, and sensitive data.
 9. Offline and permission-denied behavior for context capture and matching.
 
-## Intent data contract review — new unresolved questions
+## Historical data-contract review questions — preserved
 
 14. Exact language and interaction distinguishing confirmation for the current task from saving an Intent for later.
 15. Which entry points may create an immediate Confirmed Intent without a second confirmation step.
@@ -40,4 +61,4 @@ The formal conceptual contract is [INTENT_CONTEXT_DATA_CONTRACT.md](HANDOFF/2026
 12. Business-user messaging responsibility, identity, tenant isolation, retention, and moderation.
 13. Field validation plan for map tiles, GPS, floor selection, camera, and AR anchors.
 
-No item above is approved for implementation by being listed here. Each item needs an owner, decision record, and compatibility review where it touches V1. Stage 3 implementation remains blocked until the contract review closes the relevant items.
+Historical questions that the Redesign answered are not reopened by remaining in this register. Questions tied to excluded capabilities become active only if that capability is proposed for scope. No item in this file authorizes implementation; Stage 3 coding remains blocked until a separate implementation decision and compatibility review are completed.
