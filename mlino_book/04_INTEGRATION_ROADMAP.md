@@ -101,7 +101,10 @@
 
 **فاز ۱ انجام شد ✅** — قراردادهای دامنه‌ی `Fact` · `Goal` · `KPI` · `Capability` در `foundation/business-context/`، ۳۹ تست، مجموع Suite ‏۲۴۹/۲۴۹. **بدون شِمای دیتابیس** — طبق قید صریح: اول قرارداد دامنه.
 
-**فاز ۲ — طراحی، پس از بازبینی:** `Observation` · `Signal` · `Decision`
+**فاز ۲ — طراحی انجام شد، در انتظار بازبینی:** `Observation` · `Signal` · `Decision` → [`contracts/BUSINESS_CONTEXT_PHASE2_DESIGN.md`](contracts/BUSINESS_CONTEXT_PHASE2_DESIGN.md)
+
+بسته‌ی بازبینی معماری — **صفر خط کد**؛ بدون شِما، بدون migration، بدون Repository، بدون integration. پنج تصمیم باز جدید: OD-20 تا OD-24.
+
 **فاز ۳:** تکامل دانش، یادگیری، استنتاج
 
 ⛔ **شروع نمی‌شود:** ذخیره‌سازی دیتابیس · یکپارچه‌سازی پیشنهاد · پیاده‌سازی داده‌ی مشتری
