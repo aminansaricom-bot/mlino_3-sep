@@ -8,6 +8,18 @@ The current governing reference is [INTENT_CONTEXT_CONTRACT_REDESIGN.md](HANDOFF
 
 No unresolved conceptual decision blocks further **Experience Matching design** for the approved local, single-session, experimental-data scope. This status does not authorize implementation, schema, API, live V1 integration, or production deployment.
 
+## Knowledge Loop terminology alignment — OD-30
+
+[KNOWLEDGE_LOOP_ALIGNMENT.md](HANDOFF/20260910_V2_REVIEW/KNOWLEDGE_LOOP_ALIGNMENT.md) resolves OD-30. **Reality**, **Knowledge**, and **Learning** are conceptual layers/processes over the existing architecture, not new domain entities.
+
+| Concept | Adopted meaning | Existing architectural home |
+|---|---|---|
+| Reality | The operational world outside MLINO, reported through observations and events. | External/business/user reality; V1 Event inputs preserve evidence and history. |
+| Knowledge | Governed, traceable understanding and derived state with provenance, validity, and explicit unknowns. | Memory & Knowledge Event Log/Projections, Business Context, facts, capabilities and approved V1 projection. |
+| Learning | A governed process that evaluates valid outcomes/feedback and improves future derived behaviour. | V1 Learning & Feedback boundary; current V2 scope remains consented, task-scoped and non-persistent. |
+
+OD-30 therefore requires no new entity, schema, API, migration, storage layer, or parallel knowledge store. Future decisions for outcome/evaluation vocabulary, consent and retention, aggregate learning, model effects, telemetry, and any reverse V2→V1 direction remain open. This alignment does not authorize implementation or change frozen V1/Backend contracts.
+
 ## Experience Matching finalization — current status
 
 [EXPERIENCE_MATCHING_FINALIZATION.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md) closes EM-G1–EM-G4 in the bounded design and amends [EXPERIENCE_MATCHING_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_DESIGN.md). [EXPERIENCE_MATCHING_CLOSURE.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_CLOSURE.md) is the current documentation-level closure record. The conditional Gate remains historical evidence.

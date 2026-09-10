@@ -8,6 +8,12 @@ MLINO V2 لایهٔ هوشمند تجربهٔ دنیای واقعی است؛ ن�
 
 مرحلهٔ دوم بر مبنای `4bbc88c` پیاده‌سازی، اعتبارسنجی و تحویل شده است: کشف پیشنهاد نزدیک، اعتبار `valid_from`، اشتراک‌گذاری متنی و حالت خالی صادقانه. commit تحویل `3784e4f61c8d273355ce19bb8bcaddef4e23ba97` روی شاخهٔ استرا و Remote تأیید شده است.
 
+## هم‌ترازی حلقهٔ Reality → Knowledge → Learning (OD-30)
+
+سند [KNOWLEDGE_LOOP_ALIGNMENT.md](HANDOFF/20260910_V2_REVIEW/KNOWLEDGE_LOOP_ALIGNMENT.md) واژه‌های Reality، Knowledge و Learning را به‌عنوان لایه/فرآیند مفهومی نگه می‌دارد، نه موجودیت جدید. Reality دنیای عملیاتی خارج از MLINO است که از طریق Observation/Event گزارش می‌شود؛ Knowledge فهم حاکم‌شده و قابل‌ردیابی حاصل Event Log و Projectionهای موجود است؛ Learning فرآیند governed برای مقایسهٔ Outcome/Evaluation و بهبود مشتق‌هاست. هیچ Reality/Knowledge/Learning entity، schema، API یا مخزن موازی ایجاد نمی‌شود.
+
+در مرز V1/V2، V1 و منبع کسب‌وکار مالک Business Context، facts، capability، knowledge و evidence هستند و V2 آن‌ها را برای Intent و Experience به‌صورت read-only مصرف می‌کند. Signal، Recommendation، Action و Outcome جایگزین یکدیگر نیستند؛ کلیک، اشتراک‌گذاری، بازشدن جزئیات یا proximity به‌تنهایی Outcome یا Learning معتبر نیست. OD-30 بسته شد، اما قرارداد outcome، consent/retention و learning آینده همچنان در Open Decisions باقی است.
+
 ## مرز فعلی
 
 دادهٔ نمایشی شامل ۱۰ رکورد است و اتصال عملیاتی V1↔V2 وجود ندارد. موجودی، reviews، شبکهٔ اجتماعی، گفت‌وگوی کسب‌وکار، telemetry، deep link و تبدیل خرید ساخته نشده‌اند. قراردادهای V1، Backend و مرزهای منجمد دست‌نخورده‌اند.
