@@ -105,9 +105,15 @@
 
 پنج تصمیم بازبینی اعمال شد (D-39 تا D-43): منبع `AI_INFERRED` برای `Observation` رد شد · `Evidence` مفهوم مستقل شد و به قرارداد پیشنهاد وصل نمی‌شود · `Goal.createdByDecision` اختیاری تصویب شد · تفکیک `strength` از `strengthBasis` تصویب شد · تصمیم سیستم بیرونی بیرون از V1 ماند.
 
-زنجیره‌ی مصوب: `Observation → Evidence → Signal → Decision → Recommendation`
+چهار تصمیم تکمیلی هم اعمال شد (D-44 تا D-47): `Evidence` **پشتیبان** ادعاهای دانش است و **جایگزین `Observation` نیست** · `Evidence` **نوع دانش نیست** و `KNOWLEDGE_TYPES` دست‌نخورده می‌ماند · `AI_INFERRED` **نمی‌تواند شاهد بسازد** · C-02 با دو منظر معتبر بسته شد.
 
-**همچنان صفر خط کد** — بدون شِما، بدون migration، بدون Repository، بدون integration. یک تصمیم باز جدید (OD-25) و یک تعارض علامت‌خورده (C-02).
+```
+ساختار نهایی    Knowledge Item + Evidence + Provenance + Confirmation
+جریان عملیاتی   Observation → Signal → Decision → Recommendation
+حلقه‌ی یادگیری   Evaluation → Decision آینده
+```
+
+**همچنان صفر خط کد** — بدون شِما، بدون migration، بدون Repository، بدون integration، بدون ADR جدید. **هیچ تصمیم باز جدیدی ایجاد نشد.**
 
 **فاز ۳:** تکامل دانش، یادگیری، استنتاج
 
