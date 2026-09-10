@@ -234,6 +234,8 @@ quality_improvement     بهبود کیفیت
 | **`feedback` تا R8-a مسدود** — راه دور زدن D-36 در v1.0 · نوع شاهد `signal` افزوده | ✅ تصمیم‌گرفته | D-54 |
 | منشأ `SYSTEM` · `AI_INFERRED` · `INTEGRATION` — انسان پیشنهاد نمی‌سازد | ✅ تصمیم‌گرفته | D-54 |
 | چرخه‌ی عمر: `draft` · `proposed` · `accepted` · `rejected` · `expired` · `superseded`؛ `in_progress`/`done` حذف؛ رد با دلیل | ✅ تصمیم‌گرفته | D-54 · ADR-0008 |
+| `permissions.can_change_status` **حذف** — نقش‌به‌جای‌اجازه · `visibility.roles` = مسیریابی · `decided_by` با اجازه | ✅ تصمیم‌گرفته | D-55 · ADR-0009 |
+| `TARGET_ROLES` به ماژول خنثی؛ این قرارداد از آن استفاده می‌کند | ✅ تصمیم‌گرفته | D-55 |
 | `ActionRecord`: `recommendation_id` **اختیاری**؛ مبدأ `recommendation` · `decision` · `automated` · `undeclared` با `authorizedBy` انسانی | ✅ تصمیم‌گرفته | D-51 · ADR-0007 |
 
 **هیچ مصرف‌کننده‌ای امروز این رکوردها را نمی‌خواند** (بررسی‌شده) — پس حذف `effective` امروز تقریباً رایگان است و پس از گام ۳ به migration تبدیل می‌شود.

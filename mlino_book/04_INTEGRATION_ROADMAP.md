@@ -50,6 +50,8 @@
 
 **نسخه‌ی ۱٫۱ کامل طراحی شد — پیاده‌نشده** (D-54 + D-50 + D-51) → [`contracts/RECOMMENDATION_CONTRACT_ALIGNMENT.md`](contracts/RECOMMENDATION_CONTRACT_ALIGNMENT.md). **یک بازنگری، پیش از گام ۳.** مهم‌ترین تغییرش امنیتی است: `feedback` تا R8-a مسدود می‌شود. پیاده‌سازی فقط با دستور مالک.
 
+**مرز نقش و اختیار تعیین شد ✅** (OD-28 → D-55 · ADR-0009) → [`contracts/ROLE_BOUNDARY_ALIGNMENT.md`](contracts/ROLE_BOUNDARY_ALIGNMENT.md) — اجازه به شخص، نه به نقش. **پیش‌نیاز هر پیاده‌سازی عمل حاکمیتی** (انتشار، پذیرش پیشنهاد): **OD-36** — V1 جدول عضویت ندارد.
+
 ---
 
 ## گام ۲ — نگاشت `workspace ⇄ organization` ✅ **IMPLEMENTED / VALIDATED**

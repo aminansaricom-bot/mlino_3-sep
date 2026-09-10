@@ -2,6 +2,7 @@
 
 **نسخه:** ۱٫۰ · **تاریخ:** ۱۱ سپتامبر ۲۰۲۶
 **وضعیت:** `DECIDED` — OD-27 بسته شد → **D-54** · ثبت رسمی چرخه‌ی عمر: [`../adr/ADR-0008`](../adr/ADR-0008-recommendation-lifecycle-ends-at-decision.md) · **صفر خط کد، بدون شِما**
+**به‌روزرسانی (D-55) — پالایش:** `permissions.can_change_status` از v1.1 **حذف** می‌شود (نقش‌به‌جای‌اجازه، و اجراشدنی نیست — واژگان آن با نقش توکن هم‌پوشانی ندارد). `visibility.roles` **مسیریابی** است، نه دسترسی. `decided_by` باید در لحظه‌ی تصمیم اجازه‌ی تصمیم داشته باشد. → [`ROLE_BOUNDARY_ALIGNMENT.md`](ROLE_BOUNDARY_ALIGNMENT.md) بند ۶
 **مرجع:** [`SHARED_RECOMMENDATION_CONTRACT.md`](SHARED_RECOMMENDATION_CONTRACT.md) · [`ACTION_MODEL_ALIGNMENT.md`](ACTION_MODEL_ALIGNMENT.md) · [`CAPABILITY_BOUNDARY_ALIGNMENT.md`](CAPABILITY_BOUNDARY_ALIGNMENT.md) · [`OFFER_OWNERSHIP_ALIGNMENT.md`](OFFER_OWNERSHIP_ALIGNMENT.md) · [`EVALUATION_MODEL_ALIGNMENT.md`](EVALUATION_MODEL_ALIGNMENT.md)
 
 **واژه‌ها:** «پیشنهاد» = `Recommendation` · «آفر» = `Offer` · «اقدام» = `Action`
