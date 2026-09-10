@@ -8,6 +8,7 @@
 R8-b Policy  →  Business Context Model  →  Business Brain Implementation
  (حاکمیت)          (معماری)                    (پیاده‌سازی)
 ```
+**هم‌ترازی حلقه‌ی دانش:** [`KNOWLEDGE_LOOP_ALIGNMENT.md`](KNOWLEDGE_LOOP_ALIGNMENT.md) — `Reality` · `Knowledge` · `Learning`؛ **«دانش پایدار»** (مرحله‌ی حلقه) با **«نوع دانش»** (یازده نوع) یکی نیست · D-48
 **طراحی فاز ۲:** [`BUSINESS_CONTEXT_PHASE2_DESIGN.md`](BUSINESS_CONTEXT_PHASE2_DESIGN.md) — `Observation` · `Signal` · `Decision` — **طراحی، در انتظار بازبینی**
 **مرتبط:** [`../policy/R8b_BUSINESS_BRAIN_KNOWLEDGE_MODEL.md`](../policy/R8b_BUSINESS_BRAIN_KNOWLEDGE_MODEL.md) · [`SHARED_RECOMMENDATION_CONTRACT.md`](SHARED_RECOMMENDATION_CONTRACT.md) · [`../adr/ADR-0005`](../adr/ADR-0005-recommendation-lifecycle-entity-separation.md)
 
