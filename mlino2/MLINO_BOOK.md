@@ -22,6 +22,8 @@ MLINO V2 لایهٔ هوشمند تجربهٔ دنیای واقعی است؛ ن�
 
 AR و Virtual Storefront تا زمان وجود projection معتبر V1→V2، applicability در سطح option، قرارداد action، spatial/privacy governance و ارزیابی مستقل فعال نمی‌شوند. این طراحی هنوز مجوز پیاده‌سازی نیست و منتظر product approval است.
 
+مرز حافظهٔ Assistant در [ASSISTANT_MEMORY_BOUNDARY_DECISION.md](HANDOFF/20260910_V2_REVIEW/ASSISTANT_MEMORY_BOUNDARY_DECISION.md) گزینهٔ A است: فقط working context همان task و نشست مجاز نگه داشته می‌شود. User preference memory نیازمند save/consent/edit/delete و تصمیم مستقل آینده است؛ Business Context و Knowledge حافظهٔ Assistant نیستند و مالکیت آن‌ها با V1/منبع کسب‌وکار می‌ماند؛ full conversational history خارج از scope است.
+
 ## مرز فعلی
 
 دادهٔ نمایشی شامل ۱۰ رکورد است و اتصال عملیاتی V1↔V2 وجود ندارد. موجودی، reviews، شبکهٔ اجتماعی، گفت‌وگوی کسب‌وکار، telemetry، deep link و تبدیل خرید ساخته نشده‌اند. قراردادهای V1، Backend و مرزهای منجمد دست‌نخورده‌اند.

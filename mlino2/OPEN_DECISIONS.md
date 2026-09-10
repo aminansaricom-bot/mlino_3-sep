@@ -33,6 +33,19 @@ OD-30 therefore requires no new entity, schema, API, migration, storage layer, o
 
 Implementation, schema, API, AR activation, module integration, persistent memory, telemetry, and payment policy remain blocked until these decisions are reviewed and approved.
 
+## Assistant memory boundary — pending product approval
+
+[ASSISTANT_MEMORY_BOUNDARY_DECISION.md](HANDOFF/20260910_V2_REVIEW/ASSISTANT_MEMORY_BOUNDARY_DECISION.md) recommends **Option A — session-only memory** for the current local, single-session V2 scope.
+
+| Option | Disposition | Boundary |
+|---|---|---|
+| Session-only memory | Recommended for current scope. | Minimal confirmed Intent, permitted context, answers, corrections, Experience state, selected option, and authorized handoff context until task/session expiry. |
+| User preference memory | Future only. | Requires explicit save action, separate consent, visible purpose/expiry/edit/delete, and protection against overriding new Intent or hard constraints. |
+| Business context memory | Not Assistant-owned. | V1/business source owns Business Context, Knowledge, capability, products, offers, availability, provenance, and freshness; Assistant consumes approved projection. |
+| Full historical conversation | Out of scope. | No indefinite transcript, cross-session personalization, training use, or module-wide history without a new privacy/product decision. |
+
+This decision does not authorize persistence, schema, API, telemetry, cross-session behavior, external model processing, or AR spatial history. Cleanup, audit retention, module handoff minimization, saved preferences, and transcript policy remain future decisions.
+
 ## Experience Matching finalization — current status
 
 [EXPERIENCE_MATCHING_FINALIZATION.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md) closes EM-G1–EM-G4 in the bounded design and amends [EXPERIENCE_MATCHING_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_DESIGN.md). [EXPERIENCE_MATCHING_CLOSURE.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_CLOSURE.md) is the current documentation-level closure record. The conditional Gate remains historical evidence.

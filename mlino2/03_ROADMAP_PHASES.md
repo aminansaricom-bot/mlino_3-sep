@@ -10,6 +10,8 @@ OD-30 در [KNOWLEDGE_LOOP_ALIGNMENT.md](HANDOFF/20260910_V2_REVIEW/KNOWLEDGE_LO
 
 طراحی [EXPERIENCE_ORCHESTRATION_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_ORCHESTRATION_DESIGN.md) آمادهٔ product review است. تصمیم متمرکز [ASSISTANT_OWNERSHIP_DECISION.md](HANDOFF/20260910_V2_REVIEW/ASSISTANT_OWNERSHIP_DECISION.md) گزینهٔ A را پیشنهاد می‌کند: Assistant در Core و providerهای محدود در Modules. این milestone چرخهٔ Experience، نقش Assistant، مرز MLINO Core و Modules و وابستگی‌های AR/Virtual Storefront را تعریف می‌کند؛ implementation، schema، API و activation هیچ‌کدام شروع نشده‌اند. تا پذیرش محصول، scope معتبر همان Intent-Guided Local Discovery محلی و تک‌نشسته است.
 
+مرز حافظهٔ Assistant نیز در [ASSISTANT_MEMORY_BOUNDARY_DECISION.md](HANDOFF/20260910_V2_REVIEW/ASSISTANT_MEMORY_BOUNDARY_DECISION.md) مشخص شده است: session-only working context. preference memory، full conversation history و هرگونه cross-session continuity هنوز تصمیم‌های آینده‌اند؛ Business Context در مالکیت V1 می‌ماند.
+
 ## وضعیت جاری پس از نهایی‌سازی Experience Matching
 
 چهار شرط EM-G1 تا EM-G4 در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md` پاسخ داده و در طراحی اصلی اعمال شده‌اند. تجربهٔ اولیه Intent-Guided Local Discovery با صفر تا سه نتیجهٔ کسب‌وکار، یک جایگاه برای هر کسب‌وکار و اقدام `Open business details` است. context ranking مستقل، offer-driven relevance، Guided Shopping، تعامل مستقیم و AR جدید در این slice وجود ندارند. آفر فقط enhancement یک تجربهٔ از قبل معتبر است؛ درخواست صریح کاربر برای offer/discount/promotion به شرط eligibility تبدیل می‌شود و آفر هرگز ranking یا trigger تبلیغاتی نیست. هر نتیجه باید از یک option/product/service واحد بیاید و evidence چند محصول با هم ترکیب نمی‌شود.
