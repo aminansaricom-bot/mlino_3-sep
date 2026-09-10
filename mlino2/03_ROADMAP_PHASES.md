@@ -2,6 +2,20 @@
 
 این فازبندی مستقیماً از توضیح مالک محصول استخراج شده — ترتیب پیشنهادی است، نه یک تعهد زمانی (طبق انضباط کل پروژه، هیچ تخمین زمانی ساختگی داده نمی‌شود).
 
+## گام جاری — بستن شروط Gate معماری V2
+
+مرجع جاری [V2_ARCHITECTURE_CLOSURE_REVIEW.md](HANDOFF/20260910_V2_REVIEW/V2_ARCHITECTURE_CLOSURE_REVIEW.md) با نتیجهٔ **B — Ready with minor changes** است؛ فقط برای Local Discovery محلی و تک‌نشسته. تأیید Intent/Matching، مالکیت Core بر Assistant و حافظهٔ session-only پذیرفته شده است. وضعیت‌های pending قدیمی زیر سابقه‌اند و تصمیم مصوب را دوباره باز نمی‌کنند.
+
+ترتیب جاری، جایگزین توالی‌های تاریخی پایین این سند است:
+
+1. بستن CG-1: روشن‌کردن Core/V1/V2 و مرز permission؛ نقش انتخابی و متن ماژول هیچ اختیاری اعطا نمی‌کنند.
+2. بستن CG-2: هم‌ترازی جدول Orchestration با revision/confirmation، correction، pause/resume، no-match و پایان صریح کاربر.
+3. بستن CG-3: اجرای مفهومی همان قوانین disposal و منع transcript/audit با سقف‌های نشست مصوب، بدون طراحی retention تازه.
+4. بازبینی closure و سپس دستور مستقل مالک محصول برای پیاده‌سازی محدود.
+5. پس از پیاده‌سازی آینده، ارزیابی conformance و runtime/delivery مستقل.
+
+قرارداد provider/handoff و مجوز ماژول‌ها، live V1، AR/Storefront، حافظهٔ پایدار و telemetry همچنان خارج از این گام‌اند. هیچ schema، API یا کدی از این Gate ایجاد نمی‌شود.
+
 ## وضعیت هم‌ترازی Knowledge Loop
 
 OD-30 در [KNOWLEDGE_LOOP_ALIGNMENT.md](HANDOFF/20260910_V2_REVIEW/KNOWLEDGE_LOOP_ALIGNMENT.md) بسته شد. Reality، Knowledge و Learning به‌عنوان لایه‌ها/فرآیندهای مفهومی روی Event، Projection، Business Context، Facts، Observations، Signals، Decisions، Recommendations، Actions، Outcomes و Evaluations موجود تعریف شده‌اند؛ موجودیت، schema یا API جدیدی لازم نیست. این تصمیم برنامهٔ اجرایی Stage 3 را جلو نمی‌اندازد و learning پایدار، outcome measurement، telemetry و reverse data flow همچنان نیازمند تصمیم جدا هستند.

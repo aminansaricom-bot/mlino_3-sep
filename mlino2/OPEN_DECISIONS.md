@@ -2,6 +2,22 @@
 
 This register lists decisions that block implementation or require product/architecture approval. It complements the V2 HANDOFF reports and does not replace V1 contracts.
 
+## Current V2 architecture closure gate
+
+[V2_ARCHITECTURE_CLOSURE_REVIEW.md](HANDOFF/20260910_V2_REVIEW/V2_ARCHITECTURE_CLOSURE_REVIEW.md) records **B) Ready with minor changes** at baseline `0495d4ab253020a7a71dfc851c5ec244774cffb2`. Scope: local single-task/session Intent-Guided Local Discovery over experimental data, manual context, 0–3 businesses and Open Business Details.
+
+The current product-owner instruction explicitly approves Intent Context, Experience Matching, Core-owned Assistant and session-only memory. Earlier proposal/pending labels below remain historical evidence; they do not reopen those choices. Core stewardship never changes the user's ownership of Intent meaning or V1 Governance's authority.
+
+| ID | Pre-coding closure required | Status and owner |
+|---|---|---|
+| CG-1 | Qualify V1 Business OS versus shared V2 Core responsibilities; Assistant consumes/enforces authority; selected role/screen does not grant access; no privileged module or V1 write operation in this slice. | Open — V2 architect; preserve frozen V1 ownership. |
+| CG-2 | Align Orchestration entry, clarification, correction, current-revision confirmation, late-result invalidation, pause/resume, no-match recovery and user-reported completion with the approved Intent contract. | Open — V2 product/architecture owner. |
+| CG-3 | Make Intent Redesign §6.2 and Finalization §2.4 govern Assistant memory: current-only content, superseded/rejected wording discarded, existing session caps, no persistent transcript/log/audit exception. | Open — V2 architect. |
+
+These three items require documentation alignment and closure review before a separate implementation instruction. They introduce no new entity, schema, API, retention duration or ownership model.
+
+Future blockers are tracked separately: provider capability/permission/handoff contracts; live V1 projection and any new data direction; persistent preferences/history; AR spatial/assets/permissions and storefront actions; production evaluation and telemetry. Their absence does not expand or silently block the deliberately limited discovery scope. Specific closure scenarios and evidence are in report §6.
+
 ## Current Intent contract status
 
 The current governing reference is [INTENT_CONTEXT_CONTRACT_REDESIGN.md](HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_CONTRACT_REDESIGN.md). The [final gate review](HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_FINAL_GATE_REVIEW.md) returned **B — Approved with minor changes**. [INTENT_CONTEXT_FINALIZATION.md](HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_FINALIZATION.md) closes the session-resume rule, document alignment, and bounded product-scope adoption required by that gate.
