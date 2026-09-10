@@ -231,7 +231,7 @@ quality_improvement     بهبود کیفیت
 | `EvaluationRecord`: `effective: boolean` **حذف** و جایگزین با **اثربخشی** و **انتساب** جدا، هر کدام با سطح، مبنا و منشأ | ✅ تصمیم‌گرفته | D-50 |
 | `OutcomeRecord`: خط پایه و مقدار مشاهده‌شده؛ `AI_INFERRED` رد | ✅ تصمیم‌گرفته | D-50 |
 | پیوند تایپ‌شده به زمینه (`context_refs`) به‌جای `kpi_alignment` | ⬜ در انتظار | OD-27 |
-| مبدأ `ActionRecord` — آیا `recommendation_id` اجباری بماند | ⬜ در انتظار | OD-33 |
+| `ActionRecord`: `recommendation_id` **اختیاری**؛ مبدأ `recommendation` · `decision` · `automated` · `undeclared` با `authorizedBy` انسانی | ✅ تصمیم‌گرفته | D-51 · ADR-0007 |
 
 **هیچ مصرف‌کننده‌ای امروز این رکوردها را نمی‌خواند** (بررسی‌شده) — پس حذف `effective` امروز تقریباً رایگان است و پس از گام ۳ به migration تبدیل می‌شود.
 

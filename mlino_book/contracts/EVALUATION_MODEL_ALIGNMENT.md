@@ -2,6 +2,7 @@
 
 **نسخه:** ۱٫۰ · **تاریخ:** ۱۰ سپتامبر ۲۰۲۶
 **وضعیت:** `DECIDED` — OD-32 بسته شد → **D-50** · **صفر خط کد، بدون شِما، بدون migration، بدون موجودیت جدید**
+**به‌روزرسانی:** مبدأ اقدام (OD-33) تعیین شد → **D-51** · [`ACTION_MODEL_ALIGNMENT.md`](ACTION_MODEL_ALIGNMENT.md)
 **مرجع:** [`LEARNING_LOOP_ALIGNMENT.md`](LEARNING_LOOP_ALIGNMENT.md) · [`SHARED_RECOMMENDATION_CONTRACT.md`](SHARED_RECOMMENDATION_CONTRACT.md) · [`../adr/ADR-0005`](../adr/ADR-0005-recommendation-lifecycle-entity-separation.md) · [`../adr/ADR-0006`](../adr/ADR-0006-provenance-versus-confirmation.md)
 
 ---
@@ -284,7 +285,7 @@ Evaluation
 ```
 Decision  ──basedOn──►  Evaluation  ──outcomeRefs──►  Outcome  ──actionRef──►  Action
   D-49                 شناسه · منشأ ·               شناسه · خط پایه ·        شناسه
-                       اثربخشی ≠ انتساب              مشاهده                    (مبدأ: OD-33)
+                       اثربخشی ≠ انتساب              مشاهده                    (مبدأ: D-51)
 ```
 
 هر حلقه **شناسه** دارد و هر پیکان **رو به عقب** است. ✅ اصل «قابل توضیح و ممیزی».
@@ -328,6 +329,6 @@ Decision  ──basedOn──►  Evaluation  ──outcomeRefs──►  Outcom
 
 - **شِما، migration، کد** — طبق قید صریح
 - **جزء درون رکورد یا رکورد فرزند** برای انتساب — تصمیم ذخیره‌سازی
-- **مبدأ اقدام‌های بدون پیشنهاد** — OD-33
+- **مبدأ اقدام‌های بدون پیشنهاد** — ✅ D-51 → [`ACTION_MODEL_ALIGNMENT.md`](ACTION_MODEL_ALIGNMENT.md)
 - **روش آماری انتساب** — `comparisonBasis` فقط می‌گوید مقایسه‌ای انجام شده، نه اینکه کدام روش
 - **یادگیری بین کسب‌وکارها** — OD-07

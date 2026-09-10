@@ -1,6 +1,7 @@
 # ADR-0005 — تفکیک موجودیت‌های چرخه‌ی عمر پیشنهاد
 
 **وضعیت:** مصوب · **تاریخ:** ۹ سپتامبر ۲۰۲۶ · **تصمیم‌گیرنده:** مالک محصول
+**⚠️ بخشی جایگزین شد:** جایگاه `ActionRecord` → [`ADR-0007`](ADR-0007-action-independent-entity.md) (D-51) — اقدام دیگر فقط جزو چرخه‌ی عمر پیشنهاد نیست و `recommendation_id` روی آن اختیاری می‌شود. **بقیه‌ی این ADR معتبر است.**
 **پیاده‌سازی:** `implementation/foundation/recommendation/recommendation-contract.ts`
 **قرارداد مرتبط:** [`../contracts/SHARED_RECOMMENDATION_CONTRACT.md`](../contracts/SHARED_RECOMMENDATION_CONTRACT.md)
 

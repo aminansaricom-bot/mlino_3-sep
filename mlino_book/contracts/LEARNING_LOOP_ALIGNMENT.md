@@ -3,6 +3,7 @@
 **نسخه:** ۱٫۰ · **تاریخ:** ۱۰ سپتامبر ۲۰۲۶
 **وضعیت:** `DECIDED` — OD-31 بسته شد → **D-49** · **صفر خط کد، بدون شِما، بدون موجودیت جدید**
 **به‌روزرسانی:** مسدودیت پیاده‌سازی (OD-32) در سطح مفهومی برداشته شد → **D-50** · [`EVALUATION_MODEL_ALIGNMENT.md`](EVALUATION_MODEL_ALIGNMENT.md)
+**به‌روزرسانی:** سوگیری انتخاب بند ۲٫۴ (OD-33) حل شد → **D-51** · [`ACTION_MODEL_ALIGNMENT.md`](ACTION_MODEL_ALIGNMENT.md)
 **مرجع:** [`KNOWLEDGE_LOOP_ALIGNMENT.md`](KNOWLEDGE_LOOP_ALIGNMENT.md) · [`BUSINESS_CONTEXT_PHASE2_DESIGN.md`](BUSINESS_CONTEXT_PHASE2_DESIGN.md) · [`../adr/ADR-0005`](../adr/ADR-0005-recommendation-lifecycle-entity-separation.md)
 
 ---
@@ -276,6 +277,6 @@ export interface EvaluationRecord {
 
 - **شِما، migration، کد** — طبق قید صریح
 - **شکل دقیق شناسه، منشأ و انتساب در `EvaluationRecord`** — ✅ D-50 → [`EVALUATION_MODEL_ALIGNMENT.md`](EVALUATION_MODEL_ALIGNMENT.md)
-- **مبدأ اقدام‌های بدون پیشنهاد** — OD-33
+- **مبدأ اقدام‌های بدون پیشنهاد** — ✅ D-51 → [`ACTION_MODEL_ALIGNMENT.md`](ACTION_MODEL_ALIGNMENT.md)
 - **ردپای یادگیری روی `Fact` · `KPI` · `Capability`** — طراحی فاز ۳
 - **هر چیزی درباره‌ی یادگیری بین کسب‌وکارها** — OD-07
