@@ -2,6 +2,19 @@
 
 This register lists decisions that block implementation or require product/architecture approval. It complements the V2 HANDOFF reports and does not replace V1 contracts.
 
+## V2 Local Discovery implementation readiness
+
+[V2_IMPLEMENTATION_READINESS_CHECKLIST.md](HANDOFF/20260910_V2_REVIEW/V2_IMPLEMENTATION_READINESS_CHECKLIST.md) required components, V1 dependencies, mock/real boundaries, exclusions and validation evidence for the bounded first implementation. **Implementation remains blocked.**
+
+| ID | Decision or gate | Status |
+|---|---|---|
+| IR-1 | Close and accept CG-1–CG-3 using the governing Intent, Orchestration and memory rules. | Open — required before coding. |
+| IR-2 | Product owner accepts the closed entry gate and issues a separate, explicit implementation instruction. | Open — required before coding. |
+| IR-3 | Treat the existing Directory data as experimental evidence only: no claim of live availability, stock, freshness, offer-to-product applicability or production provenance. | Adopted for the mock slice. |
+| IR-4 | After any future implementation, provide conformance, privacy/session, matching, product, desktop/mobile and delivery evidence against the exact commit. | Future delivery gate. |
+
+Live V1 projection, provider permission/handoff, production availability and offer applicability, persistent memory, cross-session inference, modules, AR/Virtual Storefront, telemetry and business outcome measurement remain future decisions. They are not hidden dependencies of the approved mock slice and cannot enter it without a separate gate.
+
 ## Current V2 architecture closure gate
 
 [V2_ARCHITECTURE_CLOSURE_REVIEW.md](HANDOFF/20260910_V2_REVIEW/V2_ARCHITECTURE_CLOSURE_REVIEW.md) records **B) Ready with minor changes** at baseline `0495d4ab253020a7a71dfc851c5ec244774cffb2`. Scope: local single-task/session Intent-Guided Local Discovery over experimental data, manual context, 0–3 businesses and Open Business Details.

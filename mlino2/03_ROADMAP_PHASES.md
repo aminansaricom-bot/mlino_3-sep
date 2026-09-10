@@ -2,6 +2,18 @@
 
 این فازبندی مستقیماً از توضیح مالک محصول استخراج شده — ترتیب پیشنهادی است، نه یک تعهد زمانی (طبق انضباط کل پروژه، هیچ تخمین زمانی ساختگی داده نمی‌شود).
 
+## گام جاری — چک‌لیست آمادگی Local Discovery
+
+مرجع ورود به پیاده‌سازی آینده [V2_IMPLEMENTATION_READINESS_CHECKLIST.md](HANDOFF/20260910_V2_REVIEW/V2_IMPLEMENTATION_READINESS_CHECKLIST.md) است. وضعیت فعلی **Implementation blocked** باقی می‌ماند؛ این چک‌لیست مجوز کدنویسی نیست.
+
+ترتیب لازم:
+
+1. بستن و پذیرش مستنداتی CG-1 تا CG-3 بدون بازطراحی تصمیم‌های مصوب.
+2. ثبت پذیرش مالک محصول و صدور دستور مستقل برای شروع پیاده‌سازی محدود.
+3. ساخت فقط Intent-Guided Local Discovery با reuse مرزهای موجود و دادهٔ mock؛ بدون live V1، schema یا API جدید مگر با Gate جدا.
+4. ارزیابی conformance معماری، privacy/session، matching/evidence، رفتار محصول و validation دسکتاپ/موبایل.
+5. تکمیل HANDOFF، checksum، HANDOFF_STATE، MLINO Book و CHANGELOG؛ سپس commit و فقط در صورت مجوز، Push و راستی‌آزمایی Remote.
+
 ## گام جاری — بستن شروط Gate معماری V2
 
 مرجع جاری [V2_ARCHITECTURE_CLOSURE_REVIEW.md](HANDOFF/20260910_V2_REVIEW/V2_ARCHITECTURE_CLOSURE_REVIEW.md) با نتیجهٔ **B — Ready with minor changes** است؛ فقط برای Local Discovery محلی و تک‌نشسته. تأیید Intent/Matching، مالکیت Core بر Assistant و حافظهٔ session-only پذیرفته شده است. وضعیت‌های pending قدیمی زیر سابقه‌اند و تصمیم مصوب را دوباره باز نمی‌کنند.

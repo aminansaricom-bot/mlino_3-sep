@@ -2,6 +2,14 @@
 
 این فایل حافظهٔ محصولی V2 است و جایگزین قراردادهای V1 یا اسناد `AI_HANDOFF/` نیست.
 
+## چک‌لیست آمادگی پیاده‌سازی Local Discovery
+
+[V2_IMPLEMENTATION_READINESS_CHECKLIST.md](HANDOFF/20260910_V2_REVIEW/V2_IMPLEMENTATION_READINESS_CHECKLIST.md) نتیجهٔ Gate B را به یک ورودی اجرایی قابل‌بررسی تبدیل می‌کند. وضعیت پیاده‌سازی همچنان **BLOCKED** است تا CG-1 تا CG-3 بسته و پذیرفته شوند و مالک محصول دستور مستقل شروع پیاده‌سازی را صادر کند.
+
+دامنهٔ مجازِ آینده فقط Intent-Guided Local Discovery محلی و تک‌نشسته است: ورود صریح کاربر، تفسیر محلی و تأیید revision دقیق، permission جداگانهٔ پردازش، context دستی، Directory آزمایشی، eligibility پیش از ranking، صفر تا سه نتیجه، توضیح evidence و Open Business Details. حافظه فقط current task context همان نشست است و حالت‌های empty، unsupported، stale، paused و expired باید صادقانه نمایش داده شوند.
+
+در این slice اتصال زندهٔ V1 لازم نیست. BusinessDirectoryService مرز فعلی دادهٔ mock است؛ `last_synced_at` مدرک freshness عملیاتی، `is_active` مدرک موجودی و آفر سطح کسب‌وکار مدرک applicability یک محصول نیست. اتصال زنده، availability، provenance، product-offer applicability، ماژول‌های عملیاتی، AR/Virtual Storefront، حافظهٔ پایدار و telemetry خارج از این دامنه‌اند و تصمیم یا قرارداد جدا می‌خواهند.
+
 ## وضعیت جاری Gate نهایی معماری V2
 
 گزارش [V2_ARCHITECTURE_CLOSURE_REVIEW.md](HANDOFF/20260910_V2_REVIEW/V2_ARCHITECTURE_CLOSURE_REVIEW.md) بر مبنای `0495d4ab253020a7a71dfc851c5ec244774cffb2` نتیجهٔ **B — Ready with minor changes** را ثبت می‌کند. این نتیجه فقط برای Intent-Guided Local Discovery محلی، یک task/نشست، context دستی، دادهٔ آزمایشی، صفر تا سه کسب‌وکار و اقدام Open Business Details است.
