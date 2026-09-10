@@ -257,7 +257,7 @@ Decision.basedOn[]:    Fact / Observation / Signal / KPI     ← EvaluationRecor
 
 دانش رخدادی (سیگنال، تصمیم)، چرخه‌ی عمر پیشنهاد و یادگیری **هوش داخلی V1 هستند و به V2 نمی‌رسند.** این همان اصل دستور ادامه است: V1 مالک هوش کسب‌وکار، V2 مالک تجربه.
 
-**Business Twin** در V2 یک **تصویر از لایه‌ی پایدارِ قابل‌انتشار** است، نه نسخه‌ای از حلقه. مرز «قابل‌انتشار» موضوع OD-29 است و این سند آن را تعیین نمی‌کند.
+**Business Twin** در V2 یک **تصویر از لایه‌ی پایدارِ قابل‌انتشار** است، نه نسخه‌ای از حلقه. مرز «قابل‌انتشار» در **D-52** تعیین شد → [`CAPABILITY_BOUNDARY_ALIGNMENT.md`](CAPABILITY_BOUNDARY_ALIGNMENT.md).
 
 ---
 
@@ -267,5 +267,5 @@ Decision.basedOn[]:    Fact / Observation / Signal / KPI     ← EvaluationRecor
 - **نوع‌بندی `Policy` و `Role`** در طبقه‌بندی دانش
 - **سازوکار یادگیری** — فاز ۳ (D-33)
 - **یادگیری بین کسب‌وکارها** — OD-07
-- **مرز انتشار به V2** — OD-29
+- **مرز انتشار به V2** — ✅ D-52 → [`CAPABILITY_BOUNDARY_ALIGNMENT.md`](CAPABILITY_BOUNDARY_ALIGNMENT.md)
 - **اصلاح `Decision.basedOn`** — ✅ تصمیم‌گیری شد: D-49 · پیاده‌سازی مسدود تا OD-32

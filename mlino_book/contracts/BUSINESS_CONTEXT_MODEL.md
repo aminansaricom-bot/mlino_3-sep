@@ -251,6 +251,8 @@ Knowledge Item  +  Evidence  +  Provenance  +  Confirmation
 
 **فیلدها:** عنوان · وضعیت (`available` / `planned` / `not_available`) · نقش‌های مرتبط · منبع (اعلام‌شده یا استنتاج‌شده از داده‌ی واقعی)
 
+⚠️ **بازنگری برنامه‌ریزی‌شده — D-52، پیاده‌نشده:** توانمندی **چهار بُعد مستقل** می‌گیرد — توانایی (`planned` · `active` · `retired`) · مخاطب (`internal` · `customer_facing`) · تایید · انتشار. واژه‌ی `available` خودش «در دسترس» — یعنی **دسترس‌پذیری** — است، نه توانایی؛ و `not_available` دو ادعای متفاوت را ادغام کرده. دسترس‌پذیری بُعد توانمندی نیست (OD-34). بازنگری همراه پیاده‌سازی فاز ۲ — چون انتشار به بُعد شاهد نیاز دارد. → [`CAPABILITY_BOUNDARY_ALIGNMENT.md`](CAPABILITY_BOUNDARY_ALIGNMENT.md)
+
 ---
 
 ### A.۱۱. Signal — نشانه
