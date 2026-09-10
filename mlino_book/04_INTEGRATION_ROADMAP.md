@@ -101,9 +101,13 @@
 
 **فاز ۱ انجام شد ✅** — قراردادهای دامنه‌ی `Fact` · `Goal` · `KPI` · `Capability` در `foundation/business-context/`، ۳۹ تست، مجموع Suite ‏۲۴۹/۲۴۹. **بدون شِمای دیتابیس** — طبق قید صریح: اول قرارداد دامنه.
 
-**فاز ۲ — طراحی انجام شد، در انتظار بازبینی:** `Observation` · `Signal` · `Decision` → [`contracts/BUSINESS_CONTEXT_PHASE2_DESIGN.md`](contracts/BUSINESS_CONTEXT_PHASE2_DESIGN.md)
+**فاز ۲ — طراحی مصوب شد، در انتظار بازبینی مستندات:** `Observation` · `Evidence` · `Signal` · `Decision` → [`contracts/BUSINESS_CONTEXT_PHASE2_DESIGN.md`](contracts/BUSINESS_CONTEXT_PHASE2_DESIGN.md)
 
-بسته‌ی بازبینی معماری — **صفر خط کد**؛ بدون شِما، بدون migration، بدون Repository، بدون integration. پنج تصمیم باز جدید: OD-20 تا OD-24.
+پنج تصمیم بازبینی اعمال شد (D-39 تا D-43): منبع `AI_INFERRED` برای `Observation` رد شد · `Evidence` مفهوم مستقل شد و به قرارداد پیشنهاد وصل نمی‌شود · `Goal.createdByDecision` اختیاری تصویب شد · تفکیک `strength` از `strengthBasis` تصویب شد · تصمیم سیستم بیرونی بیرون از V1 ماند.
+
+زنجیره‌ی مصوب: `Observation → Evidence → Signal → Decision → Recommendation`
+
+**همچنان صفر خط کد** — بدون شِما، بدون migration، بدون Repository، بدون integration. یک تصمیم باز جدید (OD-25) و یک تعارض علامت‌خورده (C-02).
 
 **فاز ۳:** تکامل دانش، یادگیری، استنتاج
 
