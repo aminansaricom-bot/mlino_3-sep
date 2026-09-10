@@ -12,7 +12,7 @@ MLINO V2 لایهٔ هوشمند تجربهٔ دنیای واقعی است؛ ن�
 
 دادهٔ نمایشی شامل ۱۰ رکورد است و اتصال عملیاتی V1↔V2 وجود ندارد. موجودی، reviews، شبکهٔ اجتماعی، گفت‌وگوی کسب‌وکار، telemetry، deep link و تبدیل خرید ساخته نشده‌اند. قراردادهای V1، Backend و مرزهای منجمد دست‌نخورده‌اند.
 
-## گام بعد
+## سابقهٔ وضعیت پیش از Gate معماری Experience Matching
 
 مرحلهٔ سوم هنوز پیاده‌سازی نشده است. مرجع جاری و حاکم Intent Layer، `HANDOFF/20260910_V2_REVIEW/INTENT_CONTEXT_CONTRACT_REDESIGN.md` است؛ نتیجهٔ Gate نهایی در `INTENT_CONTEXT_FINAL_GATE_REVIEW.md` وضعیت B، یعنی «تأیید با تغییرات جزئی»، را ثبت کرد و `INTENT_CONTEXT_FINALIZATION.md` بسته‌شدن همان موارد را مستند می‌کند. اسناد `INTENT_CONTEXT_DECISIONS.md` و `INTENT_CONTEXT_DATA_CONTRACT.md` برای تاریخچه حفظ شده‌اند، اما هر فرض ناسازگار آن‌ها دربارهٔ Strength، تأیید نسخه، consent، lifecycle، retention یا outcome با Redesign جایگزین شده است.
 
@@ -21,3 +21,13 @@ MLINO V2 لایهٔ هوشمند تجربهٔ دنیای واقعی است؛ ن�
 طراحی پیشنهادی Experience Matching در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_DESIGN.md` ثبت شده و منتظر بازبینی محصول و معماری است. این طراحی Experience را یک فرصت محدود، قابل توضیح و متصل به Intent تأییدشده و capability دارای evidence تعریف می‌کند. eligibility پیش از ordering اعمال می‌شود: constraint سخت یا evidence ناشناخته با امتیاز، فاصله، آفر یا پرداخت کسب‌وکار جبران نمی‌شود. ترتیب پیشنهادی پس از eligibility از preferenceهای صریح و مرتب‌شدهٔ کاربر، context مجاز، فاصله و شناسهٔ پایدار برای tie استفاده می‌کند.
 
 این بسته مجوز کدنویسی، schema، API، اتصال V1 یا تغییر ranking موجود نیست. گام بعدی Gate مستقل همین طراحی و تصمیم دربارهٔ mode اولیه، evidence آزمایشی قابل اتکا و حداقل explanation است. توسعهٔ live V1، storefront، تعامل مستقیم، AR، telemetry و سنجش conversion همچنان به قرارداد و governance جدا نیاز دارد.
+
+## نتیجهٔ Gate معماری Experience Matching
+
+بازبینی سه سند Intent Redesign، Finalization و Experience Matching در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINAL_GATE_REVIEW.md` نتیجهٔ **B — تأیید با اصلاحات جزئی** را ثبت کرد. این گزارش self-review کدکس است؛ بازبینی مستقل بیرونی یا تأیید runtime نیست. بخش بالا سابقهٔ پیشنهاد پیش از Gate است؛ وضعیت جاری همین بخش است.
+
+اصول مالکیت کاربر، eligibility پیش از ranking، مسئولیت V1 برای حقیقت کسب‌وکار و مسئولیت V2 برای relevance تأیید شدند. چهار شرط پیش از کدنویسی باز است: EM-G1 حذف عامل مستقل context-fit از ترتیب‌دهی و هم‌راستایی با preferenceهای تأییدشده؛ EM-G2 حفظ تفاوت آفر اختیاری و شرط اجباری؛ EM-G3 تصریح Active/Paused و پایان قطعی در مرز تجربه؛ EM-G4 انتخاب mode اولیه و ثبت ماتریس شواهد، حدود ادعاها و مثال‌های ارزیابی.
+
+آفر ثبت‌شده برای یک کسب‌وکار به‌تنهایی اثبات تخفیف برای محصول مشخص نیست. پرداخت نیز با ثابت‌ماندن facts و evidence نباید انتخاب، تعداد فرصت ترجیحی، ترتیب یا زمان ارائه را تغییر دهد. ارزش کسب‌وکار از پاسخ‌دادن به نیاز مرتبط حاصل می‌شود؛ conversion یا درآمد هنوز اثبات نشده است.
+
+گام بعد فقط بستن EM-G1 تا EM-G4 در مستندات و بازبینی closure است. اجرای Stage 3 همچنان به دستور جدا نیاز دارد. دامنهٔ محلی، یک نشست و دادهٔ آزمایشی و قرارداد حاکم Intent بدون تغییر باقی مانده‌اند.

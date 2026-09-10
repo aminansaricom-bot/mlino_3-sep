@@ -8,7 +8,24 @@ The current governing reference is [INTENT_CONTEXT_CONTRACT_REDESIGN.md](HANDOFF
 
 No unresolved conceptual decision blocks further **Experience Matching design** for the approved local, single-session, experimental-data scope. This status does not authorize implementation, schema, API, live V1 integration, or production deployment.
 
-## Experience Matching design — pending review
+## Experience Matching architecture gate — current status
+
+[EXPERIENCE_MATCHING_FINAL_GATE_REVIEW.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINAL_GATE_REVIEW.md) records **B — Approved with minor changes**, reviewing all three governing/design documents at `993780fe11087cc2194f798030ae9db674437957`. This is Codex self-review, not external approval or runtime validation.
+
+Core ownership, eligibility-before-ranking, V1/V2 separation, explanation and non-advertising principles are accepted. Exactly four pre-coding closure items remain:
+
+| ID | Required closure | Owner/responsibility |
+|---|---|---|
+| EM-G1 | Align ordering with the Intent contract; remove independent context-fit priority, preserve user ordering, and define comparable/unknown optional evidence behavior. | V2 design author; product/architecture review accepts closure. |
+| EM-G2 | Preserve optional versus mandatory offer/price meaning; distinguish offer-claim validity from underlying discovery eligibility. | V2 design author; product review accepts worked examples. |
+| EM-G3 | Enforce Active-use authority at generation/display/action; distinguish Paused recovery from terminal stop/withdrawal/expiry. | V2 architecture review verifies consistency with Finalization. |
+| EM-G4 | Adopt the bounded mode/action, evidence matrix, claim limits, candidate granularity, explanation minimum and conformance examples. | Product owner selects scope; V2 architecture review verifies evidence limits. |
+
+Original proposal questions 1 and 5 have their conceptual principles accepted, subject to these closures; question 4 must align with the already finalized Intent ordering; questions 2 and 3 remain product/evidence choices under EM-G4. Original question 6 (perform the gate) is completed by this report, but its conditions remain open.
+
+The next step is documentation-only closure, then closure verification and a separate implementation instruction. No approval of paid matching, telemetry, live V1 or schema/API work follows from this result. Prior Intent Finalization remains closed.
+
+## Experience Matching design — historical pre-gate proposal
 
 The current proposal is [EXPERIENCE_MATCHING_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_DESIGN.md). It defines an Experience as a transient, explainable opportunity tied to one confirmed Intent revision and evidence-backed Business Capability. Eligibility is decided before relevance ordering; business payment, proximity, engagement, or an offer cannot repair failed eligibility.
 
