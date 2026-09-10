@@ -230,7 +230,10 @@ quality_improvement     بهبود کیفیت
 | شناسه‌ی مستقل برای `ActionRecord` · `OutcomeRecord` · `EvaluationRecord` | ✅ تصمیم‌گرفته | D-50 |
 | `EvaluationRecord`: `effective: boolean` **حذف** و جایگزین با **اثربخشی** و **انتساب** جدا، هر کدام با سطح، مبنا و منشأ | ✅ تصمیم‌گرفته | D-50 |
 | `OutcomeRecord`: خط پایه و مقدار مشاهده‌شده؛ `AI_INFERRED` رد | ✅ تصمیم‌گرفته | D-50 |
-| پیوند تایپ‌شده به زمینه (`context_refs`) به‌جای `kpi_alignment` | ⬜ در انتظار | OD-27 |
+| ارجاع‌های اجباری: ≥۱ KPI (`context_refs`) · ≥۱ توانمندی `active` · شاهد؛ `kpi_alignment` **حذف** · `decision_refs` · `offer_refs` | ✅ تصمیم‌گرفته | D-54 |
+| **`feedback` تا R8-a مسدود** — راه دور زدن D-36 در v1.0 · نوع شاهد `signal` افزوده | ✅ تصمیم‌گرفته | D-54 |
+| منشأ `SYSTEM` · `AI_INFERRED` · `INTEGRATION` — انسان پیشنهاد نمی‌سازد | ✅ تصمیم‌گرفته | D-54 |
+| چرخه‌ی عمر: `draft` · `proposed` · `accepted` · `rejected` · `expired` · `superseded`؛ `in_progress`/`done` حذف؛ رد با دلیل | ✅ تصمیم‌گرفته | D-54 · ADR-0008 |
 | `ActionRecord`: `recommendation_id` **اختیاری**؛ مبدأ `recommendation` · `decision` · `automated` · `undeclared` با `authorizedBy` انسانی | ✅ تصمیم‌گرفته | D-51 · ADR-0007 |
 
 **هیچ مصرف‌کننده‌ای امروز این رکوردها را نمی‌خواند** (بررسی‌شده) — پس حذف `effective` امروز تقریباً رایگان است و پس از گام ۳ به migration تبدیل می‌شود.

@@ -2,6 +2,7 @@
 
 **نسخه:** ۱٫۰ · **تاریخ:** ۱۰ سپتامبر ۲۰۲۶
 **وضعیت:** `DECIDED` — OD-33 بسته شد → **D-51** · ثبت رسمی: [`../adr/ADR-0007`](../adr/ADR-0007-action-independent-entity.md) · **صفر خط کد، بدون شِما، بدون migration، بدون موجودیت جدید**
+**به‌روزرسانی (D-54) — پالایش قاعده‌ی ۴:** برای مبدأ `recommendation`، `authorizedBy` حالا **پیش‌فرض از پذیرش ثبت‌شده روی خود پیشنهاد** خوانده می‌شود، نه تکرار روی اقدام — همان منطق مبدأ `decision`. پیش‌فرض قاعده‌ی ۴ («پیشنهاد هیچ انسانی را نگه نمی‌دارد») در v1.1 دیگر برقرار نیست. → [`RECOMMENDATION_CONTRACT_ALIGNMENT.md`](RECOMMENDATION_CONTRACT_ALIGNMENT.md) بند ۵٫۳
 **مرجع:** [`EVALUATION_MODEL_ALIGNMENT.md`](EVALUATION_MODEL_ALIGNMENT.md) · [`LEARNING_LOOP_ALIGNMENT.md`](LEARNING_LOOP_ALIGNMENT.md) · [`../adr/ADR-0005`](../adr/ADR-0005-recommendation-lifecycle-entity-separation.md) · [`../adr/ADR-0006`](../adr/ADR-0006-provenance-versus-confirmation.md)
 
 ---

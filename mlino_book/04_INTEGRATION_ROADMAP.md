@@ -48,6 +48,8 @@
 
 سه مفهومی که در گام ۱ باید تصمیم‌گیری می‌شد، تصمیم‌گیری شد: یازده نقش، هشت نوع × چهار سطح اثر، و مقیاس زمانی effort.
 
+**نسخه‌ی ۱٫۱ کامل طراحی شد — پیاده‌نشده** (D-54 + D-50 + D-51) → [`contracts/RECOMMENDATION_CONTRACT_ALIGNMENT.md`](contracts/RECOMMENDATION_CONTRACT_ALIGNMENT.md). **یک بازنگری، پیش از گام ۳.** مهم‌ترین تغییرش امنیتی است: `feedback` تا R8-a مسدود می‌شود. پیاده‌سازی فقط با دستور مالک.
+
 ---
 
 ## گام ۲ — نگاشت `workspace ⇄ organization` ✅ **IMPLEMENTED / VALIDATED**
@@ -117,7 +119,7 @@
 
 **حلقه‌ی دانش هم‌تراز شد ✅** (OD-30 → D-48) → [`contracts/KNOWLEDGE_LOOP_ALIGNMENT.md`](contracts/KNOWLEDGE_LOOP_ALIGNMENT.md) — `Reality` مرز است، `Knowledge` لایه‌ی دانش پایدار، `Learning` فرایند. **هیچ موجودیت جدیدی لازم نشد.**
 
-**فاز ۳:** تکامل دانش، یادگیری، استنتاج — یعنی همان فرایند `Learning`. حلقه‌ی یادگیری هم‌تراز شد ✅ (OD-31 → D-49) → [`contracts/LEARNING_LOOP_ALIGNMENT.md`](contracts/LEARNING_LOOP_ALIGNMENT.md). مدل ارزیابی هم‌تراز شد ✅ (OD-32 → D-50) → [`contracts/EVALUATION_MODEL_ALIGNMENT.md`](contracts/EVALUATION_MODEL_ALIGNMENT.md) — اثربخشی جدا از انتساب. **قرارداد پیشنهاد v1.1** = OD-27 (در انتظار) + D-50 — یک بازنگری، پیش از گام ۳. مدل اقدام هم‌تراز شد ✅ (OD-33 → D-51 · ADR-0007) → [`contracts/ACTION_MODEL_ALIGNMENT.md`](contracts/ACTION_MODEL_ALIGNMENT.md) — اقدام مستقل، پیشنهاد یکی از مبدأها. **هر سه پیش‌نیاز مدل‌سازی حلقه‌ی یادگیری (OD-31 · OD-32 · OD-33) بسته شدند.** قرارداد پیشنهاد v1.1 = OD-27 (در انتظار) + D-50 + D-51.
+**فاز ۳:** تکامل دانش، یادگیری، استنتاج — یعنی همان فرایند `Learning`. حلقه‌ی یادگیری هم‌تراز شد ✅ (OD-31 → D-49) → [`contracts/LEARNING_LOOP_ALIGNMENT.md`](contracts/LEARNING_LOOP_ALIGNMENT.md). مدل ارزیابی هم‌تراز شد ✅ (OD-32 → D-50) → [`contracts/EVALUATION_MODEL_ALIGNMENT.md`](contracts/EVALUATION_MODEL_ALIGNMENT.md) — اثربخشی جدا از انتساب. **قرارداد پیشنهاد v1.1** = OD-27 (در انتظار) + D-50 — یک بازنگری، پیش از گام ۳. مدل اقدام هم‌تراز شد ✅ (OD-33 → D-51 · ADR-0007) → [`contracts/ACTION_MODEL_ALIGNMENT.md`](contracts/ACTION_MODEL_ALIGNMENT.md) — اقدام مستقل، پیشنهاد یکی از مبدأها. **هر سه پیش‌نیاز مدل‌سازی حلقه‌ی یادگیری (OD-31 · OD-32 · OD-33) بسته شدند.** قرارداد پیشنهاد v1.1 **کامل طراحی شد** = D-54 + D-50 + D-51 (OD-27 بسته شد).
 
 ⛔ **شروع نمی‌شود:** ذخیره‌سازی دیتابیس · یکپارچه‌سازی پیشنهاد · پیاده‌سازی داده‌ی مشتری
 
