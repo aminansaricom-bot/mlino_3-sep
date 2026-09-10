@@ -13,7 +13,7 @@ The scope remains local processing, one foreground task in one tab/session, manu
 | Gate item | Final decision | Status |
 |---|---|---|
 | EM-G1 — Context and ordering | Context is expressed only as a confirmed hard condition, an explicitly user-ordered optional preference, or the approved distance fallback. There is no independent context-fit score or tier. | Closed in design. |
-| EM-G2 — Offer semantics | Mandatory offer requirements affect eligibility; optional offer preferences affect ordering at the user's chosen position; incidental offers enhance only an already relevant Experience. Exact claim scope needs evidence. | Closed in design. |
+| EM-G2 — Offer semantics | In the initial scope, an explicit user request for an offer/discount/promotion is an eligibility requirement; incidental offers enhance only an already relevant Experience. Offers never create relevance, override constraints, change ranking, or trigger advertising. Exact claim scope needs evidence. | Closed in design. |
 | EM-G3 — Session authority | Active, Paused, Rejected, Expired, and Ended states have distinct matching authority and transitions. Confirmation alone cannot authorize matching while Paused or after terminal state. | Closed in design. |
 | EM-G4 — Initial Experience | The initial mode is Intent-Guided Local Discovery with zero to three business-level results, one slot per business, incidental business-level offer awareness, and Open business details as the supported next action. | Closed in design. |
 
@@ -69,25 +69,26 @@ Missing, stale, or incomparable optional evidence receives no positive credit. U
 
 Capability evidence must first show that a business can satisfy the confirmed need. An offer is a conditional business fact; it is not a substitute for capability matching.
 
-An offer cannot:
+For the initial Intent-Guided Local Discovery scope, an offer cannot:
 
 - create Intent or relevance;
 - make an irrelevant capability eligible;
 - override a hard condition or exclusion;
 - replace product/service/capability or availability evidence;
 - create another result slot for the same business;
-- improve ordering unless the user explicitly made it an optional preference;
+- improve ordering, including when the business has paid or requested reach;
 - trigger a notification, background match, or unsolicited Experience;
 - gain influence from payment or requested reach.
 
-### 3.2 Mandatory, optional, and incidental treatment
+### 3.2 Explicit requirement and incidental enhancement
 
 | Confirmed meaning | Matching behavior | Expiry or failed evidence |
 |---|---|---|
-| Mandatory offer/discount condition | Part of eligibility. The exact requirement and applicability must be supported. | Candidate becomes ineligible; the Intent may remain Active and receive another result or no match. |
-| Optional offer/price preference | Compares eligible candidates only at the preference position chosen by the user. | Receives no positive credit; independently supported discovery remains eligible. |
-| Incidental business offer | May be attached after the business is selected as relevant. It does not affect inclusion or ordering. | Remove the enhancement; recheck the underlying Experience without ending the Intent. |
+| Explicit request for an offer/discount/promotion | Part of eligibility. The exact requirement and applicability must be supported after the underlying capability is eligible. | Candidate becomes ineligible; the Intent may remain Active and receive another result or no match. |
+| Incidental business offer | May be attached after the business is selected as relevant. It does not affect inclusion, ordering, or notification. | Remove the enhancement; recheck the underlying Experience without ending the Intent. |
 | Price requirement without offer | Evaluate the relevant listed price only when item, amount, currency and comparison basis satisfy the confirmed rule. | Unknown/incomparable price cannot pass a mandatory condition; no discount is invented. |
+
+An ambiguous statement such as “a discount would be nice” is not silently converted into an offer-ranking preference in this initial scope. It is either clarified as an explicit requirement or treated as incidental, based on the confirmed Intent revision. No offer behavior may bypass that confirmation boundary.
 
 ### 3.3 Evidence required before showing an offer
 
@@ -174,7 +175,9 @@ Opening business details is the useful first business/user interaction: the user
 
 The ranking unit is a business-level Experience. Matching product/service listings are supporting evidence inside that Experience. Multiple matching listings, offers, visual modes, or paid features cannot create additional slots or duplicate exposure for the same business.
 
-If several listings within one business are relevant, the explanation may identify the supported ones without asserting stock. The business occupies one ordering position determined by the user's preferences, then distance and stable business identity. The bounded slice does not define an internal product order beyond what is necessary to explain the match.
+One business result is valid only when **one qualifying option, product, or service** from that business satisfies every required user condition. Evidence may not be assembled across different options: Product A satisfying one requirement and Product B satisfying another is not a combined match. If no single option satisfies all hard conditions, the business is ineligible even when the union of its catalogue appears to satisfy them.
+
+If several individual options qualify independently, the business still occupies one result slot. The explanation names the qualifying option used for the result and keeps every claim tied to that option's evidence. Comparisons between options are allowed only when they share the same semantic item/service basis, unit, currency, and a confirmed user preference. Without that common comparison basis, V2 makes no “cheaper,” “better,” or cross-option aggregate claim; it uses the approved business-level tie rules after eligibility.
 
 ## 6. Experimental Claim and Evidence Matrix
 
@@ -203,14 +206,16 @@ The four possible outcomes remain distinct:
 |---|---|
 | User selects a mall but gives no mall-related optional preference. | The selected area constrains eligibility; it receives no additional ranking score. |
 | User explicitly orders “same floor” as an optional preference. | Compare it only at that confirmed preference position; unknown receives no credit. |
-| “A discount would be nice.” | Businesses without an offer remain eligible; supported offers affect order only at the user's selected preference position. |
+| “A discount would be nice.” | The phrase is clarified before matching. If the confirmed revision requires a discount, offer evidence is an eligibility condition; otherwise a valid business-level offer may appear only as an incidental enhancement and never changes order. |
 | “Only show a valid discount.” | Offer evidence is mandatory; no qualifying evidence means ineligible. |
 | Product is listed and the business has a valid offer with no product link. | Show the listing and, if relevant, a separately labelled business-level offer; do not claim a product discount. |
-| Optional offer expires. | Remove the enhancement; preserve independently supported discovery after recheck. |
+| Incidental offer expires. | Remove the enhancement; preserve independently supported discovery after recheck. |
 | Tab becomes visible after pause. | Show no new/pending Experience until explicit Resume and all authority checks pass. |
 | Session expires while hidden. | Dispose the old task/candidates; a new task, permission and confirmation are required. |
 | User rejects the interpretation. | That revision cannot resume or match; a new explicit request is required. |
 | Four products from one business match. | One business-level Experience slot; products remain supporting evidence. |
+| Product A satisfies the category requirement and Product B satisfies the price requirement, but neither satisfies both. | Invalid combined match; the business is excluded because no single option satisfies all required conditions. |
+| One product satisfies category, price, area and an explicitly requested valid discount with traceable scope. | Valid business result; explain the one qualifying option and attach the offer only within its evidenced scope. |
 | Only one business qualifies. | Return one result; never pad with an ineligible listing. |
 | Payment status changes while user inputs and evidence remain identical. | No change to retrieval, inclusion, number of slots, ordering, mode or timing. |
 | User opens business details. | Record no inferred visit, purchase or conversion; disclose no private Intent to the business. |

@@ -81,7 +81,7 @@ These are semantic obligations, not proposed data fields.
 
 ### 1.4 Independent availability
 
-An Experience Candidate is transient. It may be considered, become eligible, be selected for presentation, become unavailable, or be discarded. These conditions do not alter the User Intent lifecycle or Business Offer lifecycle. An expired mandatory offer can remove one candidate while the Intent remains Active. An expired optional offer removes only the dependent enhancement when the underlying discovery remains independently supported. A stopped or expired Intent invalidates its candidates without changing business facts.
+An Experience Candidate is transient. It may be considered, become eligible, be selected for presentation, become unavailable, or be discarded. These conditions do not alter the User Intent lifecycle or Business Offer lifecycle. An expired explicitly requested offer can remove one candidate while the Intent remains Active. An expired incidental offer removes only the dependent enhancement when the underlying discovery remains independently supported. A stopped or expired Intent invalidates its candidates without changing business facts.
 
 Candidate generation, presentation, and action require current **Active-use authority**, not confirmation alone. Before presentation and again before an action, V2 must verify the current revision, confirmation, processing permission, task/session state, relevant context, and business evidence. A stale candidate has no authority merely because it was once valid.
 
@@ -138,15 +138,15 @@ The controlling order is:
 
 > User requirement → Eligibility → Relevant Experience → Optional offer enhancement
 
-The confirmed hard/soft meaning governs offer treatment:
+For the initial Intent-Guided Local Discovery scope, the confirmed meaning governs offer treatment:
 
-- A **mandatory** offer, discount, or maximum-price requirement participates in eligibility and must have evidence that satisfies the exact requirement.
-- An **optional user preference** for an offer or price may order already eligible candidates only at the position explicitly assigned by the user.
-- An **incidental offer** may be attached after relevance is established. It cannot change eligibility or ordering.
+- An **explicit user request** for an offer, discount, or promotion is a user requirement. It participates in eligibility and must have evidence that satisfies the exact requirement; it does not create capability relevance by itself.
+- An **incidental offer** may be attached after relevance is established. It is an enhancement only: it cannot create relevance, change eligibility, change ordering, trigger matching, or create a notification.
+- An offer preference that is not an explicit requirement has no ranking effect in this first scope. A future product decision may define that behavior separately; it is not active here.
 
 Showing an offer requires a traceable business/offer identity, a current source record, satisfied `valid_from`/`valid_until`, non-revoked status where the source supports it, all stated conditions, and evidence that its scope applies to the capability/product/service being claimed. The current mock directory links offers to a business, not to a specific product or service. It may therefore show a time-valid **business-level offer** with that scope made explicit, but it cannot claim that the offer discounts the user's matched item. Product-specific offer requirements are unsupported without product-applicability evidence.
 
-If an optional offer expires, V2 removes the offer claim and rechecks the independently supported discovery Experience. If a mandatory offer expires or lacks applicable evidence, that candidate is ineligible. An acceptable listed price may satisfy a price requirement without an offer when the item, amount, currency, and comparison basis are supported.
+If an incidental offer expires, V2 removes the enhancement and rechecks the independently supported discovery Experience. If an explicitly requested offer/discount/promotion expires or lacks applicable evidence, that candidate is ineligible. An acceptable listed price may satisfy a price requirement without an offer when the item, amount, currency, and comparison basis are supported.
 
 ## 3. Relevance Model
 
@@ -194,7 +194,7 @@ For the bounded experimental slice, ordering is lexicographic and explainable:
 
 Missing, stale, or incomparable optional evidence receives no positive credit and is disclosed. A comparison may be made only when the meaning, units, currency, scope, and evidence are comparable for the confirmed preference. If the user did not order optional preferences, V2 must not invent weights from context, behavior, business economics, popularity, or an opaque model. It uses distance plus the stable tie-break among eligible candidates. The same contextual fact cannot act first as a constraint and again as a ranking bonus.
 
-Evidence freshness controls whether a claim can be used; it does not act as a promotional bonus. An offer does not outrank a better goal/preference fit unless the user made offer/price utility part of the confirmed request.
+Evidence freshness controls whether a claim can be used; it does not act as a promotional bonus. In the initial scope, an offer never outranks another eligible experience. If the user explicitly requests an offer/discount/promotion, that requirement is checked at eligibility and does not become a ranking boost.
 
 ### 3.4 Relevance outcomes
 
@@ -251,7 +251,7 @@ The matching layer selects a conceptual mode only after eligibility. Mode select
 |---|---|---|---|
 | Discovery | Show a small set of explainable businesses/capabilities relevant to the confirmed need. | Supported goal/capability match and usable context. | Selected core mode for the bounded slice. |
 | Guided shopping | Help the user compare or narrow eligible choices through explicit, minimal decisions. | Multiple viable options or one material ambiguity; questions remain inside the approved asking limit. | Future design; excluded from the initial Experience. |
-| Offer awareness | Make a valid offer visible when it serves an already relevant capability or an explicit deal/price need. | Eligible capability plus independently valid offer evidence. | Incidental enhancement only in the initial Experience; never a standalone ad trigger. |
+| Offer awareness | Make a valid incidental offer visible when it serves an already relevant capability. An explicit deal/price request is handled as eligibility. | Eligible capability plus independently valid offer evidence, or the separate evidence required by an explicit offer requirement. | Enhancement only in the initial Experience; never a standalone ad trigger or ranking input. |
 | Direct business interaction | Let the user deliberately initiate contact, booking, reservation, or another supported exchange. | Verified interaction capability plus identity, consent, tenant, moderation, retention, and failure rules. | Future gated capability; unavailable in the bounded slice. |
 | Virtual Storefront | Let the user explore a business's relevant products, services, offers, availability, and supported actions around the current goal. | Governed storefront data and evidence projection; user remains in control of navigation/actions. | Future product layer; matching may supply entry context but does not design it here. |
 | Visual/AR discovery | Present an already eligible Experience through a spatial or visual surface. | Current evidence plus device/permission/location/anchor validity and field-tested presentation rules. | Presentation adapter only; no new AR/GPS authority is approved here. |
@@ -281,7 +281,7 @@ If privacy authority, current revision, or processing permission becomes invalid
 The [B architecture gate](EXPERIENCE_MATCHING_FINAL_GATE_REVIEW.md) accepted the core model and raised EM-G1–EM-G4. [Experience Matching Finalization](EXPERIENCE_MATCHING_FINALIZATION.md) records these bounded answers:
 
 1. Context has no independent ranking tier; it acts only through confirmed constraints, user-ordered preferences, or the distance fallback.
-2. Mandatory, optional-preference, and incidental offers have separate eligibility/ordering/display behavior and evidence requirements.
+2. In the initial scope, an explicitly requested offer/discount/promotion is an eligibility requirement; an incidental offer is an enhancement only. No offer creates relevance, overrides constraints, changes ranking, or triggers advertising.
 3. Active, Paused, Rejected, Expired, and Ended authority at the Experience boundary follows the finalized Intent lifecycle.
 4. The first mode is Intent-Guided Local Discovery: zero to three business-level results, one slot per business, Open business details as the only matching-owned next action, and incidental business-level offer awareness.
 

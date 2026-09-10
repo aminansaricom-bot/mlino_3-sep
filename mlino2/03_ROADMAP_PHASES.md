@@ -4,12 +4,12 @@
 
 ## وضعیت جاری پس از نهایی‌سازی Experience Matching
 
-چهار شرط EM-G1 تا EM-G4 در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md` پاسخ داده و در طراحی اصلی اعمال شده‌اند. تجربهٔ اولیه Intent-Guided Local Discovery با صفر تا سه نتیجهٔ کسب‌وکار، یک جایگاه برای هر کسب‌وکار و اقدام `Open business details` است. context ranking مستقل، offer-driven relevance، Guided Shopping، تعامل مستقیم و AR جدید در این slice وجود ندارند.
+چهار شرط EM-G1 تا EM-G4 در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md` پاسخ داده و در طراحی اصلی اعمال شده‌اند. تجربهٔ اولیه Intent-Guided Local Discovery با صفر تا سه نتیجهٔ کسب‌وکار، یک جایگاه برای هر کسب‌وکار و اقدام `Open business details` است. context ranking مستقل، offer-driven relevance، Guided Shopping، تعامل مستقیم و AR جدید در این slice وجود ندارند. آفر فقط enhancement یک تجربهٔ از قبل معتبر است؛ درخواست صریح کاربر برای offer/discount/promotion به شرط eligibility تبدیل می‌شود و آفر هرگز ranking یا trigger تبلیغاتی نیست. هر نتیجه باید از یک option/product/service واحد بیاید و evidence چند محصول با هم ترکیب نمی‌شود.
 
 ترتیب بعدی Stage 3:
 
 1. بازبینی closure و تطبیق Design، Finalization و Intent Contract.
-2. پذیرش رسمی scope محدود و claim/evidence matrix توسط مالک محصول.
+2. پذیرش رسمی scope محدود، claim/evidence matrix و مثال‌های single-option توسط مالک محصول.
 3. دستور جداگانه برای پیاده‌سازی؛ این سند یا Gate قبلی به‌تنهایی مجوز کدنویسی نیست.
 4. پس از پیاده‌سازی، conformance و runtime delivery gate مستقل.
 
