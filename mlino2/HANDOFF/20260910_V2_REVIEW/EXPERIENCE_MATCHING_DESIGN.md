@@ -2,7 +2,7 @@
 
 Author: Codex, Product Architect role.
 
-Status: **proposed product and architecture design for review**. This document builds on the finalized [Intent Context Contract Redesign](INTENT_CONTEXT_CONTRACT_REDESIGN.md) and [Finalization](INTENT_CONTEXT_FINALIZATION.md). It does not create or authorize code, schema, API, migration, production matching, live V1 integration, advertising, or data collection.
+Status: **finalized for the bounded design scope; closure review pending**. This document builds on the finalized [Intent Context Contract Redesign](INTENT_CONTEXT_CONTRACT_REDESIGN.md) and [Intent Finalization](INTENT_CONTEXT_FINALIZATION.md). The four conditions from [the B architecture gate](EXPERIENCE_MATCHING_FINAL_GATE_REVIEW.md) are resolved in this document and [Experience Matching Finalization](EXPERIENCE_MATCHING_FINALIZATION.md). This status does not authorize code, schema, API, migration, production matching, live V1 integration, advertising, or data collection.
 
 Approved working boundary: local processing, one foreground Intent task in one tab/session, manual context, and experimental/mock business data. The user's exact confirmed Intent revision remains the authority for matching.
 
@@ -81,9 +81,20 @@ These are semantic obligations, not proposed data fields.
 
 ### 1.4 Independent availability
 
-An Experience Candidate is transient. It may be considered, become eligible, be selected for presentation, become unavailable, or be discarded. These conditions do not alter the User Intent lifecycle or Business Offer lifecycle. An expired offer can remove one candidate while the Intent remains Active. A stopped or expired Intent invalidates its candidates without changing business facts.
+An Experience Candidate is transient. It may be considered, become eligible, be selected for presentation, become unavailable, or be discarded. These conditions do not alter the User Intent lifecycle or Business Offer lifecycle. An expired mandatory offer can remove one candidate while the Intent remains Active. An expired optional offer removes only the dependent enhancement when the underlying discovery remains independently supported. A stopped or expired Intent invalidates its candidates without changing business facts.
 
-Before presentation and again before an action, V2 must verify the current revision, confirmation, processing permission, task/session validity, relevant context, and business evidence. A stale candidate has no authority merely because it was once valid.
+Candidate generation, presentation, and action require current **Active-use authority**, not confirmation alone. Before presentation and again before an action, V2 must verify the current revision, confirmation, processing permission, task/session state, relevant context, and business evidence. A stale candidate has no authority merely because it was once valid.
+
+### 1.5 Session-state authority at the Experience boundary
+
+| State | Meaning for Experience Matching | User action and transition |
+|---|---|---|
+| Active | The exact revision is confirmed, matching was deliberately requested, processing is allowed, and task/context/session prerequisites are valid. | Matching may generate, present, and recheck candidates. A correction, pause, rejection, stop, withdrawal, or expiry leaves this authority. |
+| Paused | The task remains inside its session limit, but matching authority is suspended because the app/tab was hidden, the user paused/started editing, or a recoverable essential prerequisite is unavailable. | Visibility alone does nothing. Explicit Resume may restore the unchanged confirmed revision only after permission, deadline, context, and evidence checks. A material edit creates a new revision and requires confirmation. |
+| Rejected interpretation | The user rejected the displayed hypothesis/revision. That revision is terminal and authorizes no candidate. Rejection is not a claim that MLINO knows the user's “real” intent. | Resume is unavailable. Only a new explicit user request can create another hypothesis/attempt. |
+| Expired Intent task | The confirmed deadline, inactivity limit, or absolute session limit was reached. The old authority and task content are disposed under the Intent contract. | Resume and retry cannot revive it. A fresh task needs applicable processing permission, a new interpretation, and confirmation. |
+
+Explicit stop, delete, processing-permission withdrawal, navigation/reload, or replacement by a different goal follows the terminal Ended rules in the Intent contract. A pre-pause candidate has no independent authority: after an explicit valid resume it may be used only after a fresh authority and evidence recheck. Pending results cannot display while Paused or after Rejected, Expired, or Ended state.
 
 ## 2. Business Capability Matching
 
@@ -101,7 +112,7 @@ V1 Knowledge may substantiate a capability only through the governed evidence pr
 
 ### 2.2 Matching sequence
 
-1. **Authority gate:** require the current confirmed Intent revision, valid processing permission, valid current session, and a deliberate matching action.
+1. **Authority gate:** require current Active-use authority: the exact confirmed Intent revision, valid processing permission and session/context prerequisites, plus a deliberate matching request. Confirmation alone is insufficient while Paused or after a terminal state.
 2. **Need decomposition:** use only the goal, hard constraints/exclusions, optional user-ordered preferences, permitted context, and requested next action visible in that revision.
 3. **Capability retrieval:** read candidate Business Capabilities and evidence through the Directory boundary. In the approved slice, this is labelled experimental/mock data.
 4. **Evidence normalization:** distinguish supported, unsupported, unknown, stale, not-yet-valid, expired, and revoked claims without manufacturing certainty.
@@ -123,7 +134,19 @@ Offers are conditional facts attached to an otherwise relevant capability. An of
 - move a business ahead because it paid or requested reach;
 - trigger matching, notification, or an Experience without user authority.
 
-When the user explicitly requests a deal, price condition, or current offer, supported offer evidence becomes part of eligibility. Otherwise it may be disclosed as an attribute of an already relevant Experience but does not receive an independent ranking boost in the bounded slice.
+The controlling order is:
+
+> User requirement → Eligibility → Relevant Experience → Optional offer enhancement
+
+The confirmed hard/soft meaning governs offer treatment:
+
+- A **mandatory** offer, discount, or maximum-price requirement participates in eligibility and must have evidence that satisfies the exact requirement.
+- An **optional user preference** for an offer or price may order already eligible candidates only at the position explicitly assigned by the user.
+- An **incidental offer** may be attached after relevance is established. It cannot change eligibility or ordering.
+
+Showing an offer requires a traceable business/offer identity, a current source record, satisfied `valid_from`/`valid_until`, non-revoked status where the source supports it, all stated conditions, and evidence that its scope applies to the capability/product/service being claimed. The current mock directory links offers to a business, not to a specific product or service. It may therefore show a time-valid **business-level offer** with that scope made explicit, but it cannot claim that the offer discounts the user's matched item. Product-specific offer requirements are unsupported without product-applicability evidence.
+
+If an optional offer expires, V2 removes the offer claim and rechecks the independently supported discovery Experience. If a mandatory offer expires or lacks applicable evidence, that candidate is ineligible. An acceptable listed price may satisfy a price requirement without an offer when the item, amount, currency, and comparison basis are supported.
 
 ## 3. Relevance Model
 
@@ -142,6 +165,8 @@ Value requires all of the following:
 
 Popularity, engagement likelihood, business payment, margin, or a desire to fill business capacity are not user-value substitutes.
 
+Intent answers **what the user wants**. Context supplies the confirmed constraints and conditions under which that goal can be fulfilled, such as selected area, time window, radius, building, or floor. Context modifies Experience suitability only through that confirmed meaning. It does not create a separate goal, hidden preference, user profile, or independent ranking signal. A contextual condition is either a hard constraint, an explicitly ordered optional preference, or part of the approved distance fallback; it cannot be counted twice.
+
 ### 3.2 Eligibility before ordering
 
 Eligibility is a truth-and-authority gate, not a numeric score.
@@ -151,7 +176,7 @@ Eligibility is a truth-and-authority gate, not a numeric score.
 | Confirmed Intent and permission | Authority gate | Missing, withdrawn, expired, or stale authority means no personalized candidate. |
 | Intent/capability fit | Eligibility | Evidence must support that the capability addresses the requested goal. |
 | Hard constraints and exclusions | Eligibility | All must pass. Unknown cannot count as satisfied. Only the user may relax a constraint through a new revision. |
-| Context match | Eligibility or applicability | Required area, time, floor, and task-window conditions must pass when material to the request. Manual context is not proof of physical presence. |
+| Context conditions | Eligibility or explicit preference | Required area, time, floor, and task-window conditions must pass when material to the request. Optional context affects ordering only when the user explicitly made and ordered it as a preference. Manual context is not proof of physical presence. |
 | Availability | Eligibility when promised or required | Authoritative positive evidence is required for a positive availability claim. Missing availability remains unknown. |
 | Offer validity | Eligibility only when the offer is part of the request/experience | `valid_from`, `valid_until`, conditions, and source status must pass independently. |
 | Supported next action | Eligibility for the promised experience mode | V2 cannot promise contact, purchase, booking, navigation, or fulfilment without an approved capability for it. |
@@ -164,11 +189,10 @@ For the bounded experimental slice, ordering is lexicographic and explainable:
 
 1. all candidates have already satisfied the goal and every hard constraint;
 2. compare the user's explicitly ordered optional preferences, in that order, using only comparable supported evidence;
-3. use context fit that the user explicitly selected and that was not already a hard gate;
-4. use nearest distance within the confirmed search area;
-5. use stable business identity only as a deterministic tie-break.
+3. use nearest distance within the confirmed search area;
+4. use stable business identity only as a deterministic tie-break.
 
-Missing optional evidence receives no positive credit and is disclosed. If the user did not order optional preferences, V2 must not invent weights from behavior, business economics, popularity, or an opaque model. It may explain the tradeoff and use distance plus the stable tie-break among eligible candidates.
+Missing, stale, or incomparable optional evidence receives no positive credit and is disclosed. A comparison may be made only when the meaning, units, currency, scope, and evidence are comparable for the confirmed preference. If the user did not order optional preferences, V2 must not invent weights from context, behavior, business economics, popularity, or an opaque model. It uses distance plus the stable tie-break among eligible candidates. The same contextual fact cannot act first as a constraint and again as a ranking bonus.
 
 Evidence freshness controls whether a claim can be used; it does not act as a promotional bonus. An offer does not outrank a better goal/preference fit unless the user made offer/price utility part of the confirmed request.
 
@@ -181,11 +205,11 @@ The evaluation must return one of four honest conceptual outcomes:
 | Supported match | At least one candidate satisfies all gates with sufficient evidence. | Present ordered Experiences with reasons, limits, and supported actions. |
 | No supported match | Evidence was usable, but no capability met all hard requirements. | Preserve the Active Intent; offer user-controlled edit or separate broad discovery. |
 | Unsupported requirement | The data vocabulary cannot evaluate a mandatory requirement. | Name the unsupported requirement; do not drop or guess it. |
-| Temporarily unusable | Permission, session, context, directory, freshness, or required evidence is unavailable. | Pause or invalidate matching and provide an explicit retry/edit path when allowed. |
+| Recoverably unusable | The task/session and permission remain valid, but a recoverable essential context, directory, freshness, or evidence prerequisite is currently unavailable. | Suspend affected matching and provide an explicit retry/edit path. Terminal withdrawal, rejection, ending, or expiry is handled by §1.5 and is never labelled retryable. |
 
 ### 3.5 Explanation boundary
 
-The user-facing reasoning must be derivable from the confirmed request and business evidence: “matches your requested service,” “inside your selected area,” or “this valid offer applies to the requested product.” It must not cite hidden traits, inferred emotion, assumed purchasing power, or confidential business ranking logic.
+The user-facing reasoning must be derivable from the confirmed request and business evidence: “matches your requested service,” “inside your selected area,” or, where scope evidence exists, “this valid offer applies to the requested product.” In the bounded mock slice, the permitted offer wording is limited to a time-valid business-level offer because product applicability is absent. Reasoning must not cite hidden traits, inferred emotion, assumed purchasing power, or confidential business ranking logic.
 
 The explanation states material unknowns and unmet optional preferences. It never claims that a click, detail view, route launch, or business display proves a visit, purchase, satisfaction, or completed goal.
 
@@ -205,13 +229,29 @@ Business influence is limited to improving truthful inputs and fulfilment readin
 
 ## 5. User Experience Modes
 
+### 5.1 Initial bounded Experience — Intent-Guided Local Discovery
+
+The first MLINO V2 Experience is **Intent-Guided Local Discovery**. It is selected because it gives the user a credible answer, gives a genuinely capable business qualified visibility, and tests the central Intent→Evidence→Experience architecture without adding AR, messaging, transactions, or persistence.
+
+**Input:** the exact Active confirmed Intent revision; manual selected area/radius and any confirmed time/building/floor constraints; optional user-ordered preferences; and read-only experimental directory capability/evidence.
+
+**Output:** zero to three ordered business-level Experiences. There is one candidate slot per business; multiple products or offers from the same business provide supporting detail and never create duplicate exposure. Each presented Experience includes the confirmed purpose it serves, the supported listed capability/product/service, why it qualifies, selected-area distance where available, the experimental-data/source label, material unknowns and unmet optional preferences, applicable validity, and the supported next action **Open business details**.
+
+Opening details is a voluntary user/business interaction boundary: it lets the user inspect the relevant business information but does not share private Intent/context with the business and is not proof of contact, visit, purchase, fulfilment, or satisfaction. Existing save/like/navigation behaviors are outside this matching decision and gain no outcome meaning from it.
+
+Offer awareness is incidental in this slice. A verified time-valid business-level offer may be attached to an already relevant business with its scope stated; it neither creates a slot nor changes order. No product-specific discount is claimed without applicability evidence. Guided Shopping, direct business interaction, rich Virtual Storefront composition, and new AR behavior are excluded from the initial Experience.
+
+The bounded slice must support all four honest outcomes: supported match, no supported match, unsupported mandatory requirement, and recoverably unusable context/data. It never pads the result set with ineligible businesses.
+
+### 5.2 Mode catalogue and scope
+
 The matching layer selects a conceptual mode only after eligibility. Mode selection changes how the opportunity helps; it does not change facts or ranking authority.
 
 | Mode | Product purpose | Entry requirement | Current design status |
 |---|---|---|---|
-| Discovery | Show a small set of explainable businesses/capabilities relevant to the confirmed need. | Supported goal/capability match and usable context. | Core mode proposed for the bounded slice. |
-| Guided shopping | Help the user compare or narrow eligible choices through explicit, minimal decisions. | Multiple viable options or one material ambiguity; questions remain inside the approved asking limit. | Conceptually supported; detailed journey and UI require later design. |
-| Offer awareness | Make a valid offer visible when it serves an already relevant capability or an explicit deal/price need. | Eligible capability plus independently valid offer evidence. | Attribute/mode of a relevant Experience; never a standalone ad trigger. |
+| Discovery | Show a small set of explainable businesses/capabilities relevant to the confirmed need. | Supported goal/capability match and usable context. | Selected core mode for the bounded slice. |
+| Guided shopping | Help the user compare or narrow eligible choices through explicit, minimal decisions. | Multiple viable options or one material ambiguity; questions remain inside the approved asking limit. | Future design; excluded from the initial Experience. |
+| Offer awareness | Make a valid offer visible when it serves an already relevant capability or an explicit deal/price need. | Eligible capability plus independently valid offer evidence. | Incidental enhancement only in the initial Experience; never a standalone ad trigger. |
 | Direct business interaction | Let the user deliberately initiate contact, booking, reservation, or another supported exchange. | Verified interaction capability plus identity, consent, tenant, moderation, retention, and failure rules. | Future gated capability; unavailable in the bounded slice. |
 | Virtual Storefront | Let the user explore a business's relevant products, services, offers, availability, and supported actions around the current goal. | Governed storefront data and evidence projection; user remains in control of navigation/actions. | Future product layer; matching may supply entry context but does not design it here. |
 | Visual/AR discovery | Present an already eligible Experience through a spatial or visual surface. | Current evidence plus device/permission/location/anchor validity and field-tested presentation rules. | Presentation adapter only; no new AR/GPS authority is approved here. |
@@ -234,18 +274,18 @@ Experience generation inherits every Intent privacy and retention rule and adds 
 
 If privacy authority, current revision, or processing permission becomes invalid, matching stops and pending/stale candidates are discarded under the finalized session rules.
 
-## 7. Open Decisions
+## 7. Finalization and Remaining Decisions
 
-### 7.1 Decisions required before a bounded implementation instruction
+### 7.1 Bounded design decisions closed
 
-1. **Design adoption:** product and architecture review must accept the eligibility-before-ordering model, four relevance outcomes, explanation boundary, and anti-advertising rules.
-2. **First delivery mode:** confirm whether the bounded implementation is limited to Discovery with relevant offer awareness, or whether a minimal Guided Shopping step is included. Direct interaction and Virtual Storefront remain excluded either way.
-3. **Mock evidence matrix:** identify exactly which existing experimental fields can substantiate each supported capability, constraint, context condition, and offer claim. Unsupported claims must be listed, not inferred.
-4. **Optional preference behavior:** approve the proposed user-ordered comparison and distance/stable-identity fallback when no order is supplied. No hidden weights are proposed.
-5. **Explanation minimum:** approve the minimum visible reason, source/test-data label, unknowns, unmet optional preferences, validity limit, and supported next action for each presented Experience.
-6. **Architecture gate:** validate consistency with the Intent Contract and protected V1/V2 boundary before any coding, schema, or API instruction.
+The [B architecture gate](EXPERIENCE_MATCHING_FINAL_GATE_REVIEW.md) accepted the core model and raised EM-G1–EM-G4. [Experience Matching Finalization](EXPERIENCE_MATCHING_FINALIZATION.md) records these bounded answers:
 
-These are product/architecture approvals, not requests for implementation detail or database fields.
+1. Context has no independent ranking tier; it acts only through confirmed constraints, user-ordered preferences, or the distance fallback.
+2. Mandatory, optional-preference, and incidental offers have separate eligibility/ordering/display behavior and evidence requirements.
+3. Active, Paused, Rejected, Expired, and Ended authority at the Experience boundary follows the finalized Intent lifecycle.
+4. The first mode is Intent-Guided Local Discovery: zero to three business-level results, one slot per business, Open business details as the only matching-owned next action, and incidental business-level offer awareness.
+
+These are design closures for review. They do not authorize implementation. Closure verification and a separate product-owner implementation instruction remain required process gates, not unresolved semantic choices.
 
 ### 7.2 Future expansion decisions
 
@@ -257,6 +297,6 @@ These are product/architecture approvals, not requests for implementation detail
 6. Outcome measurement and business-value attribution without hidden profiling, false conversion claims, raw Intent disclosure, or unauthorized V2→V1 data.
 7. GPS/passive context, external AI, persistent/cross-session Intent, accessibility context, sensitive domains, sponsored experiences, and public deployment as separate architecture/privacy gates.
 
-Until reviewed, this document is a proposed matching design. It advances no implementation state and changes no approved contract.
+The bounded design is finalized for closure review. It advances no implementation state and changes no V1, Backend, schema, API, integration contract, or production scope.
 
 من کدکس هستم

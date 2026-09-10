@@ -8,7 +8,22 @@ The current governing reference is [INTENT_CONTEXT_CONTRACT_REDESIGN.md](HANDOFF
 
 No unresolved conceptual decision blocks further **Experience Matching design** for the approved local, single-session, experimental-data scope. This status does not authorize implementation, schema, API, live V1 integration, or production deployment.
 
-## Experience Matching architecture gate — current status
+## Experience Matching finalization — current status
+
+[EXPERIENCE_MATCHING_FINALIZATION.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md) closes EM-G1–EM-G4 in the bounded design and amends [EXPERIENCE_MATCHING_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_DESIGN.md). The conditional Gate remains historical evidence.
+
+| ID | Adopted bounded decision | Closure status |
+|---|---|---|
+| EM-G1 | Context acts only as a confirmed hard condition, explicit user-ordered optional preference, display-only context, or the approved distance fallback. It has no independent ranking tier and cannot be counted twice. | Closed in design; closure review pending. |
+| EM-G2 | Mandatory offer requirements affect eligibility; optional offer preferences affect order only at their user-assigned position; incidental offers only enhance an already relevant Experience. Exact claim scope needs evidence. | Closed in design; closure review pending. |
+| EM-G3 | Active-use authority is required for generation/display/action. Paused may resume only through explicit valid user action; Rejected, Expired and Ended authority cannot resume. | Closed in design; closure review pending. |
+| EM-G4 | First scope is Intent-Guided Local Discovery: zero to three business-level results, one slot per business, Open business details as the matching-owned action, and incidental evidenced business-level offer awareness. | Closed in design; closure review pending. |
+
+No semantic choice from the four Gate conditions remains open for the bounded authoring scope. Closure verification and a separate product-owner implementation instruction remain process gates. They do not authorize code, schema, API, live V1, new AR, telemetry or production.
+
+## Experience Matching architecture gate — historical conditional status
+
+This section preserves the Gate state at commit `e84a83846bdc548edaa710b988332cddb2caffc8`. Its EM-G1–EM-G4 closure status is superseded by the current Finalization section above; the Gate findings and review history remain valid.
 
 [EXPERIENCE_MATCHING_FINAL_GATE_REVIEW.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINAL_GATE_REVIEW.md) records **B — Approved with minor changes**, reviewing all three governing/design documents at `993780fe11087cc2194f798030ae9db674437957`. This is Codex self-review, not external approval or runtime validation.
 
@@ -27,9 +42,9 @@ The next step is documentation-only closure, then closure verification and a sep
 
 ## Experience Matching design — historical pre-gate proposal
 
-The current proposal is [EXPERIENCE_MATCHING_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_DESIGN.md). It defines an Experience as a transient, explainable opportunity tied to one confirmed Intent revision and evidence-backed Business Capability. Eligibility is decided before relevance ordering; business payment, proximity, engagement, or an offer cannot repair failed eligibility.
+The earlier proposal was [EXPERIENCE_MATCHING_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_DESIGN.md). It defined an Experience as a transient, explainable opportunity tied to one confirmed Intent revision and evidence-backed Business Capability. Eligibility was decided before relevance ordering; business payment, proximity, engagement, or an offer could not repair failed eligibility. The same file now incorporates the Finalization decisions.
 
-The following decisions remain open before any bounded implementation instruction:
+The following decisions were open before the Gate and are preserved for traceability:
 
 1. Adopt or revise the eligibility-before-ordering model, four relevance outcomes, explanation boundary, and business-influence limits.
 2. Choose the first delivery mode: Discovery with relevant offer awareness only, or a separately bounded Guided Shopping step.

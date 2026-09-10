@@ -2,7 +2,18 @@
 
 این فازبندی مستقیماً از توضیح مالک محصول استخراج شده — ترتیب پیشنهادی است، نه یک تعهد زمانی (طبق انضباط کل پروژه، هیچ تخمین زمانی ساختگی داده نمی‌شود).
 
-## وضعیت جاری پس از Gate معماری Experience Matching
+## وضعیت جاری پس از نهایی‌سازی Experience Matching
+
+چهار شرط EM-G1 تا EM-G4 در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md` پاسخ داده و در طراحی اصلی اعمال شده‌اند. تجربهٔ اولیه Intent-Guided Local Discovery با صفر تا سه نتیجهٔ کسب‌وکار، یک جایگاه برای هر کسب‌وکار و اقدام `Open business details` است. context ranking مستقل، offer-driven relevance، Guided Shopping، تعامل مستقیم و AR جدید در این slice وجود ندارند.
+
+ترتیب بعدی Stage 3:
+
+1. بازبینی closure و تطبیق Design، Finalization و Intent Contract.
+2. پذیرش رسمی scope محدود و claim/evidence matrix توسط مالک محصول.
+3. دستور جداگانه برای پیاده‌سازی؛ این سند یا Gate قبلی به‌تنهایی مجوز کدنویسی نیست.
+4. پس از پیاده‌سازی، conformance و runtime delivery gate مستقل.
+
+## سابقهٔ وضعیت پس از Gate معماری Experience Matching
 
 مرجع نتیجه `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINAL_GATE_REVIEW.md` است: **B — تأیید با اصلاحات جزئی**. بازبینی معماری انجام شده؛ closure پیش از پیاده‌سازی هنوز کامل نیست.
 

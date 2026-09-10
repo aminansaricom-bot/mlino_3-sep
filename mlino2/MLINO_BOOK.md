@@ -22,7 +22,7 @@ MLINO V2 لایهٔ هوشمند تجربهٔ دنیای واقعی است؛ ن�
 
 این بسته مجوز کدنویسی، schema، API، اتصال V1 یا تغییر ranking موجود نیست. گام بعدی Gate مستقل همین طراحی و تصمیم دربارهٔ mode اولیه، evidence آزمایشی قابل اتکا و حداقل explanation است. توسعهٔ live V1، storefront، تعامل مستقیم، AR، telemetry و سنجش conversion همچنان به قرارداد و governance جدا نیاز دارد.
 
-## نتیجهٔ Gate معماری Experience Matching
+## سابقهٔ نتیجهٔ Gate معماری Experience Matching
 
 بازبینی سه سند Intent Redesign، Finalization و Experience Matching در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINAL_GATE_REVIEW.md` نتیجهٔ **B — تأیید با اصلاحات جزئی** را ثبت کرد. این گزارش self-review کدکس است؛ بازبینی مستقل بیرونی یا تأیید runtime نیست. بخش بالا سابقهٔ پیشنهاد پیش از Gate است؛ وضعیت جاری همین بخش است.
 
@@ -31,3 +31,11 @@ MLINO V2 لایهٔ هوشمند تجربهٔ دنیای واقعی است؛ ن�
 آفر ثبت‌شده برای یک کسب‌وکار به‌تنهایی اثبات تخفیف برای محصول مشخص نیست. پرداخت نیز با ثابت‌ماندن facts و evidence نباید انتخاب، تعداد فرصت ترجیحی، ترتیب یا زمان ارائه را تغییر دهد. ارزش کسب‌وکار از پاسخ‌دادن به نیاز مرتبط حاصل می‌شود؛ conversion یا درآمد هنوز اثبات نشده است.
 
 گام بعد فقط بستن EM-G1 تا EM-G4 در مستندات و بازبینی closure است. اجرای Stage 3 همچنان به دستور جدا نیاز دارد. دامنهٔ محلی، یک نشست و دادهٔ آزمایشی و قرارداد حاکم Intent بدون تغییر باقی مانده‌اند.
+
+## وضعیت جاری پس از نهایی‌سازی Experience Matching
+
+چهار شرط Gate در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md` بسته و در `EXPERIENCE_MATCHING_DESIGN.md` اعمال شده‌اند. context فقط شرط یا preference صریحِ داخل revision تأییدشده است و عامل ranking مستقل نیست. آفر اجباری، preference اختیاری و enhancement اتفاقی رفتار جدا دارند؛ آفر بدون capability و evidence مرتبط، relevance نمی‌سازد.
+
+تجربهٔ اولیه «Intent-Guided Local Discovery» است: صفر تا سه نتیجهٔ کسب‌وکار، حداکثر یک جایگاه برای هر کسب‌وکار، با دلیل تطبیق، حدود evidence و اقدام `Open business details`. آفر آزمایشی فعلی فقط در سطح کسب‌وکار قابل بیان است و بدون شواهد applicability نباید تخفیف محصول مشخص معرفی شود. Guided Shopping، تعامل مستقیم، storefront غنی و AR جدید در این slice نیستند.
+
+Active، Paused، Rejected، Expired و Ended در مرز Experience تفکیک شده‌اند؛ visibility ادامهٔ matching نیست و حالت terminal قابل resume نیست. وضعیت طراحی برای closure review آماده است. کدنویسی فقط پس از پذیرش همین closure و دستور جداگانهٔ مالک محصول مجاز می‌شود.
