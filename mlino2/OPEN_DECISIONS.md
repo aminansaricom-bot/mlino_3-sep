@@ -20,6 +20,19 @@ No unresolved conceptual decision blocks further **Experience Matching design** 
 
 OD-30 therefore requires no new entity, schema, API, migration, storage layer, or parallel knowledge store. Future decisions for outcome/evaluation vocabulary, consent and retention, aggregate learning, model effects, telemetry, and any reverse V2→V1 direction remain open. This alignment does not authorize implementation or change frozen V1/Backend contracts.
 
+## Experience Orchestration design — pending product approval
+
+[EXPERIENCE_ORCHESTRATION_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_ORCHESTRATION_DESIGN.md) defines the next V2 design layer without authorizing implementation. It preserves the confirmed Intent → Context → Capability → Evidence → Eligibility → Ranking → Experience boundary and proposes a bounded lifecycle, Assistant posture, Core/Module split, and future AR/Virtual Storefront dependencies.
+
+| Area | Current decision or proposal | Status |
+|---|---|---|
+| Experience lifecycle | Discovering, Asking, Matching, Presenting, Comparing, Acting, Completed, Abandoned, Expired; initial slice excludes Comparing until separately approved. | Product review required. |
+| Assistant | Cross-module orchestration and guidance within authorized session; no hidden inference, business ranking, autonomous action, or ownership of module truth. | Product/architecture review required. |
+| Core vs Modules | Core owns shared Intent, privacy, lifecycle, evidence, explanation, and handoff policy; Modules own domain data, capability, rules, and actions. | Product/architecture review required. |
+| AR / Virtual Storefront | Future modes requiring authoritative projection, option-level applicability, spatial/privacy governance, interaction contracts, and evaluation. | Deferred; dependencies open. |
+
+Implementation, schema, API, AR activation, module integration, persistent memory, telemetry, and payment policy remain blocked until these decisions are reviewed and approved.
+
 ## Experience Matching finalization — current status
 
 [EXPERIENCE_MATCHING_FINALIZATION.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md) closes EM-G1–EM-G4 in the bounded design and amends [EXPERIENCE_MATCHING_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_DESIGN.md). [EXPERIENCE_MATCHING_CLOSURE.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_CLOSURE.md) is the current documentation-level closure record. The conditional Gate remains historical evidence.

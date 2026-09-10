@@ -14,6 +14,14 @@ MLINO V2 لایهٔ هوشمند تجربهٔ دنیای واقعی است؛ ن�
 
 در مرز V1/V2، V1 و منبع کسب‌وکار مالک Business Context، facts، capability، knowledge و evidence هستند و V2 آن‌ها را برای Intent و Experience به‌صورت read-only مصرف می‌کند. Signal، Recommendation، Action و Outcome جایگزین یکدیگر نیستند؛ کلیک، اشتراک‌گذاری، بازشدن جزئیات یا proximity به‌تنهایی Outcome یا Learning معتبر نیست. OD-30 بسته شد، اما قرارداد outcome، consent/retention و learning آینده همچنان در Open Decisions باقی است.
 
+## طراحی لایهٔ Experience Orchestration
+
+سند [EXPERIENCE_ORCHESTRATION_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_ORCHESTRATION_DESIGN.md) ادامهٔ طراحی V2 را ثبت می‌کند و برای تأیید محصول آماده است. Orchestration فقط پس از Intent تأییدشده، context مجاز، capability/evidence واجد شرایط و eligibility، mode تجربه و اقدام بعدی را هماهنگ می‌کند؛ Intent، facts یا outcome جدیدی تولید نمی‌کند.
+
+چرخهٔ پیشنهادی Experience شامل Discovering، Asking، Matching، Presenting، Comparing، Acting، Completed، Abandoned و Expired است؛ slice اولیه فقط از حالت‌های لازم برای Local Discovery استفاده می‌کند و Comparing نیازمند تصمیم بعدی است. Assistant یک لایهٔ هماهنگ‌کنندهٔ persistent در محدودهٔ نشست است، نه chatbot مستقل، profiler یا مالک منطق کسب‌وکار. Core قواعد مشترک Intent، privacy، lifecycle، evidence و handoff را نگه می‌دارد و Modules منطق و دادهٔ دامنهٔ خود را مالک‌اند.
+
+AR و Virtual Storefront تا زمان وجود projection معتبر V1→V2، applicability در سطح option، قرارداد action، spatial/privacy governance و ارزیابی مستقل فعال نمی‌شوند. این طراحی هنوز مجوز پیاده‌سازی نیست و منتظر product approval است.
+
 ## مرز فعلی
 
 دادهٔ نمایشی شامل ۱۰ رکورد است و اتصال عملیاتی V1↔V2 وجود ندارد. موجودی، reviews، شبکهٔ اجتماعی، گفت‌وگوی کسب‌وکار، telemetry، deep link و تبدیل خرید ساخته نشده‌اند. قراردادهای V1، Backend و مرزهای منجمد دست‌نخورده‌اند.
@@ -40,7 +48,7 @@ MLINO V2 لایهٔ هوشمند تجربهٔ دنیای واقعی است؛ ن�
 
 ## وضعیت جاری پس از نهایی‌سازی Experience Matching
 
-چهار شرط Gate در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md` بسته و در `EXPERIENCE_MATCHING_DESIGN.md` اعمال شده‌اند. context فقط شرط یا preference صریحِ داخل revision تأییدشده است و عامل ranking مستقل نیست. آفر اجباری، preference اختیاری و enhancement اتفاقی رفتار جدا دارند؛ آفر بدون capability و evidence مرتبط، relevance نمی‌سازد.
+چهار شرط Gate در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md` بسته و در `EXPERIENCE_MATCHING_DESIGN.md` اعمال شده‌اند. context فقط شرط یا preference صریحِ داخل revision تأییدشده است و عامل ranking مستقل نیست. در slice اولیه، درخواست صریح آفر/تخفیف/promotion شرط eligibility است و آفر اتفاقی فقط enhancement تجربهٔ معتبر است؛ هیچ آفر بدون capability و evidence مرتبط relevance یا ranking نمی‌سازد.
 
 تجربهٔ اولیه «Intent-Guided Local Discovery» است: صفر تا سه نتیجهٔ کسب‌وکار، حداکثر یک جایگاه برای هر کسب‌وکار، با دلیل تطبیق، حدود evidence و اقدام `Open business details`. برای این slice، آفر هرگز relevance، رتبه، اعلان یا مسیر تبلیغاتی ایجاد نمی‌کند و فقط enhancement یک تجربهٔ از قبل معتبر است. اگر کاربر صریحاً آفر، تخفیف یا promotion بخواهد، این درخواست requirement و شرط eligibility است؛ در غیر این صورت آفر business-level فقط با scope روشن قابل نمایش است و بدون شواهد applicability نباید تخفیف محصول مشخص معرفی شود.
 

@@ -6,6 +6,10 @@
 
 OD-30 در [KNOWLEDGE_LOOP_ALIGNMENT.md](HANDOFF/20260910_V2_REVIEW/KNOWLEDGE_LOOP_ALIGNMENT.md) بسته شد. Reality، Knowledge و Learning به‌عنوان لایه‌ها/فرآیندهای مفهومی روی Event، Projection، Business Context، Facts، Observations، Signals، Decisions، Recommendations، Actions، Outcomes و Evaluations موجود تعریف شده‌اند؛ موجودیت، schema یا API جدیدی لازم نیست. این تصمیم برنامهٔ اجرایی Stage 3 را جلو نمی‌اندازد و learning پایدار، outcome measurement، telemetry و reverse data flow همچنان نیازمند تصمیم جدا هستند.
 
+## وضعیت طراحی Experience Orchestration
+
+طراحی [EXPERIENCE_ORCHESTRATION_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_ORCHESTRATION_DESIGN.md) آمادهٔ product review است. این milestone چرخهٔ Experience، نقش Assistant، مرز MLINO Core و Modules و وابستگی‌های AR/Virtual Storefront را تعریف می‌کند؛ implementation، schema، API و activation هیچ‌کدام شروع نشده‌اند. تا پذیرش محصول، scope معتبر همان Intent-Guided Local Discovery محلی و تک‌نشسته است.
+
 ## وضعیت جاری پس از نهایی‌سازی Experience Matching
 
 چهار شرط EM-G1 تا EM-G4 در `HANDOFF/20260910_V2_REVIEW/EXPERIENCE_MATCHING_FINALIZATION.md` پاسخ داده و در طراحی اصلی اعمال شده‌اند. تجربهٔ اولیه Intent-Guided Local Discovery با صفر تا سه نتیجهٔ کسب‌وکار، یک جایگاه برای هر کسب‌وکار و اقدام `Open business details` است. context ranking مستقل، offer-driven relevance، Guided Shopping، تعامل مستقیم و AR جدید در این slice وجود ندارند. آفر فقط enhancement یک تجربهٔ از قبل معتبر است؛ درخواست صریح کاربر برای offer/discount/promotion به شرط eligibility تبدیل می‌شود و آفر هرگز ranking یا trigger تبلیغاتی نیست. هر نتیجه باید از یک option/product/service واحد بیاید و evidence چند محصول با هم ترکیب نمی‌شود.
