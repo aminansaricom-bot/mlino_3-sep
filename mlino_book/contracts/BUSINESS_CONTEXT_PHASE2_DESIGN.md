@@ -2,7 +2,7 @@
 
 **`Observation` · `Signal` · `Decision`** — به‌همراه `Evidence` به‌عنوان بُعد پشتیبان
 
-**نسخه:** ۰٫۳ — **طراحی، پیاده‌سازی نشده** · **تاریخ:** ۱۰ سپتامبر ۲۰۲۶
+**نسخه:** ۰٫۴ — **طراحی، پیاده‌سازی نشده** · **تاریخ:** ۱۰ سپتامبر ۲۰۲۶
 **وضعیت:** `DESIGN / DECISIONS_APPLIED` — در انتظار بازبینی مستندات
 **مرجع بالادست:** [`BUSINESS_CONTEXT_MODEL.md`](BUSINESS_CONTEXT_MODEL.md) · [`../adr/ADR-0005`](../adr/ADR-0005-recommendation-lifecycle-entity-separation.md) · [`../adr/ADR-0006`](../adr/ADR-0006-provenance-versus-confirmation.md)
 
@@ -356,7 +356,7 @@ Decision
 
   ── بر چه زمینه‌ای ──
   basisKind             'recorded_context' | 'judgement_only'
-  basedOn[]             ارجاع به Fact / Observation / Signal / KPI
+  basedOn[]             ارجاع به Fact / Observation / Signal / KPI / EvaluationRecord  ← D-49
 
   ── نتیجه‌ی مورد انتظار ──
   expectation           { kind: 'measurable', statement, measuredBy[], horizon, direction }
@@ -425,6 +425,20 @@ Goal.createdByDecision?   DecisionId   ← اختیاری
 **۳. جهت از `Goal` به `Decision`** — تا `Decision` فقط‌افزودنی بماند.
 
 ⚠️ رابط `Goal` در `implementation/` **تغییر نکرد** — این تصمیم مستندسازی شد، پیاده نشد.
+
+## D.۹. استناد به ارزیابی — ✅ مصوب (OD-31 · D-49)
+
+`Decision.basedOn` می‌تواند به `EvaluationRecord` ارجاع دهد، تا حلقه‌ی یادگیری D-47 (`Evaluation → Decision آینده`) در ساختار داده قابل بیان باشد، نه فقط در متن `rationale`.
+
+- **فقط با شناسه** — زمینه‌ی کسب‌وکار شکل `EvaluationRecord` را import نمی‌کند (D-40 · D-37)
+- **نه `OutcomeRecord`** — با `recommendation_id` ثبت می‌شود، پس انتساب قضاوت‌نشده را با خودش می‌آورد
+- **نه از راه `Evidence`** — ارزیابی قضاوت است، نه ماده‌ی پشتیبان (D-45)
+- استناد به ارزیابی = `basisKind: 'recorded_context'`
+- موضع تصمیم (تقویت یا معکوس) در `rationale`؛ رابطه‌ی تایپ‌شده ساخته نمی‌شود (D-34)
+
+⛔ **پیاده‌سازی مسدود است تا `EvaluationRecord` شناسه‌ی خودش را داشته باشد** → OD-32.
+
+→ [`LEARNING_LOOP_ALIGNMENT.md`](LEARNING_LOOP_ALIGNMENT.md)
 
 ---
 
@@ -594,10 +608,11 @@ Goal.createdByDecision?   DecisionId   ← اختیاری
 | `basedOn` و `evidence` به آیتم‌های **موجود** اشاره کنند | تمامیت ارجاعی نیازمند مخزن است |
 | `measuredBy` به KPI **موجود** اشاره کند | همان |
 | `Goal.createdByDecision` به تصمیم **موجود** اشاره کند | همان |
+| `basedOn` به `EvaluationRecord` **موجود** اشاره کند | همان — و امروز حتی شناسه‌ای برای ارجاع وجود ندارد (OD-32) |
 | `supersedes` حلقه نسازد | نیازمند پیمایش گراف |
 | سقف اطمینان از زنجیره‌ی مبنا | نیازمند خواندن آیتم‌های مرتبط |
 
-هر پنج مورد **تعهد فاز ذخیره‌سازی** هستند و باید در CCR آن فاز صریح بیایند.
+هر شش مورد **تعهد فاز ذخیره‌سازی** هستند و باید در CCR آن فاز صریح بیایند.
 
 ---
 
@@ -630,6 +645,7 @@ Goal.createdByDecision?   DecisionId   ← اختیاری
 | OD-25 | `Evidence` **نوع دانش نیست**؛ `KNOWLEDGE_TYPES` دست‌نخورده | **D-45** |
 | — | `AI_INFERRED` نمی‌تواند `Evidence` بسازد | **D-46** |
 | C-02 | دو منظر معتبر: جریان عملیاتی و حلقه‌ی یادگیری | **D-47** |
+| OD-31 | `Decision.basedOn` می‌تواند به `EvaluationRecord` ارجاع دهد — پیاده‌سازی مسدود تا OD-32 | **D-49** |
 
 **هیچ تصمیم باز جدیدی در این پاس ایجاد نشد.**
 
