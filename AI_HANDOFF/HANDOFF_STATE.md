@@ -1,23 +1,16 @@
-HANDOFF_ID: HANDOFF-20260911-OD37-PLATFORM-RECOVERY-BOUNDARY
-AUTHOR: CLAUDE
-PHASE: OD37_PLATFORM_RECOVERY_BOUNDARY
+HANDOFF_ID: HANDOFF-20260911-C03-C04-APPROVAL
+AUTHOR: CODEX
+PHASE: C03_C04_OWNER_APPROVAL
 STATUS: DELIVERED_AWAITING_INDEPENDENT_REVIEW
-REPORT_PATH: C:\mlino code\AI_HANDOFF\CLAUDE_REPORTS\20260911_OD37_PLATFORM_RECOVERY_BOUNDARY_ALIGNMENT_REPORT.md
-REPORT_SHA256: c0d3f0e2dfa559915966ca4f8b72ac232bcbb4cd6e08c21c4b40c03b5cce72d1
-ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - governance design only, zero code change). Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-11T09:30:00
-NEXT_ACTION: Return for review. OD-37 is decided as D-58 for recovery and disputes; its third part, business identity at founding and impersonation risk, remains open as OD-38. Conflict C-04 is marked: the instruction's diagram placed User between Membership and Grant, while D-57 attaches grants to the membership; D-57 was kept and confirmation is needed. By the established criterion D-58 is ADR-worthy - a defined boundary exception on the platform's relation to business authority - but no ADR was written because the instruction restricted outputs; ADR-0010 is recommended upon approval. Awaiting the owner's review: ADR-0007, ADR-0008, ADR-0009, C-03 and C-04. Still open: OD-35, OD-38, OD-07. OD-09 remains BLOCKED. Blocking open decisions unchanged: OD-01 consent policy R8-a, OD-05 publishable contract fields, OD-08 Connector, OD-12 workspace deletion enforcement.
-
-PREVIOUS_HANDOFF_ID: HANDOFF-20260911-OD36-MEMBERSHIP-PERMISSION-BOUNDARY
-EXECUTED_INSTRUCTION_ID: OWNER-20260911-OD37-PLATFORM-RECOVERY-BOUNDARY (no explicit id was supplied by the owner; this identifier is assigned by me for traceability and is recorded as assigned, not as received)
-
-MODEL_ROUTING_NOTE: Routed to "Claude Opus 5 - MLINO V1 Governance Architect", which is the model that executed it.
-
-SCOPE_CONSTRAINT_NOTE: Updates were restricted to the book change log, the roadmap and the open decisions. The update script enforced an allow-list and asserted from git status that nothing else under mlino_book/ changed besides the new decision document. MEMBERSHIP_PERMISSION_BOUNDARY_ALIGNMENT.md still refers to OD-37; it was deliberately left alone and the D-58 register row states that it supersedes that reference.
-
-HANDOFF_PRECONDITION_CHECK: OD-37 was open in the register, raised by D-57. This instruction addresses exactly OD-37 by name, so BLOCKED_BY_HANDOFF_MISMATCH was not raised. The decision document was written first; the script asserted it existed and that implementation/shared-contracts/types.ts, implementation/prisma/schema.prisma and V1_MINIMUM_AC2_ACCESS_POLICY.md did not change.
-
-CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted. ADR-0007, ADR-0008 and ADR-0009 await the owner's review, as do C-03 and C-04.
-
-NOTE: Governance design only - zero code change. Decision D-58: recovery restores a business's capacity to govern itself - at least one valid grant holder - never business acts. Five layers from inner to outer, each used only when the previous cannot: prevention through D-57, identity recovery, succession designated in advance by the business itself with a waiting period and cancellation by any current holder, a platform safety hold that only blocks, and ownership recovery on external legal evidence with two independent reviewers, notification and contest - the last resort. The central finding is that the instruction's three examples are three different problems and most need no platform change to grants: a lost account is identity recovery with membership and grants intact; incorrect revocation is already structurally prevented by D-57, since peers cannot revoke one another's grant permission and the last holder cannot leave; a partner dispute is legal, and MLINO executes a verified external instrument without adjudicating, while a single party's unverified claim triggers nothing. The one genuine case of a business with no administrator - a holder permanently gone - was not in the list, so the D-55 exception shrinks to its minimum. Recovery adds a holder and never removes one, so a mistaken or fraudulent recovery cannot take control from the real owner, who still holds their grants on return; removing a holder requires an external instrument. The platform never chooses the grantee, restores only the founding set, never reads business content, never performs governed acts and has no break-glass business access; AI is never initiator, approver, reviewer or successor. D-55 rule 6 holds literally because no platform admin ever holds a business permission; layer 4 executes an external determination rather than granting at discretion. Option B was rejected because temporary access still gives an admin business permission, reading business content means data leaving the organisation against AC-2 section 4.1, and a break-glass account is a permanent backdoor that audit records but does not close. Explicit D-57 refinements: grant basis gains designated_succession and ownership_recovery - kept separate so audit can tell business consent from platform execution - still without ADMIN_ACTION; the peers-cannot-remove rule gains one exception for a verified external instrument; designating a successor becomes a governed act. Audit evidence stays in the platform plane, is minimised because claimant identity documents are personal data, and is transparent to the business without exposing those documents; its retention policy is a platform privacy question left open. No recovery layer is needed in V1 minimum, but the grant basis must be an extensible closed list from day one.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260911_C03_C04_APPROVAL_REPORT.md
+REPORT_SHA256: 5f2a78fbd01bc9667a2e23b1590fca292a27151bdf81cf185cabc6b25042aede
+CODE_COMMIT_SHA: 309094285b1d141a52156cfbb50865a1869a980d
+CODE_COMMIT_NOTE: کامیت مستندات؛ کد اجرایی تغییر نکرده است.
+PREVIOUS_HANDOFF_ID: HANDOFF-20260911-OD37-PLATFORM-RECOVERY-BOUNDARY
+EXECUTED_INSTRUCTION_ID: OWNER-20260911-C03-C04-APPROVAL
+INSTRUCTION_PATH: AI_HANDOFF/CODEX_INSTRUCTIONS/20260911_C03_C04_APPROVAL.md
+CREATED_AT: 2026-09-11T14:04:03.2312335+03:30
+NEXT_ACTION: بازبینی تحویل مستندات؛ C-03 و C-04 مصوب و بسته‌اند. پیاده‌سازی یا دیتابیس خودکار شروع نشود. سایر تصمیم‌ها و بازبینی‌ها باز می‌مانند.
+CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN همچنان منتظر بازبینی مستقل؛ بخش B اجرا نشده. ADR-0007، ADR-0008 و ADR-0009 منتظر بازبینی مالک‌اند. این تحویل سایر بخش‌های تحویل OD-37 را تأیید نمی‌کند.
+OPEN_ITEMS: OD-01، OD-05، OD-07، OD-08، OD-12، OD-35، OD-38؛ OD-09 همچنان BLOCKED. ADR-0010 ایجاد نشده است.
+HANDOFF_PRECONDITION_CHECK: شناسه قبلی و چک‌سام نسخه داخل مخزن منطبق بودند. مسیر مطلق قدیمی موجود نبود؛ مسیر نسبی مخزن در این تحویل ثبت شد. محتوای تاریخی بازنویسی نشد.
