@@ -1,5 +1,9 @@
 # MLINO V2 — Open Decisions
 
+## ثبت دامنه Intent Foundation — ۱۱ سپتامبر ۲۰۲۶
+
+دستور مستقل مالک برای بنیاد Intent اجرا شد. [تصمیم اجرایی محدود](HANDOFF/20260911_INTENT_FLOW_DESIGN.md): فقط متن صریح و تأیید وابسته به نسخه؛ بدون parser معنایی یا Matching. تصمیم‌های C-03/C-04 دوباره طراحی نشده‌اند. هیچ تصمیم معماری جدیدی به‌جای مالک بسته نشده است. توسعه مرحله بعد و قابلیت‌های خارج از دامنه همچنان به مجوز مستقل نیاز دارند.
+
 This register lists decisions that block implementation or require product/architecture approval. It complements the V2 HANDOFF reports and does not replace V1 contracts.
 
 ## Current technical-design review — 2026-09-10

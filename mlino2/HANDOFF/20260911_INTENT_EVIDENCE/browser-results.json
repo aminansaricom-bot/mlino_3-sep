@@ -1,0 +1,51 @@
+{
+  "build": "production-preview",
+  "results": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "passed": true,
+      "storageUnchanged": true,
+      "intentRequests": 0,
+      "pageErrors": 0,
+      "checks": [
+        "consent-before-input",
+        "typing-spaces",
+        "confirm",
+        "correct-reconfirm",
+        "pause-resume",
+        "reject-clears",
+        "withdraw-clears",
+        "new-session-empty",
+        "reload-empty",
+        "idle-expiry-with-browser-clock",
+        "dialog-fits"
+      ]
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "storageUnchanged": true,
+      "intentRequests": 0,
+      "pageErrors": 0,
+      "checks": [
+        "consent-before-input",
+        "typing-spaces",
+        "confirm",
+        "correct-reconfirm",
+        "pause-resume",
+        "reject-clears",
+        "withdraw-clears",
+        "new-session-empty",
+        "reload-empty",
+        "idle-expiry-with-browser-clock",
+        "dialog-fits"
+      ]
+    }
+  ]
+}

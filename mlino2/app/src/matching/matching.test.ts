@@ -1,7 +1,7 @@
 // matching.test.ts — تست‌های فاز ۲: پارسر نیت + سرویس تطبیق
 // همه‌ی نتایج باید قابل‌ردیابی به دایرکتوری واقعی باشند (بدون اختراع).
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { RuleBasedIntentParser, extractRadiusMeters } from './IntentParser';
 import { MatchingService } from './MatchingService';
 import { BusinessDirectoryService } from '../directory/BusinessDirectoryService';
@@ -125,6 +125,9 @@ describe('MatchingService — تطبیق با دایرکتوری واقعی', ()
   });
 
   it('درخواست تخفیف → آفرِ واقعی رکورد برگردانده می‌شود (اختراع ممنوع)', () => {
+    // تاریخ داده‌ی آزمایشی ثابت است؛ این تست نباید با گذر تقویم شکست بخورد.
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-09-05T12:00:00Z'));
+    try {
     const intent = parser.parse('دنبال تخفیف لیزر هستم');
     const res = matching.match(intent, {
       latitude: 35.7603,
@@ -134,6 +137,9 @@ describe('MatchingService — تطبیق با دایرکتوری واقعی', ()
     const top = res.items[0];
     expect(top.record.business_id).toBe('biz_mock_beauty_02');
     expect(top.matchedOffer?.offer_id).toBe('off_b02_01');
+    } finally {
+      clock.mockRestore();
+    }
   });
 
   it('شعاع جغرافیایی احترام می‌شود', () => {

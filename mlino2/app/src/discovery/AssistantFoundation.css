@@ -20,6 +20,12 @@
 .foundation-note { margin-top: 24px !important; }
 .foundation-footer { border-top: 1px solid var(--border); padding: 16px 24px; }
 .foundation-footer p { margin: 8px 0 0; }
+.intent-foundation { margin-bottom: 24px; }
+.intent-foundation label { display: block; font-weight: 600; }
+.intent-foundation textarea { box-sizing: border-box; width: 100%; resize: vertical; font: inherit; color: var(--ink); background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.intent-foundation textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.intent-foundation blockquote { margin: 12px 0; padding: 12px; border-inline-start: 3px solid var(--accent); white-space: pre-wrap; overflow-wrap: anywhere; }
+.foundation-dialog button:disabled { opacity: .55; cursor: not-allowed; }
 @media (max-width: 420px) {
   .foundation-content, .foundation-header, .foundation-footer { padding: 18px; }
   .foundation-actions button { flex: 1 1 100%; }

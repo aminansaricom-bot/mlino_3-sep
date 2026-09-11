@@ -1,4 +1,6 @@
-// Core owns authority and lifecycle. This slice has no intent capture or matching.
+import { expireIntent, intentStatus, reduceIntent } from './intent';
+import type { IntentAction, IntentState, IntentToken } from './intent';
+// مالکیت چرخه‌ی نشست، اجازه و Intent در Core می‌ماند؛ Matching غیرفعال است.
 export const IDLE_LIMIT_MS = 30 * 60 * 1000;
 export const SESSION_LIMIT_MS = 2 * 60 * 60 * 1000;
 export type EndReason = 'done' | 'dismissed' | 'declined' | 'withdrawn' | 'permission' | 'expired' | 'navigation';
@@ -6,15 +8,16 @@ export type FoundationState = {
   phase: 'idle' | 'consent' | 'active' | 'paused' | 'closed';
   consent: boolean;
   session: { startedAt: number; lastActivityAt: number } | null;
-  intent: null; // Reserved boundary: no interpretation/confirmation implementation in this slice.
+  intent: IntentState | null;
   generation: number;
   endedBy: EndReason | null;
 };
 export type FoundationCommand =
   | 'start' | 'accept' | 'decline' | 'pause' | 'resume' | 'activity'
   | 'check' | 'hidden' | 'visible' | 'done' | 'dismiss' | 'withdraw' | 'navigate';
-export type FoundationEvent = {
-  command: FoundationCommand;
+export type FoundationEvent = ({ command: FoundationCommand } | {
+  command: 'intent'; action: IntentAction; token: IntentToken;
+}) & {
   now: number;
   foreground: boolean;
   permitted: boolean;
@@ -37,10 +40,21 @@ export function foundationReducer(state: FoundationState, event: FoundationEvent
   if (state.session && (now < state.session.lastActivityAt ||
       now - state.session.startedAt >= SESSION_LIMIT_MS ||
       now - state.session.lastActivityAt >= IDLE_LIMIT_MS)) return close(state, 'expired');
+  const currentIntent = expireIntent(state.intent, now);
+  if (currentIntent !== state.intent) state = { ...state, intent: currentIntent, generation: state.generation + 1 };
   if (command === 'hidden' || !foreground) {
     return state.phase === 'active'
       ? { ...state, phase: 'paused', generation: state.generation + 1 }
       : state;
+  }
+  if (event.command === 'intent') {
+    if (state.phase !== 'active' || !state.consent || !state.session ||
+        event.token.generation !== state.generation || event.token.revision !== (state.intent?.revision ?? 0)) return state;
+    const intent = reduceIntent(state.intent, event.action, now, state.session.startedAt + SESSION_LIMIT_MS);
+    return intent === state.intent ? state
+      : { ...state, intent,
+        generation: intent?.status === 'cancelled' ? state.generation + 1 : state.generation,
+        session: { ...state.session, lastActivityAt: now } };
   }
   switch (command) {
     case 'start':
@@ -76,6 +90,8 @@ export function foundationExperience(state: FoundationState) {
     mode: state.phase === 'consent' ? 'request-consent' : state.phase === 'active' ? 'guide' : 'silent',
     route: 'assistant-shell',
     canInterpret: false,
+    canEditIntent: state.phase === 'active' && state.consent,
+    intentStatus: intentStatus(state.intent),
     canMatch: false,
     canOpenBusiness: false,
   } as const;
