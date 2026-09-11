@@ -1,30 +1,35 @@
-HANDOFF_ID: HANDOFF-20260911-CORE-PRISMA-DESIGN-V2
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FINAL-READINESS
 AUTHOR: CLAUDE
-PHASE: CORE_PRISMA_DESIGN_OWNER_DECISIONS_APPLIED
+PHASE: CORE_PRISMA_DESIGN_FINAL_AND_READINESS_REVIEW
 STATUS: DELIVERED_AWAITING_INDEPENDENT_REVIEW
-REVIEW_VERDICT: All owner decisions on PR1, PR2 and PY1-PY6 are applied to MLINO_CORE_PRISMA_SCHEMA_DESIGN.md (v2). No schema-shaping fork remains in the models. The only open physical item is PY7 (timestamp type and Prisma field naming).
-REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260911_CORE_PRISMA_DESIGN_V2_OWNER_DECISIONS_REPORT.md
-REPORT_SHA256: ec2eaf8eb98671650dd26fcb2a7605e83fb94cf778962afab24ba25341cdd060
+REVIEW_VERDICT: DESIGN FINAL AND READY FOR schema.prisma - 0 design RED, 4 YELLOW (FY1-FY4, to be made explicit in the CCR). Writing schema.prisma is still gated by 3 process gates: G1 PostgreSQL validation, G2 branch sync, G3 an owner-approved CCR.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260912_CORE_PRISMA_FINAL_READINESS_REPORT.md
+REPORT_SHA256: 045100dd38a380c0f2b30761fab5b972869d1492c210caaacf0589985bc319ef
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - documentation only). The design change is commit b8b763ddca53c0859b62079b3419b15d323fa72e on codex/v2-intent-flow-foundation (parent 39b6708). Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-12T06:00:00+03:30
+CODE_COMMIT_SHA: (none - documentation only). Design v3 is commit 84420ad3962841752d7225a96182f72ceebf43ac on codex/v2-intent-flow-foundation (parent b8b763d). Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-12T06:40:00+03:30
 NEXT_ACTION:
-1. Run the PostgreSQL constraint validation in section 8 of the design: 15 constraints, 9 test cases including a second prisma migrate, output PRISMA_POSTGRESQL_CONSTRAINT_VALIDATION.md. It runs in a temp folder outside the repo, with no real migration and no real schema.prisma.
-2. RR1 branch sync. merge-tree currently conflicts in root AI_HANDOFF/CLAUDE_LATEST_REPORT.md and HANDOFF_STATE.md, because Codex commit 39b6708 wrote them.
-3. PY7: the timestamp type (existing TIMESTAMP(3) or Timestamptz(3)) and Prisma field naming (camelCase with @map recommended).
-4. Name the issuer of new organisation identifiers. Core no longer mints them (PR2); related to OD-08.
-Owner questions (non-blocking):
-- Claim withdrawal by the organisation, or revocation of a verified claim, has no state among the five approved values; adding an enum value later is additive.
-- The claim status_changed_* columns keep only the latest change, so SUSPENDED to VERIFIED overwrites the earlier suspension audit. Full history would need a small append-only table (a separate owner decision).
-Interpretation to confirm: "Publication is the single source of truth" was applied as follows. Publication state changes only via Publication events. publication_status on the subject is a same-transaction projection, needed for the one-published-version partial unique. The enforcement method (trigger, or domain plus tests) is settled in the PostgreSQL validation. grant_id was not added, per the owner's minimal audit set.
+Gates before schema.prisma. Run G1 and G2 in parallel now, then G3.
+- G1: run the PostgreSQL validation in design section 8 (C1-C15, 11 tests), adding the tests for FY1-FY3. Output PRISMA_POSTGRESQL_CONSTRAINT_VALIDATION.md. Temp folder only, no real migration.
+- G2: RR1 branch sync. Codex's implementation/prisma lacks ExternalWorkspaceLink and migration 20260910020000. merge-tree conflicts in root AI_HANDOFF/CLAUDE_LATEST_REPORT.md and HANDOFF_STATE.md.
+- G3: a CCR on the frozen schema.prisma, owner-approved, citing the G1 results and FY1-FY4.
+YELLOW for the CCR:
+- FY1: onDelete and onUpdate are unspecified. Prisma's optional-relation default SetNull either silently nulls references (e.g. the profile's claim reference) or fails a CHECK by accident. The required-relation onUpdate Cascade would re-split organisation identity if an AC-2 id changed. Use Restrict everywhere.
+- FY2: OfferVersionCapability insert and delete only while the version's published_at IS NULL; UPDATE is never allowed.
+- FY3: when replacing a published version, the WITHDRAWN event must come before PUBLISHED, because the C5 partial unique index is not deferrable.
+- FY4: confirm Prisma field naming (camelCase with @map, derived from the existing convention), explicit @relation names for the multiple relations to Membership, and the Client write pattern (test 7).
+Soon needed:
+- The profile publish permission (OD-05) is now on the MVP critical path, because capabilities and offers are visible only when a profile is visible.
+- Record the PR1, PR2, PY1-PY6 and F1-F5 owner decisions as D rows in 05_OPEN_DECISIONS.md before the CCR.
+- The issuer of new organisation ids (OD-08).
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260911-CORE-PRISMA-DESIGN-REVIEW
-EXECUTED_INSTRUCTION_ID: OWNER-20260911-CORE-PRISMA-DESIGN-DECISIONS (no explicit id was supplied by the owner; this identifier is assigned by me for traceability and is recorded as assigned, not as received)
+PREVIOUS_HANDOFF_ID: HANDOFF-20260911-CORE-PRISMA-DESIGN-V2
+EXECUTED_INSTRUCTION_ID: OWNER-20260912-CORE-PRISMA-DESIGN-FINAL (no explicit id was supplied by the owner; this identifier is assigned by me for traceability and is recorded as assigned, not as received)
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5.
 
-HANDOFF_PRECONDITION_CHECK: Before editing, the Codex clone was confirmed equal to origin at 39b6708, with only the 3 known untracked files. The push to the Codex branch was preceded by a check that its origin was still 39b6708. The push to main was preceded by a check that origin/main was still 38040a4.
+HANDOFF_PRECONDITION_CHECK: Both clones were checked equal to origin before editing (Codex at b8b763d, main at c98e874). The Codex push was guarded on origin still being b8b763d. The main push was guarded on origin/main still being c98e874.
 
-SCOPE_CONSTRAINT_NOTE: On the owner's explicit instruction, only mlino2/MLINO_CORE_PRISMA_SCHEMA_DESIGN.md was changed on the Codex branch; the 3 untracked Codex files were not touched. On main, only AI_HANDOFF files changed. No schema.prisma, no migration, no code, no ADR change.
+SCOPE_CONSTRAINT_NOTE: On the Codex branch, only mlino2/MLINO_CORE_PRISMA_SCHEMA_DESIGN.md was changed, on the owner's instruction. On main, only the new review and the AI_HANDOFF files were added or changed. No schema.prisma, no migration, no code, no ADR change, no register change.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
