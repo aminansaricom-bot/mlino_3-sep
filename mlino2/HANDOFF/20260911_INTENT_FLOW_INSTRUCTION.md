@@ -1,6 +1,6 @@
 INSTRUCTION_ID: OWNER-20260911-V2-INTENT-FLOW-FOUNDATION
 RECORDED_BY: CODEX
-STATUS: IN_PROGRESS
+STATUS: EXECUTED
 TARGET_HANDOFF_ID: HANDOFF-20260909-V2-ASTRA-STAGE2
 TARGET_REPORT_PATH: mlino2/HANDOFF/20260909_ASTRA_STAGE2_REPORT.md
 TARGET_REPORT_SHA256: 2d828ac641e7e82bdfb124be6560815e456054b5c79606744e29be9340a9392b
@@ -26,3 +26,5 @@ C-03 و C-04 دوباره طراحی نمی‌شوند. اجازه محلی ای
 معیار تحویل: npm test، npx tsc -b، npm run build، حفظ تست‌های موجود، بررسی مرز persistence/network و اعلام دامنه دقیق. پس از تحویل برای بازبینی توقف شود.
 
 بررسی چک‌سام تحویل قدیمی: SHA-256 بالا دقیقاً با بایت‌های Git blob و نسخه LF گزارش منطبق است. checkout ویندوز همان فایل را با CRLF و چک‌سام 46029d0f83b87d0c649d26cd7c789a0f7bace721c72896e7eaa5b2896b473fc5 دارد؛ پس از حذف CR در پایان‌خط، چک‌سام دقیق مرجع حاصل می‌شود. اختلاف محتوا وجود ندارد؛ هیچ checksum یا گزارش تاریخی بازنویسی نشد.
+
+نتیجه: اجرا شد؛ گزارش تحویل در `mlino2/HANDOFF/20260911_INTENT_FLOW_REPORT.md` ثبت شده است. کامیت کد: `9ebc349737ba756ec5996e8e4d9534349202d2e5`.
