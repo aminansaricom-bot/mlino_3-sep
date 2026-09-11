@@ -17,11 +17,11 @@
 قواعد اجرایی:
 
 - MLINO یک Platform چندVertical است؛ Clinic فقط نخستین Module اجرایی است.
-- V1 مالک هویت متعارف Organization و حقیقت ثبت‌شدهٔ کسب‌وکار است.
+- V1 مالک Organization و حقیقت ثبت‌شدهٔ کسب‌وکار است؛ Organization با Business Identity Claim/Verification یکی نیست.
 - Core قرارداد عمومی، چرخهٔ عمر و Gateهای Capability، Offer، Evidence و Publication را تعریف می‌کند.
 - Clinic Module vocabulary، content، روش راستی‌آزمایی و workflow صنفی را فراهم می‌کند؛ این Module Entityهای عمومی Core را دوباره نمی‌سازد.
 - V2 فقط خروجی Published را از Read Port مصرف می‌کند و Business Truth نمی‌سازد یا تغییر نمی‌دهد.
-- Authorization به Membership و Grant تعلق دارد. Role به‌تنهایی Permission نیست.
+- Authorization فقط از Membership فعال و Permission Grant فعال می‌آید. Role هرگز منشأ Permission نیست.
 - Platform می‌تواند اختیار موجود را بررسی و مصرف کند، اما Permission یا Grant جدید ایجاد نمی‌کند.
 - Recommendation، ActionRecord، OutcomeRecord و EvaluationRecord موجودیت‌های جدا هستند و در این سند مدل تکراری برای آن‌ها ساخته نمی‌شود.
 - `CUSTOMER_DATA` در مدل مفهومی تعریف‌شده اما تا تصویب R8-a از ورود به Business Context مسدود است.
@@ -43,22 +43,66 @@
 
 | Entity | هدف | مالک منطقی | Clinic Module | Future Module | رابطه و چرخهٔ عمر پیشنهادی |
 |---|---|---|---|---|---|
-| `Organization` / Business Identity | هویت متعارف و پایدار کسب‌وکار | Core/V1 | فقط ارجاع و تکمیل محتوای مجاز | ارجاع | ایجاد → فعال/قابل‌استفاده → آرشیو طبق سیاست آتی؛ نام، دسته یا workspace کلید هویت نیست |
+| `Organization` | فضای کاری و هویت متعارف V1 برای نگهداری زمینهٔ کسب‌وکار | Core/V1 | فقط ارجاع و تکمیل محتوای مجاز | ارجاع | ایجاد آزاد → قابل‌استفاده → آرشیو طبق سیاست آتی؛ ساختن Organization ادعای مالکیت یا هویت حقوقی نیست |
+| `BusinessIdentityClaim` / Verification | ادعای اینکه Organization نمایندهٔ کدام کسب‌وکار واقعی است و وضعیت بررسی آن | Core/Governance؛ حقیقت ادعا در V1 | روش و شاهد راستی‌آزمایی صنفی را فراهم می‌کند؛ ادعا را به‌تنهایی تأیید نمی‌کند | روش و شاهد صنفی خود را فراهم می‌کند | چند ادعا می‌تواند به یک Organization وابسته باشد؛ حداکثر یک ادعای راستی‌آزمایی‌شدهٔ فعال برای هر کسب‌وکار واقعی؛ راستی‌آزمایی اختیار حکمرانی نمی‌دهد |
 | `Membership` | رابطهٔ عضو با Organization | Core | مصرف‌کنندهٔ وضعیت موجود؛ سازنده نیست | مصرف‌کننده | ایجاد/فعال‌سازی → لغو یا پایان؛ وضعیت آن از Session جداست |
-| `PermissionGrant` | اعطای صریح اختیار به Membership | Core و سازوکار Governance | فقط مصرف می‌کند | فقط مصرف می‌کند | اعطا → مصرف → لغو؛ از Role، مالکیت حقوقی یا متن UI به‌صورت ضمنی ساخته نمی‌شود |
-| `Session` | حمل بافت هویت و چرخهٔ نشست | Core | Session احرازشده نمی‌سازد | Session احرازشده نمی‌سازد | ایجاد → فعال → بسته/منقضی؛ Session اختیار، Organization یا Grant را جایگزین نمی‌کند |
-| `Consent` | ثبت رضایت لازم برای یک تعامل مجاز | Core، با ارجاع به سیاست مربوط | محتوای سیاست را تعیین نمی‌کند | محتوای سیاست را تعیین نمی‌کند | درخواست → اعطا/رد/انقضا/لغو؛ R8-a مرجع رضایت دادهٔ مشتری است و این مفهوم جایگزین آن نیست |
+| `PermissionGrant` | اعطای صریح اختیار به Membership | Core و سازوکار Governance | فقط مصرف می‌کند | فقط مصرف می‌کند | اعطا → فعال → پایان/لغو؛ فقط از مبناهای مصوب؛ از Role، مالکیت حقوقی یا متن UI به‌صورت ضمنی ساخته نمی‌شود |
+| `Session` | حمل بافت هویت و چرخهٔ نشست احرازشده | Core | Session احرازشده نمی‌سازد | Session احرازشده نمی‌سازد | ایجاد → فعال → بسته/منقضی؛ Session اختیار، Organization یا Grant را جایگزین نمی‌کند |
+| `Consent` (خارج از Persistence Phase 1) | مفهوم رضایت وابسته به سیاست؛ فقط پس از تصمیم OD-01 مدل می‌شود | **Deferred تا OD-01** | سیاست را تعیین نمی‌کند | سیاست را تعیین نمی‌کند | در Phase 1 هیچ Entity، جدول، ذخیره یا چرخهٔ پایدار ندارد؛ رضایت شروع گفت‌وگوی V2 فقط session-only است |
+
+#### مسیر اعطای Permission
+
+Permission فقط با این زنجیره معتبر است:
+
+```text
+Membership فعال
+        +
+Permission Grant فعال روی همان Membership
+        ↓
+Permission قابل‌مصرف برای همان عمل
+```
+
+Role هرگز منشأ Permission نیست. `ActorContext.role` در بررسی اجازه خوانده نمی‌شود؛ Role فقط برای مسیریابی یا الگوی کپی در لحظهٔ اعطا کاربرد دارد و هیچ پیوند زنده‌ای با Permission ندارد.
+
+مبناهای اعطای مصوب:
+
+- `founding`: اعطاهای عضو مؤسس هنگام ساخت Organization؛
+- `member_grant`: اعطا به‌وسیلهٔ عضو دارای Permission اعطا و لغو، فقط در حدود Permissionهای خودش؛
+- `designated_succession`: بازیابی بر اساس جانشینی از پیش تعیین‌شده؛
+- `ownership_recovery`: بازیابی مالکیت با شاهد بیرونی و کنترل‌های مصوب.
+
+`ADMIN_ACTION` هرگز مبنای اعطای Permission نیست. مدیر Platform و مدل هوش مصنوعی هیچ Permission کسب‌وکاری دریافت نمی‌کنند و راستی‌آزمایی هویت نیز Grant ایجاد نمی‌کند.
+
+حداقل شش Permission لازم برای انتشار V1 عبارت‌اند از: تأیید Capability، انتشار Capability، ساخت Offer، تأیید شرایط Offer، انتشار Offer، و اعطا/لغو Permission. درخواست و رهاسازی Business Identity Claim طبق D-61 یک Permission جداگانه در مرز هویت است. این اعطاها روی Membership فعال ثبت می‌شوند و فهرست فنی و Persistence آن‌ها در اجرای D-57 تعیین می‌شود؛ این سند فقط مسیر و قاعدهٔ مالکیت را تثبیت می‌کند.
 
 ### ۲.۲ Entityهای عمومی حقیقت کسب‌وکار
 
 | Entity | هدف | مالک منطقی | Clinic Module | Future Module | رابطه و چرخهٔ عمر پیشنهادی |
 |---|---|---|---|---|---|
-| `Capability` | بیان عمومی یک توانمندی قابل‌ارائه با ابعاد توانایی، مخاطب، تأیید و انتشار | Core | vocabulary و محتوای خدمت کلینیک را روی شناسهٔ عمومی فراهم می‌کند | vocabulary و content صنف خود را فراهم می‌کند | ایجاد داخلی → اعتبارسنجی/تأیید → قابل‌انتشار یا داخلی → انتشار → پس‌گرفتن/منقضی‌شدن |
+| `Capability` | بیان عمومی یک توانمندی قابل‌ارائه با ابعاد مستقل توانایی، مخاطب، تأیید و انتشار | Core | vocabulary و محتوای خدمت کلینیک را روی شناسهٔ عمومی فراهم می‌کند | vocabulary و content صنف خود را فراهم می‌کند | چهار بُعد مستقل: توانایی `planned/active/retired`، مخاطب `internal/customer_facing`، تأیید طبق ADR-0006، انتشار `unpublished/published/withdrawn`؛ `active + unpublished` معتبر است |
 | `Offer` | بیان عمومی قلم، بسته یا کمپین با Scope، نسخه، شرایط و بازهٔ اعتبار | Core | کاتالوگ و محتوای آفر کلینیکی را فراهم می‌کند | کاتالوگ و محتوای صنف خود را فراهم می‌کند | ایجاد نسخه → اعتبار زمانی و Scope → انتشار → انقضا/پس‌گرفتن؛ نسخهٔ قبلی حقیقت تاریخی خود را حفظ می‌کند |
 | `Evidence` | ثبت شاهد، منشأ، تازگی و وضعیت تأیید برای یک ادعا | Core | منبع و روش راستی‌آزمایی کلینیکی را فراهم می‌کند | منبع و روش صنفی خود را فراهم می‌کند | ثبت → بررسی/تأیید یا باقی‌ماندن تأییدنشده → تازه/کهنه/پس‌گرفته؛ provenance با confirmation یکی نیست |
-| `Publication` | Gate خروج اطلاعات عمومی از حقیقت داخلی به تصویر قابل‌مصرف | Core | محتوای قابل‌انتشار را آماده می‌کند؛ Gate را دور نمی‌زند | محتوای قابل‌انتشار را آماده می‌کند | درخواست Gate → بررسی شروط → Published → Revoked/Expired؛ انتشار خودکار مجاز نیست |
+| `Publication` | Gate خروج اطلاعات عمومی از حقیقت داخلی به تصویر قابل‌مصرف | Core | محتوای قابل‌انتشار را آماده می‌کند؛ Gate را دور نمی‌زند | محتوای قابل‌انتشار را آماده می‌کند | درخواست Gate → بررسی شروط → Published → Withdrawn/Expired؛ انتشار خودکار مجاز نیست |
 
 `Publication` در این سند یک Gate و سابقهٔ وضعیت است، نه مجوز جدید و نه اختیار مستقل برای Module. تأیید شرایط انتشار باید با Membership و Grant موجود انجام شود.
+
+#### پیش‌شرط‌های کامل Publication Gate
+
+انتشار Capability فقط وقتی ممکن است که هر پنج پیش‌شرط D-52 و پیش‌شرط ششم D-61 هم‌زمان برقرار باشند:
+
+۱. بُعد توانایی Capability برابر `active` باشد؛
+
+۲. بُعد مخاطب برابر `customer_facing` باشد؛
+
+۳. بُعد تأیید `human_confirmed` با `confirmedBy` و Membership و Permission فعالِ قابل‌راستی‌آزمایی باشد؛
+
+۴. حداقل یک Evidence غیراستنتاجی وجود داشته باشد؛
+
+۵. تأیید و Evidence تازه باشند و افق تازگیِ وابسته به Module رعایت شود؛
+
+۶. برای هر کسب‌وکار واقعی، یک Business Identity Claim راستی‌آزمایی‌شدهٔ فعال وجود داشته باشد؛ ساخت Organization یا راستی‌آزمایی، خودبه‌خود اختیار حکمرانی نمی‌سازد.
+
+برای Offer، همهٔ Capabilityها و Offerهای ارجاع‌شده نیز باید منتشرشده و واجد شرایط باشند. پس گرفتن هر Capability یا شاهد بی‌اعتبار باید انتشار وابسته را در جهت امن باطل کند. ساخت نسخهٔ تازهٔ Offer هرگز به‌تنهایی آن را Published نمی‌کند و نیازمند عمل انسانی مجاز است. `withdrawn` با `retired` یا دسترس‌پذیری لحظه‌ای یکی نیست.
 
 ### ۲.۳ پایه‌های Business Context در Phase 1
 
@@ -75,11 +119,11 @@
 
 | Entity | هدف | مالک منطقی | Clinic Module | Future Module | رابطه و چرخهٔ عمر پیشنهادی |
 |---|---|---|---|---|---|
-| `Intent` | بیان نیاز کاربر در تعامل جاری | Core | معنای صنفی را به Core تحمیل نمی‌کند | مصرف‌کنندهٔ تجربهٔ خود | empty → collecting → interpreted → awaiting confirmation → confirmed؛ سپس expired/cancelled؛ هر تغییر معنادار revision جدید می‌سازد |
+| `Intent` | بیان نیاز کاربر در گفت‌وگوی جاری دستیار | Core؛ به‌صورت assistant conversation context | معنای صنفی را به Core تحمیل نمی‌کند | مصرف‌کنندهٔ تجربهٔ خود | empty → collecting → interpreted → awaiting confirmation → confirmed؛ سپس expired/cancelled؛ هر تغییر معنادار revision جدید می‌سازد؛ به Session احرازشدهٔ Core وابسته نیست |
 | `Context` | قیود قابل‌مشاهدهٔ مرتبط با Intent | Core | فقط vocabulary لازم را از Port می‌گیرد | vocabulary خود را از Port می‌گیرد | ایجاد → اصلاح/تأیید → invalidate/reset؛ تغییر معنادار نتیجهٔ قبلی را باطل می‌کند |
 | `ExperienceOrchestration` | هماهنگی چرخهٔ تجربه و مرزهای Core | Core | عملیات صنفی را نمی‌سازد | فقط از مرز عمومی استفاده می‌کند | بدون Business Truth مستقل؛ فقط وضعیت‌ها و Gateها را هماهنگ می‌کند |
 
-در V2، `Session`، `Permission` و `Consent` ممکن است در UI با واژه‌های نزدیک دیده شوند. سند اجرایی باید صریح باشد: حالت محلی دستیار Session احرازشدهٔ Core نیست؛ دروازهٔ محیط Permission Grant سازمانی نیست؛ رضایت شروع گفت‌وگو جای R8-a را نمی‌گیرد. دستیار مشتری اختیار هیچ شخصی را حمل نمی‌کند.
+در V2، `Session`، `Permission` و `Consent` ممکن است در UI با واژه‌های نزدیک دیده شوند. سند اجرایی باید صریح باشد: حالت محلی دستیار، **assistant conversation context** و session-only است و Session احرازشدهٔ Core نیست؛ دروازهٔ محیط Permission، Grant سازمانی نیست؛ رضایت شروع گفت‌وگو جای R8-a را نمی‌گیرد. دستیار مشتری برای شروع گفت‌وگو به Session احرازشدهٔ Core نیاز ندارد و اختیار هیچ شخصی را حمل نمی‌کند. Session احرازشده فقط در مسیر عضو احرازشدهٔ V1 وارد زنجیره می‌شود.
 
 ### ۲.۵ موجودیت‌های چرخهٔ عمر که در این Phase تکرار نمی‌شوند
 
@@ -100,6 +144,7 @@
 ```mermaid
 flowchart TD
   O[Organization]
+  B[Business Identity Claim / Verification]
   M[Membership]
   G[PermissionGrant]
   C[Capability]
@@ -107,7 +152,8 @@ flowchart TD
   E[Evidence]
   R[Offer]
   P[Publication Gate]
-  S[Core Session]
+  S[Authenticated Core Session]
+  CS[Assistant conversation context\nsession-only]
   I[Intent]
   X[Context]
   T[Experience Orchestration]
@@ -120,6 +166,7 @@ flowchart TD
 
   O --> M
   M --> G
+  O --> B
   O --> C
   O --> F
   C --> R
@@ -127,15 +174,17 @@ flowchart TD
   R --> E
   C --> P
   R --> P
+  B -. publication prerequisite .-> P
   P --> VP
   CM -. content for .-> C
   CM -. content for .-> R
   CM -. evidence source .-> E
-  S --> I
+  CS --> I
   I --> X
-  T --> S
+  T --> CS
   T --> I
   T --> X
+  S -. optional member path .-> T
   C -. context reference .-> N
   F -. objective/KPI .-> N
   N --> A
@@ -156,9 +205,9 @@ flowchart TD
 
 برای مسیر `Onboarding → Capability → Offer → Publish → Business Action Loop` این موارد لازم‌اند:
 
-۱. **Organization Identity:** یک شناسهٔ پایدار و متعارف در V1، مستقل از نام و مستقل از Clinic Module.
+۱. **Organization و Business Identity Claim:** Organization یک فضای کاری با شناسهٔ پایدار و متعارف V1 است. ادعای اینکه این Organization نمایندهٔ کدام کسب‌وکار واقعی است، در `BusinessIdentityClaim` جدا ثبت و راستی‌آزمایی می‌شود. ساخت Organization ادعای هویت یا مالکیت حقوقی نیست؛ یک Organization می‌تواند چند ادعا داشته باشد و حداکثر یک ادعای راستی‌آزمایی‌شدهٔ فعال برای هر کسب‌وکار واقعی مجاز است.
 
-۲. **Membership و PermissionGrant:** نمایندهٔ مجاز باید با Membership و Grant موجود قابل‌شناسایی باشد. Role فقط زمینه است و از آن Grant ضمنی استخراج نمی‌شود. اگر D-57 هنوز عملیاتی نشده باشد، Demo باید Fixture صریح و برچسب‌خورده داشته باشد.
+۲. **Membership و PermissionGrant:** نمایندهٔ مجاز باید با Membership فعال و Grant فعال روی همان Membership قابل‌شناسایی باشد. Role هرگز منشأ Permission نیست و `ActorContext.role` در بررسی اجازه خوانده نمی‌شود. اگر D-57 هنوز عملیاتی نشده باشد، Demo باید Fixture صریح و برچسب‌خورده داشته باشد.
 
 ۳. **Capability عمومی Core:** ایجاد Capability با ارجاع به Organization، محتوای صنفی جدا، ابعاد تأیید و انتشار و وضعیت freshness.
 
@@ -166,7 +215,7 @@ flowchart TD
 
 ۵. **Evidence عمومی Core:** منشأ، زمان، confidence و `confirmedBy` جدا ثبت شوند. `AI_INFERRED` بدون تأیید انسانی Fact یا Capability قابل‌انتشار نمی‌شود.
 
-۶. **Publication Gate:** پیش از اولین انتشار، راستی‌آزمایی هویت طبق D-61، Grant معتبر، Evidence کافی و اعتبار Capability/Offer بررسی شود. لغو و انقضا باید در مصرف بعدی قابل‌تشخیص باشد.
+۶. **Publication Gate:** پیش از اولین انتشار، وجود Business Identity Claim راستی‌آزمایی‌شدهٔ فعال طبق D-61، Grant معتبر، Evidence کافی و اعتبار Capability/Offer بررسی شود. راستی‌آزمایی هویت هرگز Grant یا اختیار حکمرانی ایجاد نمی‌کند. لغو و انقضا باید در مصرف بعدی قابل‌تشخیص باشد.
 
 ۷. **مصرف داخلی و خروجی عمومی جدا:** V1 می‌تواند Capability معتبر اما منتشرنشده را برای Recommendation داخلی بخواند؛ V2 فقط Published Read Port را می‌خواند.
 
@@ -185,6 +234,7 @@ flowchart TD
 **هستهٔ هویت و حاکمیت:**
 
 - `Organization`
+- `BusinessIdentityClaim` و سابقهٔ Verification آن
 - `Membership`
 - `PermissionGrant`
 - سابقهٔ لازم برای لغو Grant و ردیابی تصمیم‌های حاکمیتی، در حدی که ADRهای مربوط تصویب کنند.
@@ -202,6 +252,7 @@ flowchart TD
 **حالت تجربه:**
 
 - حالت `Session`، `Intent` و `Context` در MVP مشتری باید session-only بماند؛ ذخیرهٔ بلندمدت یا Transcript در این Phase طراحی نمی‌شود.
+- `Consent` عمداً در Persistence Phase 1 وجود ندارد. رضایت انتشار همان عمل انتشار توسط عضو مجاز برای شیء مشخص است و رضایت آغاز گفت‌وگو فقط در assistant conversation context و به‌صورت session-only می‌ماند. مدل Consent داده‌ای پس از تصمیم OD-01 طراحی می‌شود.
 
 **Entityهای خارج از مدل تکراری این Phase:**
 
@@ -215,17 +266,19 @@ flowchart TD
 ### ۵.۳ روابطی که Persistence آینده باید حفظ کند
 
 - Organization ← Membership ← PermissionGrant؛
+- Organization ← BusinessIdentityClaim/Verification؛ برای هر کسب‌وکار واقعی حداکثر یک Claim راستی‌آزمایی‌شدهٔ فعال؛
 - Organization ← Capability ← Offer؛
 - Capability/Offer ← Evidence؛
 - Capability/Offer ← Publication Gate؛
 - Organization ← Fact/Goal/KPI؛
-- Session ← Intent ← Context؛
+- assistant conversation context ← Intent ← Context؛ Session احرازشدهٔ Core فقط در مسیر عضو احرازشده و به‌صورت اختیاری وارد می‌شود؛
 - Recommendation → ActionRecord → OutcomeRecord → EvaluationRecord، با جدایی Entityها و زمان‌های مستقل؛
 - ارتباط workspace یا Business Twin با Organization فقط از قرارداد `ExternalWorkspaceLink` و در V1 انجام می‌شود.
 
 ### ۵.۴ چیزهایی که نباید در Core schema وجود داشته باشد
 
 - جدول یا فیلد مخصوص Clinic مانند `Doctor`، `Specialty`، `Treatment`، `Appointment`، `ClinicCapacity`، `ClinicCatalog` یا vocabulary درمانی؛
+- ادغام Business Identity Claim یا Verification با Organization؛ Claim باید رکورد و تاریخچهٔ مستقل داشته باشد؛
 - دسته‌بندی بستهٔ Clinic یا Verticalهای آینده در Enum/فهرست ثابت Core؛
 - جدول‌های Content Studio یا ستون `organization_id` در شِمای Content Studio؛
 - جدول Business Directory یا Business Twin مخصوص V2؛
@@ -246,8 +299,9 @@ flowchart TD
 
 Core باید سرویس‌های عمومی زیر را عرضه یا تعریف کند:
 
-- **Identity Reference:** resolve و اعتبارسنجی Organization ID متعارف؛ بدون ساخت هویت موازی در Module یا V2.
-- **Membership Authorization Check:** بررسی Membership و Grant موجود برای یک عملیات؛ بدون اعطا، اصلاح Grant یا تصمیم‌گیری بر اساس Role تنها.
+- **Organization Identity Reference:** resolve و اعتبارسنجی Organization ID متعارف؛ ساخت Organization با Business Identity Claim/Verification ادغام نمی‌شود.
+- **Business Identity Claim/Verification:** ثبت، بررسی و خواندن وضعیت ادعای هویت طبق D-61؛ بدون اعطای Permission، تغییر Membership یا انتخاب بین مدعیان.
+- **Membership Authorization Check:** بررسی Membership فعال و Grant فعال روی همان Membership برای یک عملیات؛ بدون اعطا یا اصلاح Grant. Role هرگز منشأ Permission نیست و `ActorContext.role` در بررسی اجازه خوانده نمی‌شود.
 - **Capability Contract Service:** اعتبارسنجی ساختار و ابعاد عمومی Capability؛ بدون تفسیر vocabulary کلینیک.
 - **Offer Contract Service:** اعتبارسنجی نسخه، Scope، شرایط و زمان اعتبار Offer؛ بدون ساخت محتوای صنفی.
 - **Evidence Service:** بررسی provenance، freshness، confidence و confirmation؛ `confirmedBy` از provenance جداست.
@@ -267,7 +321,7 @@ Clinic Module باید فقط این مسئولیت‌ها را عرضه کند:
 - منطق ظرفیت و Fixture محدود دمو؛
 - تولید signal یا recommendation داخلی مربوط به ظرفیت، بدون تغییر در semantics عمومی Core.
 
-Clinic Module نمی‌تواند Permission/Grant، Publication Gate، سازمان متعارف یا Session احرازشدهٔ خودش را بسازد.
+Clinic Module نمی‌تواند Permission/Grant، Publication Gate، Organization متعارف، Business Identity Claim معتبر یا Session احرازشدهٔ خودش را بسازد.
 
 ### ۶.۳ مصرف V1 و V2
 
