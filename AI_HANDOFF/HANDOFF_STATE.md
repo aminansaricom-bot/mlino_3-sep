@@ -1,24 +1,24 @@
-HANDOFF_ID: HANDOFF-20260911-WINDOW1-PREP
+HANDOFF_ID: HANDOFF-20260911-FIRST-90-DAY-PRODUCT-STRATEGY
 AUTHOR: CLAUDE
-PHASE: WINDOW_1_PREPARATION_NO_NEW_DECISIONS
+PHASE: MVP_VALUE_VALIDATION_STRATEGY
 STATUS: DELIVERED_AWAITING_INDEPENDENT_REVIEW
-REVIEW_VERDICT: Window 1 items that need no new decision are done: formal reply to the V2 live-offer-pulse CR, and a decision brief for OD-08 and OD-05; the remaining Window 1 items are owner-only
-REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260911_WINDOW1_PREP_REPORT.md
-REPORT_SHA256: b34ac8805d1951ab4e0c6ee6ca1679f0a89a39bbb3672b146eb775f4ae6ddee9
+REVIEW_VERDICT: B - MINOR STRATEGIC ADJUSTMENTS REQUIRED (strong direction; two input plans missing; demo loop must close through the system of record; V2 maintenance-only until G4; G1 and G2 still with the owner)
+REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260911_FIRST_90_DAY_PRODUCT_STRATEGY_REPORT.md
+REPORT_SHA256: 194fed7136cf5cf354ddb7878e14130c547c2c058eaf933fb7e4b4ad9b247115
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - documentation only, zero code change). Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-12T00:30:00+03:30
-NEXT_ACTION: Owner-only actions for Window 1. (1) OD-09: create the private Content Studio repository manually on GitHub, or provide a token allowed to create repositories; the earlier attempt was refused with 403. (2) Verify whether Malino is live today and whether pilot clinics use it; this decides between the OD-08 options. (3) Decide OD-08; the brief recommends the Malino path under three conditions if Malino is live, otherwise a minimal MLINO issuer plus upload of real clinic data. (4) Decide OD-05; the brief recommends a contract 02 v1 with the D-52, D-53, D-56 and D-61 sections plus address, phone, website, Instagram, business-provided logo and image, and hours as a Fact; no rating, because V1 has no rating source; chat after OD-01; the offer display radius stays open. (5) Commit the "MVP Execution Plan" to the repository if it exists. Exit criteria for Window 1 are N1 and N2.
+CODE_COMMIT_SHA: (none - strategy document only, zero code change). Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-12T00:50:00+03:30
+NEXT_ACTION: The owner decides. Concrete adjustments, and only these. (1) MLINO_FIRST_VALUE_PATH_PLAN.md and MLINO_MVP_EXECUTION_PLAN.md, named as review inputs, do not exist. They were searched for in the repository, origin/main, the working folder, Desktop, Documents and Downloads. They should be committed and reconciled with MLINO_FIRST_90_DAY_PRODUCT_STRATEGY.md. (2) The investor demo loop must close through the clinic's system of record (steps 7 and 8: the booking event returns and the outcome is evaluated), otherwise business value and customer value remain two separate demos. This depends on OD-08. (3) V2 is maintenance-only until G4, the first closed loop. (4) G1 (OD-09) and G2 (OD-08, OD-05, Malino status) are owner actions, and all building waits on them.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260911-POST-ARCHITECTURE-STRATEGY-REVIEW
-EXECUTED_INSTRUCTION_ID: OWNER-20260911-CONTINUE-AFTER-STRATEGY-REVIEW (owner message "continue"; no explicit id supplied; this identifier is assigned by me for traceability and is recorded as assigned, not as received)
+PREVIOUS_HANDOFF_ID: HANDOFF-20260911-WINDOW1-PREP
+EXECUTED_INSTRUCTION_ID: OWNER-20260911-FIRST-90-DAY-PRODUCT-STRATEGY (no explicit id was supplied by the owner; this identifier is assigned by me for traceability and is recorded as assigned, not as received)
 
-MODEL_ROUTING_NOTE: Executed by Claude Opus 5.
+MODEL_ROUTING_NOTE: Routed to "Claude Opus 5 - MLINO Chief Product & Strategy Reviewer", which is the model that executed it.
 
-HANDOFF_PRECONDITION_CHECK: Repository state was inspected before writing: in sync with origin at 42d11b9, clean working tree. The push was preceded by a check that origin/main was still 42d11b9.
+HANDOFF_PRECONDITION_CHECK: Repository state was inspected before writing: in sync with origin at 151f10e, clean working tree. The push was preceded by a check that origin/main was still 151f10e.
 
-SCOPE_CONSTRAINT_NOTE: Added mlino2/HANDOFF/20260911_CLAUDE_RESPONSE_CR_LIVE_OFFER_PULSE.md and mlino_book/DECISION_BRIEF_OD08_OD05.md, plus the AI_HANDOFF files. No decision taken, no ADR changed, nothing reopened. Code, schema, API, contract 02, frozen contracts, the register, the roadmap and the changelog were not touched; the V2 CR file itself was not edited.
+SCOPE_CONSTRAINT_NOTE: Only mlino_book/MLINO_FIRST_90_DAY_PRODUCT_STRATEGY.md and the AI_HANDOFF files were added or changed. No ADR modified, no architecture decision reopened, no module created, Core not redesigned; register, roadmap, changelog, code, schema, API and contracts untouched.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
 
-NOTE: CR reply. The route is a contract/backend CR under OD-05. A short-term offer is an Offer with a short validity window (D-53: temporary is a dimension, not a form; D-68), so no separate LiveOfferEvent is needed. Delivery goes only through the AC-2 gateway. Expired or unconfirmed offers fail closed and are hidden (D-53 rule 7, D-56, ADR-0010 decision 6). "Live" must not promise availability (D-56). Build waits for the minimum V1 publication path (N5). Astra's current behaviour stands. The display radius (OD-05) and user location (OD-01) are left explicitly open. Security note: a GITHUB_TOKEN.txt exists in the local parent folder outside the repository; it was not opened; moving it to an environment variable is recommended.
+NOTE: Platform versus vertical: clinic is a strong beachhead. Its pain is measurable, the engines are already written and tested, it has single-player value, and a Malino data path is assumed but unverified. Four safeguards against vertical lock-in: (1) the Core leak inventory never grows beyond 9; (2) the product surface speaks in Core concepts, with trade words only as module content; (3) no clinical features; (4) V2 stays multi-category. Narrative: "a trustworthy operational intelligence layer for local businesses"; pillars are market expansion, multiple verticals (honest about the one-time M1 CCR), defensibility, and why the Core architecture matters; a list of forbidden claims is included. Demo: one closed loop of eight steps, made only from approved decisions. Capacity opportunity, recommendation, human acceptance, an offer as an action, human publication with verified identity, customer discovery on published truth with handoff to the system of record, the booking event returning, and outcome evaluation with honest attribution. Any open step must be disclosed, never closed with fabricated data. V1 first until N4/G4; V2 then consumes only published truth. Success criteria: eight binary gates G1 to G8, and pilot metrics whose thresholds the owner sets, with no fabricated numbers. Build priorities: nine rows in three sequence windows. An explicit do-not-build list and seven demo requirements are included.
