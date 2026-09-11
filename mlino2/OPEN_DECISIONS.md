@@ -2,7 +2,48 @@
 
 This register lists decisions that block implementation or require product/architecture approval. It complements the V2 HANDOFF reports and does not replace V1 contracts.
 
-## V2 Local Discovery implementation readiness
+## Current technical-design review — 2026-09-10
+
+The product owner's current request confirms Architecture Closure and Implementation Plan approval. [V2_TECHNICAL_ARCHITECTURE_DESIGN.md](HANDOFF/20260910_V2_REVIEW/V2_TECHNICAL_ARCHITECTURE_DESIGN.md) is the technical-design reference. Earlier blocked/pending closure entries below are historical, not reopened architecture decisions.
+
+Technical choices awaiting review: feature-scoped session controller/reducer; directly bound local interpreter; eligibility/ranking policy consuming Directory rather than the legacy scorer; task-only details navigation without persistent viewed history; injected adapters for lifecycle/privacy tests. These do not introduce new domain entities, schemas or APIs.
+
+The separate instruction to implement remains outstanding. Runtime validation and delivery evidence remain future work. Live V1 evidence/availability/applicability contracts, production scale, modules, AR, Virtual Storefront and persistent memory remain separate future gates, not hidden prerequisites for the approved mock slice.
+
+## V2 Local Discovery implementation plan
+
+[V2_IMPLEMENTATION_PLAN.md](HANDOFF/20260910_V2_REVIEW/V2_IMPLEMENTATION_PLAN.md) is the current planning reference after the Architecture Gate A result. It defines phases, frontend/backend responsibilities, Mock/Real boundaries, required conceptual contracts, V1 dependency points, testing and completion criteria.
+
+The plan does not create implementation authority. AR, Virtual Storefront, the full module marketplace and production integrations remain explicitly excluded.
+
+## Historical V2 gate alignment — before closure acceptance
+
+[V2_GATE_ALIGNMENT_UPDATE.md](HANDOFF/20260910_V2_REVIEW/V2_GATE_ALIGNMENT_UPDATE.md) applies pre-implementation review R1–R4 in the source documents and [readiness checklist](HANDOFF/20260910_V2_REVIEW/V2_IMPLEMENTATION_READINESS_CHECKLIST.md). **Documentation corrections applied; closure acceptance and separate implementation instruction pending.** No replacement A/B/C verdict or runtime approval is claimed.
+
+| Canonical gate | Responsibility and evidence | Current status |
+|---|---|---|
+| CG-1 — Core / V1 / V2 responsibility boundary | Core owns shared Intent/Permission/Consent/Session/Orchestration/Routing mechanisms; user meaning, V1 business truth and governance remain authoritative. Ownership §§4–5; Orchestration §4. | Documentation aligned; acceptance pending. |
+| CG-2 — Assistant permission, consent and memory boundary | Permission → Consent before interpretation; exact revision confirmation before Matching; correction/pause/resume and disposal; no transcript. Orchestration §§1–2; Memory §4.4. | Documentation aligned; acceptance pending. |
+| CG-3 — Initial implementation scope | Local single-task/session, manual context, mock Directory, 0–3 businesses, one qualifying option per business and Open Business Details. Checklist §§2–5. | Scope preserved; no expansion authorized. |
+
+Historical CG-1 maps to current CG-1 and CG-2 authority; historical CG-2 orchestration and historical CG-3 memory map to current CG-2. Current CG-3 scope does not retire a memory obligation. Original review identifiers and findings are preserved in the historical section below.
+
+| Readiness item | Current disposition |
+|---|---|
+| IR-1 | R1–R4 documentation edits completed with scenario references in Alignment §6; closure acceptance remains open. |
+| IR-2 | Separate product-owner instruction to implement remains open; this documentation request is not that instruction. |
+| IR-3 | Experimental evidence only; no live stock/availability/freshness or product-discount assertion without evidence. |
+| IR-4 | Runtime tests, privacy inspection, desktop/mobile verification and delivery evidence are future checks after implementation. |
+
+Business truth, Capability, Evidence, Availability, Recommendations, Actions and Learning remain V1-owned. V2 owns Matching/Experience/Interaction. Assistant is not a business logic owner and cannot create facts/capabilities or bypass permissions. Selected role/screen/provider content grants no access.
+
+Current-session cleanup is defined, not an unresolved retention choice: current-only wording, no transcript even temporarily, disposal at terminal controls or existing 30-minute/two-hour/session-ending limits. Future persistent-memory/audit/provider/AR rules remain separate and unavailable in this slice. Permission/Consent separation adds no new entity or permission service.
+
+## Historical readiness register — before alignment
+
+The following IR/CG statuses record the earlier review baseline. The current register above and alignment crosswalk govern subsequent work.
+
+### Historical V2 Local Discovery implementation readiness
 
 [V2_IMPLEMENTATION_READINESS_CHECKLIST.md](HANDOFF/20260910_V2_REVIEW/V2_IMPLEMENTATION_READINESS_CHECKLIST.md) required components, V1 dependencies, mock/real boundaries, exclusions and validation evidence for the bounded first implementation. **Implementation remains blocked.**
 
@@ -15,7 +56,7 @@ This register lists decisions that block implementation or require product/archi
 
 Live V1 projection, provider permission/handoff, production availability and offer applicability, persistent memory, cross-session inference, modules, AR/Virtual Storefront, telemetry and business outcome measurement remain future decisions. They are not hidden dependencies of the approved mock slice and cannot enter it without a separate gate.
 
-## Current V2 architecture closure gate
+### Historical V2 architecture closure gate
 
 [V2_ARCHITECTURE_CLOSURE_REVIEW.md](HANDOFF/20260910_V2_REVIEW/V2_ARCHITECTURE_CLOSURE_REVIEW.md) records **B) Ready with minor changes** at baseline `0495d4ab253020a7a71dfc851c5ec244774cffb2`. Scope: local single-task/session Intent-Guided Local Discovery over experimental data, manual context, 0–3 businesses and Open Business Details.
 
@@ -49,7 +90,7 @@ No unresolved conceptual decision blocks further **Experience Matching design** 
 
 OD-30 therefore requires no new entity, schema, API, migration, storage layer, or parallel knowledge store. Future decisions for outcome/evaluation vocabulary, consent and retention, aggregate learning, model effects, telemetry, and any reverse V2→V1 direction remain open. This alignment does not authorize implementation or change frozen V1/Backend contracts.
 
-## Experience Orchestration design — pending product approval
+## Historical Experience Orchestration proposal — prior to approved direction and alignment
 
 [EXPERIENCE_ORCHESTRATION_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_ORCHESTRATION_DESIGN.md) defines the next V2 design layer without authorizing implementation. It preserves the confirmed Intent → Context → Capability → Evidence → Eligibility → Ranking → Experience boundary and proposes a bounded lifecycle, Assistant posture, Core/Module split, and future AR/Virtual Storefront dependencies.
 
@@ -62,7 +103,7 @@ OD-30 therefore requires no new entity, schema, API, migration, storage layer, o
 
 Implementation, schema, API, AR activation, module integration, persistent memory, telemetry, and payment policy remain blocked until these decisions are reviewed and approved.
 
-## Assistant memory boundary — pending product approval
+## Historical Assistant memory proposal — prior to approved direction and alignment
 
 [ASSISTANT_MEMORY_BOUNDARY_DECISION.md](HANDOFF/20260910_V2_REVIEW/ASSISTANT_MEMORY_BOUNDARY_DECISION.md) recommends **Option A — session-only memory** for the current local, single-session V2 scope.
 

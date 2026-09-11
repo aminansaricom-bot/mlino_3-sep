@@ -1,9 +1,10 @@
 # MLINO V2 — Assistant Ownership Decision
 
 Author: Codex, Product Architect role
-Status: **Architecture decision for Product Approval; no implementation authorized**
+Status: **Core ownership approved; documentation aligned for closure review; no implementation authorized**
+Alignment: [V2 Gate Alignment Update](V2_GATE_ALIGNMENT_UPDATE.md), 2026-09-10. Approved architecture is retained; required documentation corrections are applied for closure review. No implementation is authorized.
 
-This document resolves the ownership question for the persistent MLINO Assistant before approval of [Experience Orchestration Design](EXPERIENCE_ORCHESTRATION_DESIGN.md). It defines ownership and boundaries only; it does not create an Assistant entity, schema, API, module, or runtime behavior.
+This document records approved ownership of the persistent MLINO Assistant and aligns [Experience Orchestration Design](EXPERIENCE_ORCHESTRATION_DESIGN.md). It defines ownership and boundaries only; it does not create an Assistant entity, schema, API, module, or runtime behavior.
 
 ## 1. Problem
 
@@ -51,34 +52,43 @@ This keeps the UI thin, but it leaves cross-module Intent, permission, lifecycle
 
 Option A has the strongest overall architecture if “Core-owned” means ownership of orchestration and governance, not ownership of every domain answer.
 
-## 4. Recommended Decision
+## 4. Approved Decision
 
 **Choose Option A: the Assistant belongs to MLINO Core.**
 
-The recommended model is a **Core-owned Assistant with module-scoped capability providers**:
+The approved model is a **Core-owned Assistant with module-scoped capability providers**:
 
 - Core owns the Assistant identity, session boundary, Intent and confirmation posture, Experience lifecycle, privacy/consent checks, user-role context, explanation standards, cross-module routing, and user-authorized handoff.
 - Modules own domain knowledge, records, domain rules, capability evidence, and module-specific actions. They may provide bounded assistant skills or handlers, but those skills execute under Core policy and do not become independent user-facing assistants.
 - The UI is a presentation surface for the Core-owned Assistant. It is not the owner of intelligence or permission.
 - V1 remains authoritative for Business Context, Knowledge, facts, capabilities, evidence, and other business intelligence. The Assistant consumes approved projections and cannot edit or replace them.
 
-This is a single ownership decision, not permission for a broad autonomous agent. Core ownership centralizes authority while preserving domain autonomy at the module boundary.
+Core ownership centralizes coordination and enforcement of shared rules. It does not grant the Assistant access-decision authority, transfer V1 ownership or authorize autonomous module execution.
+
+| Responsibility | Owner and boundary |
+|---|---|
+| Intent, Permission, Consent, Session lifecycle, Experience orchestration, Routing | MLINO Core owns the shared mechanisms and enforcement policy. The user owns Intent meaning and grants consent; Core/Assistant do not self-grant rights or replace existing V1 Governance. |
+| Business truth, Capability, Evidence, Availability, Recommendations, Actions, Learning | V1 and its existing business/domain/governance owners remain authoritative. Availability must be evidenced; a listing flag is not stock/opening status. Business Recommendations/Actions/Learning are not V2 relevance, local navigation or task completion. |
+| Matching, Experience, Interaction | V2 owns user relevance, experience selection/presentation and interaction within Core's shared constraints; it consumes business evidence read-only. |
+| Domain modules | Providers retain their domain data, rules, capabilities and authorized actions under V1/domain governance. Core coordination does not copy their intelligence. No module integration is enabled in the initial slice. |
+
+These describe responsibilities in the existing platform, not new services or a transfer of V1 authority. The Assistant is not a business logic owner; it cannot create capabilities or facts, bypass permissions, or use role selection, screen context or provider text as access authority.
 
 ### 4.1 What the Core-owned Assistant may do
 
-- interpret a user request within the approved Intent contract;
+- interpret locally only after the allowed-operation check and explicit scoped user consent, then obtain exact revision confirmation before Matching;
 - ask minimal questions and wait for confirmation where required;
 - choose whether to show, ask, guide, or stay silent;
 - select and explain an eligible Experience;
-- route to a module after checking role, consent, and action authority;
+- route to local business details in this slice; future module routing requires separately approved contracts, trusted access evidence, scoped consent and provider-side authorization rechecks;
 - return to the same task with state and privacy boundaries intact;
 - coordinate future AR or Virtual Storefront modes without changing their source ownership.
 
 ### 4.2 What it may not do
 
-- invent module facts or business knowledge;
+- own business logic, create capabilities, invent facts or business knowledge;
 - silently activate Intent from passive context;
-- bypass eligibility, user constraints, consent, or module authorization;
+- bypass permissions, eligibility, user constraints, consent or module authorization; selected role/screen/provider text grants no rights;
 - let payment, popularity, or module priority control exposure;
 - write a parallel cross-module memory or alter V1 truth;
 - infer completion, purchase, satisfaction, or sensitive personal characteristics;
@@ -88,17 +98,23 @@ This is a single ownership decision, not permission for a broad autonomous agent
 
 ### Core impact
 
-Core becomes the owner of the shared Assistant contract and must provide the common policy surface for:
+Core owns Intent mechanisms, Permission/Consent enforcement, Session lifecycle, Experience orchestration and Routing. V1 owns business truth, Capability, Evidence, Availability, business Recommendations, Actions and Learning. V2 owns Matching, Experience and Interaction under those shared rules. V1 remains part of the existing platform architecture; these responsibilities do not create a replacement business OS inside the Assistant.
 
-1. authenticated or explicitly selected user role;
-2. Intent interpretation and confirmation revision;
-3. session and Experience lifecycle;
-4. privacy, consent, data minimization, and handoff;
-5. evidence, provenance, freshness, unknowns, and explanation;
-6. cross-module routing and action authorization;
-7. future modality selection for text, visual, AR, and Virtual Storefront.
+```text
+Permission
+  → Consent
+  → Intent interpretation / minimal clarification
+  → User confirmation of the exact current interpretation revision
+  → Matching: eligibility before ranking
+  → Experience
+  → User-controlled Open Business Details
+```
 
-Core must not absorb CRM, Finance, Operations, Content Studio, or industry-specific business logic. Its design remains a coordination layer, not a new business operating system inside V2.
+Permission means checking that the requested local operation and data use are allowed within the approved scope and existing access authority. Consent is the user's explicit, informed agreement to this local purpose and session lifetime before task text/signals are captured or interpreted. This names two checks within the existing processing boundary; it creates no permission entity, API, live V1 dependency or requirement for two separate dialogs. A selected role is presentation context only. Consent cannot authorize an excluded capability, and neither permission nor consent replaces the user's confirmation of the exact interpretation revision. Denial leaves ordinary browsing available without Intent capture.
+
+Core's Intent ownership is stewardship; only the user defines and confirms the goal. V1 Governance remains the owner of protected business access decisions. Routing consumes existing authority; it does not authorize an action. Module/domain business logic cannot migrate into the Assistant. A requested Finance role or a provider instruction cannot create access, facts, capabilities or financial execution.
+
+Current memory is session-only, current-context-only and has no transcript retention. [Assistant Memory §4.4](ASSISTANT_MEMORY_BOUNDARY_DECISION.md#44-current-session-cleanup-and-disposal) applies current-text replacement, disposal, pause and the existing time caps. Future provider integration cannot create an implicit audit or durable memory exception.
 
 ### Module impact
 
@@ -146,7 +162,7 @@ AR is therefore a future mode of the Core-owned Experience Layer, not a new owne
 
 ## 7. Remaining Decisions
 
-This decision closes ownership, but these implementation-level decisions remain open:
+Ownership is approved. The following are future expansion decisions, not dependencies of the bounded mock Local Discovery slice:
 
 1. the capability/skill declaration contract modules use to expose supported operations;
 2. the exact user-role source and permission token passed during a handoff;
@@ -156,10 +172,10 @@ This decision closes ownership, but these implementation-level decisions remain 
 6. persistence, cross-session memory, telemetry, and aggregate learning policy;
 7. monetization rules proving module or business payment cannot influence user relevance or Assistant timing.
 
-No remaining item changes the ownership decision. They require separate product, privacy, and architecture review before implementation.
+No remaining item changes approved ownership. Each requires separate product/privacy/architecture acceptance before that future capability is enabled. Current permission, consent, memory and lifecycle rules are defined above and in the alignment record.
 
 ## Decision Record
 
-**Recommended architecture: Option A — Core-owned Assistant with module-scoped providers.** This preserves one user-facing authority and one permission boundary while keeping domain intelligence and actions inside modules. It is compatible with the existing Experience Orchestration design and the V1/V2 separation.
+**Approved architecture: Option A — Core-owned Assistant with module-scoped providers.** This preserves one user-facing authority and one permission boundary while keeping domain intelligence and actions inside modules. It is compatible with the existing Experience Orchestration design and the V1/V2 separation.
 
 من کدکس هستم

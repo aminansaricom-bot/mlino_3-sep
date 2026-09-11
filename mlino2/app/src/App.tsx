@@ -21,6 +21,7 @@ import { feedback, useLocalExperience } from './experience/useLocalExperience';
 import { isOfferActiveAt, offerStatus } from './offers';
 import { pickSuggestion, type SuggestionResult } from './experience/pickSuggestion';
 import ShareBusinessAction from './experience/ShareBusinessAction';
+import AssistantFoundation from './discovery/AssistantFoundation';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
 
@@ -73,7 +74,7 @@ interface ChatMessage {
   interpretedCategory?: V2BusinessCategory | null;
 }
 
-type Overlay = 'none' | 'assistant' | 'vitrine' | 'settings' | 'detail' | 'experience';
+type Overlay = 'foundation' | 'none' | 'assistant' | 'vitrine' | 'settings' | 'detail' | 'experience';
 
 export default function App() {
   const [loaded, setLoaded] = useState(false);
@@ -562,7 +563,7 @@ export default function App() {
       </div>
 
       <div className="primary-actions">
-        <button className="action-fab assistant" onClick={() => setOverlay('assistant')}>
+        <button className="action-fab assistant" onClick={() => setOverlay('foundation')}>
           <span className="action-fab-icon" aria-hidden="true">✦</span>
           <span className="action-fab-label">دستیار هوشمند</span>
         </button>
@@ -618,6 +619,10 @@ export default function App() {
           ))
         )}
       </BottomSheet>
+
+      {overlay === 'foundation' && (
+        <AssistantFoundation onClose={() => setOverlay('none')} onLegacySearch={() => setOverlay('assistant')} />
+      )}
 
       {overlay === 'settings' && (
         <SettingsPanel

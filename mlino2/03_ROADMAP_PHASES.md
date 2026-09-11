@@ -2,7 +2,36 @@
 
 این فازبندی مستقیماً از توضیح مالک محصول استخراج شده — ترتیب پیشنهادی است، نه یک تعهد زمانی (طبق انضباط کل پروژه، هیچ تخمین زمانی ساختگی داده نمی‌شود).
 
-## گام جاری — چک‌لیست آمادگی Local Discovery
+## گام جاری — بازبینی طراحی فنی Local Discovery
+
+پذیرش Architecture Closure و Implementation Plan طبق درخواست جاری مالک محصول ثبت است. [V2_TECHNICAL_ARCHITECTURE_DESIGN.md](HANDOFF/20260910_V2_REVIEW/V2_TECHNICAL_ARCHITECTURE_DESIGN.md) مرجع فنی بعد از برنامه است؛ مستندات قدیمیِ پذیرش‌نشده در بخش سابقه، مانع بازگشودهٔ معماری محسوب نمی‌شوند.
+
+1. بازبینی طراحی فنی: کنترل نشست/اختیار، مفسر محلی، سیاست Matching، مسیر جزئیات بدون persistence و تست مرزها.
+2. فقط با دستور مستقل پیاده‌سازی، اجرای فازهای برنامه در محدودهٔ Local Discovery و دادهٔ آزمایشی.
+3. اعتبارسنجی runtime و تحویل مستند با حفظ V1، Backend، قراردادهای منجمد و main.
+
+در این گام فقط مستندات تهیه شده است. AR، Virtual Storefront، Marketplace و Production integrations وارد دامنه نشده‌اند.
+
+## مرجع برنامهٔ پیاده‌سازی Local Discovery
+
+[V2_IMPLEMENTATION_PLAN.md](HANDOFF/20260910_V2_REVIEW/V2_IMPLEMENTATION_PLAN.md) مرجع اجرای مرحله‌ای تجربهٔ اول V2 است: Permission/Consent، Intent، Context، Matching، Orchestration، تجربه، اعتبارسنجی و تحویل. دامنه محدود به محیط محلی، نشست واحد و دادهٔ آزمایشی است؛ AR، Virtual Storefront، Marketplace کامل و Production integration در این مرحله وارد نمی‌شوند.
+
+## سابقه — پذیرش اصلاحات مستنداتی V2 پیش از closure
+
+مرجع جاری [V2_GATE_ALIGNMENT_UPDATE.md](HANDOFF/20260910_V2_REVIEW/V2_GATE_ALIGNMENT_UPDATE.md) و [چک‌لیست هم‌راستا](HANDOFF/20260910_V2_REVIEW/V2_IMPLEMENTATION_READINESS_CHECKLIST.md) است. اصلاحات R1 تا R4 اعمال شده‌اند. پیاده‌سازی آغاز نشده و هنوز مجاز نیست.
+
+1. بررسی و پذیرش اصلاحات اعمال‌شده: **CG-1** مرز Core/V1/V2؛ **CG-2** Permission/Consent/Memory و چرخهٔ اختیار Assistant؛ **CG-3** دامنهٔ اولیه.
+2. ثبت نتیجهٔ closure و سپس دستور مستقل مالک برای پیاده‌سازی محدود.
+3. تنها پس از آن، پیاده‌سازی Local Discovery با reuse اجزای موجود و mock: Permission → Consent → Interpretation → تأیید revision → Matching → Experience؛ حافظهٔ current-session بدون transcript.
+4. پس از پیاده‌سازی، ارزیابی conformance، privacy/lifecycle، matching/evidence و تجربهٔ دسکتاپ/موبایل؛ سپس تحویل مطابق HANDOFF موجود.
+
+Core سازوکار Intent، Permission، Consent، نشست، Orchestration و Routing را مالک است؛ V1 حقیقت و intelligence/action/learning کسب‌وکار را مالک می‌ماند؛ V2 Matching، Experience و Interaction را اجرا می‌کند. Assistant نه منطق دامنه را مالک می‌شود و نه fact، capability یا permission می‌سازد.
+
+اتصال زندهٔ V1، providerها، AR/Virtual Storefront و حافظهٔ پایدار milestones آینده‌اند؛ کمبود قراردادهای آن‌ها وابستگی پنهان نسخهٔ mock نیست. هیچ schema/API یا پیاده‌سازی در این مرحله وجود ندارد.
+
+توالی‌ها و شماره‌گذاری‌های پایین سابقه‌اند؛ Orchestration با CG-2 قدیمی و Memory با CG-3 قدیمی اکنون هر دو زیر CG-2 جاری ردیابی می‌شوند.
+
+## سابقه — چک‌لیست آمادگی Local Discovery پیش از alignment
 
 مرجع ورود به پیاده‌سازی آینده [V2_IMPLEMENTATION_READINESS_CHECKLIST.md](HANDOFF/20260910_V2_REVIEW/V2_IMPLEMENTATION_READINESS_CHECKLIST.md) است. وضعیت فعلی **Implementation blocked** باقی می‌ماند؛ این چک‌لیست مجوز کدنویسی نیست.
 
@@ -14,7 +43,7 @@
 4. ارزیابی conformance معماری، privacy/session، matching/evidence، رفتار محصول و validation دسکتاپ/موبایل.
 5. تکمیل HANDOFF، checksum، HANDOFF_STATE، MLINO Book و CHANGELOG؛ سپس commit و فقط در صورت مجوز، Push و راستی‌آزمایی Remote.
 
-## گام جاری — بستن شروط Gate معماری V2
+## سابقه — شروط Gate معماری V2 پیش از alignment
 
 مرجع جاری [V2_ARCHITECTURE_CLOSURE_REVIEW.md](HANDOFF/20260910_V2_REVIEW/V2_ARCHITECTURE_CLOSURE_REVIEW.md) با نتیجهٔ **B — Ready with minor changes** است؛ فقط برای Local Discovery محلی و تک‌نشسته. تأیید Intent/Matching، مالکیت Core بر Assistant و حافظهٔ session-only پذیرفته شده است. وضعیت‌های pending قدیمی زیر سابقه‌اند و تصمیم مصوب را دوباره باز نمی‌کنند.
 
@@ -32,7 +61,7 @@
 
 OD-30 در [KNOWLEDGE_LOOP_ALIGNMENT.md](HANDOFF/20260910_V2_REVIEW/KNOWLEDGE_LOOP_ALIGNMENT.md) بسته شد. Reality، Knowledge و Learning به‌عنوان لایه‌ها/فرآیندهای مفهومی روی Event، Projection، Business Context، Facts، Observations، Signals، Decisions، Recommendations، Actions، Outcomes و Evaluations موجود تعریف شده‌اند؛ موجودیت، schema یا API جدیدی لازم نیست. این تصمیم برنامهٔ اجرایی Stage 3 را جلو نمی‌اندازد و learning پایدار، outcome measurement، telemetry و reverse data flow همچنان نیازمند تصمیم جدا هستند.
 
-## وضعیت طراحی Experience Orchestration
+## سابقه — وضعیت طراحی Experience Orchestration
 
 طراحی [EXPERIENCE_ORCHESTRATION_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_ORCHESTRATION_DESIGN.md) آمادهٔ product review است. تصمیم متمرکز [ASSISTANT_OWNERSHIP_DECISION.md](HANDOFF/20260910_V2_REVIEW/ASSISTANT_OWNERSHIP_DECISION.md) گزینهٔ A را پیشنهاد می‌کند: Assistant در Core و providerهای محدود در Modules. این milestone چرخهٔ Experience، نقش Assistant، مرز MLINO Core و Modules و وابستگی‌های AR/Virtual Storefront را تعریف می‌کند؛ implementation، schema، API و activation هیچ‌کدام شروع نشده‌اند. تا پذیرش محصول، scope معتبر همان Intent-Guided Local Discovery محلی و تک‌نشسته است.
 

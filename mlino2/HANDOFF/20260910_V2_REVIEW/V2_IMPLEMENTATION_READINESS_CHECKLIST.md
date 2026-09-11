@@ -4,7 +4,8 @@ Author: Codex, Product Architect role
 Date: 2026-09-10
 Architecture baseline: `ccee2c8a4bfffe03430bebb7f6e04f905d2af49b`
 Target branch: `astra/visual-system-local-experience`
-Gate status: **Not authorized to start implementation until Pre-Implementation Gate is complete**
+Gate status: **Documentation alignment applied; closure acceptance and separate implementation instruction pending**
+Alignment: [V2 Gate Alignment Update](V2_GATE_ALIGNMENT_UPDATE.md), 2026-09-10, addresses [Pre-Implementation Review](V2_PRE_IMPLEMENTATION_GATE_REVIEW.md) R1–R4.
 
 ## Purpose and Approved Slice
 
@@ -13,16 +14,27 @@ This checklist converts the **B) Ready with minor changes** result in [V2 Archit
 The only implementation candidate covered here is **Intent-Guided Local Discovery**:
 
 ```text
-Explicit user entry
-  → local interpretation and exact revision confirmation
-  → permitted manual context
-  → mock Business Directory capability/evidence
-  → eligibility before ranking
-  → 0–3 business Experiences
-  → Open Business Details
+Permission
+  → Consent
+  → Intent interpretation / minimal clarification
+  → User confirmation of the exact current interpretation revision
+  → Matching: eligibility before ranking
+  → Experience
+  → User-controlled Open Business Details
 ```
 
-The user owns Intent meaning. V1/the authoritative business source owns business facts and evidence. V2 owns customer relevance, Experience selection, explanation and interaction. The Assistant is Core-owned and uses session-only working context.
+Permission means checking that the requested local operation and data use are allowed within the approved scope and existing access authority. Consent is the user's explicit, informed agreement to this local purpose and session lifetime before task text/signals are captured or interpreted. This names two checks within the existing processing boundary; it creates no permission entity, API, live V1 dependency or requirement for two separate dialogs. A selected role is presentation context only. Consent cannot authorize an excluded capability, and neither permission nor consent replaces the user's confirmation of the exact interpretation revision. Denial leaves ordinary browsing available without Intent capture.
+
+Matching uses permitted manual context and the existing mock Business Directory. It returns 0–3 businesses, one qualifying option per business.
+
+| Responsibility | Owner and boundary |
+|---|---|
+| Intent, Permission, Consent, Session lifecycle, Experience orchestration, Routing | MLINO Core owns the shared mechanisms and enforcement policy. The user owns Intent meaning and grants consent; Core/Assistant do not self-grant rights or replace existing V1 Governance. |
+| Business truth, Capability, Evidence, Availability, Recommendations, Actions, Learning | V1 and its existing business/domain/governance owners remain authoritative. Availability must be evidenced; a listing flag is not stock/opening status. Business Recommendations/Actions/Learning are not V2 relevance, local navigation or task completion. |
+| Matching, Experience, Interaction | V2 owns user relevance, experience selection/presentation and interaction within Core's shared constraints; it consumes business evidence read-only. |
+| Domain modules | Providers retain their domain data, rules, capabilities and authorized actions under V1/domain governance. Core coordination does not copy their intelligence. No module integration is enabled in the initial slice. |
+
+These describe responsibilities in the existing platform, not new services or a transfer of V1 authority. The Assistant is not a business logic owner; it cannot create capabilities or facts, bypass permissions, or use role selection, screen context or provider text as access authority.
 
 ## How to Use This Checklist
 
@@ -39,15 +51,20 @@ The checklist has four statuses:
 
 Implementation may start only after all items below are checked:
 
-- [ ] **CG-1 — Core and authority alignment is closed.** Documentation distinguishes V1 Business OS responsibilities from shared V2 Experience responsibilities. The user owns Intent meaning. Assistant/Core enforce or consume permission; they do not grant it. A selected role, screen or module response is not access authority.
-- [ ] **CG-2 — Orchestration transitions are closed.** Pre-confirmation capture, clarification, exact revision confirmation, correction, stale-result invalidation, pause/resume, no-match recovery and user-reported completion agree with the governing Intent contract.
-- [ ] **CG-3 — Memory inheritance is closed.** [Intent Redesign §6.2](INTENT_CONTEXT_CONTRACT_REDESIGN.md#62-data-handling-and-retention-decisions) and [Intent Finalization §2.4](INTENT_CONTEXT_FINALIZATION.md#24-when-confirmation-is-required-again) explicitly govern current-only memory, disposal, the 30-minute inactivity limit, two-hour absolute cap, reload/tab-close behavior and the no-transcript/no-audit-exception rule.
+The canonical gate names below replace the checklist's earlier numbering. Historical CG-1 maps to current CG-1 (responsibility) and CG-2 (authority). Historical CG-2 orchestration and historical CG-3 memory both map to current CG-2. Current CG-3 covers scope; it cannot close the historical memory item. Original reviews retain their historical identifiers.
+
+- [x] **CG-1 — Core / V1 / V2 responsibility boundary: documentation aligned.** Core owns shared Intent/Permission/Consent/Session/Orchestration/Routing mechanisms; user meaning and V1 truth/governance ownership remain intact. See Ownership §§4–5 and Orchestration §4.
+- [x] **CG-2 — Assistant permission, consent and memory boundary: documentation aligned.** Permission check and explicit scoped consent precede interpretation; exact revision confirmation precedes Matching. Correction, late-result invalidation, pause/resume, disposal and explicit done are aligned. See Orchestration §§1–2 and Memory §4.4.
+- [x] **CG-3 — Initial implementation scope: documented and preserved.** Local single-task/session, manual context, experimental Directory, 0–3 businesses and Open Business Details. No live/module/AR/persistent-memory expansion. See §§2–5.
+
+These three checks record completion of documentation corrections only. They are not independent closure acceptance or runtime evidence. [Alignment §6](V2_GATE_ALIGNMENT_UPDATE.md#6-closure-evidence) maps R1–R4 and their acceptance scenarios.
+
 - [ ] Product/architecture review accepts evidence closing CG-1–CG-3 without changing approved ownership or scope.
 - [ ] The product owner issues a separate, explicit implementation instruction for this bounded slice.
 - [ ] The implementation baseline commit and target branch are recorded before any file changes.
 - [ ] `main`, V1, Backend, frozen architecture and protected integration contracts are declared out of the change set.
 
-If any item is unchecked, status remains **DESIGN READY WITH MINOR CHANGES / IMPLEMENTATION BLOCKED**.
+If any required entry item is unchecked, implementation remains **NOT AUTHORIZED**. The previous C review is preserved as historical evidence; this update does not issue a replacement architecture verdict.
 
 ## 2. Required Components
 
@@ -55,12 +72,12 @@ These are conceptual/runtime responsibilities, not permission to create a servic
 
 | Component | Required behavior | Entry evidence |
 |---|---|---|
-| Explicit Intent entry | A deliberate user action starts the new task. Existing map/detail/save/like/AR behavior does not silently create Intent. | Approved entry description and acceptance scenario. |
+| Explicit Intent entry | A deliberate entry checks allowed local processing and obtains scoped consent before task capture. Existing map/detail/save/like/AR behavior does not silently create Intent. | Approved entry description and acceptance scenario. |
 | Local interpretation | Produces visible user-readable meaning and uncertainty; parser output is a hypothesis. No external model fallback. | Confirmed bounded interpretation path. |
 | Interpretation revision | Material changes create a new revision. Confirmation is tied to the exact displayed revision. | CG-2 closure and revision scenarios. |
-| Processing permission | Local task processing is accepted separately from Intent confirmation. Withdrawal stops use and invalidates late results. | Permission flow and withdrawal scenario. |
-| Session/task authority | One foreground task in one tab/session; hidden state pauses; explicit resume rechecks authority; expiry disposes the task. | CG-2/CG-3 closure. |
-| Session-only Assistant memory | Keeps only current required wording, confirmed constraints, permitted context and Experience state. Superseded/rejected text is discarded. | CG-3 closure and storage/network inspection plan. |
+| Processing permission and consent | Check allowed scope/authority, then obtain explicit consent before text/signals are captured or interpreted. Exact-revision confirmation is separate and required before Matching. Withdrawal stops use and invalidates late results. | CG-2 processing order and denial/withdrawal scenarios. |
+| Session/task authority | One foreground task in one tab/session; hidden state pauses; explicit resume rechecks authority; expiry disposes the task. | CG-2 lifecycle alignment. |
+| Session-only Assistant memory | Keeps only current required wording, confirmed constraints, permitted context and Experience state. Superseded/rejected text is discarded. | CG-2 memory alignment and storage/network inspection plan. |
 | Manual context | User-selected area/radius and supported category/floor/time conditions are interpreted as constraints or explicit preferences, never proof of physical presence. | Context precedence scenarios. |
 | Business Directory boundary | All business records enter V2 through the existing Directory boundary using mock data for this slice. No direct V1 database/Event Log access. | Dependency review and import trace. |
 | Eligibility evaluator | Applies exact goal, exclusions and hard constraints before ordering. Unknown mandatory evidence fails eligibility. | Supported/unsupported/no-match cases. |
@@ -150,6 +167,8 @@ An out-of-scope dependency must produce an honest unavailable/unsupported result
 
 ### 6.2 Intent, permission and lifecycle behavior
 
+- [ ] Allowed-operation check and explicit scoped consent precede any task-text/signal capture or interpretation; denial leaves ordinary browsing available.
+
 - [ ] Unconfirmed explicit or implicit interpretations never reach matching.
 - [ ] High confidence never replaces exact revision confirmation.
 - [ ] Answering a material clarification creates a visible new revision requiring confirmation.
@@ -204,10 +223,11 @@ An out-of-scope dependency must produce an honest unavailable/unsupported result
 
 ## 7. Readiness Decision Record
 
-Current status at creation:
+Current aligned status (original creation baseline retained above):
 
 - Architecture direction: **B — Ready with minor changes**.
-- Implementation authority: **BLOCKED pending CG-1–CG-3 closure, acceptance and a separate owner instruction**.
+- Documentation status after alignment: **CG-1–CG-3 corrections applied**, mapped to review R1–R4; see the alignment record.
+- Implementation authority: **NOT AUTHORIZED pending closure acceptance and a separate owner instruction**.
 - Mock Local Discovery dependencies: identified and bounded.
 - Live V1, modules, AR/Virtual Storefront and persistent memory: future, not part of this gate.
 - Code/schema/API changes in this step: none.

@@ -1,9 +1,10 @@
 # MLINO V2 — Assistant Memory Boundary Decision
 
 Author: Codex, Product Architect role
-Status: **Architecture decision for Product Approval; no implementation authorized**
+Status: **Session-only boundary approved; documentation aligned for closure review; no implementation authorized**
+Alignment: [V2 Gate Alignment Update](V2_GATE_ALIGNMENT_UPDATE.md), 2026-09-10. Approved architecture is retained; required documentation corrections are applied for closure review. No implementation is authorized.
 
-This document defines what the Core-owned MLINO Assistant may remember. It complements [Assistant Ownership Decision](ASSISTANT_OWNERSHIP_DECISION.md) and [Experience Orchestration Design](EXPERIENCE_ORCHESTRATION_DESIGN.md). It creates no memory entity, schema, API, storage policy, or runtime behavior.
+This document defines what the Core-owned MLINO Assistant may remember. It complements [Assistant Ownership Decision](ASSISTANT_OWNERSHIP_DECISION.md) and [Experience Orchestration Design](EXPERIENCE_ORCHESTRATION_DESIGN.md). It creates no memory entity, schema, API or runtime behavior. Current handling inherits the approved Intent rules; it grants no persistent storage policy.
 
 ## 1. Problem
 
@@ -20,7 +21,7 @@ The current approved V2 scope is local, single-session, experimental, and explic
 
 ### Option A — Session-only memory
 
-The Assistant retains only the minimum context needed for the authorized foreground task and current session: the confirmed Intent interpretation, permitted context, answers, corrections, current Experience state, selected business/option, and user-authorized actions.
+The Assistant retains only the minimum context needed for the authorized foreground task and current session: the current Intent interpretation, permitted context, current accepted constraints, Experience state and selected business/option. Superseded/rejected raw wording, prior answers and a conversation transcript are not retained.
 
 This context expires with the task/session rules and is not converted into a durable user profile.
 
@@ -47,7 +48,7 @@ This provides maximum apparent continuity, but creates the highest privacy, expl
 | Criterion | A — Session-only | B — User preference | C — Business context | D — Full conversation |
 |---|---|---|---|---|
 | Privacy | Lowest necessary retention; scope is visible and bounded. | Medium/high; requires durable consent and controls. | Safe only when V1-owned and read-only; unsafe if copied by Assistant. | Highest exposure and inference risk. |
-| Consent | Task/session processing permission is sufficient for the bounded slice. | Separate explicit save/retention consent is required. | Business/source permissions and V1 governance apply, not user-memory consent alone. | Separate explicit, purpose-specific consent and deletion policy required. |
+| Consent | Allowed-operation check plus explicit scoped local-processing consent before capture/interpretation; exact Intent confirmation is separately required before Matching. | Separate explicit save/retention consent is required. | Business/source permissions and V1 governance apply, not user-memory consent alone. | Separate explicit, purpose-specific consent and deletion policy required. |
 | Usefulness | Coherent completion of the current task. | Better continuity across tasks if users choose it. | Reliable business information when freshness and provenance are available. | Broad continuity but often opaque and over-personalized. |
 | Explainability | Easy to state what is being used now and why. | Requires visible memory inspection and reason codes. | Explainable through source/provenance, not Assistant recollection. | Difficult to explain which historical statement influenced a decision. |
 | V1/V2 boundary | V2 task context; no business truth ownership. | Future V2 user preference product, separately approved. | V1/business-owned knowledge; Assistant must not duplicate it. | Cross-session V2 profile with major governance and integration impact. |
@@ -60,11 +61,11 @@ This provides maximum apparent continuity, but creates the highest privacy, expl
 The Assistant may retain a minimal, purpose-limited working context only while an authorized task/session is active:
 
 - the confirmed Intent interpretation revision and its confirmation status;
-- user-provided constraints, preferences, selected area, and answers in that task;
+- current user-provided constraints, preferences and selected area; answers replace current wording rather than accumulate into history;
 - permitted non-sensitive context used for the current Experience;
-- the current Experience state, candidate explanation, selected business/option, and user corrections;
-- explicit pause, stop, rejection, action, and completion signals within the task;
-- the minimum handoff context required to return the user safely to the same task.
+- the current Experience state, candidate explanation and selected business/option; corrections replace the current interpretation and invalidate old result authority;
+- minimum current pause/action/control state, not an interaction/event history; terminal controls cause disposal;
+- minimum state for returning from local business details to this task; module handoff context is future and separately gated.
 
 This is **working context, not a user profile**. It must expire with the approved session/task lifecycle, must not silently survive into a new session, and must not be used for cross-session behavioural inference or unrelated ranking.
 
@@ -87,7 +88,25 @@ Option C is rejected as Assistant ownership. Business Context, Knowledge, capabi
 
 ### 4.3 Full conversation is out of scope
 
-Option D is rejected for the current product. Conversation content needed to answer the active task may remain in the session working context, subject to the approved permission and retention boundary. Indefinite transcript retention, training use, cross-session personalization, and module-wide conversational search require new decisions and are not implicit in Assistant ownership.
+Option D is rejected for the current product. Only necessary current working wording may remain within the approved local task. Full transcripts are prohibited even temporarily within one session; no persistent log/audit copy is allowed. Future transcript retention, training, cross-session personalization and module-wide search require separate decisions and are unavailable here.
+
+### 4.4 Current session cleanup and disposal
+
+[Intent Redesign §6.2](INTENT_CONTEXT_CONTRACT_REDESIGN.md#62-data-handling-and-retention-decisions) and [Intent Finalization §2.4](INTENT_CONTEXT_FINALIZATION.md#24-when-confirmation-is-required-again) govern this initial slice. General references to conversation, answers, caching, audit or future handoff elsewhere in this document cannot override these rules.
+
+| Trigger | Memory and active-use consequence |
+|---|---|
+| Before permission check and explicit local-processing consent | No task-text/signal capture or interpretation. Allowed-operation checks and consent do not confirm meaning. |
+| Current task interpretation | Keep only necessary current wording/constraints, permitted context, current revision/confirmation and current Experience state; matching requires confirmation of this exact revision. |
+| Correction or rejected wording | Discard superseded/rejected raw content and obsolete dependent state; a visible new interpretation needs confirmation. No answer/correction transcript or replayable revision history. |
+| Hidden/background or explicit pause | Suspend matching and display authority. Minimum current task context may remain only until existing deadlines; hidden time counts. |
+| Explicit Resume while unexpired | Recheck consent, unchanged confirmed revision, context and evidence; material change requires fresh confirmation. Visibility alone cannot resume. |
+| Stop/delete, task rejection/dismissal, explicit done, consent/permission withdrawal | Stop use, invalidate pending results and dispose task content. Explicit done is user-reported closure only. |
+| Reload/navigation/tab close, 30 minutes without direct task interaction, or two hours from session start | Dispose all task content; no restoration. Earliest ending event controls. Only deliberate task interaction resets inactivity; nothing extends the absolute cap. |
+
+There is no transcript retention, even for the current session, no persistent personal audit exception and no storage in localStorage/sessionStorage/IndexedDB, URLs, service-worker caches, console/crash logs or telemetry. Task content cannot enter external model, business or map requests. Existing saved-business/theme data is not Intent memory and must not receive or restore task content.
+
+V1 business data remains source-owned. Existing public/mock Directory storage is not permission to cache user Intent or to claim live freshness. After disposal, a new task requires applicable scoped consent and new exact-revision confirmation; it does not reconstruct prior behavior.
 
 ## 5. Privacy Implications
 
@@ -105,7 +124,7 @@ Option D is rejected for the current product. Conversation content needed to ans
 
 ### Core-owned Assistant
 
-Core owns the policy for session working context, including what may be retained, when it expires, how consent is checked, how context is minimized for a handoff, and how a user can correct or stop it. Core must not become a durable business or conversation warehouse.
+Core owns Intent mechanisms, Permission/Consent enforcement, Session lifecycle, Experience orchestration and Routing; it enforces §4.4 and user control. The user owns Intent meaning and grants consent. Existing V1 Governance owns protected access decisions. V2 owns Matching, Experience and Interaction; V1 owns business truth, Capability, Evidence, Availability, Recommendations, Actions and Learning. Assistant cannot own business logic, create facts/capabilities or bypass permissions.
 
 ### Modules
 
@@ -123,7 +142,7 @@ Session-only memory is sufficient for a current visual task: selected business, 
 
 Choosing Option A closes the bounded memory direction, but future work still needs separate approval for:
 
-1. exact session/task cleanup and audit-retention rules;
+1. retention/audit rules only for separately approved future capabilities; current session cleanup is defined in §4.4 and permits no transcript/audit exception;
 2. explicit saved-preference product semantics and consent;
 3. cross-tab, cross-device, cross-session, and concurrent-task behavior;
 4. module handoff minimization and deletion acknowledgements;
@@ -135,6 +154,6 @@ No item above authorizes implementation. The current Assistant memory boundary r
 
 ## Decision Record
 
-**Recommended boundary: Option A — session-only memory.** Option B is future, explicit user-controlled preference memory; Option C remains V1/business-owned context rather than Assistant memory; Option D is out of scope. This decision preserves the local single-session V2 contract and the existing V1/V2 separation.
+**Approved boundary: Option A — session-only memory.** Option B is future, explicit user-controlled preference memory; Option C remains V1/business-owned context rather than Assistant memory; Option D is out of scope. This decision preserves the local single-session V2 contract and the existing V1/V2 separation.
 
 من کدکس هستم

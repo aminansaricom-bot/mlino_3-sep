@@ -1,0 +1,26 @@
+.foundation-dialog {
+  position: fixed; inset: 0; margin: auto; padding: 0; box-sizing: border-box;
+  width: min(100% - 24px, 480px); max-height: calc(100dvh - 24px);
+  border: 1px solid var(--border); border-radius: 22px;
+  color: var(--ink); background: var(--surface); box-shadow: var(--sh-3);
+  font: inherit; direction: rtl; overflow: auto;
+}
+.foundation-dialog::backdrop { background: rgba(11, 18, 32, .62); }
+.foundation-header { display: flex; align-items: center; justify-content: space-between; padding: 22px; border-bottom: 1px solid var(--border); }
+.foundation-header h2 { font-size: 1.2rem; margin: 6px 0 0; }
+.foundation-eyebrow, .foundation-note, .foundation-footer p { color: var(--ink-soft); font-size: .85rem; }
+.foundation-dialog button { font: inherit; color: var(--ink); background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; min-height: 44px; padding: 10px 16px; cursor: pointer; }
+.foundation-dialog button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.foundation-content { padding: 24px; line-height: 1.9; }
+.foundation-symbol { display: inline-grid; place-items: center; width: 56px; height: 56px; background: var(--accent-soft); color: var(--ink); border-radius: 18px; font-size: 28px; }
+.foundation-content h3 { font-size: 1.2rem; margin: 18px 0 8px; }
+.foundation-content p { margin: 8px 0 20px; }
+.foundation-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.foundation-dialog .foundation-primary { background: var(--navy-800); color: #fff; border-color: var(--border); }
+.foundation-note { margin-top: 24px !important; }
+.foundation-footer { border-top: 1px solid var(--border); padding: 16px 24px; }
+.foundation-footer p { margin: 8px 0 0; }
+@media (max-width: 420px) {
+  .foundation-content, .foundation-header, .foundation-footer { padding: 18px; }
+  .foundation-actions button { flex: 1 1 100%; }
+}

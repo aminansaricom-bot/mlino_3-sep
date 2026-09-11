@@ -2,7 +2,41 @@
 
 این فایل حافظهٔ محصولی V2 است و جایگزین قراردادهای V1 یا اسناد `AI_HANDOFF/` نیست.
 
-## چک‌لیست آمادگی پیاده‌سازی Local Discovery
+## وضعیت جاری — طراحی فنی Local Discovery
+
+طبق درخواست جاری مالک محصول، Architecture Closure و Implementation Plan تأیید شده‌اند. [V2_TECHNICAL_ARCHITECTURE_DESIGN.md](HANDOFF/20260910_V2_REVIEW/V2_TECHNICAL_ARCHITECTURE_DESIGN.md) طراحی فنی تجربهٔ اول را روی ساختار موجود ثبت می‌کند: کنترل نشست در Core، مفسر محلی، Matching با evidence یک option، نمایش ۰ تا ۳ کسب‌وکار و مسیر جزئیات بدون ذخیرهٔ سابقهٔ task.
+
+این طراحی Frontend، منطق محلیِ لایهٔ کاربرد، مرز Directory/V1، قراردادهای جایگزینی آینده و راهبرد تست را مشخص می‌کند. برای نسخهٔ محلی Backend جدید پیشنهاد نشده است. وضعیت سند: **آمادهٔ بازبینی طراحی؛ پیاده‌سازی آغاز نشده است.** این درخواست مجوز پیاده‌سازی نیست.
+
+عبارت‌های «closure pending / blocked» در سابقهٔ زیر وضعیت زمان نگارش‌اند؛ پذیرش معماری و برنامه در درخواست جاری ثبت شده است. این ثبت به معنای ایجاد گزارش closure مفقود یا اعتبارسنجی نرم‌افزار نیست. دامنه همچنان محلی، تک‌نشست، دادهٔ آزمایشی و بدون transcript یا حافظهٔ پایدار است.
+
+## برنامهٔ پیاده‌سازی Local Discovery
+
+[V2_IMPLEMENTATION_PLAN.md](HANDOFF/20260910_V2_REVIEW/V2_IMPLEMENTATION_PLAN.md) برنامهٔ مرحله‌ای اجرای Intent-Guided Local Discovery را ثبت می‌کند. این برنامه مسئولیت‌های Frontend/Backend، مرز Mock/Real، قراردادهای لازم، وابستگی‌های V1، راهبرد تست و Definition of Done را مشخص می‌کند؛ AR، Virtual Storefront، Marketplace کامل و اتصال‌های Production خارج از scope هستند.
+
+این سند مجوز کدنویسی یا تحویل Remote نیست و اجرای آن همچنان به دستور مستقل پیاده‌سازی و رعایت Gateهای تحویل نیاز دارد.
+
+## سابقه — هم‌راستاسازی Gateهای V2 پیش از پذیرش closure
+
+سند [V2_GATE_ALIGNMENT_UPDATE.md](HANDOFF/20260910_V2_REVIEW/V2_GATE_ALIGNMENT_UPDATE.md) اصلاحات R1 تا R4 از [بازبینی پیش از پیاده‌سازی](HANDOFF/20260910_V2_REVIEW/V2_PRE_IMPLEMENTATION_GATE_REVIEW.md) را در اسناد مرجع اعمال کرده است. وضعیت: **اصلاحات مستنداتی انجام شده؛ پذیرش closure و دستور مستقل پیاده‌سازی هنوز ثبت نشده است.** این مرحله نتیجهٔ Gate مستقل یا اعتبارسنجی نرم‌افزار صادر نمی‌کند.
+
+شماره‌گذاری جاری:
+
+- **CG-1:** مرز مسئولیت Core / V1 / V2.
+- **CG-2:** مرز Permission، Consent و حافظهٔ Assistant، شامل اختیار اجرا و چرخهٔ نشست/Orchestration.
+- **CG-3:** دامنهٔ اولیهٔ پیاده‌سازی.
+
+Core مالک سازوکار Intent، Permission، Consent، Session lifecycle، Experience orchestration و Routing است؛ معنای نیت و رضایت متعلق به کاربر است و اختیار دسترسی موجود V1 منتقل نمی‌شود. V1 مالک Business truth، Capability، Evidence، Availability، Recommendations، Actions و Learning است. V2 مالک Matching، Experience و Interaction است. Assistant مالک منطق کسب‌وکار نیست، fact یا capability تولید نمی‌کند و مجوزها را دور نمی‌زند؛ انتخاب role، صفحه یا متن provider مجوز نمی‌سازد.
+
+ترتیب: **Permission → Consent → Intent interpretation → تأیید نسخهٔ دقیق توسط کاربر → Matching → Experience**. Permission بررسی مجازبودن عملیات و حدود دسترسی است؛ Consent پذیرش صریح پردازش محلی برای همین هدف و نشست، پیش از دریافت/تفسیر متن نیت است. این تفکیک موجودیت یا دو گفت‌وگوی مجوز جدید ایجاد نمی‌کند. هیچ‌یک جای تأیید معنای نیت را نمی‌گیرد.
+
+حافظه session-only و فقط current context است؛ متن اصلاح‌شده جای متن قبلی را می‌گیرد، متن ردشده/قدیمی حذف می‌شود و transcript حتی موقت نگه داشته نمی‌شود. پنهان‌شدن توقف اجراست؛ زمان پنهان در سقف ۳۰ دقیقه بی‌فعالیتی و ۲ ساعت مطلق حساب می‌شود. پایان/رد task، لغو رضایت، reload/navigation/tab close یا انقضا باعث disposal می‌شود. بازگشت به تب ادامهٔ خودکار نیست.
+
+دامنه همچنان Local Discovery محلی، یک task/نشست، context دستی، Directory آزمایشی، eligibility پیش از ranking، یک option واجد همهٔ شروط برای هر کسب‌وکار، صفر تا سه نتیجه و Open Business Details است. live V1، ماژول عملیاتی، AR جدید، حافظهٔ پایدار، telemetry و outcome writeback خارج‌اند.
+
+بخش‌های تاریخی زیر وضعیت زمان نگارش خود را حفظ می‌کنند؛ CG-2 قدیمیِ Orchestration و CG-3 قدیمیِ Memory هر دو زیر CG-2 جاری قرار گرفته‌اند. این سابقه وضعیت یا شماره‌گذاری جاری را بازنویسی نمی‌کند.
+
+## سابقه — چک‌لیست آمادگی پیش از alignment
 
 [V2_IMPLEMENTATION_READINESS_CHECKLIST.md](HANDOFF/20260910_V2_REVIEW/V2_IMPLEMENTATION_READINESS_CHECKLIST.md) نتیجهٔ Gate B را به یک ورودی اجرایی قابل‌بررسی تبدیل می‌کند. وضعیت پیاده‌سازی همچنان **BLOCKED** است تا CG-1 تا CG-3 بسته و پذیرفته شوند و مالک محصول دستور مستقل شروع پیاده‌سازی را صادر کند.
 
@@ -10,7 +44,7 @@
 
 در این slice اتصال زندهٔ V1 لازم نیست. BusinessDirectoryService مرز فعلی دادهٔ mock است؛ `last_synced_at` مدرک freshness عملیاتی، `is_active` مدرک موجودی و آفر سطح کسب‌وکار مدرک applicability یک محصول نیست. اتصال زنده، availability، provenance، product-offer applicability، ماژول‌های عملیاتی، AR/Virtual Storefront، حافظهٔ پایدار و telemetry خارج از این دامنه‌اند و تصمیم یا قرارداد جدا می‌خواهند.
 
-## وضعیت جاری Gate نهایی معماری V2
+## سابقه — Gate نهایی معماری V2 پیش از alignment
 
 گزارش [V2_ARCHITECTURE_CLOSURE_REVIEW.md](HANDOFF/20260910_V2_REVIEW/V2_ARCHITECTURE_CLOSURE_REVIEW.md) بر مبنای `0495d4ab253020a7a71dfc851c5ec244774cffb2` نتیجهٔ **B — Ready with minor changes** را ثبت می‌کند. این نتیجه فقط برای Intent-Guided Local Discovery محلی، یک task/نشست، context دستی، دادهٔ آزمایشی، صفر تا سه کسب‌وکار و اقدام Open Business Details است.
 
@@ -32,7 +66,7 @@ MLINO V2 لایهٔ هوشمند تجربهٔ دنیای واقعی است؛ ن�
 
 در مرز V1/V2، V1 و منبع کسب‌وکار مالک Business Context، facts، capability، knowledge و evidence هستند و V2 آن‌ها را برای Intent و Experience به‌صورت read-only مصرف می‌کند. Signal، Recommendation، Action و Outcome جایگزین یکدیگر نیستند؛ کلیک، اشتراک‌گذاری، بازشدن جزئیات یا proximity به‌تنهایی Outcome یا Learning معتبر نیست. OD-30 بسته شد، اما قرارداد outcome، consent/retention و learning آینده همچنان در Open Decisions باقی است.
 
-## طراحی لایهٔ Experience Orchestration
+## سابقه — طراحی لایهٔ Experience Orchestration
 
 سند [EXPERIENCE_ORCHESTRATION_DESIGN.md](HANDOFF/20260910_V2_REVIEW/EXPERIENCE_ORCHESTRATION_DESIGN.md) ادامهٔ طراحی V2 را ثبت می‌کند و برای تأیید محصول آماده است. Orchestration فقط پس از Intent تأییدشده، context مجاز، capability/evidence واجد شرایط و eligibility، mode تجربه و اقدام بعدی را هماهنگ می‌کند؛ Intent، facts یا outcome جدیدی تولید نمی‌کند.
 
