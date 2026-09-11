@@ -1,24 +1,24 @@
-HANDOFF_ID: HANDOFF-20260911-FIRST-90-DAY-PRODUCT-STRATEGY
+HANDOFF_ID: HANDOFF-20260911-MVP-BOUNDARY-REVIEW
 AUTHOR: CLAUDE
-PHASE: MVP_VALUE_VALIDATION_STRATEGY
+PHASE: MVP_BOUNDARY_REVIEW_BEFORE_CODE
 STATUS: DELIVERED_AWAITING_INDEPENDENT_REVIEW
-REVIEW_VERDICT: B - MINOR STRATEGIC ADJUSTMENTS REQUIRED (strong direction; two input plans missing; demo loop must close through the system of record; V2 maintenance-only until G4; G1 and G2 still with the owner)
-REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260911_FIRST_90_DAY_PRODUCT_STRATEGY_REPORT.md
-REPORT_SHA256: 194fed7136cf5cf354ddb7878e14130c547c2c058eaf933fb7e4b4ad9b247115
+REVIEW_VERDICT: B - MINOR BOUNDARY ADJUSTMENTS REQUIRED (the MVP foundation stays valid for restaurant, retail and cafe modules if tests B1-B10 hold; the named roadmap document could not be reviewed because it does not exist)
+REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260911_MVP_BOUNDARY_REVIEW_REPORT.md
+REPORT_SHA256: 4f0546c6b094b97cde3de01b65f845dd377556a4f53d0ced8c1e2d1b24d3f324
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - strategy document only, zero code change). Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-12T00:50:00+03:30
-NEXT_ACTION: The owner decides. Concrete adjustments, and only these. (1) MLINO_FIRST_VALUE_PATH_PLAN.md and MLINO_MVP_EXECUTION_PLAN.md, named as review inputs, do not exist. They were searched for in the repository, origin/main, the working folder, Desktop, Documents and Downloads. They should be committed and reconciled with MLINO_FIRST_90_DAY_PRODUCT_STRATEGY.md. (2) The investor demo loop must close through the clinic's system of record (steps 7 and 8: the booking event returns and the outcome is evaluated), otherwise business value and customer value remain two separate demos. This depends on OD-08. (3) V2 is maintenance-only until G4, the first closed loop. (4) G1 (OD-09) and G2 (OD-08, OD-05, Malino status) are owner actions, and all building waits on them.
+CODE_COMMIT_SHA: (none - review only, zero code change). Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-12T01:10:00+03:30
+NEXT_ACTION: Before any code starts: (1) commit MLINO_MVP_IMPLEMENTATION_ROADMAP.md to the repository so its "Phase 1 Core Foundation" can be tested against B1-B10. This is the third consecutive named input that is not in the repository, after MLINO_FIRST_VALUE_PATH_PLAN.md and MLINO_MVP_EXECUTION_PLAN.md; the likely cause is that these documents are produced elsewhere and never committed. (2) Adopt B1-B7 as acceptance tests for every foundation pull request. B1: permission never comes from the token role. B2: no trade roles in recommendations. B3: no clinic KPI catalogue in Core. B4: no clinic service taxonomy in Core. B5: no clinic fields on Offer. B6: no trade-specific verification method in Core. B7: no trade display labels in the Core UI. (3) Record in the plan that the appointment connector (B8) and outcome observation (B9) live inside the Clinic Module. (4) With roadmap step 7, turn V2's closed category union into data received from V1 (B10). G1 and G2 remain owner actions.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260911-WINDOW1-PREP
-EXECUTED_INSTRUCTION_ID: OWNER-20260911-FIRST-90-DAY-PRODUCT-STRATEGY (no explicit id was supplied by the owner; this identifier is assigned by me for traceability and is recorded as assigned, not as received)
+PREVIOUS_HANDOFF_ID: HANDOFF-20260911-FIRST-90-DAY-PRODUCT-STRATEGY
+EXECUTED_INSTRUCTION_ID: OWNER-20260911-MVP-BOUNDARY-REVIEW (no explicit id was supplied by the owner; this identifier is assigned by me for traceability and is recorded as assigned, not as received)
 
-MODEL_ROUTING_NOTE: Routed to "Claude Opus 5 - MLINO Chief Product & Strategy Reviewer", which is the model that executed it.
+MODEL_ROUTING_NOTE: Routed to "Claude Opus 5 - MLINO Architecture & Product Boundary Reviewer", which is the model that executed it.
 
-HANDOFF_PRECONDITION_CHECK: Repository state was inspected before writing: in sync with origin at 151f10e, clean working tree. The push was preceded by a check that origin/main was still 151f10e.
+HANDOFF_PRECONDITION_CHECK: Repository state was inspected before review: in sync with origin at 8b79c94, clean working tree. MLINO_MVP_IMPLEMENTATION_ROADMAP.md was searched for in the repository, origin/main, the working folder, Desktop, Documents and Downloads, and was not found. The push was preceded by a check that origin/main was still 8b79c94.
 
-SCOPE_CONSTRAINT_NOTE: Only mlino_book/MLINO_FIRST_90_DAY_PRODUCT_STRATEGY.md and the AI_HANDOFF files were added or changed. No ADR modified, no architecture decision reopened, no module created, Core not redesigned; register, roadmap, changelog, code, schema, API and contracts untouched.
+SCOPE_CONSTRAINT_NOTE: Only mlino_book/MLINO_MVP_BOUNDARY_REVIEW.md and the AI_HANDOFF files were added or changed. No ADR modified, no architecture change, no feature added. Register, roadmap, changelog, code, schema, API and contracts untouched.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
 
-NOTE: Platform versus vertical: clinic is a strong beachhead. Its pain is measurable, the engines are already written and tested, it has single-player value, and a Malino data path is assumed but unverified. Four safeguards against vertical lock-in: (1) the Core leak inventory never grows beyond 9; (2) the product surface speaks in Core concepts, with trade words only as module content; (3) no clinical features; (4) V2 stays multi-category. Narrative: "a trustworthy operational intelligence layer for local businesses"; pillars are market expansion, multiple verticals (honest about the one-time M1 CCR), defensibility, and why the Core architecture matters; a list of forbidden claims is included. Demo: one closed loop of eight steps, made only from approved decisions. Capacity opportunity, recommendation, human acceptance, an offer as an action, human publication with verified identity, customer discovery on published truth with handoff to the system of record, the booking event returning, and outcome evaluation with honest attribution. Any open step must be disclosed, never closed with fabricated data. V1 first until N4/G4; V2 then consumes only published truth. Success criteria: eight binary gates G1 to G8, and pilot metrics whose thresholds the owner sets, with no fabricated numbers. Build priorities: nine rows in three sequence windows. An explicit do-not-build list and seven demo requirements are included.
+NOTE: Reviewed instead: the MVP plan in the repository (MLINO_FIRST_90_DAY_PRODUCT_STRATEGY.md section 7 and 04_INTEGRATION_ROADMAP.md steps 3-7) and the current code. Every foundation item passes the D-63 Core test: organisation, membership, grants and the six permissions; recommendation v1.1; Action, outcome and evaluation; capability publication; Offer; the identity-claim mechanism; Session; the AC-2 publication gateway. The risk lies in implementation shape, captured as tests B1-B9. New finding from code: B10. V2 hard-codes a closed V2BusinessCategory union (dental_clinic, beauty_clinic, cafe, restaurant, retail_shop) in directory/contract.ts, directory/validate.ts, matching/IntentParser.ts and matching/intentContract.ts. This is the V2-side twin of the D-63 leak and a second source of truth for category once contract 02 carries module vocabulary. The fix waits until roadmap step 7, because V2 is maintenance-only until G4. Keyword-to-category mapping stays V2 relevance logic.
