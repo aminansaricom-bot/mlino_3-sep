@@ -1,16 +1,23 @@
-HANDOFF_ID: HANDOFF-20260911-C03-C04-APPROVAL
-AUTHOR: CODEX
-PHASE: C03_C04_OWNER_APPROVAL
+HANDOFF_ID: HANDOFF-20260911-OD38-BUSINESS-IDENTITY-BOUNDARY
+AUTHOR: CLAUDE
+PHASE: OD38_BUSINESS_IDENTITY_CREATION_BOUNDARY
 STATUS: DELIVERED_AWAITING_INDEPENDENT_REVIEW
-REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260911_C03_C04_APPROVAL_REPORT.md
-REPORT_SHA256: 5f2a78fbd01bc9667a2e23b1590fca292a27151bdf81cf185cabc6b25042aede
-CODE_COMMIT_SHA: 309094285b1d141a52156cfbb50865a1869a980d
-CODE_COMMIT_NOTE: کامیت مستندات؛ کد اجرایی تغییر نکرده است.
-PREVIOUS_HANDOFF_ID: HANDOFF-20260911-OD37-PLATFORM-RECOVERY-BOUNDARY
-EXECUTED_INSTRUCTION_ID: OWNER-20260911-C03-C04-APPROVAL
-INSTRUCTION_PATH: AI_HANDOFF/CODEX_INSTRUCTIONS/20260911_C03_C04_APPROVAL.md
-CREATED_AT: 2026-09-11T14:04:03.2312335+03:30
-NEXT_ACTION: بازبینی تحویل مستندات؛ C-03 و C-04 مصوب و بسته‌اند. پیاده‌سازی یا دیتابیس خودکار شروع نشود. سایر تصمیم‌ها و بازبینی‌ها باز می‌مانند.
-CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN همچنان منتظر بازبینی مستقل؛ بخش B اجرا نشده. ADR-0007، ADR-0008 و ADR-0009 منتظر بازبینی مالک‌اند. این تحویل سایر بخش‌های تحویل OD-37 را تأیید نمی‌کند.
-OPEN_ITEMS: OD-01، OD-05، OD-07، OD-08، OD-12، OD-35، OD-38؛ OD-09 همچنان BLOCKED. ADR-0010 ایجاد نشده است.
-HANDOFF_PRECONDITION_CHECK: شناسه قبلی و چک‌سام نسخه داخل مخزن منطبق بودند. مسیر مطلق قدیمی موجود نبود؛ مسیر نسبی مخزن در این تحویل ثبت شد. محتوای تاریخی بازنویسی نشد.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260911_OD38_BUSINESS_IDENTITY_BOUNDARY_ALIGNMENT_REPORT.md
+REPORT_SHA256: 8ccbe5679d61237af91e4c883ab33f69c563d6a488ede66b8899970fb6ab6421
+ZIP_PATH: (none built this pass)
+CODE_COMMIT_SHA: (none - design only, zero code change). Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-11T15:00:00+03:30
+NEXT_ACTION: Return for review. OD-38 is decided as D-61. One new open decision, OD-39: ExternalWorkspaceLink allows ADMIN_ACTION as a link basis (D-25, approved and implemented), so a platform admin could link a real business's workspace to another organisation - the identity problem of D-61 at the integration layer; an owner decision and probably a CCR are needed. D-61 explicitly refines D-52 (a sixth publication precondition: an active verified identity claim) and D-57 (a seventh permission: request and release an identity claim; the V1 publication minimum now includes the identity claim and its verification). D-58 and D-61 together are ADR-worthy; one ADR-0010 is recommended, not written because outputs were restricted. Awaiting the owner's review: ADR-0007, ADR-0008, ADR-0009. Still open: OD-35, OD-39, OD-07. OD-09 remains BLOCKED. Blocking open decisions unchanged: OD-01, OD-05, OD-08, OD-12.
+
+PREVIOUS_HANDOFF_ID: HANDOFF-20260911-C03-C04-APPROVAL
+EXECUTED_INSTRUCTION_ID: OWNER-20260911-OD38-BUSINESS-IDENTITY-BOUNDARY (no explicit id was supplied by the owner; this identifier is assigned by me for traceability and is recorded as assigned, not as received)
+
+MODEL_ROUTING_NOTE: Routed to "Claude Opus 5 - MLINO V1 Business Identity Architect", which is the model that executed it.
+
+HANDOFF_PRECONDITION_CHECK: The live HANDOFF_STATE was read before acting, not assumed. It had changed since my OD-37 delivery: the owner approved C-03 and C-04 as D-59 and D-60 through OWNER-20260911-C03-C04-APPROVAL, recorded by Codex as HANDOFF-20260911-C03-C04-APPROVAL (commits 3090942 and 7616f30), which therefore is this handoff's predecessor and makes this decision D-61. Its NEXT_ACTION keeps the other open decisions open, and OD-38 was open in the register, so the precondition is met and BLOCKED_BY_HANDOFF_MISMATCH was not raised. Codex was active in the same working copy during this pass - HANDOFF_STATE changed on disk while I was reading it - so no shared file was edited until Codex had committed and pushed 7616f30; the update script then refused to run unless the working tree was clean, and the push was preceded by a check that origin/main was still 7616f30. No Codex file was committed under this handoff. The owner's D-59 and D-60 rows sit above D-58 in the register; their order was not changed.
+
+SCOPE_CONSTRAINT_NOTE: Updates were restricted to the book changelog, the roadmap and the open decisions. The update script enforced an allow-list and asserted from git status that nothing else under mlino_book/ changed besides the new decision document. The documents recording D-52 and D-57 were not edited; the D-61 register row and the decision document's refinement table are the reference for the two refinements.
+
+CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted. ADR-0007, ADR-0008 and ADR-0009 await the owner's review; the C-03/C-04 approval explicitly did not approve them implicitly.
+
+NOTE: Design only - zero code change. Decision D-61 (hybrid): creation is free and identity is verified before the first public statement. The central finding is that "creating a business identity" conflates two things: creating an organisation is a private workspace that harms no one if misrepresented, while the identity claim - this organisation is the real Clinic X - reaches others only at publication, which is exactly where impersonation harms users and the real business; so, by the D-08 logic, the wall belongs at the exit, not the entrance. Two kinds of owner were separated: the founding member controls the MLINO workspace (D-57), the legal owner is determined by law outside MLINO, and agencies, managers and relatives routinely set tools up for owners, so forcing creator equals legal owner would be a structural lie or would block legitimate setup; what is verified is authority to represent, never legal ownership, which MLINO neither records nor determines. Three rules close impersonation without adding onboarding friction: no name is reserved, so there is no namespace to squat; at most one active verified claim exists per real-world business, never transferred automatically, since otherwise a SIM swap would hijack an identity; and identity verification never grants governance - authority changes only through D-57 and D-58 - which is the most important rule, because otherwise control of an official channel would become a takeover path. AI never verifies; the platform never chooses between claimants, transfers a claim, or implies endorsement, and a verified identity does not validate the business's claims. Option B was rejected for putting friction before any value, blocking legitimate delegated setup and wasting verification on organisations that never publish; option C was rejected as an identity model because platform invitations would let the platform decide who represents which business, which the instruction itself forbids. The cost is stated honestly: the verification gate slows supply for local discovery. D-61 makes two explicit refinements: D-52 gains a sixth publication precondition, and D-57 gains a seventh permission and an extended publication minimum. New open decision OD-39 covers the ADMIN_ACTION link basis.
