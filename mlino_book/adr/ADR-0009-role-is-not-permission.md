@@ -1,6 +1,6 @@
 # ADR-0009 — نقش اجازه نیست
 
-**وضعیت:** 📝 **Draft — Pending Owner Approval** · تصمیم پایه‌ی D-55 در دفتر تصمیم‌ها ثبت است؛ خود این ADR در انتظار تصویب مالک است · **تاریخ:** ۱۱ سپتامبر ۲۰۲۶
+**وضعیت:** ✅ **Approved** · مصوب مالک — ۱۱ سپتامبر ۲۰۲۶ · تصمیم پایه‌ی D-55 در دفتر تصمیم‌ها ثبت است · گزارش تصویب: [`ADR_0007_0008_0009_APPROVAL_REPORT.md`](../ADR_0007_0008_0009_APPROVAL_REPORT.md) · **تاریخ:** ۱۱ سپتامبر ۲۰۲۶
 **ویرایش:** اصلاحات سازگاری ۵ تا ۷ از [`ADR_0007_0008_0009_FINAL_REVIEW.md`](../ADR_0007_0008_0009_FINAL_REVIEW.md) و اصلاح نهایی ارجاع OD-36 ([`ADR_0009_FINAL_CONSISTENCY_REPORT.md`](../ADR_0009_FINAL_CONSISTENCY_REPORT.md)) اعمال شد — **بدون تغییر هیچ تصمیم**
 **تصمیم‌گیرنده:** مالک محصول، با تفویض به معمار دامنه (دستور «Resolve OD-28»)
 **سند کامل:** [`../contracts/ROLE_BOUNDARY_ALIGNMENT.md`](../contracts/ROLE_BOUNDARY_ALIGNMENT.md)
