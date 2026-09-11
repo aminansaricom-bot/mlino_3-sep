@@ -76,3 +76,11 @@ RESULTING_REPORT_SHA256: d83632943a756083c5edfe2b647053a71990258a54ce6960d9bed1e
 DELIVERY_COMMIT_SHA: c4097c309e8d351669394bf6aab88f9c116a4ef4
 DELIVERY_STATUS: DOCUMENTATION_DELIVERED_TRANSFER_PLAN
 NEXT_ACTION: Owner review of the selective transfer plan; do not execute transfer, merge, rebase, cherry-pick, schema change, or migration before explicit approval and a separate implementation instruction.
+
+EXECUTED_INSTRUCTION_ID: CODEX-20260912-ARTIFACT-COMPATIBILITY-REVIEW-001
+EXECUTED_AT: 2026-09-12
+RESULTING_REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260912_ARTIFACT_COMPATIBILITY_REVIEW_REPORT.md
+RESULTING_REPORT_SHA256: 9d2d51d617ab4890fccfd843f9a86ff437b0f348907b5d6fabda9556b9ef7875
+DELIVERY_COMMIT_SHA: fbdb638be136891fa11e44748f0af36c94c7746b
+DELIVERY_STATUS: DOCUMENTATION_DELIVERED_ARTIFACT_COMPATIBILITY_REVIEW
+NEXT_ACTION: Owner review of the conditional compatibility result; do not transfer artifacts, merge, rebase, cherry-pick, create schema.prisma, or create migrations before explicit approval and a separate implementation instruction.
