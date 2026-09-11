@@ -1,45 +1,34 @@
-HANDOFF_ID: HANDOFF-20260911-CORE-SCHEMA-IMPLEMENTATION-READINESS
+HANDOFF_ID: HANDOFF-20260911-PRE-PRISMA-DECISION-NOTE
 AUTHOR: CLAUDE
-PHASE: CORE_SCHEMA_PRISMA_READINESS_REVIEW
-STATUS: DELIVERED_AWAITING_INDEPENDENT_REVIEW
-REVIEW_VERDICT: NOT YET READY FOR PRISMA - 2 RED, 8 YELLOW, 11 GREEN. V2 closes R1, Y4, Y6, Y7 and Y11 from the v1 review. Neither RED item questions the approved architecture.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260911_CORE_SCHEMA_IMPLEMENTATION_READINESS_REVIEW_REPORT.md
-REPORT_SHA256: e0488b3f38719084c74ebe942a83573feb559af87492485b70f4ca1d5923c4c2
+PHASE: CORE_SCHEMA_PRE_PRISMA_DECISIONS
+STATUS: DELIVERED_AWAITING_OWNER_DECISION
+REVIEW_VERDICT: Decision note prepared, recommendations only; the owner signs. Five items: branch sync, tenant isolation, Action boundary, BusinessProfile ownership and yellow triage.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260911_PRE_PRISMA_DECISION_NOTE_REPORT.md
+REPORT_SHA256: 2ad0b010e1653d1e78d9cef4dd4eaf4e6394cdbf1f1c6619650af9b34f6a2702
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only, zero code change). Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-12T04:10:00+03:30
+CODE_COMMIT_SHA: (none - decision note only, zero code change). Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-12T04:40:00+03:30
 NEXT_ACTION:
-RR1 (RED, owner decision): the Codex branch's implementation/prisma is stale. Its schema.prisma has zero ExternalWorkspaceLink references (last touched 72954e2) and it lacks migration 20260910020000_add_external_workspace_link, which origin/main has. A first Core Prisma schema written there would fork the migration history of a frozen file. The ExternalWorkspaceLink-to-Organization relation cannot even be designed on that branch. Prisma work must start from a base whose implementation/prisma equals origin/main; the owner chooses merge, rebase or a fresh branch. This is F7 turning into a concrete blocker.
-RR2 (RED, design decision): cross-tenant integrity is not enforced. OfferVersionCapability has no organization_id, and Evidence.organization_id consistency is stated but has no mechanism. The confirmed_by, granted_by and performed_by memberships could belong to another organisation. This risks cross-business leakage (D-08) and cross-organisation authority (D-57). Recommended fix: a composite unique (id, organization_id) on tenant tables plus composite foreign keys, which follows the project precedent of enforcing critical invariants in the database.
-YELLOW:
-- YR1: one claim status, adding "suspended" per D-61.
-- YR2: revoked_by and revocation reason on grant and membership, plus grant_id on Publication.
-- YR3: compute Read Port eligibility at read time (published, claim verified and active, within validity, capability active with fresh evidence), so no automatic withdrawal events without a performer are needed.
-- YR4 BusinessProfile: (a) unique per organisation conflicts with D-61 branches; reference the identity claim instead. (b) Publishing a profile is not among the six D-57 permissions; this is an owner decision under OD-05. (c) Store location as typed lat/lng for proximity queries.
-- YR5: drop version_status; publication_status with a partial unique on PUBLISHED is enough.
-- YR6: registry location (versioned config per module for the MVP) and the ExternalWorkspaceLink relation.
-- YR7: generic D-53 terms contract.
-- YR8: list which constraints go into hand-written migration SQL, triggers, or domain-plus-tests. These are the partial uniques, the XOR, validity and price CHECKs, append-only and immutability. Precedent: migration 20260910020000 says Prisma lacks partial unique indexes and uses a manual WHERE index.
+Owner signs the five items in mlino_book/MLINO_PRE_PRISMA_DECISION_NOTE.md:
+1. RR1 branch sync: create the implementation branch from origin/main and merge (not rebase) codex/v2-intent-flow-foundation into it. Verified: merge base 95d7c26, main 51 ahead, codex 38 ahead, zero overlapping files, git merge-tree clean, zero codex changes under implementation/. Before the first Prisma model, implementation/prisma must equal origin/main byte for byte. The three uncommitted files in the local Codex clone must be committed or explicitly discarded first.
+2. RR2 tenant isolation: composite unique (id, organization_id) plus composite FKs on 11 tenant-bound entities. Add organization_id to IdentityVerification, PermissionGrant, OfferVersion and OfferVersionCapability. The platform reviewer reference is excluded on purpose. MATCH SIMPLE works with the XOR nullable targets. Prisma's handling of optional composite relations must be verified by a spike first; the fallback is raw SQL FKs, following the precedent of migration 20260910020000.
+3. Action stays out of Phase 1. CCR 2 carries recommendation v1.1, Action, the Y8 typed subject reference, KPI and Goal.
+4. BusinessProfile as the location or branch unit:
+   - No unique on organization_id.
+   - A nullable claim reference, partial unique when set.
+   - Typed lat/lng.
+   - One profile per organisation in the MVP, as a domain rule only.
+   - The profile publish permission is an owner decision under OD-05; it does not shape the schema.
+5. Fix before Prisma: YR1, YR2, YR4a, YR4c, YR5, the YR6 link FK and YR8. Can wait: YR3 (decide now, performer stays required), YR4b, the YR6 registry and YR7.
+Standing prerequisites unchanged: a CCR on the frozen schema.prisma, OD-08 for identity_provider, and the D-71 physical shape.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260911-CORE-SCHEMA-DESIGN-REVIEW
-EXECUTED_INSTRUCTION_ID: OWNER-20260911-CORE-SCHEMA-IMPLEMENTATION-READINESS (no explicit id was supplied by the owner; this identifier is assigned by me for traceability and is recorded as assigned, not as received)
+PREVIOUS_HANDOFF_ID: HANDOFF-20260911-CORE-SCHEMA-IMPLEMENTATION-READINESS
+EXECUTED_INSTRUCTION_ID: OWNER-20260911-PRE-PRISMA-DECISION-NOTE (no explicit id was supplied by the owner; this identifier is assigned by me for traceability and is recorded as assigned, not as received)
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as MLINO Database Architecture Reviewer.
 
-HANDOFF_PRECONDITION_CHECK: The design was reviewed at 588b9c0 on codex/v2-intent-flow-foundation, with the local clone equal to origin. The branches' implementation/prisma folders were compared directly with git show and ls-tree. The main staging clone was in sync with origin at da39e27. The push was preceded by a check that origin/main was still da39e27.
+HANDOFF_PRECONDITION_CHECK: Both clones fetched. origin/main 075f1e7, origin/codex 588b9c0. The Codex clone was read only. The push was preceded by a check that origin/main was still 075f1e7.
 
-SCOPE_CONSTRAINT_NOTE: Review only. Only mlino_book/MLINO_CORE_SCHEMA_IMPLEMENTATION_READINESS_REVIEW.md and the AI_HANDOFF files were added or changed on main. Nothing in the Codex clone or the reviewed document was modified. No Prisma, no migration, no code.
+SCOPE_CONSTRAINT_NOTE: "Do not modify files." Only the new mlino_book/MLINO_PRE_PRISMA_DECISION_NOTE.md and the AI_HANDOFF files were added or changed on main. No existing book, ADR, register, roadmap or changelog file was edited. Nothing in the Codex clone was modified. No Prisma, no migration, no code.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
-
-NOTE: GREEN:
-- Entity completeness for CCR 1 and entity boundaries.
-- The claim kept separate from the organisation.
-- The verification model, with the reviewer as a platform identity reference.
-- The permission model.
-- The publication model, with no module-storage dependency and computed offer expiry.
-- Offer ownership, with one published version per offer.
-- Evidence ownership.
-- Multi-vertical extensibility.
-- MVP simplicity.
-- The Action boundary deferred to CCR 2, where the Y8 subject reference is still owed.
