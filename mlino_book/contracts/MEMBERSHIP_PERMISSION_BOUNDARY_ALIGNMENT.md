@@ -1,5 +1,10 @@
 # هم‌ترازی مرز عضویت و اجازه — OD-36
 
+## ثبت تأیید مالک — ۱۱ سپتامبر ۲۰۲۶
+
+تصمیم مالک D-60: C-04 بسته شد. Authorization به Membership سازمانی متصل است؛ Permission از طریق Grant روی همان Membership اعطا می‌شود. User مستقل یا Role به‌تنهایی اجازه ایجاد نمی‌کند؛ Role فقط الگو/زمینه است. این تأیید مستنداتی است و ادعای اجرای این مدل در کد موجود نیست.
+
+
 **نسخه:** ۱٫۰ · **تاریخ:** ۱۱ سپتامبر ۲۰۲۶
 **وضعیت:** `DECIDED` — OD-36 بسته شد → **D-57** · **صفر خط کد، بدون شِما**
 **مرجع:** [`ROLE_BOUNDARY_ALIGNMENT.md`](ROLE_BOUNDARY_ALIGNMENT.md) (D-55) · [`../adr/ADR-0009`](../adr/ADR-0009-role-is-not-permission.md) · [`../adr/ADR-0006`](../adr/ADR-0006-provenance-versus-confirmation.md) · [`../../V1_MINIMUM_AC2_ACCESS_POLICY.md`](../../V1_MINIMUM_AC2_ACCESS_POLICY.md)
