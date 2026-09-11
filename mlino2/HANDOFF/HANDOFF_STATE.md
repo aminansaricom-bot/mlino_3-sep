@@ -12,3 +12,11 @@ VALIDATION: npm test 201/201; npx tsc -b PASS; npm run build PASS; Chrome mobile
 NEXT_ACTION: Independent review of the Intent Flow Foundation; do not start parser semantic flow, Matching or V1 integration until review and separate instruction
 INSTRUCTION_ID: OWNER-20260911-V2-INTENT-FLOW-FOUNDATION
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN remains pending independent review; no V1 or Docker work was performed in this delivery.
+
+EXECUTED_INSTRUCTION_ID: CODEX-20260911-0044-CORE-PRISMA-DESIGN
+EXECUTED_AT: 2026-09-11
+RESULTING_REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260911_CORE_PRISMA_DESIGN_REPORT.md
+RESULTING_REPORT_SHA256: ae1e1a565988e9e3719e20783f54c51e1fbee72ec3bb928af5e042fc47470815
+DELIVERY_COMMIT_SHA: ccca7c547be232e5ec98f556a59fc706162eeba8
+DELIVERY_STATUS: DOCUMENTATION_DELIVERED_AWAITING_REVIEW
+NEXT_ACTION: Independent review of MLINO_CORE_PRISMA_SCHEMA_DESIGN.md; do not modify schema.prisma, create migrations, or write application code until review and a separate implementation authorization.
