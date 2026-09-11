@@ -1,9 +1,31 @@
 # طراحی نخست شِمای Prisma برای MLINO Core Foundation
 
-**تاریخ:** ۲۰۲۶-۰۹-۱۱  
-**نقش:** MLINO Core Prisma Schema Architect  
-**وضعیت:** پیش‌نویس طراحی پیاده‌سازی؛ فقط مستندات  
+**تاریخ:** ۲۰۲۶-۰۹-۱۱
+**نقش:** MLINO Core Prisma Schema Architect
+**وضعیت:** پیش‌نویس طراحی پیاده‌سازی — **نسخه‌ی ۲، با اعمال تصمیم‌های مالک**؛ فقط مستندات
 **دامنه:** طراحی Prisma برای بازبینی پیش از CCR و Migration
+
+### تاریخچه‌ی نسخه
+
+| نسخه | نویسنده | مبنا |
+|---|---|---|
+| ۱ | Codex — `ccca7c5` | `MLINO_CORE_SCHEMA_DESIGN_V2.md` · یادداشت پیش از Prisma · اعتبارسنجی کلید مرکب |
+| **۲** | **Claude — اعمال تصمیم‌های مالک** | `MLINO_CORE_PRISMA_DESIGN_REVIEW.md` (main، `38040a4`) · **تصمیم‌های مالک روی PR1، PR2، PY1 تا PY6 — ۱۱ سپتامبر ۲۰۲۶** |
+
+### تصمیم‌های مالک که در این نسخه اعمال شده‌اند
+
+| # | تصمیم مالک | کجا اعمال شد |
+|---|---|---|
+| **PR1-الف** | وضعیت ادعای هویت: **`PENDING` · `VERIFIED` · `SUSPENDED` · `REJECTED` · `EXPIRED`** | §۴٫۲ |
+| **PR1-ب** | تغییرهای حساس چرخه‌ی عمر فیلدهای ممیزی حداقلی دارند: **انجام‌دهنده · دلیل · زمان** | §۳٫۵ و هر مدل |
+| **PR1-ج** | **حذف `OfferVersion.version_status`** — انتشار تنها منبع حقیقت وضعیت منتشرشده است | §۴٫۹ · §۴٫۱۱ |
+| **PR2** | **`Organization.id` همان شناسه‌ی سازمان در AC-2 است** — هویت UUID تازه ساخته نمی‌شود · نوع `TEXT` می‌ماند | §۳٫۱ · §۴٫۱ |
+| **PY1** | **`id` کلید اصلی می‌ماند** · یکتا و FK مرکب محدود به سازمان هر جا جداسازی مستأجر لازم دارد | §۳٫۲ |
+| **PY2/PY3** | پیش از پیاده‌سازی Prisma، **اعتبارسنجی PostgreSQL** برای قیدهایی که Prisma بیان نمی‌کند | §۸ |
+| **PY4** | **`CUSTOMER_DATA` از Core حذف می‌شود** | §۴٫۱۰ · §۶ |
+| **PY5/PY6** | **قواعد صریح نمایش انتشار** | §۵ |
+
+---
 
 ## ۱. ماهیت این سند
 
@@ -18,670 +40,732 @@
 - Content Studio یا Schema آن؛
 - API، Connector یا V2.
 
-این طراحی از `MLINO_CORE_SCHEMA_DESIGN_V2.md` و تصمیم‌های آماده‌سازی Prisma استفاده می‌کند. دو محدودیت مهم همچنان باز هستند و پیش از اجرای شِما باید در CCR بسته شوند:
+دو پیش‌شرط همچنان بیرون از این سند است و پیش از اجرای شِما باید بسته شود:
 
-1. پایهٔ شاخهٔ پیاده‌سازی Prisma باید با `origin/main` و مدل `ExternalWorkspaceLink` همگام باشد؛
-2. قاعدهٔ کلید مرکب برای جلوگیری از ارجاع بین سازمانی باید در همهٔ روابط اعمال شود.
+1. پایه‌ی شاخه‌ی پیاده‌سازی Prisma باید با `origin/main` و مدل `ExternalWorkspaceLink` همگام باشد (RR1)؛
+2. اعتبارسنجی PostgreSQL در §۸ باید اجرا و ثبت شود.
 
 ## ۲. منابع و مبانی معماری
 
-منابع بررسی‌شده:
+منابع:
 
 - `MLINO_CORE_SCHEMA_DESIGN_V2.md`؛
 - `MLINO_CORE_SCHEMA_IMPLEMENTATION_READINESS_REVIEW.md`؛
 - `MLINO_PRE_PRISMA_DECISION_NOTE.md`؛
 - `PRISMA_COMPOSITE_KEY_VALIDATION.md`؛
-- ADR-0001 تا ADR-0012.
+- `MLINO_CORE_PRISMA_DESIGN_REVIEW.md` و تصمیم‌های مالک روی آن؛
+- ADR-0001 تا ADR-0012؛
+- شِمای منجمد زنده روی `main`: `implementation/prisma/schema.prisma` و Migration `20260910020000_add_external_workspace_link`.
 
 مبانی اصلی:
 
-- `Organization` با `BusinessIdentityClaim` یکی نیست؛ سازمان ریشهٔ داخلی V1 است و Claim ارتباط آن با کسب‌وکار واقعی را ادعا و راستی‌آزمایی می‌کند؛
+- `Organization` با `BusinessIdentityClaim` یکی نیست؛ سازمان ریشه‌ی داخلی V1 است و Claim ارتباط آن با کسب‌وکار واقعی را ادعا و راستی‌آزمایی می‌کند؛
+- **هویت متعارف سازمان یکی است:** همان شناسه‌ای که AC-2 به‌عنوان مصرف‌کننده به کار می‌برد (D-08، ADR-0001، ADR-0004)؛
 - Permission فقط از Membership فعال و Permission Grant فعال می‌آید؛ Role هرگز منبع Permission نیست؛
 - بازبین پلتفرم، Business Membership نیست و با ارجاع هویت پلتفرمی ثبت می‌شود؛
-- Core مالک حقیقت کسب‌وکار و دادهٔ عمومی لازم برای V2 است؛ V2 مستقیماً جدول Module را نمی‌خواند؛
+- Core مالک حقیقت کسب‌وکار و داده‌ی عمومی لازم برای V2 است؛ V2 مستقیماً جدول Module را نمی‌خواند؛
 - Capability، Offer و Publication در Core عمومی و مستقل از Vertical هستند؛
 - هیچ Entity اختصاصی Clinic در Core قرار نمی‌گیرد؛
 - Action، Intent، Session persistence، Consent persistence و Customer Data در این شِما نیستند؛
-- `Recommendation`، `Decision`، `Outcome` و `Evaluation` نیز در شِمای این فاز جدول ندارند و طبق ADR-0005 موجودیت‌های چرخهٔ جداگانهٔ آینده‌اند.
+- `Recommendation`، `Decision`، `Outcome` و `Evaluation` نیز در این فاز جدول ندارند (ADR-0005).
 
 ## ۳. قرارداد فیزیکی مشترک Prisma
 
-### ۳.۱ پایگاه داده و نوع‌ها
+### ۳٫۱ پایگاه داده و نوع‌ها
 
-هدف نهایی PostgreSQL است. آزمایش مستقل `PRISMA_COMPOSITE_KEY_VALIDATION.md` با Prisma CLI و Client نسخهٔ `5.20.0` روی SQLite موفق بوده است؛ رفتار اختصاصی PostgreSQL برای Index جزئی و Checkهای چندستونه باید در CCR و Migration جداگانه تأیید شود.
+هدف PostgreSQL است. آزمایش `PRISMA_COMPOSITE_KEY_VALIDATION.md` با Prisma `5.20.0` روی SQLite موفق بوده است؛ رفتار PostgreSQL در §۸ اعتبارسنجی می‌شود.
 
 | مفهوم | پیشنهاد Prisma/PostgreSQL | قاعده |
 |---|---|---|
-| شناسه | `String @db.Uuid` | تصادفی، پایدار و بدون معنای کسب‌وکاری |
-| زمان | `DateTime @db.Timestamptz(3)` | UTC و قابل ممیزی |
-| متن کوتاه | `String @db.VarChar(...)` | طول نهایی در CCR تعیین شود |
-| متن بلند | `String @db.Text` | برای توضیح و دلیل |
+| **`Organization.id`** | **`String` (`TEXT`) — بدون مقدار پیش‌فرض** | **همان شناسه‌ی سازمان در AC-2** (PR2). Core آن را نمی‌سازد؛ فقط ثبت می‌کند |
+| **`organization_id` در همه‌ی مدل‌ها** | **`String` (`TEXT`)** | هم‌نوع با `Organization.id` و با شش جدول موجود V1 |
+| شناسه‌ی سایر مدل‌ها | `String @id @default(uuid())` — ذخیره به‌صورت `TEXT` | همان الگوی `ExternalWorkspaceLink` و `CoreEntity`؛ پیامد مستقیم PR2 و هم‌نوعی ستون‌های کلید مرکب |
+| زمان | `DateTime` | قرارداد نهایی (`TIMESTAMP(3)` موجود یا `Timestamptz(3)`) — §۹، مورد باز PY7 |
+| متن کوتاه | `String @db.VarChar(...)` | طول نهایی در CCR |
+| متن بلند | `String @db.Text` | توضیح و دلیل |
 | مقدار پولی | `Decimal @db.Decimal(12, 2)` | منطق پولی کامل در این فاز نیست |
-| دادهٔ ساختاریافته | `Json @db.JsonB` | فقط قرارداد عمومی محدود یا Snapshot ممیزی؛ نه جایگزین رابطه |
+| داده‌ی ساختاریافته | `Json @db.JsonB` | فقط قرارداد عمومی محدود یا Snapshot ممیزی؛ نه جایگزین رابطه |
 | مقادیر ثبت‌شده | `String` | برای `*_key`، `permission_key` و `identifier_type` Enum بسته ساخته نمی‌شود |
-| وضعیت پایدار | Prisma Enum یا رشتهٔ ثبت‌شده | فقط جایی Enum شود که دامنه واقعاً بسته و مصوب است |
+| وضعیت پایدار | Prisma Enum | فقط جایی که دامنه بسته و مصوب است |
 
-### ۳.۲ کلید Tenant
+**نام‌گذاری:** در این سند نام ستون‌های پایگاه داده (`snake_case`) آمده است. نام فیلد Prisma در CCR طبق قرارداد نهایی PY7 تعیین می‌شود (پیشنهاد: `camelCase` + `@map` مثل شِمای موجود).
 
-`Organization` ریشهٔ Tenant است و فقط `id` به‌عنوان کلید اصلی دارد. هر مدل دیگر در این سند Organization-scoped است و باید این دو ستون را داشته باشد:
+### ۳٫۲ کلید Tenant — `id` کلید اصلی، زوج مرکب هدف FK (PY1)
 
-```text
-id
-organization_id
-```
-
-کلید اصلی پیشنهادی برای هر مدل سازمانی:
+`Organization` ریشه‌ی Tenant است و فقط `id` دارد. هر مدل دیگر Organization-scoped است:
 
 ```text
-@@id([id, organization_id])
+id               String  @id @default(uuid())
+organization_id  String
+@@unique([id, organization_id])      // هدف همه‌ی FKهای درون‌مستأجری
 ```
 
-هر مدل سازمانی همچنین باید زوج `(id, organization_id)` را برای ارجاع مرکب در دسترس قرار دهد؛ در Prisma همین کلید مرکب مرجع `references` است. هر Foreign Key داخلی باید شناسهٔ والد و `organization_id` را با هم حمل کند:
+- **`id` سراسری یکتا می‌ماند.** ارجاع از بیرون مستأجر (Read Port برای V2، ارجاع موضوعی CCR دوم، لاگ و ممیزی) فقط `id` را حمل می‌کند.
+- **هر رابطه‌ی درون‌مستأجری** شناسه‌ی والد و `organization_id` را با هم حمل می‌کند و به یکتای مرکب والد ارجاع می‌دهد:
 
 ```text
-fields:    [parent_id, organization_id]
-references:[id, organization_id]
+fields:     [parent_id, organization_id]
+references: [id, organization_id]
 ```
 
-نتیجه: وجود `parent_id` متعلق به سازمان دیگر به‌تنهایی برای ساخت رابطه کافی نیست و Database آن را رد می‌کند. این قاعده در کنار فیلتر سازمانی Query و Permission بررسی می‌شود و جای آن‌ها را نمی‌گیرد.
+- ترتیب ستون‌ها در `fields` و `references` **همیشه** `(id, organization_id)` است.
+- نتیجه: `parent_id` متعلق به سازمان دیگر رد می‌شود. این قاعده جای فیلتر سازمانی Query، مجوز Membership یا RLS را نمی‌گیرد.
+- رابطه‌ی هر مدل با `Organization` یک FK ساده‌ی `organization_id → Organization.id` است.
 
-### ۳.۳ روابط اختیاری مرکب
+### ۳٫۳ روابط اختیاری مرکب — الگوی زوج سایه
 
-در Prisma هر رابطهٔ مرکب اختیاری باید تمام Scalar Fieldهای رابطه را nullable داشته باشد. بنابراین برای رابطه‌ای مثل Claim اختیاری روی BusinessProfile، زوج زیر استفاده می‌شود:
+در Prisma هر رابطه‌ی مرکب اختیاری باید تمام Scalar Fieldهایش nullable باشد؛ `organization_id` اجباری است و نمی‌تواند در رابطه‌ی اختیاری شریک شود. پس هر رابطه‌ی اختیاری درون‌مستأجری یک ستون سازمان سایه دارد:
 
 ```text
-business_identity_claim_id              String?
-business_identity_claim_organization_id String?
+x_id               String?
+x_organization_id  String?
 ```
 
-برای این زوج، Check پایگاه داده باید مشخص کند که یا هر دو تهی‌اند یا هر دو پرند و `business_identity_claim_organization_id` با `organization_id` رکورد برابر است. این Check و رابطهٔ مرکب، دو لایهٔ جدا هستند.
+با CHECK پایگاه داده:
 
-### ۳.۴ قیدهایی که Prisma به‌تنهایی کافی نیست
+```sql
+(x_id IS NULL AND x_organization_id IS NULL)
+OR (x_id IS NOT NULL AND x_organization_id = organization_id)
+```
 
-موارد زیر در طراحی ثبت می‌شوند اما اجرای کامل آن‌ها نیازمند PostgreSQL DDL بررسی‌شده در Migration مصوب است:
+### ۳٫۴ ممیزی حداقلی تغییرهای حساس (PR1-ب)
 
-- Unique جزئی برای Claimهای فعال و Verified؛
-- Unique جزئی برای تنها یک OfferVersion فعال و Published؛
-- XOR برای مالک Evidence و هدف Publication؛
-- برابری Organization در زوج‌های مالکیت اختیاری؛
-- بازهٔ `valid_from < valid_until`؛
-- سازگاری قیمت با `on_request`؛
-- Append-only بودن Publication و تغییرناپذیری OfferVersion.
+**قاعده‌ی مالک:** هر تغییر حساس چرخه‌ی عمر سه چیز ثبت می‌کند: **انجام‌دهنده · دلیل · زمان.**
 
-هیچ‌کدام از این قیدها نباید با یک بررسی صرفاً Application-level جایگزین شوند.
+**انجام‌دهنده دو نوع دارد و هرگز هر دو هم‌زمان نیست:**
+
+| نوع | ستون‌ها | کِی |
+|---|---|---|
+| عضو همان سازمان | `*_by_membership_id` + `*_by_organization_id` (زوج سایه §۳٫۳) | کار کسب‌وکار |
+| پلتفرم | `*_by_platform_identity_ref` (`VarChar`، opaque، **بدون FK**) | کنترل ایمنی، بازیابی (D-58) یا راستی‌آزمایی — **هرگز اختیار کسب‌وکاری** (ADR-0009، ADR-0010) |
+
+**فهرست تغییرهای حساس در این شِما:**
+
+| تغییر | انجام‌دهنده‌ی مجاز | ستون‌ها |
+|---|---|---|
+| ثبت ادعا (`PENDING`) | عضو | `submitted_by_*` · `submitted_at` |
+| هر تغییر وضعیت ادعا | پلتفرم — یا سیستم فقط برای `EXPIRED` | `status_changed_by_platform_identity_ref` · `status_change_reason` · `status_changed_at` |
+| لغو عضویت | عضو یا پلتفرم | `revoked_by_*` · `revocation_reason` · `revoked_at` |
+| لغو اعطا | عضو یا پلتفرم | `revoked_by_*` · `revocation_reason` · `revoked_at` |
+| آرشیو سازمان | عضو یا پلتفرم | `archived_by_*` · `archive_reason` · `archived_at` |
+| انتشار و پس‌گرفتن | **فقط عضو** | `performed_by_membership_id` · `reason` · `occurred_at` در `Publication` |
+| تأیید انسانی توانمندی و شاهد | فقط عضو | `confirmed_by_*` · `confirmed_at` (موجود) |
+
+**CHECKهای ممیزی:**
+
+- در وضعیت پایانی (`REVOKED` / `ARCHIVED`): **دقیقاً یکی** از دو نوع انجام‌دهنده پر است، `*_reason` و `*_at` پرند؛
+- در وضعیت فعال: هر سه تهی‌اند.
+
+**تغییرهای دیگر** — بازنشستگی آفر، آرشیو پروفایل، بازنشستگی توانمندی — به‌خودی‌خود حساس نیستند، **به‌شرط** قاعده‌ی §۵٫۳: اگر موضوع منتشرشده است، اول یک رخداد `WITHDRAWN` با ممیزی کامل ثبت می‌شود.
+
+**`grant_id` در `Publication`:** طبق مجموعه‌ی حداقلی مالک اضافه نشده است؛ `permission_key` مصرف‌شده ثبت می‌شود. افزودن بعدی یک ستون تهی‌پذیر افزودنی است.
+
+### ۳٫۵ قیدهایی که Prisma بیان نمی‌کند
+
+فهرست کامل با روش اجرا در §۸٫۱ آمده است. هیچ‌کدام با بررسی صرفاً Application-level جایگزین نمی‌شود.
 
 ## ۴. مدل‌ها
 
-## ۴.۱ Organization
+## ۴٫۱ Organization
 
-**هدف:** ریشهٔ هویت داخلی و Tenant در MLINO V1. ایجاد Organization به‌معنی اثبات هویت کسب‌وکار واقعی نیست.
+**هدف:** ریشه‌ی هویت داخلی و Tenant در MLINO V1. ایجاد Organization به‌معنی اثبات هویت کسب‌وکار واقعی نیست.
 
 **مالکیت:** Core/V1.
 
+**هویت (PR2):** `Organization.id` **همان شناسه‌ی سازمان در AC-2** است — همان مقداری که امروز در `organization_id` شش جدول V1 است (`external_workspace_links`، `core_entities`، `event_log`، `admission_observability`، `opportunity_current_state`، `revenue_recovery_raw_aggregate`). **Core هویت UUID تازه برای سازمان نمی‌سازد.** ردیف `Organization` برای شناسه‌ای ساخته می‌شود که مرجع هویت AC-2 صادر کرده است.
+
 | فیلد | نوع Prisma پیشنهادی | الزام و توضیح |
 |---|---|---|
-| `id` | `String @db.Uuid` | کلید اصلی ریشه |
+| `id` | `String @id` — **`TEXT`، بدون `@default`** | شناسه‌ی سازمان AC-2 |
 | `display_name` | `String @db.VarChar` | نام نمایشی؛ Unique نیست |
 | `lifecycle_status` | `OrganizationLifecycle` | `ACTIVE` یا `ARCHIVED` |
-| `created_at` | `DateTime @db.Timestamptz(3)` | اجباری |
-| `updated_at` | `DateTime @db.Timestamptz(3)` | اجباری |
-| `archived_at` | `DateTime? @db.Timestamptz(3)` | هنگام آرشیو پر می‌شود |
+| `created_at` | `DateTime` | اجباری |
+| `updated_at` | `DateTime` | اجباری |
+| `archived_at` | `DateTime?` | ممیزی آرشیو |
+| `archived_by_membership_id` | `String?` | ممیزی — عضو |
+| `archived_by_organization_id` | `String?` | زوج سایه؛ برابر `id` |
+| `archived_by_platform_identity_ref` | `String? @db.VarChar` | ممیزی — پلتفرم |
+| `archive_reason` | `String? @db.Text` | ممیزی |
 
-**روابط:** یک سازمان چند Claim، Verification، Membership، PermissionGrant، BusinessProfile، Capability، Offer و Publication دارد.
+**روابط:** یک سازمان چند Claim، Verification، Membership، PermissionGrant، BusinessProfile، Capability، Offer و Publication دارد. رابطه‌ی اختیاری آرشیوکننده: `(archived_by_membership_id, archived_by_organization_id) → Membership(id, organization_id)` — FK حلقوی تهی‌پذیر، مجاز در PostgreSQL و Prisma.
 
-**کلیدها و Unique:**
+**کلیدها و قیدها:**
 
 - `PRIMARY KEY (id)`؛
-- `display_name` Unique نیست؛
-- هیچ شمارهٔ مجوز، تلفن، نشانی حقوقی یا شناسهٔ کسب‌وکار واقعی در این مدل نیست.
+- CHECK: `archived_by_organization_id` تهی یا برابر `id`؛
+- CHECK ممیزی §۳٫۴ برای `ARCHIVED`؛
+- هیچ شماره‌ی مجوز، تلفن، نشانی حقوقی یا شناسه‌ی کسب‌وکار واقعی در این مدل نیست.
 
-**Indexها:**
+**Indexها:** `(lifecycle_status, created_at)`.
 
-- `(lifecycle_status, created_at)`؛
-- در صورت نیاز `(updated_at)` برای پردازش‌های نگهداری.
+**چرخه:** `ACTIVE → ARCHIVED`. آرشیو تاریخچه را حذف نمی‌کند و طبق §۵٫۱ همه‌ی موضوعات سازمان را در زمان خواندن نامرئی می‌کند.
 
-**چرخه:** `ACTIVE → ARCHIVED`. آرشیو سازمان، تاریخچهٔ Claim و روابط را حذف نمی‌کند.
+**جدول‌های موجود V1:** CCR اول به آن‌ها دست نمی‌زند و FK از آن‌ها به `Organization` نمی‌سازد. **ولی نوع و هویت از روز اول سازگار است.** FK از `ExternalWorkspaceLink` و سایر جدول‌ها تصمیم جداگانه‌ای پس از تعیین تکلیف داده‌ی موجود است.
 
-**Tenant isolation:** Organization ریشه است و `organization_id` ندارد. همهٔ مدل‌های دیگر باید FK به `Organization.id` داشته باشند؛ هر رابطهٔ داخلی دیگر باید از کلید مرکب استفاده کند.
+## ۴٫۲ BusinessIdentityClaim
 
-## ۴.۲ BusinessIdentityClaim
-
-**هدف:** ثبت ادعای یک Organization دربارهٔ هویت یک کسب‌وکار واقعی. Claim مالک Organization نیست و با خود Organization جایگزین نمی‌شود.
+**هدف:** ثبت ادعای یک Organization درباره‌ی هویت یک کسب‌وکار واقعی. Claim مالک Organization نیست و با آن جایگزین نمی‌شود.
 
 **مالکیت:** Core/Governance.
 
+**وضعیت (PR1-الف) — یک ستون، یک منبع حقیقت:**
+
+| وضعیت | معنا | پایانی؟ |
+|---|---|---|
+| `PENDING` | ثبت‌شده، در انتظار راستی‌آزمایی | خیر |
+| `VERIFIED` | راستی‌آزمایی‌شده و معتبر | خیر |
+| `SUSPENDED` | تعلیق ایمنی پلتفرم (D-61) — شناسه همچنان در اختیار همین ادعاست | خیر |
+| `REJECTED` | راستی‌آزمایی رد شد | **بله** |
+| `EXPIRED` | اعتبار راستی‌آزمایی تمام شد | **بله** |
+
+**گذارها:**
+
+```text
+(ایجاد) → PENDING                       عضو سازمان · submitted_by_*
+PENDING → VERIFIED | REJECTED           پلتفرم · از راه نتیجه‌ی IdentityVerification
+VERIFIED → SUSPENDED                    پلتفرم · دلیل الزامی
+SUSPENDED → VERIFIED                    پلتفرم · دلیل الزامی
+VERIFIED | SUSPENDED → EXPIRED          سیستم (پایان valid_until) یا پلتفرم
+```
+
+وضعیت پایانی دوباره فعال نمی‌شود؛ ادعای تازه رکورد تازه است. ستون `verification_status` نسخه‌ی ۱ **حذف شد**.
+
 | فیلد | نوع Prisma پیشنهادی | الزام و توضیح |
 |---|---|---|
-| `id` | `String @db.Uuid` | همراه `organization_id` کلید مرکب |
-| `organization_id` | `String @db.Uuid` | FK به Organization |
+| `id` | `String @id @default(uuid())` | |
+| `organization_id` | `String` | FK به Organization |
 | `identifier_type` | `String @db.VarChar` | واژگان ثبت‌شده و قابل‌گسترش |
-| `identifier_value` | `String @db.VarChar` | مقدار نرمال‌شده و قابل مقایسه |
-| `claim_status` | `ClaimStatus` | `DRAFT`, `SUBMITTED`, `ACTIVE`, `REVOKED`, `WITHDRAWN`؛ وضعیت نهایی هنوز باید با YR1 بررسی شود |
-| `verification_status` | `VerificationStatus` | وضعیت جاری راستی‌آزمایی؛ تکرار وضعیت Claim در YR1 باز است |
-| `submitted_at` | `DateTime? @db.Timestamptz(3)` | زمان ارسال |
-| `verified_at` | `DateTime? @db.Timestamptz(3)` | زمان Verified شدن |
-| `revoked_at` | `DateTime? @db.Timestamptz(3)` | زمان پس‌گرفتن؛ ممیزی کامل لغو در YR2 هنوز باز است |
-| `created_at` | `DateTime @db.Timestamptz(3)` | اجباری |
-| `updated_at` | `DateTime @db.Timestamptz(3)` | اجباری |
+| `identifier_value` | `String @db.VarChar` | مقدار نرمال‌شده |
+| `claim_status` | `ClaimStatus` | `PENDING`, `VERIFIED`, `SUSPENDED`, `REJECTED`, `EXPIRED` |
+| `submitted_by_membership_id` | `String` | ممیزی ثبت — عضو ثبت‌کننده |
+| `submitted_at` | `DateTime` | ممیزی ثبت |
+| `verified_at` | `DateTime?` | آخرین زمان Verified شدن |
+| `valid_until` | `DateTime?` | پایان اعتبار راستی‌آزمایی؛ تهی = بدون پایان |
+| `status_changed_by_platform_identity_ref` | `String? @db.VarChar` | ممیزی آخرین تغییر وضعیت |
+| `status_change_reason` | `String? @db.Text` | ممیزی آخرین تغییر وضعیت |
+| `status_changed_at` | `DateTime?` | ممیزی آخرین تغییر وضعیت |
+| `created_at` | `DateTime` | اجباری |
+| `updated_at` | `DateTime` | اجباری |
 
-**روابط:** هر Claim متعلق به یک Organization و دارای چند IdentityVerification است. BusinessProfile می‌تواند در طرح شعبه‌ای به یک Claim فعال و Verified اشاره کند.
+**روابط:** متعلق به یک Organization؛ ثبت‌کننده با `(submitted_by_membership_id, organization_id) → Membership(id, organization_id)` — **اجباری**، پس زوج سایه لازم نیست؛ چند IdentityVerification؛ حداکثر یک BusinessProfile.
 
-**کلیدها و Unique:**
+**کلیدها و قیدها:**
 
-- `@@id([id, organization_id])`؛
-- Unique جزئی سراسری روی `(identifier_type, identifier_value)` فقط برای `claim_status = ACTIVE` و `verification_status = VERIFIED`؛
-- Unique جزئی بالا باید با SQL PostgreSQL اجرا شود؛ دو شناسهٔ متفاوت برای یک کسب‌وکار به‌تنهایی معادل تلقی نمی‌شوند.
+- `@@unique([id, organization_id])`؛
+- **Unique جزئی سراسری** روی `(identifier_type, identifier_value)` `WHERE claim_status IN ('VERIFIED', 'SUSPENDED')`. **تعلیق شناسه را آزاد نمی‌کند** — وگرنه تعلیق ایمنی راه تصاحب هویت را برای سازمان دیگر باز می‌کرد؛
+- CHECK: در `PENDING` سه ستون `status_changed_*` تهی‌اند؛ در سایر وضعیت‌ها `status_changed_at` و `status_change_reason` پرند و `status_changed_by_platform_identity_ref` پر است **مگر** وضعیت `EXPIRED` با انقضای سیستمی؛
+- CHECK: `VERIFIED` و `SUSPENDED` ⇒ `verified_at` پر.
 
-**Indexها:**
+**Indexها:** `(organization_id, claim_status)` · `(identifier_type, identifier_value)`.
 
-- `(organization_id, claim_status)`؛
-- `(organization_id, verification_status)`؛
-- `(identifier_type, identifier_value)` برای جست‌وجوی Verification.
+**Tenant isolation:** FK مرکب ثبت‌کننده؛ ارجاع پلتفرمی عمداً بیرون از Tenant.
 
-**چرخه:** ایجاد Organization آزاد است، Claim باید جداگانه ایجاد شود، سپس ارسال و Verification انجام می‌شود. Claim پس‌گرفته یا مردود دوباره Active نمی‌شود؛ ادعای تازه رکورد تازه است. یک وضعیت واحد و ممیزی لغو باید در CCR مربوط تعیین تکلیف شود.
+## ۴٫۳ IdentityVerification
 
-**Tenant isolation:** FK مرکب به Organization لازم است. هیچ Claim سازمان A نمی‌تواند با BusinessProfile، Membership یا Evidence سازمان B رابطهٔ داخلی بسازد.
-
-## ۴.۳ IdentityVerification
-
-**هدف:** تاریخچهٔ مستقل و قابل ممیزی تلاش‌های راستی‌آزمایی یک Claim.
-
-**مالکیت:** Core/Governance.
+**هدف:** تاریخچه‌ی مستقل و قابل ممیزی تلاش‌های راستی‌آزمایی یک Claim.
 
 | فیلد | نوع Prisma پیشنهادی | الزام و توضیح |
 |---|---|---|
-| `id` | `String @db.Uuid` | همراه `organization_id` کلید مرکب |
-| `organization_id` | `String @db.Uuid` | Tenant و جزء FK Claim |
-| `claim_id` | `String @db.Uuid` | همراه Organization به Claim اشاره می‌کند |
-| `attempt_number` | `Int` | شمارهٔ یکتا در محدودهٔ Claim |
-| `method_key` | `String @db.VarChar` | روش ثبت‌شده؛ روش تخصصی از Module می‌آید |
-| `status` | `VerificationAttemptStatus` | `PENDING`, `UNDER_REVIEW`, `VERIFIED`, `REJECTED`, `EXPIRED`, `REVOKED` |
-| `evidence_locator` | `Json?` | اشارهٔ محدود به مدرک Verification؛ Evidence عمومی نیست |
-| `reviewed_by_platform_identity_ref` | `String? @db.VarChar` | ارجاع opaque به هویت پلتفرم؛ Membership کسب‌وکار نیست |
-| `decision_reason` | `String? @db.Text` | برای نتیجه‌های منفی یا لغو در صورت نیاز |
-| `started_at` | `DateTime @db.Timestamptz(3)` | اجباری |
-| `decided_at` | `DateTime? @db.Timestamptz(3)` | پس از تصمیم پر می‌شود |
-| `created_at` | `DateTime @db.Timestamptz(3)` | اجباری |
+| `id` | `String @id @default(uuid())` | |
+| `organization_id` | `String` | Tenant و جزء FK Claim |
+| `claim_id` | `String` | با Organization به Claim |
+| `attempt_number` | `Int` | یکتا در محدوده‌ی Claim |
+| `method_key` | `String @db.VarChar` | روش ثبت‌شده؛ روش تخصصی از Module |
+| `status` | `VerificationAttemptStatus` | `PENDING`, `UNDER_REVIEW`, `VERIFIED`, `REJECTED`, `EXPIRED` |
+| `evidence_locator` | `Json?` | اشاره‌ی محدود به مدرک Verification؛ Evidence عمومی نیست |
+| `reviewed_by_platform_identity_ref` | `String? @db.VarChar` | بازبین پلتفرم؛ Membership نیست |
+| `decision_reason` | `String? @db.Text` | دلیل تصمیم |
+| `started_at` | `DateTime` | اجباری |
+| `decided_at` | `DateTime?` | پس از تصمیم |
+| `created_at` | `DateTime` | اجباری |
 
-**روابط:** `IdentityVerification` به Claim با FK مرکب `(claim_id, organization_id)` متصل است. بازبین با Membership سازمانی مدل نمی‌شود.
+**کلیدها و قیدها:**
 
-**کلیدها و Unique:**
+- `@@unique([id, organization_id])`؛
+- `@@unique([claim_id, attempt_number])`؛
+- FK `(claim_id, organization_id) → BusinessIdentityClaim(id, organization_id)`؛
+- CHECK: `VERIFIED` یا `REJECTED` ⇒ بازبین، `decision_reason` و `decided_at` پر — **همان ممیزی حداقلی** برای تصمیم راستی‌آزمایی؛
+- تاریخچه بازنویسی نمی‌شود: پس از تصمیم فقط‌خواندنی (§۸٫۱).
 
-- `@@id([id, organization_id])`؛
-- `@@unique([organization_id, claim_id, attempt_number])`؛
-- هیچ FK به Membership برای `reviewed_by_platform_identity_ref` وجود ندارد.
+**چرخه:** نتیجه‌ی `VERIFIED`/`REJECTED` در **همان تراکنش** وضعیت Claim و ستون‌های `status_changed_*` آن را به‌روز می‌کند.
 
-**Indexها:**
-
-- `(organization_id, claim_id, created_at)`؛
-- `(organization_id, status, decided_at)`.
-
-**چرخه:** هر تلاش از Pending به نتیجه می‌رسد و تاریخچهٔ آن بازنویسی نمی‌شود. همگام‌سازی وضعیت جاری Claim با نتیجهٔ معتبر باید در یک تراکنش دامنه‌ای انجام شود.
-
-**Tenant isolation:** Claim فقط از همان Organization پذیرفته می‌شود. ارجاع بازبین پلتفرمی خارج از Tenant است و عمداً FK سازمانی ندارد.
-
-## ۴.۴ Membership
+## ۴٫۴ Membership
 
 **هدف:** اتصال Subject یک Identity Provider خارجی به Organization.
 
-**مالکیت:** Core.
-
 | فیلد | نوع Prisma پیشنهادی | الزام و توضیح |
 |---|---|---|
-| `id` | `String @db.Uuid` | همراه Organization کلید مرکب |
-| `organization_id` | `String @db.Uuid` | FK به Organization |
+| `id` | `String @id @default(uuid())` | |
+| `organization_id` | `String` | FK به Organization |
 | `identity_provider` | `String @db.VarChar` | مقدار نهایی تابع OD-08 |
 | `external_subject` | `String @db.VarChar` | Subject پایدار نزد Provider |
 | `membership_status` | `MembershipStatus` | `ACTIVE` یا `REVOKED` |
-| `created_at` | `DateTime @db.Timestamptz(3)` | اجباری |
-| `revoked_at` | `DateTime? @db.Timestamptz(3)` | زمان لغو |
+| `created_at` | `DateTime` | اجباری |
+| `revoked_at` | `DateTime?` | ممیزی |
+| `revoked_by_membership_id` | `String?` | ممیزی — عضو |
+| `revoked_by_organization_id` | `String?` | زوج سایه |
+| `revoked_by_platform_identity_ref` | `String? @db.VarChar` | ممیزی — پلتفرم (D-58) |
+| `revocation_reason` | `String? @db.Text` | ممیزی |
 
-**روابط:** یک Membership چند PermissionGrant دارد و متعلق به یک Organization است.
+**کلیدها و قیدها:**
 
-**کلیدها و Unique:**
+- `@@unique([id, organization_id])`؛
+- Unique جزئی `(organization_id, identity_provider, external_subject)` `WHERE membership_status = 'ACTIVE'`؛
+- FK خودارجاع اختیاری `(revoked_by_membership_id, revoked_by_organization_id) → Membership(id, organization_id)`؛
+- CHECK زوج سایه §۳٫۳ و CHECK ممیزی §۳٫۴.
 
-- `@@id([id, organization_id])`؛
-- Unique جزئی روی `(organization_id, identity_provider, external_subject)` فقط برای Membershipهای Active؛
-- Membershipهای Revoked تاریخی باقی می‌مانند.
+**Indexها:** `(organization_id, membership_status)` · `(identity_provider, external_subject)`.
 
-**Indexها:**
+**چرخه:** `ACTIVE → REVOKED`؛ بازیابی خودکار در MVP مدل نمی‌شود.
 
-- `(organization_id, membership_status)`؛
-- `(identity_provider, external_subject)`؛
-- `(organization_id, external_subject)` در صورت نیاز Query.
+**مرز:** بدون User داخلی، Password یا Credential. هیچ `role` یا `role_id` منبع Permission نیست.
 
-**چرخه:** `ACTIVE → REVOKED`. انقضا و بازیابی خودکار در MVP مدل نمی‌شود.
-
-**Tenant isolation:** `organization_id` جزء کلید اصلی و تمام FKهای وابسته است. Core هیچ User داخلی، Password، Credential یا هویت داخلی مستقل اضافه نمی‌کند.
-
-**محدودیت Permission:** هیچ `role` یا `role_id` در این مدل منبع Permission نیست. Role هرگز Permission source نیست.
-
-## ۴.۵ PermissionGrant
+## ۴٫۵ PermissionGrant
 
 **هدف:** اعطای صریح یک Permission به یک Membership مشخص.
 
-**مالکیت:** Core/Governance.
-
 | فیلد | نوع Prisma پیشنهادی | الزام و توضیح |
 |---|---|---|
-| `id` | `String @db.Uuid` | همراه Organization کلید مرکب |
-| `organization_id` | `String @db.Uuid` | Tenant |
-| `membership_id` | `String @db.Uuid` | دریافت‌کننده؛ FK مرکب |
-| `permission_key` | `String @db.VarChar` | رشتهٔ ثبت‌شده و قابل‌گسترش |
+| `id` | `String @id @default(uuid())` | |
+| `organization_id` | `String` | Tenant |
+| `membership_id` | `String` | دریافت‌کننده؛ FK مرکب |
+| `permission_key` | `String @db.VarChar` | رشته‌ی ثبت‌شده |
 | `grant_status` | `GrantStatus` | `ACTIVE` یا `REVOKED` |
 | `basis_key` | `String @db.VarChar` | در MVP فقط `founding` یا `member_grant` |
-| `granted_by_membership_id` | `String? @db.Uuid` | اعطاکنندهٔ اختیاری |
-| `granted_by_organization_id` | `String? @db.Uuid` | جزء زوج رابطهٔ اختیاری |
-| `reason` | `String? @db.Text` | دلیل ممیزی |
-| `granted_at` | `DateTime @db.Timestamptz(3)` | اجباری |
-| `revoked_at` | `DateTime? @db.Timestamptz(3)` | زمان لغو |
+| `granted_by_membership_id` | `String?` | اعطاکننده |
+| `granted_by_organization_id` | `String?` | زوج سایه |
+| `reason` | `String? @db.Text` | دلیل اعطا |
+| `granted_at` | `DateTime` | اجباری |
+| `revoked_at` | `DateTime?` | ممیزی |
+| `revoked_by_membership_id` | `String?` | ممیزی — عضو |
+| `revoked_by_organization_id` | `String?` | زوج سایه |
+| `revoked_by_platform_identity_ref` | `String? @db.VarChar` | ممیزی — پلتفرم (D-58) |
+| `revocation_reason` | `String? @db.Text` | ممیزی |
 
-**روابط:** Grant به Membership دریافت‌کننده با `(membership_id, organization_id)` و در صورت وجود به Membership اعطاکننده با زوج nullable متصل است.
+**کلیدها و قیدها:**
 
-**کلیدها و Unique:**
+- `@@unique([id, organization_id])`؛
+- Unique جزئی `(organization_id, membership_id, permission_key)` `WHERE grant_status = 'ACTIVE'`؛
+- FK `(membership_id, organization_id) → Membership(id, organization_id)`؛
+- FKهای اختیاری اعطاکننده و لغوکننده با زوج سایه؛
+- CHECK: `basis_key IN ('founding', 'member_grant')` در MVP؛ **`founding` ⇔ اعطاکننده تهی** (D-57)؛
+- CHECK ممیزی §۳٫۴ برای `REVOKED`.
 
-- `@@id([id, organization_id])`؛
-- Unique جزئی روی `(organization_id, membership_id, permission_key)` برای Grantهای Active؛
-- `granted_by_organization_id` و `granted_by_membership_id` یا هر دو تهی‌اند یا هر دو پرند؛ هر دو باید با Organization رکورد برابر باشند.
+**Indexها:** `(organization_id, membership_id, grant_status)` · `(organization_id, permission_key, grant_status)`.
 
-**Indexها:**
+**چرخه:** `ACTIVE → REVOKED`؛ اعطای مجدد رکورد تازه است.
 
-- `(organization_id, membership_id, grant_status)`؛
-- `(organization_id, permission_key, grant_status)`؛
-- `(organization_id, granted_at)`.
+**مرز اختیار:** Role، Claim، Session یا دستیار به‌تنهایی Grant ایجاد نمی‌کند. پلتفرم فقط لغو ایمنی و بازیابی را اجرا می‌کند و اختیار کسب‌وکاری نمی‌سازد (ADR-0009، ADR-0010).
 
-**چرخه:** `ACTIVE → REVOKED`. Grant لغوشده دوباره Active نمی‌شود؛ اعطای مجدد رکورد تازه است. ممیزی کامل `revoked_by` و `revocation_reason` طبق YR2 باید پیش از Migration نهایی شود.
+## ۴٫۶ BusinessProfile
 
-**Tenant isolation:** Membership دریافت‌کننده و اعطاکننده هر دو باید در همان Organization باشند. عضویت یا Role سازمان دیگر نمی‌تواند Permission داخل این سازمان ایجاد کند.
+**هدف:** تصویر عمومی Core برای Discovery و مصرف V2؛ **واحد مکان یا شعبه.**
 
-**مرز اختیار:** وجود Role، Claim، Session یا دستیار به‌تنهایی Grant ایجاد نمی‌کند. Platform فقط اجرا می‌کند و اختیار را خودش نمی‌سازد.
-
-## ۴.۶ BusinessProfile
-
-**هدف:** تصویر عمومی Core برای Discovery و مصرف V2، مستقل از Vertical و بدون وابستگی به جدول Module.
-
-**مالکیت:** Core/V1.
-
-**شکل پیشنهادی برای Prisma:** BusinessProfile واحد مکان یا شعبه است. بنابراین در این طراحی `organization_id` به‌تنهایی Unique نیست و یک Organization می‌تواند در آینده چند Profile داشته باشد. «یک Profile در MVP» قاعدهٔ دامنه است، نه قید Database. هر Profile می‌تواند Claim مرتبط داشته باشد.
+- `organization_id` Unique نیست؛ «یک Profile در MVP» قاعده‌ی دامنه است، نه قید Database؛
+- هر Profile می‌تواند به یک Claim اشاره کند؛ تا راستی‌آزمایی تهی است.
 
 | فیلد | نوع Prisma پیشنهادی | الزام و توضیح |
 |---|---|---|
-| `id` | `String @db.Uuid` | همراه Organization کلید مرکب |
-| `organization_id` | `String @db.Uuid` | FK به Organization |
-| `business_identity_claim_id` | `String? @db.Uuid` | Claim اختیاری تا قبل از Verification |
-| `business_identity_claim_organization_id` | `String? @db.Uuid` | جزء زوج رابطهٔ اختیاری |
+| `id` | `String @id @default(uuid())` | |
+| `organization_id` | `String` | FK به Organization |
+| `business_identity_claim_id` | `String?` | Claim اختیاری |
+| `business_identity_claim_organization_id` | `String?` | زوج سایه |
 | `name` | `String @db.VarChar` | نام عمومی |
 | `description` | `String? @db.Text` | توضیح عمومی |
-| `latitude` | `Decimal? @db.Decimal(9, 6)` | مکان عمومی؛ برای Discovery |
-| `longitude` | `Decimal? @db.Decimal(9, 6)` | مکان عمومی؛ برای Discovery |
+| `latitude` | `Decimal? @db.Decimal(9, 6)` | مکان عمومی |
+| `longitude` | `Decimal? @db.Decimal(9, 6)` | مکان عمومی |
 | `address_text` | `String? @db.Text` | نشانی عمومی |
 | `contact_information` | `Json? @db.JsonB` | تماس عمومی محدود |
 | `links` | `Json? @db.JsonB` | پیوندهای عمومی محدود |
-| `business_hours` | `Json? @db.JsonB` | ساعات کاری اعلام‌شده؛ Availability زنده نیست |
+| `business_hours` | `Json? @db.JsonB` | ساعات کاری اعلام‌شده (D-56)؛ Availability زنده نیست |
 | `lifecycle_status` | `BusinessProfileLifecycle` | `DRAFT`, `ACTIVE`, `ARCHIVED` |
-| `publication_status` | `PublicationStatus` | `UNPUBLISHED`, `PUBLISHED`, `WITHDRAWN` |
-| `created_at` | `DateTime @db.Timestamptz(3)` | اجباری |
-| `updated_at` | `DateTime @db.Timestamptz(3)` | اجباری |
+| `publication_status` | `PublicationStatus` | `UNPUBLISHED`, `PUBLISHED`, `WITHDRAWN` — §۴٫۱۱ |
+| **`content_revision`** | **`Int`** | **با هر ویرایش فیلد عمومی یکی زیاد می‌شود (§۵٫۲)** |
+| **`published_content_revision`** | **`Int?`** | **بازبینی‌ای که آخرین رخداد `PUBLISHED` منتشر کرد** |
+| `created_at` | `DateTime` | اجباری |
+| `updated_at` | `DateTime` | اجباری |
 
-**روابط:** به Organization، در صورت وجود به Claim همان Organization، و به Publicationهای تاریخی متصل است.
+**کلیدها و قیدها:**
 
-**کلیدها و Unique:**
+- `@@unique([id, organization_id])`؛
+- Unique جزئی روی `business_identity_claim_id` `WHERE business_identity_claim_id IS NOT NULL`؛
+- FK اختیاری `(business_identity_claim_id, business_identity_claim_organization_id) → BusinessIdentityClaim(id, organization_id)` با CHECK زوج سایه؛
+- CHECK: `PUBLISHED` ⇒ `published_content_revision` پر؛
+- Unique روی `organization_id` وجود ندارد.
 
-- `@@id([id, organization_id])`؛
-- Unique جزئی روی `business_identity_claim_id` وقتی مقدار دارد، برای جلوگیری از اتصال هم‌زمان یک Claim به چند Profile؛
-- Unique روی `organization_id` وجود ندارد؛
-- زوج Claim اختیاری دقیقاً هر دو تهی یا هر دو پر باشد و Organization آن با Profile برابر باشد.
+**Indexها:** `(organization_id, lifecycle_status)` · `(organization_id, publication_status, updated_at)` · `(publication_status, latitude, longitude)`. Index جغرافیایی دقیق‌تر (PostGIS) به تصمیم بعدی موکول است.
 
-**Indexها:**
-
-- `(organization_id, lifecycle_status)`؛
-- `(organization_id, publication_status, updated_at)`؛
-- `(publication_status, latitude, longitude)` برای فیلتر ابتدایی Discovery؛
-- Index جغرافیایی دقیق‌تر نیازمند تصمیم Extension/Provider است و در این فاز ایجاد نمی‌شود.
-
-**چرخه:** `DRAFT → ACTIVE → ARCHIVED`. Publication بُعد جداست. Profile آرشیوشده یا بدون Claim فعال و Verified واجد انتشار عمومی نیست.
-
-**Tenant isolation:** Profile، Claim و Publication باید با زوج‌های مرکب به همان Organization محدود شوند.
+**چرخه:** `DRAFT → ACTIVE → ARCHIVED`. انتشار بُعد جداست؛ قواعد نمایش در §۵.
 
 **فیلدهای عمداً غایب:** Rating، Review، CRM، Customer Data، Popularity، Availability زنده و هر مفهوم Clinic.
 
-## ۴.۷ Capability
+## ۴٫۷ Capability
 
-**هدف:** بیان توانمندی عمومی قابل‌ارائه، مستقل از Clinic یا هر Vertical دیگر.
-
-**مالکیت:** Core/V1؛ vocabulary تخصصی را Module از راه قرارداد نسخه‌دار فراهم می‌کند.
+**هدف:** توانمندی عمومی قابل‌ارائه، مستقل از Vertical.
 
 | فیلد | نوع Prisma پیشنهادی | الزام و توضیح |
 |---|---|---|
-| `id` | `String @db.Uuid` | همراه Organization کلید مرکب |
-| `organization_id` | `String @db.Uuid` | FK به Organization |
+| `id` | `String @id @default(uuid())` | |
+| `organization_id` | `String` | FK به Organization |
 | `capability_key` | `String @db.VarChar` | کلید پایدار در سازمان |
 | `name` | `String @db.VarChar` | نام عمومی |
 | `short_description` | `String? @db.Text` | توضیح عمومی |
-| `category_key` | `String @db.VarChar` | رشتهٔ ثبت‌شده؛ Enum عمودی نیست |
+| `category_key` | `String @db.VarChar` | رشته‌ی ثبت‌شده؛ Enum عمودی نیست |
 | `capability_status` | `CapabilityStatus` | `PLANNED`, `ACTIVE`, `RETIRED` |
 | `audience` | `CapabilityAudience` | `INTERNAL` یا `CUSTOMER_FACING` |
 | `confirmation_status` | `ConfirmationStatus` | `UNCONFIRMED` یا `HUMAN_CONFIRMED` |
-| `confirmed_by_membership_id` | `String? @db.Uuid` | Membership انسانی تأییدکننده |
-| `confirmed_by_organization_id` | `String? @db.Uuid` | جزء زوج رابطهٔ اختیاری |
-| `confirmed_at` | `DateTime? @db.Timestamptz(3)` | زمان تأیید |
-| `publication_status` | `PublicationStatus` | `UNPUBLISHED`, `PUBLISHED`, `WITHDRAWN` |
-| `fresh_until` | `DateTime? @db.Timestamptz(3)` | افق تازگی |
-| `created_at` | `DateTime @db.Timestamptz(3)` | اجباری |
-| `updated_at` | `DateTime @db.Timestamptz(3)` | اجباری |
+| `confirmed_by_membership_id` | `String?` | تأییدکننده‌ی انسانی |
+| `confirmed_by_organization_id` | `String?` | زوج سایه |
+| `confirmed_at` | `DateTime?` | زمان تأیید |
+| `publication_status` | `PublicationStatus` | §۴٫۱۱ |
+| **`content_revision`** | **`Int`** | §۵٫۲ |
+| **`published_content_revision`** | **`Int?`** | §۵٫۲ |
+| `fresh_until` | `DateTime?` | افق تازگی |
+| `created_at` | `DateTime` | اجباری |
+| `updated_at` | `DateTime` | اجباری |
 
-**روابط:** به Organization، Evidence، OfferVersionCapability و Publication متصل است. تأییدکننده در صورت وجود Membership همان Organization است.
+**کلیدها و قیدها:**
 
-**کلیدها و Unique:**
-
-- `@@id([id, organization_id])`؛
+- `@@unique([id, organization_id])`؛
 - `@@unique([organization_id, capability_key])`؛
-- زوج تأییدکننده یا هر دو تهی یا هر دو پرند و Organization آن برابر است.
+- FK اختیاری تأییدکننده با زوج سایه؛
+- CHECK: `HUMAN_CONFIRMED` ⇔ تأییدکننده و `confirmed_at` پر؛
+- CHECK: `PUBLISHED` ⇒ `published_content_revision` پر.
 
-**Indexها:**
+**Indexها:** `(organization_id, capability_status, audience)` · `(organization_id, publication_status, category_key)` · `(organization_id, fresh_until)`.
 
-- `(organization_id, capability_status, audience)`؛
-- `(organization_id, publication_status, category_key)`؛
-- `(organization_id, fresh_until)`.
+**چرخه:** چهار بُعد مستقل‌اند: توانمندی، مخاطب، تأیید و انتشار. `ACTIVE + UNPUBLISHED` معتبر است. AI inference با confidence بالا Human Confirmation را جایگزین نمی‌کند (ADR-0006).
 
-**چرخه:** چهار بُعد مستقل‌اند: توانمندی، مخاطب، تأیید و انتشار. `ACTIVE + UNPUBLISHED` معتبر است. AI inference با confidence بالا Human Confirmation را جایگزین نمی‌کند.
+## ۴٫۸ Offer
 
-**Tenant isolation:** تمام Evidence، OfferVersionCapability، تأییدکننده و Publication با کلید مرکب همان Organization بسته می‌شوند.
-
-**محدودیت R8-a:** منبع `CUSTOMER_DATA` در مدل مفهومی تعریف‌شده اما Access Blocked است؛ هیچ ingestion یا bypass از آن وارد Business Context یا Published نمی‌شود.
-
-## ۴.۸ Offer
-
-**هدف:** هویت پایدار یک Offer که یک یا چند نسخهٔ تاریخی دارد.
-
-**مالکیت:** Core/V1.
+**هدف:** هویت پایدار یک Offer با یک یا چند نسخه‌ی تاریخی.
 
 | فیلد | نوع Prisma پیشنهادی | الزام و توضیح |
 |---|---|---|
-| `id` | `String @db.Uuid` | همراه Organization کلید مرکب |
-| `organization_id` | `String @db.Uuid` | FK به Organization |
+| `id` | `String @id @default(uuid())` | |
+| `organization_id` | `String` | FK به Organization |
 | `offer_key` | `String @db.VarChar` | کلید پایدار در Organization |
 | `lifecycle_status` | `OfferLifecycle` | `ACTIVE` یا `RETIRED` |
-| `created_at` | `DateTime @db.Timestamptz(3)` | اجباری |
-| `retired_at` | `DateTime? @db.Timestamptz(3)` | زمان بازنشستگی |
+| `created_at` | `DateTime` | اجباری |
+| `retired_at` | `DateTime?` | زمان بازنشستگی |
 
-**روابط:** یک Offer چند OfferVersion دارد. محتوای قابل‌انتشار روی Version است، نه روی Offer.
+**کلیدها:** `@@unique([id, organization_id])` · `@@unique([organization_id, offer_key])`.
 
-**کلیدها و Unique:**
+**چرخه:** `ACTIVE → RETIRED`؛ بازنشستگی نسخه‌ها را حذف یا بازنویسی نمی‌کند. بازنشستگی آفری که نسخه‌ی منتشرشده دارد تابع §۵٫۳ است.
 
-- `@@id([id, organization_id])`؛
-- `@@unique([organization_id, offer_key])`.
+**نکته:** Offer وضعیت انتشار ندارد؛ وضعیت انتشار فقط روی OfferVersion است.
 
-**Indexها:**
+## ۴٫۹ OfferVersion
 
-- `(organization_id, lifecycle_status)`؛
-- `(organization_id, created_at)`.
+**هدف:** نسخه‌ی تغییرناپذیر و قابل‌انتشار یک Offer.
 
-**چرخه:** `ACTIVE → RETIRED`. بازنشستگی Offer نسخه‌های تاریخی را حذف یا بازنویسی نمی‌کند.
-
-**Tenant isolation:** Offer فقط به Organization خودش و Versionهایی با همان Organization متصل می‌شود.
-
-**نکته:** Offer وضعیت Publication مستقل ندارد؛ وضعیت انتشار از OfferVersion خوانده می‌شود تا دو منبع حقیقت ایجاد نشود.
-
-## ۴.۹ OfferVersion
-
-**هدف:** نسخهٔ تغییرناپذیر و قابل‌انتشار یک Offer.
-
-**مالکیت:** Core/V1.
+**PR1-ج:** `version_status` **حذف شد.** «نسخه‌ی فعال» مفهوم جداگانه‌ای نیست؛ **تنها وضعیت، وضعیت انتشار است** و فقط از راه رخداد `Publication` تغییر می‌کند (§۴٫۱۱).
 
 | فیلد | نوع Prisma پیشنهادی | الزام و توضیح |
 |---|---|---|
-| `id` | `String @db.Uuid` | همراه Organization کلید مرکب |
-| `organization_id` | `String @db.Uuid` | Tenant و جزء FK Offer |
-| `offer_id` | `String @db.Uuid` | FK مرکب به Offer |
-| `version_number` | `Int` | افزایشی در محدودهٔ Offer |
+| `id` | `String @id @default(uuid())` | |
+| `organization_id` | `String` | Tenant و جزء FK Offer |
+| `offer_id` | `String` | FK مرکب به Offer |
+| `version_number` | `Int` | افزایشی در محدوده‌ی Offer |
 | `name` | `String @db.VarChar` | نام عمومی نسخه |
 | `short_description` | `String? @db.Text` | توضیح عمومی |
 | `offer_shape` | `OfferShape` | `ITEM`, `BUNDLE`, `CAMPAIGN` |
-| `terms` | `Json? @db.JsonB` | شرایط عمومی؛ قرارداد دقیق YR7 پیش از انتشار لازم است |
+| `terms` | `Json? @db.JsonB` | شرایط عمومی؛ قرارداد YR7 پیش از انتشار نخستین آفر |
 | `price_amount` | `Decimal? @db.Decimal(12, 2)` | قیمت اختیاری |
 | `price_currency` | `String? @db.VarChar(3)` | همراه قیمت |
 | `on_request` | `Boolean` | اعلام‌نشدن قیمت |
-| `valid_from` | `DateTime @db.Timestamptz(3)` | شروع اعتبار |
-| `valid_until` | `DateTime? @db.Timestamptz(3)` | پایان اعتبار؛ تهی یعنی بدون پایان مشخص |
-| `version_status` | `OfferVersionStatus` | `ACTIVE` یا `INACTIVE`; حذف آن در YR5 هنوز باز است |
+| `valid_from` | `DateTime` | شروع اعتبار |
+| `valid_until` | `DateTime?` | پایان اعتبار |
 | `publication_status` | `PublicationStatus` | `UNPUBLISHED`, `PUBLISHED`, `WITHDRAWN` |
-| `created_at` | `DateTime @db.Timestamptz(3)` | اجباری |
-| `published_at` | `DateTime? @db.Timestamptz(3)` | زمان انتشار |
+| `created_at` | `DateTime` | اجباری |
+| `published_at` | `DateTime?` | زمان آخرین انتشار |
 
-**روابط:** هر Version به یک Offer با `(offer_id, organization_id)` وصل می‌شود، از راه جدول پیوند به Capabilityها متصل می‌شود و Evidence/Publication دارد.
+**کلیدها و قیدها:**
 
-**کلیدها و Unique:**
+- `@@unique([id, organization_id])`؛
+- `@@unique([offer_id, version_number])`؛
+- FK `(offer_id, organization_id) → Offer(id, organization_id)`؛
+- **Unique جزئی روی `(offer_id)` `WHERE publication_status = 'PUBLISHED'`** — حداکثر یک نسخه‌ی منتشرشده برای هر آفر؛
+- CHECK: `valid_until IS NULL OR valid_until > valid_from`؛
+- CHECK قیمت: `on_request = true` ⇒ `price_amount` و `price_currency` تهی؛ `on_request = false` ⇒ هر دو پر؛
+- **تغییرناپذیری:** پس از ایجاد فقط `publication_status` و `published_at` تغییرپذیرند؛ همه‌ی ستون‌های دیگر با Trigger قفل‌اند (§۸٫۱).
 
-- `@@id([id, organization_id])`؛
-- `@@unique([organization_id, offer_id, version_number])`؛
-- Unique جزئی روی `(organization_id, offer_id)` فقط وقتی `version_status = ACTIVE` و `publication_status = PUBLISHED`؛
-- Check: `valid_until IS NULL OR valid_until > valid_from`؛
-- Check قیمت: `on_request`، `price_amount` و `price_currency` باید قرارداد سازگار داشته باشند.
+**Indexها:** `(organization_id, offer_id, publication_status)` · `(organization_id, valid_from, valid_until)` · `(organization_id, publication_status, published_at)`.
 
-**Indexها:**
+**چرخه:** برای انتشار نسخه‌ی تازه، در **یک تراکنش**: رخداد `WITHDRAWN` برای نسخه‌ی منتشرشده‌ی قبلی → وضعیت آن `WITHDRAWN` → رخداد `PUBLISHED` برای نسخه‌ی تازه → وضعیت آن `PUBLISHED`. رکورد قبلی باقی می‌ماند.
 
-- `(organization_id, offer_id, version_status, publication_status)`؛
-- `(organization_id, valid_from, valid_until)`؛
-- `(organization_id, publication_status, published_at)`.
+### جدول پیوند `OfferVersionCapability`
 
-**چرخه:** Version بعد از ایجاد نباید بازنویسی شود. هنگام انتشار Version تازه، Version قبلی در همان تراکنش `INACTIVE` و Publication آن `WITHDRAWN` می‌شود؛ رکورد قبلی باقی می‌ماند. Version آینده، منقضی یا تاریخ‌نامعتبر در مصرف معتبر تلقی نمی‌شود.
-
-**Tenant isolation:** Offer و Capabilityهای مرتبط باید هر دو از همان Organization باشند؛ هر ارجاع مستقل با کلید مرکب بسته می‌شود.
-
-### جدول پیوند فیزیکی `OfferVersionCapability`
-
-این جدول Entity دامنه‌ای تازه نیست؛ جدول رابطهٔ لازم برای Prisma و Database است.
+جدول رابطه است، نه Entity دامنه‌ای تازه.
 
 | فیلد | نوع | قاعده |
 |---|---|---|
-| `organization_id` | UUID | جزء Tenant و کلید مرکب |
-| `offer_version_id` | UUID | FK مرکب به OfferVersion |
-| `capability_id` | UUID | FK مرکب به Capability |
+| `organization_id` | `TEXT` | Tenant |
+| `offer_version_id` | `TEXT` | FK مرکب به OfferVersion |
+| `capability_id` | `TEXT` | FK مرکب به Capability |
 
-- `PRIMARY KEY (organization_id, offer_version_id, capability_id)`؛
-- FKهای مرکب به `(organization_id, offer_version_id)` و `(organization_id, capability_id)`؛
-- Index معکوس `(organization_id, capability_id, offer_version_id)`؛
-- ارجاع Version سازمان A به Capability سازمان B در خود Database رد می‌شود.
+- `PRIMARY KEY (offer_version_id, capability_id)`؛
+- FKها: `(offer_version_id, organization_id) → OfferVersion(id, organization_id)` و `(capability_id, organization_id) → Capability(id, organization_id)`؛
+- Index معکوس `(capability_id, offer_version_id)`؛
+- مثل خود نسخه تغییرناپذیر؛ ارجاع نسخه‌ی سازمان A به توانمندی سازمان B در Database رد می‌شود.
 
-## ۴.۱۰ Evidence
+## ۴٫۱۰ Evidence
 
-**هدف:** ثبت شاهد دارای provenance، freshness، confidence و confirmation برای Capability یا OfferVersion.
+**هدف:** شاهد دارای provenance، freshness، confidence و confirmation برای Capability یا OfferVersion.
 
-**مالکیت:** Core؛ منبع و روش تخصصی را Module از طریق قرارداد ارائه می‌کند.
+**PY4:** **`CUSTOMER_DATA` از Core حذف شد** — نه در enum فیزیکی، نه به‌عنوان منبع مفهومی Core. هر منبع داده‌ی مشتری در آینده تصمیم سیاست و CCR جداگانه لازم دارد. نگهبان زمان اجرای CUSTOMER_DATA در کد موجود تغییر نمی‌کند و دور زده نمی‌شود.
 
-برای جلوگیری از مالکیت چندریختی مبهم، Evidence دو زوج مالک تایپ‌شده دارد و دقیقاً یکی باید پر باشد:
+دو زوج مالک تایپ‌شده؛ دقیقاً یکی پر است:
 
-- `(capability_organization_id, capability_id)`؛
-- `(offer_version_organization_id, offer_version_id)`.
-
-هر دو Scalar Field هر زوج nullable هستند تا رابطهٔ اختیاری مرکب با Prisma معتبر باشد.
+- `(capability_id, capability_organization_id)`؛
+- `(offer_version_id, offer_version_organization_id)`.
 
 | فیلد | نوع Prisma پیشنهادی | الزام و توضیح |
 |---|---|---|
-| `id` | `String @db.Uuid` | همراه Organization کلید مرکب |
-| `organization_id` | `String @db.Uuid` | Tenant |
-| `capability_organization_id` | `String? @db.Uuid` | زوج مالک اول |
-| `capability_id` | `String? @db.Uuid` | مالک Capability |
-| `offer_version_organization_id` | `String? @db.Uuid` | زوج مالک دوم |
-| `offer_version_id` | `String? @db.Uuid` | مالک OfferVersion |
-| `source_kind` | `EvidenceSourceKind` | شامل `HUMAN`, `CUSTOMER_DATA`, `SYSTEM`, `AI_INFERRED`, `INTEGRATION` |
-| `source_ref` | `String? @db.VarChar` | ارجاع قراردادی/ممیزی، نه مالکیت جدول Module |
+| `id` | `String @id @default(uuid())` | |
+| `organization_id` | `String` | Tenant |
+| `capability_id` | `String?` | مالک Capability |
+| `capability_organization_id` | `String?` | زوج سایه |
+| `offer_version_id` | `String?` | مالک OfferVersion |
+| `offer_version_organization_id` | `String?` | زوج سایه |
+| `source_kind` | `EvidenceSourceKind` | **`HUMAN`, `SYSTEM`, `AI_INFERRED`, `INTEGRATION`** |
+| `source_ref` | `String? @db.VarChar` | ارجاع قراردادی/ممیزی، نه جدول Module |
 | `method_key` | `String? @db.VarChar` | روش ثبت‌شده |
-| `captured_at` | `DateTime? @db.Timestamptz(3)` | زمان دریافت |
-| `observed_at` | `DateTime? @db.Timestamptz(3)` | زمان مشاهده |
-| `fresh_until` | `DateTime? @db.Timestamptz(3)` | افق تازگی |
-| `confidence` | `Decimal? @db.Decimal(5, 4)` | بازهٔ دامنه‌ای صفر تا یک |
+| `captured_at` | `DateTime?` | زمان دریافت |
+| `observed_at` | `DateTime?` | زمان مشاهده |
+| `fresh_until` | `DateTime?` | افق تازگی |
+| `confidence` | `Decimal? @db.Decimal(5, 4)` | بازه‌ی ۰ تا ۱ |
 | `confirmation_status` | `ConfirmationStatus` | `UNCONFIRMED` یا `HUMAN_CONFIRMED` |
-| `confirmed_by_membership_id` | `String? @db.Uuid` | تأییدکنندهٔ انسانی |
-| `confirmed_by_organization_id` | `String? @db.Uuid` | زوج رابطهٔ اختیاری |
+| `confirmed_by_membership_id` | `String?` | تأییدکننده‌ی انسانی |
+| `confirmed_by_organization_id` | `String?` | زوج سایه |
+| `confirmed_at` | `DateTime?` | زمان تأیید |
 | `evidence_status` | `EvidenceStatus` | `ACTIVE`, `EXPIRED`, `WITHDRAWN` |
-| `created_at` | `DateTime @db.Timestamptz(3)` | اجباری |
+| `created_at` | `DateTime` | اجباری |
 
-**کلیدها و Unique:**
+**کلیدها و قیدها:**
 
-- `@@id([id, organization_id])`؛
-- FKهای مرکب اختیاری به Capability و OfferVersion؛
-- Check دقیقاً یکی از دو مالک را الزام کند؛
-- Check Organization هر مالک با `organization_id` Evidence برابر باشد؛
-- Check confirmation pair یا هر دو تهی یا هر دو پر و هم‌سازمان باشد.
+- `@@unique([id, organization_id])`؛
+- FKهای مرکب اختیاری به Capability و OfferVersion با زوج سایه؛
+- CHECK XOR: دقیقاً یکی از دو مالک؛
+- CHECK زوج‌های سایه (مالک و تأییدکننده)؛
+- CHECK: `confidence IS NULL OR confidence BETWEEN 0 AND 1`؛
+- CHECK: `HUMAN_CONFIRMED` ⇔ تأییدکننده و `confirmed_at` پر.
 
-**Indexها:**
+**Indexها:** `(organization_id, capability_id, evidence_status, fresh_until)` · `(organization_id, offer_version_id, evidence_status, fresh_until)` · `(organization_id, source_kind, confirmation_status)`.
 
-- `(organization_id, capability_id, evidence_status, fresh_until)`؛
-- `(organization_id, offer_version_id, evidence_status, fresh_until)`؛
-- `(organization_id, source_kind, confirmation_status)`؛
-- `(organization_id, fresh_until)`.
+**چرخه:** Evidence فعال می‌تواند منقضی یا withdrawn شود؛ تاریخچه باقی می‌ماند. `AI_INFERRED` با confidence بالا خودکار Fact یا Capability معتبر نمی‌شود.
 
-**چرخه:** Evidence فعال می‌تواند منقضی یا withdrawn شود و تاریخچه باقی می‌ماند. Evidence با `AI_INFERRED` و confidence بالا خودکار Fact یا Capability معتبر نمی‌شود.
+## ۴٫۱۱ Publication
 
-**Tenant isolation:** هر سه لایهٔ FK، زوج Organization را کنترل می‌کنند: Evidence، مالک و تأییدکننده. Claim و Verification مالک Evidence عمومی نیستند.
+**هدف:** رخداد ممیزی انتشار یا پس‌گرفتن برای BusinessProfile، Capability یا OfferVersion.
 
-**R8-a:** `CUSTOMER_DATA` یک منبع مفهومی تعریف‌شده و `ACCESS_BLOCKED` است. تا تصویب Policy هیچ رکورد Customer Data نباید از مرز Domain عبور کند؛ درج منبع در واژگان با اجازهٔ ingestion اشتباه نشود.
+**PR1-ج — یک منبع حقیقت:**
 
-## ۴.۱۱ Publication
+- **وضعیت انتشار فقط از راه رخداد `Publication` تغییر می‌کند.** هیچ مسیر دیگری `publication_status` موضوع را عوض نمی‌کند.
+- ستون `publication_status` روی موضوع **نمایه‌ی جاری همان رخدادهاست**، نه منبع موازی. در **همان تراکنش** با درج رخداد نوشته می‌شود و برای Unique جزئی «یک نسخه‌ی منتشرشده» لازم است.
+- روش اجبار این هم‌زمانی (Trigger یا دامنه + تست) در اعتبارسنجی PostgreSQL تعیین می‌شود (§۸٫۱).
+- `Publication` فقط‌افزودنی است.
 
-**هدف:** ثبت رخداد و Gate ممیزی انتشار یا پس‌گرفتن برای BusinessProfile، Capability یا OfferVersion.
+سه هدف تایپ‌شده‌ی اختیاری؛ دقیقاً یکی پر است:
 
-**منبع حقیقت:** وضعیت جاری روی موضوع هدف (`publication_status`) است. Publication خودش وضعیت جاری موازی نگه نمی‌دارد و Append-only است.
-
-سه هدف تایپ‌شدهٔ اختیاری تعریف می‌شود:
-
-- `(business_profile_organization_id, business_profile_id)`؛
-- `(capability_organization_id, capability_id)`؛
-- `(offer_version_organization_id, offer_version_id)`.
-
-دقیقاً یکی از این سه زوج باید پر باشد.
+- `(business_profile_id, business_profile_organization_id)`؛
+- `(capability_id, capability_organization_id)`؛
+- `(offer_version_id, offer_version_organization_id)`.
 
 | فیلد | نوع Prisma پیشنهادی | الزام و توضیح |
 |---|---|---|
-| `id` | `String @db.Uuid` | همراه Organization کلید مرکب |
-| `organization_id` | `String @db.Uuid` | Tenant |
-| `business_profile_organization_id` | `String? @db.Uuid` | زوج هدف اول |
-| `business_profile_id` | `String? @db.Uuid` | هدف BusinessProfile |
-| `capability_organization_id` | `String? @db.Uuid` | زوج هدف دوم |
-| `capability_id` | `String? @db.Uuid` | هدف Capability |
-| `offer_version_organization_id` | `String? @db.Uuid` | زوج هدف سوم |
-| `offer_version_id` | `String? @db.Uuid` | هدف OfferVersion |
+| `id` | `String @id @default(uuid())` | |
+| `organization_id` | `String` | Tenant |
+| `business_profile_id` | `String?` | هدف BusinessProfile |
+| `business_profile_organization_id` | `String?` | زوج سایه |
+| `capability_id` | `String?` | هدف Capability |
+| `capability_organization_id` | `String?` | زوج سایه |
+| `offer_version_id` | `String?` | هدف OfferVersion |
+| `offer_version_organization_id` | `String?` | زوج سایه |
 | `event_kind` | `PublicationEventKind` | `PUBLISHED` یا `WITHDRAWN` |
-| `performed_by_membership_id` | `String @db.Uuid` | Membership انسانی همان Organization |
-| `permission_key` | `String @db.VarChar` | Permission مصرف‌شده؛ رشتهٔ ثبت‌شده |
-| `gate_snapshot` | `Json @db.JsonB` | Snapshot حداقل Gate در لحظهٔ رخداد |
-| `reason` | `String? @db.Text` | دلیل ممیزی |
-| `occurred_at` | `DateTime @db.Timestamptz(3)` | زمان رخداد |
+| **`content_revision`** | **`Int?`** | **بازبینی منتشرشده؛ برای Profile و Capability الزامی، برای OfferVersion تهی** |
+| `performed_by_membership_id` | `String` | **ممیزی — عضو انسانی همان Organization؛ اجباری** |
+| `permission_key` | `String @db.VarChar` | Permission مصرف‌شده |
+| `gate_snapshot` | `Json @db.JsonB` | Snapshot حداقل Gate در لحظه‌ی رخداد |
+| `reason` | `String @db.Text` | **ممیزی — اجباری** (PR1-ب) |
+| `occurred_at` | `DateTime` | ممیزی |
 
-**فیلد ممیزی باز:** افزودن `grant_id` و جزئیات `revoked_by` طبق YR2 پیش از Migration نهایی باید تصمیم‌گیری شود. در این سند بدون تصمیم مالک به شکل قطعی اضافه نشده است.
+**کلیدها و قیدها:**
 
-**روابط:** هدف دقیقاً یکی از سه مدل است و با FK مرکب به همان Organization متصل می‌شود. `performed_by_membership_id` با `(performed_by_membership_id, organization_id)` به Membership متصل است.
+- `@@unique([id, organization_id])`؛
+- FKهای مرکب اختیاری به سه هدف با زوج سایه؛
+- FK `(performed_by_membership_id, organization_id) → Membership(id, organization_id)`؛
+- CHECK XOR سه‌گانه؛
+- CHECK: `event_kind = 'PUBLISHED'` و هدف Profile یا Capability ⇒ `content_revision` پر؛ هدف OfferVersion ⇒ `content_revision` تهی؛
+- **فقط‌افزودنی:** Update و Delete با Trigger یا سلب دسترسی رد می‌شود (§۸٫۱).
 
-**کلیدها و Unique:**
+**Indexها:** `(organization_id, business_profile_id, occurred_at)` · `(organization_id, capability_id, occurred_at)` · `(organization_id, offer_version_id, occurred_at)` · `(organization_id, performed_by_membership_id, occurred_at)`.
 
-- `@@id([id, organization_id])`؛
-- Unique رخداد لازم نیست؛ یک موضوع چرخه‌های تاریخی متعدد دارد؛
-- Check دقیقاً یکی از سه هدف پر باشد؛
-- Check Organization هدف با Publication برابر باشد؛
-- Update و Delete برای بازنویسی تاریخچه مجاز نیست.
+**Gate انتشار (در لحظه‌ی رخداد `PUBLISHED`):**
 
-**Indexها:**
+- **Profile:** `ACTIVE`، فیلدهای عمومی MVP پر، متصل به Claim با وضعیت `VERIFIED` و در بازه‌ی `valid_until`؛
+- **Capability:** `ACTIVE`، `CUSTOMER_FACING`، `HUMAN_CONFIRMED` و دارای Evidence فعال و تازه؛
+- **OfferVersion:** شرایط خودش، همه‌ی Capabilityهای پیوندخورده قابل‌نمایش (§۵٫۱)؛
+- Membership فعال + Grant فعال با Permission لازم؛ Role، Claim یا Session به‌تنهایی کافی نیست؛
+- **هیچ انتشار خودکار و هیچ رخداد بدون انجام‌دهنده‌ی انسانی.**
 
-- `(organization_id, business_profile_id, occurred_at)`؛
-- `(organization_id, capability_id, occurred_at)`؛
-- `(organization_id, offer_version_id, occurred_at)`؛
-- `(organization_id, occurred_at)`؛
-- `(organization_id, performed_by_membership_id, occurred_at)`.
+## ۵. قواعد نمایش انتشار (PY5/PY6)
 
-**چرخه:** Publication رویداد چرخهٔ موضوع است، نه موجودیتی که Active/Inactive می‌شود. برای OfferVersion قبلی، رخداد `WITHDRAWN` ثبت می‌شود و Version در همان عملیات `INACTIVE` می‌گردد.
+### ۵٫۱ واجد نمایش بودن — در زمان خواندن
 
-**Gate انتشار:**
+Published Read Port **فقط** موضوعی را برمی‌گرداند که **همه‌ی** شرط‌های زیر را **در لحظه‌ی خواندن** داشته باشد. `publication_status = PUBLISHED` **شرط لازم است، نه کافی.**
 
-- Profile باید Active، دارای فیلدهای عمومی لازم و متصل به Claim فعال و Verified باشد؛
-- Capability باید Active، Customer-facing، Human-confirmed و دارای Evidence تازهٔ مجاز باشد؛
-- OfferVersion باید شرایط خودش را داشته باشد، Capabilityهای منتشرشدهٔ معتبر داشته باشد و تنها Version فعال و Published Offer باشد؛
-- Membership و Grant فعال باید Permission لازم را فراهم کنند؛ Role، Claim یا Session به‌تنهایی کافی نیست؛
-- انتشار خودکار بدون عمل انسانی در این طرح مجاز نیست.
+| موضوع | شرط‌ها |
+|---|---|
+| **همه** | `publication_status = 'PUBLISHED'` · Organization با وضعیت `ACTIVE` |
+| **BusinessProfile** | `lifecycle_status = 'ACTIVE'` · Claim مرتبط با `claim_status = 'VERIFIED'` (نه `SUSPENDED`) · `valid_until` تهی یا در آینده · **`content_revision = published_content_revision`** |
+| **Capability** | `capability_status = 'ACTIVE'` · `CUSTOMER_FACING` · `HUMAN_CONFIRMED` · `fresh_until` تهی یا در آینده · حداقل یک Evidence با `ACTIVE` و `fresh_until` تهی یا در آینده · **`content_revision = published_content_revision`** · سازمان حداقل یک Profile قابل‌نمایش دارد |
+| **OfferVersion** | اکنون در بازه‌ی `[valid_from, valid_until)` · Offer با `ACTIVE` · **همه‌ی** Capabilityهای پیوندخورده قابل‌نمایش · سازمان حداقل یک Profile قابل‌نمایش دارد |
 
-**Tenant isolation:** Publication و تمام اهداف و Membership اجراکننده باید در همان Organization باشند. هیچ Publication سازمان A نمی‌تواند هدفی از سازمان B را ثبت کند.
+**پیامدها:**
 
-## ۵. نمودار روابط
+- **تعلیق ادعا (D-61)، انقضای ادعا، انقضای شاهد، پایان اعتبار آفر و آرشیو سازمان** بلافاصله در زمان خواندن اثر می‌کنند — **بدون** نوشتن رخداد `Publication`.
+- پس `performed_by_membership_id` **اجباری می‌ماند**: پلتفرم هرگز به نام کسب‌وکار انتشار را پس نمی‌گیرد؛ کنترل ایمنی‌اش را از راه وضعیت ادعا یا سازمان اجرا می‌کند (ADR-0009، ADR-0010).
+- دروازه‌ی هویت (D-52، D-61) برای Capability و OfferVersion از راه «Profile قابل‌نمایش سازمان» اعمال می‌شود؛ انتشار توانمندی یا آفر بدون چهره‌ی راستی‌آزمایی‌شده دیده نمی‌شود.
+
+### ۵٫۲ ویرایش محتوای منتشرشده
+
+- OfferVersion تغییرناپذیر است؛ تغییر = نسخه‌ی تازه.
+- **BusinessProfile و Capability** درجا ویرایش‌پذیرند، پس:
+  - هر ویرایش فیلد عمومی `content_revision` را یکی زیاد می‌کند؛
+  - رخداد `PUBLISHED` مقدار `content_revision` را ثبت می‌کند و `published_content_revision` موضوع را برابر آن می‌کند؛
+  - ویرایش موضوع منتشرشده، در همان تراکنش، **یا** رخداد `PUBLISHED` تازه با Grant معتبر ثبت می‌کند **یا** رخداد `WITHDRAWN`.
+- **حالت ایمن در شکست:** اگر ویرایشی بدون انتشار دوباره ثبت شود، `content_revision ≠ published_content_revision` و طبق §۵٫۱ **موضوع نامرئی می‌شود** — محتوای تأییدنشده هرگز عمومی نمی‌شود.
+
+**فیلدهای عمومی** که `content_revision` را زیاد می‌کنند:
+
+- **Profile:** `name` · `description` · مکان · `address_text` · `contact_information` · `links` · `business_hours` · Claim مرتبط
+- **Capability:** `name` · `short_description` · `category_key` · `audience`
+
+### ۵٫۳ بازنشستگی و آرشیو موضوع منتشرشده
+
+آرشیو Profile، بازنشستگی Capability یا بازنشستگی Offer با نسخه‌ی منتشرشده، **اول** رخداد `WITHDRAWN` با ممیزی کامل (انجام‌دهنده، دلیل، زمان) ثبت می‌کند، در همان تراکنش. پس هیچ خروج از دید عمومی بدون ممیزی نیست.
+
+## ۶. نمودار روابط
 
 ```text
-Organization
-├── BusinessIdentityClaim
+Organization (id = شناسه‌ی سازمان AC-2)
+├── BusinessIdentityClaim ── submitted_by → Membership
 │   └── IdentityVerification history
-├── Membership
-│   └── PermissionGrant
-├── BusinessProfile ── optional verified BusinessIdentityClaim
-├── Capability
+├── Membership ── revoked_by → Membership (اختیاری)
+│   └── PermissionGrant ── granted_by / revoked_by → Membership (اختیاری)
+├── BusinessProfile ── optional BusinessIdentityClaim
+├── Capability ── confirmed_by → Membership (اختیاری)
 │   ├── Evidence
 │   └── OfferVersionCapability ── OfferVersion
 ├── Offer
 │   └── OfferVersion
-│       ├── Evidence
-│       └── Publication history
-└── Publication history
+│       └── Evidence
+└── Publication (append-only) ── performed_by → Membership
+    └── target: BusinessProfile | Capability | OfferVersion
 ```
 
-قانون همهٔ خط‌های داخلی: شناسهٔ رکورد و `organization_id` باید با هم به رابطه وارد شوند.
+قانون همه‌ی خط‌های داخلی: شناسه‌ی رکورد و `organization_id` با هم وارد رابطه می‌شوند.
 
-## ۶. چیزهایی که عمداً در شِما نیستند
-
-این طراحی هیچ‌کدام از موارد زیر را مدل نمی‌کند:
+## ۷. چیزهایی که عمداً در شِما نیستند
 
 - Doctor، Specialist، Treatment، Appointment، Patient، Inventory، Menu یا هر Entity Clinic؛
 - Action یا ActionRecord؛
 - Intent، Session، Conversation Context یا Context persistence؛
 - Consent persistence؛
-- Customer Data ingestion یا محتوای شخصی مشتری؛
+- **Customer Data در هر شکل — شامل منبع `CUSTOMER_DATA` در Evidence (PY4)**؛
 - Recommendation، Decision، Outcome یا Evaluation persistence؛
 - Business Directory یا Business Twin برای V2؛
 - جدول Content Studio یا افزودن `organization_id` به Content Studio؛
 - User داخلی، Password، Credential یا Permission مشتق‌شده از Role؛
+- **هویت UUID تازه برای سازمان (PR2)**؛
+- `version_status` یا هر وضعیت «فعال» موازی با انتشار (PR1-ج)؛
 - EventLog جدید یا `domainTag`؛
+- تغییر یا FK روی جدول‌های موجود V1؛
 - Availability زنده، Booking، Lead، Visit، Revenue یا Outcome ساختگی.
 
-## ۷. قواعد مرزی Core، Module و V2
+## ۸. اعتبارسنجی PostgreSQL — پیش‌شرط پیاده‌سازی (PY2/PY3)
 
-### Core/V1 مالک است
+**تصمیم مالک:** پیش از پیاده‌سازی Prisma، قیدهایی که Prisma بیان نمی‌کند روی PostgreSQL اعتبارسنجی شوند. این آزمون در یک پوشه‌ی موقت بیرون از مخزن اجرا می‌شود — مثل آزمایش SQLite — و نتیجه‌اش سند جداگانه است. **هیچ Migration یا `schema.prisma` واقعی نمی‌سازد.**
 
-- Organization و هویت Claim/Verification؛
-- Membership و PermissionGrant؛
-- BusinessProfile عمومی؛
-- Capability و Offer/OfferVersion عمومی؛
-- Evidence با provenance و confirmation؛
-- وضعیت جاری Publication و سابقهٔ Gate.
+### ۸٫۱ فهرست کامل قیدها و روش اجرا
 
-### Clinic Module یا Module آینده مالک است
+| # | قید | مدل | روش |
+|---|---|---|---|
+| C1 | یکتای جزئی Claim `IN ('VERIFIED','SUSPENDED')` | Claim | `CREATE UNIQUE INDEX … WHERE` |
+| C2 | یکتای جزئی عضویت فعال | Membership | `CREATE UNIQUE INDEX … WHERE` |
+| C3 | یکتای جزئی اعطای فعال | PermissionGrant | `CREATE UNIQUE INDEX … WHERE` |
+| C4 | یکتای جزئی Claim در Profile | BusinessProfile | `CREATE UNIQUE INDEX … WHERE … IS NOT NULL` |
+| C5 | یکتای جزئی نسخه‌ی منتشرشده | OfferVersion | `CREATE UNIQUE INDEX … WHERE` |
+| C6 | زوج‌های سایه: هر دو تهی یا برابر `organization_id` | همه‌ی روابط اختیاری | `CHECK` |
+| C7 | XOR مالک Evidence · XOR هدف Publication | Evidence · Publication | `CHECK` |
+| C8 | ممیزی حداقلی — دقیقاً یک انجام‌دهنده، دلیل و زمان در وضعیت پایانی | Claim · Membership · Grant · Organization · Verification | `CHECK` |
+| C9 | `basis_key` مجاز · `founding` ⇔ بدون اعطاکننده | PermissionGrant | `CHECK` |
+| C10 | بازه‌ی اعتبار · قیمت · `confidence` · `content_revision` در رخداد · `PUBLISHED` ⇒ `published_content_revision` | OfferVersion · Evidence · Publication · Profile · Capability | `CHECK` |
+| C11 | تأیید انسانی ⇔ تأییدکننده و زمان | Capability · Evidence | `CHECK` |
+| C12 | فقط‌افزودنی | Publication | Trigger رد `UPDATE`/`DELETE` — یا سلب دسترسی نقش اپلیکیشن |
+| C13 | تغییرناپذیری — فقط `publication_status` و `published_at` آزاد | OfferVersion · OfferVersionCapability | Trigger |
+| C14 | تاریخچه‌ی تصمیم‌شده فقط‌خواندنی | IdentityVerification | Trigger |
+| C15 | `publication_status` فقط هم‌زمان با درج رخداد `Publication` | Profile · Capability · OfferVersion | **در آزمون تعیین شود:** Trigger یا دامنه + تست |
 
-- واژگان تخصصی Vertical؛
-- Doctor، Treatment، Appointment و Capacity؛
-- داده و workflow داخلی Module؛
-- روش تخصصی Verification و محتوایی که در قرارداد عمومی Core نیست.
+### ۸٫۲ موارد آزمون
 
-Module باید دادهٔ عمومی را از قرارداد نسخه‌دار به Core بدهد. Core برای تکمیل Profile، Capability یا OfferVersion به جدول Module دسترسی مستقیم ندارد.
+1. FK مرکب به `@@unique([id, organization_id])` — نه به `@@id` — و رد ارجاع بین‌مستأجری.
+2. زوج سایه + CHECK C6: رد زوج نیمه‌پر و رد سازمان متفاوت.
+3. C1 تا C5: رد ردیف دوم در شرط، پذیرش ردیف‌های تاریخی.
+4. C7 تا C11: رد هر حالت نامعتبر.
+5. C12 تا C14: رد Update/Delete ممنوع؛ پذیرش تغییر ستون‌های آزاد.
+6. **ساخت یک Migration دوم با `prisma migrate dev`** پس از افزودن یک فیلد بی‌ربط: **ایندکس‌های جزئی، CHECKها و Triggerهای دستی دست‌نخورده بمانند** — اگر Prisma برای آن‌ها `DROP` تولید کند، روش جلوگیری (بازبینی اجباری SQL هر Migration) پیش از CCR ثبت شود.
+7. نوشتن از Prisma Client وقتی `organization_id` در چند رابطه شریک است: `connect` تودرتو یا مقداردهی مستقیم ستون‌ها.
+8. FK حلقوی `Organization ⇄ Membership` (آرشیوکننده) و خودارجاع Membership.
+9. `Organization.id` از نوع `TEXT` با شناسه‌ی غیر UUID (مثل `org_test_a`).
 
-### V2 مصرف‌کننده است
+**خروجی:** `PRISMA_POSTGRESQL_CONSTRAINT_VALIDATION.md` با نتیجه‌ی هر مورد و روش نهایی C15.
 
-V2 فقط Published Read Port را مصرف می‌کند. V2 به Module storage وصل نمی‌شود و حقیقت کسب‌وکار، Offer، Publication یا Permission ایجاد نمی‌کند.
+## ۹. قیدهای پذیرش برای تبدیل به CCR
 
-## ۸. قیدهای پذیرش برای تبدیل به CCR
+**بسته‌شده با تصمیم مالک (۱۱ سپتامبر ۲۰۲۶):**
 
-پیش از ساخت `schema.prisma` و Migration، CCR باید حداقل این موارد را صریح کند:
+- ✅ YR1 — وضعیت واحد ادعا با پنج مقدار؛
+- ✅ YR2 — ممیزی حداقلی تغییرهای حساس؛
+- ✅ YR5 — حذف `version_status`؛
+- ✅ هویت سازمان = شناسه‌ی AC-2، `TEXT`؛
+- ✅ `id` کلید اصلی + یکتا و FK مرکب؛
+- ✅ حذف `CUSTOMER_DATA` از Core؛
+- ✅ قواعد صریح نمایش انتشار؛
+- ✅ شکل شعبه‌ای BusinessProfile و مکان عددی (یادداشت پیش از Prisma).
 
-1. برابری پایهٔ شاخهٔ پیاده‌سازی با `origin/main` و وجود `ExternalWorkspaceLink` مصوب؛
-2. تایید نهایی `@@id([id, organization_id])` و تمام FKهای مرکب؛
-3. تعیین تکلیف YR1 دربارهٔ دو وضعیت Claim و وضعیت معلق/تاریخی؛
-4. تعیین تکلیف YR2 دربارهٔ `revoked_by`، دلیل لغو و اتصال Grant به Publication؛
-5. تایید شکل شعبه‌ای BusinessProfile، حذف Unique سازمان و مکان عددی؛
-6. تایید اینکه `version_status` در OfferVersion می‌ماند یا طبق YR5 حذف می‌شود؛
-7. تعریف قرارداد `terms` پیش از انتشار نخستین Offer؛
-8. روش اجرای Checkهای XOR، بازهٔ اعتبار، قیمت و تغییرناپذیری؛
-9. تعریف Permission key لازم برای انتشار BusinessProfile در OD-05؛
-10. تایید اینکه PostgreSQL Migration حداقلی برای Uniqueهای جزئی و Checkها استفاده می‌کند.
+**هنوز لازم پیش از CCR:**
 
-## ۹. نتیجه و گام بعدی
+1. **اجرای اعتبارسنجی PostgreSQL** (§۸) و ثبت نتیجه؛
+2. **همگام‌سازی شاخه‌ی پیاده‌سازی با `origin/main`** (RR1) — ادغام اکنون در دو فایل `AI_HANDOFF` ریشه تعارض دارد؛
+3. **PY7 — قرارداد فیزیکی:** نوع زمان (`TIMESTAMP(3)` موجود یا `Timestamptz(3)`) و نام فیلد Prisma (`camelCase` + `@map` پیشنهادی)؛
+4. **مرجع صدور شناسه‌ی سازمان تازه:** Core شناسه نمی‌سازد؛ باید مشخص شود سازمان تازه شناسه‌اش را از کجای AC-2 می‌گیرد (مرتبط با OD-08).
 
-این سند زبان فیزیکی پیشنهادی Prisma را تثبیت می‌کند اما شِمای اجرایی نیست. مدل‌ها، زوج‌های کلید، Indexها و روابط لازم برای اولین مسیر Core را مشخص می‌کند و با D-61، D-55، D-68 و D-71 هم‌راستا است.
+**سؤال‌های باز برای مالک — شکل شِما را نمی‌شکنند:**
 
-گام بعدی مجاز پس از بازبینی این سند: ایجاد یک CCR کوچک برای شِمای Core و سپس تغییر کنترل‌شدهٔ `schema.prisma` روی شاخه‌ای که با `origin/main` همگام شده است. تا آن زمان، هیچ Prisma، Migration یا کدی نباید نوشته شود.
+- **پس‌گرفتن ادعا توسط خود سازمان** و **لغو ادعای راستی‌آزمایی‌شده** در پنج وضعیت مصوب جای جداگانه ندارند. افزودن مقدار enum بعداً یک Migration افزودنی ساده است.
+- **تاریخچه‌ی کامل تغییر وضعیت ادعا:** ستون‌های `status_changed_*` فقط **آخرین** تغییر را نگه می‌دارند. با گذار برگشت‌پذیر `SUSPENDED ⇄ VERIFIED`، ممیزی تعلیق قبلی با بازگشت بازنویسی می‌شود. اگر تاریخچه‌ی کامل لازم است، یک جدول فقط‌افزودنی کوچک تغییر وضعیت ادعا تصمیم جداگانه‌ی مالک است.
 
-**من کدکس هستم.**
+**می‌تواند صبر کند:**
+
+- YR4-ب — Permission انتشار Profile ذیل OD-05 — پیش از قابلیت انتشار Profile؛
+- YR7 — قرارداد `terms` — پیش از انتشار نخستین Offer؛
+- YR6-Registry — پیش از کد دامنه‌ی اعتبارسنجی؛
+- `grant_id` در Publication — ستون افزودنی.
+
+## ۱۰. نتیجه و گام بعدی
+
+این نسخه همه‌ی تصمیم‌های مالک روی بازبینی طراحی Prisma را اعمال می‌کند و **هیچ دوراهی شکل‌دهنده‌ای در مدل‌ها باقی نمی‌گذارد.** تنها مورد باز فیزیکی PY7 (نوع زمان و نام‌گذاری Prisma) است که شکل منطقی را تغییر نمی‌دهد.
+
+گام‌های مجاز بعدی به ترتیب:
+
+1. اعتبارسنجی PostgreSQL (§۸)؛
+2. همگام‌سازی شاخه (RR1)؛
+3. CCR کوچک برای شِمای Core؛
+4. تغییر کنترل‌شده‌ی `schema.prisma` روی شاخه‌ی همگام‌شده.
+
+تا آن زمان هیچ Prisma، Migration یا کدی نوشته نمی‌شود.
+
+**نسخه‌ی ۱:** من کدکس هستم.
+**نسخه‌ی ۲:** من کلاد هستم
