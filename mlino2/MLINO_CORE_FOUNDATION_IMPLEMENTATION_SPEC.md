@@ -39,16 +39,16 @@
 
 ## ۲. Entityهای Foundation
 
-### ۲.۱ هویت و اختیار
+### ۲.۱ هویت و اختیارِ پایدار
 
 | Entity | هدف | مالک منطقی | Clinic Module | Future Module | رابطه و چرخهٔ عمر پیشنهادی |
 |---|---|---|---|---|---|
-| `Organization` | فضای کاری و هویت متعارف V1 برای نگهداری زمینهٔ کسب‌وکار | Core/V1 | فقط ارجاع و تکمیل محتوای مجاز | ارجاع | ایجاد آزاد → قابل‌استفاده → آرشیو طبق سیاست آتی؛ ساختن Organization ادعای مالکیت یا هویت حقوقی نیست |
-| `BusinessIdentityClaim` / Verification | ادعای اینکه Organization نمایندهٔ کدام کسب‌وکار واقعی است و وضعیت بررسی آن | Core/Governance؛ حقیقت ادعا در V1 | روش و شاهد راستی‌آزمایی صنفی را فراهم می‌کند؛ ادعا را به‌تنهایی تأیید نمی‌کند | روش و شاهد صنفی خود را فراهم می‌کند | چند ادعا می‌تواند به یک Organization وابسته باشد؛ حداکثر یک ادعای راستی‌آزمایی‌شدهٔ فعال برای هر کسب‌وکار واقعی؛ راستی‌آزمایی اختیار حکمرانی نمی‌دهد |
-| `Membership` | رابطهٔ عضو با Organization | Core | مصرف‌کنندهٔ وضعیت موجود؛ سازنده نیست | مصرف‌کننده | ایجاد/فعال‌سازی → لغو یا پایان؛ وضعیت آن از Session جداست |
+| `Organization` | فضای کاری و هویت متعارف V1 برای نگهداری زمینهٔ کسب‌وکار؛ هویت داخلی پایدارِ سازمان است، نه ادعای کسب‌وکار واقعی | Core/V1 | فقط ارجاع و تکمیل محتوای مجاز | ارجاع | ایجاد آزاد → قابل‌استفاده → آرشیو طبق سیاست آتی؛ ساختن Organization ادعای مالکیت، هویت حقوقی یا یکتایی کسب‌وکار واقعی نیست |
+| `BusinessIdentityClaim` / Verification | ادعای اینکه Organization نمایندهٔ کدام کسب‌وکار واقعی است | Core/Governance؛ حقیقت ادعا در V1 | روش و شاهد راستی‌آزمایی صنفی را فراهم می‌کند؛ ادعا را به‌تنهایی تأیید نمی‌کند | روش و شاهد صنفی خود را فراهم می‌کند | هر Claim دارای `identifier_type` از واژگان ثبت‌شده و `identifier_value` نرمال‌شده است؛ چرخهٔ راستی‌آزمایی مفهومی `submitted → under_review → verified / rejected / expired / revoked` دارد؛ چند Claim ممکن است به یک Organization وابسته باشد، اما قید یکتایی مفهومی روی `(identifier_type, identifier_value)` برای Claim راستی‌آزمایی‌شده و فعال برقرار است؛ حداکثر یک Claim فعال برای هر کسب‌وکار واقعی هدف است و راستی‌آزمایی اختیار حکمرانی نمی‌دهد |
+| `Membership` | رابطهٔ عضویت یک هویت خارجی با Organization | Core | مصرف‌کنندهٔ وضعیت موجود؛ سازنده نیست | مصرف‌کننده | شامل `identity_provider` و `external_subject` است؛ ایجاد/فعال‌سازی → لغو یا پایان؛ وضعیت آن از Session جداست؛ Core هیچ User داخلی، گذرواژه یا Credential نگه نمی‌دارد |
 | `PermissionGrant` | اعطای صریح اختیار به Membership | Core و سازوکار Governance | فقط مصرف می‌کند | فقط مصرف می‌کند | اعطا → فعال → پایان/لغو؛ فقط از مبناهای مصوب؛ از Role، مالکیت حقوقی یا متن UI به‌صورت ضمنی ساخته نمی‌شود |
-| `Session` | حمل بافت هویت و چرخهٔ نشست احرازشده | Core | Session احرازشده نمی‌سازد | Session احرازشده نمی‌سازد | ایجاد → فعال → بسته/منقضی؛ Session اختیار، Organization یا Grant را جایگزین نمی‌کند |
-| `Consent` (خارج از Persistence Phase 1) | مفهوم رضایت وابسته به سیاست؛ فقط پس از تصمیم OD-01 مدل می‌شود | **Deferred تا OD-01** | سیاست را تعیین نمی‌کند | سیاست را تعیین نمی‌کند | در Phase 1 هیچ Entity، جدول، ذخیره یا چرخهٔ پایدار ندارد؛ رضایت شروع گفت‌وگوی V2 فقط session-only است |
+
+این جدول فقط موجودیت‌های پایدار هویت و اختیار را توصیف می‌کند. `Session`، `assistant conversation context`، `Intent` و `Context` در مدل پایدار Core نیستند و در بخش ۲٫۴ فقط به‌عنوان اشیای زمان اجرا تعریف می‌شوند. `Consent` نیز تا OD-01 در Phase 1 هیچ Entity، جدول، ذخیره یا چرخهٔ پایدار ندارد.
 
 #### مسیر اعطای Permission
 
@@ -73,18 +73,26 @@ Role هرگز منشأ Permission نیست. `ActorContext.role` در بررسی 
 
 `ADMIN_ACTION` هرگز مبنای اعطای Permission نیست. مدیر Platform و مدل هوش مصنوعی هیچ Permission کسب‌وکاری دریافت نمی‌کنند و راستی‌آزمایی هویت نیز Grant ایجاد نمی‌کند.
 
+کلید Permission یک رشتهٔ ثبت‌شده و قابل‌گسترش است، نه Enum بستهٔ دیتابیس. Registry شامل عمل‌های Core و در آینده عمل‌های فضانام‌دار Module است؛ اضافه‌کردن کلید باید از قرارداد و Governance مربوط عبور کند و هرگز از Role به‌صورت خودکار ساخته نمی‌شود. برای MVP فقط کلیدهای Core لازم‌اند.
+
 حداقل شش Permission لازم برای انتشار V1 عبارت‌اند از: تأیید Capability، انتشار Capability، ساخت Offer، تأیید شرایط Offer، انتشار Offer، و اعطا/لغو Permission. درخواست و رهاسازی Business Identity Claim طبق D-61 یک Permission جداگانه در مرز هویت است. این اعطاها روی Membership فعال ثبت می‌شوند و فهرست فنی و Persistence آن‌ها در اجرای D-57 تعیین می‌شود؛ این سند فقط مسیر و قاعدهٔ مالکیت را تثبیت می‌کند.
 
 ### ۲.۲ Entityهای عمومی حقیقت کسب‌وکار
 
 | Entity | هدف | مالک منطقی | Clinic Module | Future Module | رابطه و چرخهٔ عمر پیشنهادی |
 |---|---|---|---|---|---|
-| `Capability` | بیان عمومی یک توانمندی قابل‌ارائه با ابعاد مستقل توانایی، مخاطب، تأیید و انتشار | Core | vocabulary و محتوای خدمت کلینیک را روی شناسهٔ عمومی فراهم می‌کند | vocabulary و content صنف خود را فراهم می‌کند | چهار بُعد مستقل: توانایی `planned/active/retired`، مخاطب `internal/customer_facing`، تأیید طبق ADR-0006، انتشار `unpublished/published/withdrawn`؛ `active + unpublished` معتبر است |
-| `Offer` | بیان عمومی قلم، بسته یا کمپین با Scope، نسخه، شرایط و بازهٔ اعتبار | Core | کاتالوگ و محتوای آفر کلینیکی را فراهم می‌کند | کاتالوگ و محتوای صنف خود را فراهم می‌کند | ایجاد نسخه → اعتبار زمانی و Scope → انتشار → انقضا/پس‌گرفتن؛ نسخهٔ قبلی حقیقت تاریخی خود را حفظ می‌کند |
-| `Evidence` | ثبت شاهد، منشأ، تازگی و وضعیت تأیید برای یک ادعا | Core | منبع و روش راستی‌آزمایی کلینیکی را فراهم می‌کند | منبع و روش صنفی خود را فراهم می‌کند | ثبت → بررسی/تأیید یا باقی‌ماندن تأییدنشده → تازه/کهنه/پس‌گرفته؛ provenance با confirmation یکی نیست |
-| `Publication` | Gate خروج اطلاعات عمومی از حقیقت داخلی به تصویر قابل‌مصرف | Core | محتوای قابل‌انتشار را آماده می‌کند؛ Gate را دور نمی‌زند | محتوای قابل‌انتشار را آماده می‌کند | درخواست Gate → بررسی شروط → Published → Withdrawn/Expired؛ انتشار خودکار مجاز نیست |
+| `Capability` | بیان عمومی یک توانمندی قابل‌ارائه با ابعاد مستقل توانایی، مخاطب، تأیید و انتشار | Core | vocabulary و محتوای خدمت کلینیک را از راه قرارداد عمومی فراهم می‌کند | vocabulary و content صنف خود را از راه قرارداد عمومی فراهم می‌کند | چهار بُعد مستقل: توانایی `planned/active/retired`، مخاطب `internal/customer_facing`، تأیید طبق ADR-0006، انتشار `unpublished/published/withdrawn`؛ نام، توضیح کوتاه و `category_key` عمومی در قرارداد Core هستند؛ `active + unpublished` معتبر است |
+| `Offer` | بیان عمومی قلم، بسته یا کمپین با Scope، نسخه، شرایط و بازهٔ اعتبار | Core | کاتالوگ و محتوای آفر کلینیکی را از راه قرارداد عمومی فراهم می‌کند | کاتالوگ و محتوای صنف خود را از راه قرارداد عمومی فراهم می‌کند | ایجاد نسخه → اعتبار زمانی و Scope → انتشار → انقضا/پس‌گرفتن؛ نسخهٔ قبلی حقیقت تاریخی خود را حفظ می‌کند؛ شکل، شرایط، قیمت یا `on_request` و بازهٔ اعتبار عمومی Core هستند و ارجاع Capability روی نسخه قرار می‌گیرد |
+| `Evidence` | ثبت شاهد، منشأ، تازگی و وضعیت تأیید برای یک ادعا | Core | منبع و روش راستی‌آزمایی کلینیکی را فراهم می‌کند | منبع و روش صنفی خود را فراهم می‌کند | ثبت → بررسی/تأیید یا باقی‌ماندن تأییدنشده → تازه/کهنه/پس‌گرفته؛ provenance با confirmation یکی نیست؛ هر Evidence دقیقاً یک مالک تایپ‌شده دارد |
+| `Publication` | Gate خروج اطلاعات عمومی از حقیقت داخلی به تصویر قابل‌مصرف | Core | محتوای قابل‌انتشار را آماده می‌کند؛ Gate را دور نمی‌زند | محتوای قابل‌انتشار را آماده می‌کند | درخواست Gate → بررسی شروط → تغییر بُعد انتشار موجودیت به `published` → پس‌گرفتن/انقضا؛ سابقهٔ Publication فقط ممیزی افزایشی است و منبع حقیقت وضعیت جاری نیست؛ انتشار خودکار مجاز نیست |
 
-`Publication` در این سند یک Gate و سابقهٔ وضعیت است، نه مجوز جدید و نه اختیار مستقل برای Module. تأیید شرایط انتشار باید با Membership و Grant موجود انجام شود.
+`Publication` در این سند یک Gate و سابقهٔ ممیزی است، نه مجوز جدید، موجودیت وضعیت‌دار دوم یا اختیار مستقل برای Module. وضعیت جاری فقط روی بُعد انتشار خود Capability/Offer حقیقت دارد؛ سابقهٔ افزایشی Publication فقط ثبت می‌کند چه کسی، چه زمانی، با کدام Grant و با کدام شروط آن وضعیت را ایجاد یا پس گرفته است. تأیید شرایط انتشار باید با Membership و Grant موجود انجام شود.
+
+دادهٔ عمومی لازم برای V2—نام، توضیح کوتاه، `category_key`، شکل Offer، شرایط، قیمت یا `on_request` و بازهٔ اعتبار—جزء قرارداد و تصویر Published در Core است. Module این محتوا را از راه قرارداد مشخص ارائه می‌کند؛ Core هرگز برای ساخت Published Read Port جدول Module را نمی‌خواند. ویژگی‌های صرفاً صنفی، مانند تخصص درمانگر، بیرون از تصویر عمومی پایه می‌مانند.
+
+#### مالکیت روشن Evidence
+
+در مدل مفهومی، هر Evidence دقیقاً به یک موضوع تایپ‌شده تعلق دارد: یا `Capability` یا `Offer`. در طراحی Persistence، این قاعده با ارجاع‌های جداگانهٔ تایپ‌شده یا جدول‌های پیوند جدا برای هر نوع موضوع بیان می‌شود و یک `owner_type + owner_id` چندریختی آزاد مجاز نیست. شاهد راستی‌آزمایی هویت روی سابقهٔ Verification خود `BusinessIdentityClaim` قرار می‌گیرد و وارد جدول عمومی Evidence نمی‌شود. یک شاهد بین موضوع‌های مستقل به‌صورت ضمنی مشترک نمی‌شود؛ اشتراک آینده فقط با قرارداد تایپ‌شدهٔ جداگانه قابل بررسی است.
 
 #### پیش‌شرط‌های کامل Publication Gate
 
@@ -115,13 +123,17 @@ Role هرگز منشأ Permission نیست. `ActorContext.role` در بررسی 
 
 `Observation`، `Signal` و `Decision` در Phase 2 طراحی/پیاده‌سازی می‌شوند. `Recommendation`، `ActionRecord`، `OutcomeRecord` و `EvaluationRecord` نیز lifecycleهای مستقل خود را دارند و در این Phase فقط به‌عنوان reference در روابط دیده می‌شوند.
 
-### ۲.۴ چرخهٔ تجربه و Intent
+### ۲.۴ اشیای تجربه در زمان اجرا؛ خارج از موجودیت‌های پایدار Core
+
+اشیای این بخش برای هماهنگی تجربه لازم‌اند، اما Entity پایدار Core نیستند و در Persistence Phase 1 جدول یا رکورد بلندمدت ندارند.
 
 | Entity | هدف | مالک منطقی | Clinic Module | Future Module | رابطه و چرخهٔ عمر پیشنهادی |
 |---|---|---|---|---|---|
-| `Intent` | بیان نیاز کاربر در گفت‌وگوی جاری دستیار | Core؛ به‌صورت assistant conversation context | معنای صنفی را به Core تحمیل نمی‌کند | مصرف‌کنندهٔ تجربهٔ خود | empty → collecting → interpreted → awaiting confirmation → confirmed؛ سپس expired/cancelled؛ هر تغییر معنادار revision جدید می‌سازد؛ به Session احرازشدهٔ Core وابسته نیست |
-| `Context` | قیود قابل‌مشاهدهٔ مرتبط با Intent | Core | فقط vocabulary لازم را از Port می‌گیرد | vocabulary خود را از Port می‌گیرد | ایجاد → اصلاح/تأیید → invalidate/reset؛ تغییر معنادار نتیجهٔ قبلی را باطل می‌کند |
-| `ExperienceOrchestration` | هماهنگی چرخهٔ تجربه و مرزهای Core | Core | عملیات صنفی را نمی‌سازد | فقط از مرز عمومی استفاده می‌کند | بدون Business Truth مستقل؛ فقط وضعیت‌ها و Gateها را هماهنگ می‌کند |
+| `assistant conversation context` | نگهداری موقت گفت‌وگوی جاری دستیار | Runtime در Core/V2؛ پایدار نیست | معنای صنفی را به Core تحمیل نمی‌کند | مصرف‌کنندهٔ تجربهٔ خود | session-only؛ پس از پایان نشست دور ریخته می‌شود و در Core Persistence ثبت نمی‌شود |
+| `Session` | حمل موقت بافت هویت و چرخهٔ نشست احرازشده | Runtime احراز هویت؛ پایدار نیست | Session احرازشده نمی‌سازد | Session احرازشده نمی‌سازد | ایجاد → فعال → بسته/منقضی؛ Session اختیار، Organization یا Grant را جایگزین نمی‌کند و در این Phase موجودیت پایدار Core نیست |
+| `Intent` | بیان نیاز کاربر در گفت‌وگوی جاری دستیار | Runtime؛ در assistant conversation context | معنای صنفی را به Core تحمیل نمی‌کند | مصرف‌کنندهٔ تجربهٔ خود | empty → collecting → interpreted → awaiting confirmation → confirmed؛ سپس expired/cancelled؛ هر تغییر معنادار revision جدید می‌سازد؛ به Session احرازشدهٔ Core وابسته نیست و پایدار نمی‌شود |
+| `Context` | قیود قابل‌مشاهدهٔ مرتبط با Intent | Runtime؛ پایدار نیست | فقط vocabulary لازم را از Port می‌گیرد | vocabulary خود را از Port می‌گیرد | ایجاد → اصلاح/تأیید → invalidate/reset؛ تغییر معنادار نتیجهٔ قبلی را باطل می‌کند و در Core Persistence ذخیره نمی‌شود |
+| `ExperienceOrchestration` | هماهنگی چرخهٔ تجربه و مرزهای Core | Core؛ orchestration زمان اجرا | عملیات صنفی را نمی‌سازد | فقط از مرز عمومی استفاده می‌کند | بدون Business Truth مستقل؛ فقط وضعیت‌ها و Gateها را هماهنگ می‌کند |
 
 در V2، `Session`، `Permission` و `Consent` ممکن است در UI با واژه‌های نزدیک دیده شوند. سند اجرایی باید صریح باشد: حالت محلی دستیار، **assistant conversation context** و session-only است و Session احرازشدهٔ Core نیست؛ دروازهٔ محیط Permission، Grant سازمانی نیست؛ رضایت شروع گفت‌وگو جای R8-a را نمی‌گیرد. دستیار مشتری برای شروع گفت‌وگو به Session احرازشدهٔ Core نیاز ندارد و اختیار هیچ شخصی را حمل نمی‌کند. Session احرازشده فقط در مسیر عضو احرازشدهٔ V1 وارد زنجیره می‌شود.
 
@@ -152,10 +164,10 @@ flowchart TD
   E[Evidence]
   R[Offer]
   P[Publication Gate]
-  S[Authenticated Core Session]
-  CS[Assistant conversation context\nsession-only]
-  I[Intent]
-  X[Context]
+  S[Authenticated Core Session\nruntime only]
+  CS[Assistant conversation context\nruntime only]
+  I[Intent\nruntime only]
+  X[Context\nruntime only]
   T[Experience Orchestration]
   N[Recommendation reference]
   A[ActionRecord reference]
@@ -196,16 +208,17 @@ flowchart TD
 
 - هر Capability، Offer و Evidence باید به Organization متعارف V1 قابل‌ردیابی باشد.
 - Offer بدون Capability واجد شرایط وارد خروجی Matching نمی‌شود.
-- Evidence متعلق به همان ادعا یا همان Capability/Offer است؛ Evidence بین گزینه‌های مستقل ترکیب نمی‌شود.
-- Publication فقط تصویر مجاز Capability/Offer را به Read Port می‌فرستد.
-- Core به جدول Module ارجاع مستقیم نمی‌دهد؛ Module می‌تواند به شناسه‌های Core ارجاع دهد.
+- Evidence فقط یک مالک تایپ‌شده از میان Capability و Offer دارد؛ شاهد راستی‌آزمایی هویت در سابقهٔ Verification خود Claim می‌ماند و Evidence چندریختی آزاد نیست.
+- بُعد انتشار روی Capability/Offer منبع حقیقت وضعیت جاری است؛ Publication فقط Gate و سابقهٔ ممیزی افزایشی آن را ثبت می‌کند و تصویر مجاز را به Read Port متعلق به Core می‌فرستد.
+- نام، توضیح کوتاه، `category_key` و فیلدهای عمومی Offer در Core/Published Read Port وجود دارند؛ Core برای تکمیل آن‌ها جدول Module را نمی‌خواند.
+- Core به جدول Module ارجاع مستقیم نمی‌دهد؛ Module می‌تواند از راه قرارداد نسخه‌دار به شناسه‌های Core ارجاع دهد.
 - Recommendation و ActionRecord زنجیرهٔ جدا دارند؛ Outcome و Evaluation فیلد پنهان روی Recommendation نیستند.
 
 ## ۴. حداقل نیازهای V1 برای اولین جریان ارزش
 
 برای مسیر `Onboarding → Capability → Offer → Publish → Business Action Loop` این موارد لازم‌اند:
 
-۱. **Organization و Business Identity Claim:** Organization یک فضای کاری با شناسهٔ پایدار و متعارف V1 است. ادعای اینکه این Organization نمایندهٔ کدام کسب‌وکار واقعی است، در `BusinessIdentityClaim` جدا ثبت و راستی‌آزمایی می‌شود. ساخت Organization ادعای هویت یا مالکیت حقوقی نیست؛ یک Organization می‌تواند چند ادعا داشته باشد و حداکثر یک ادعای راستی‌آزمایی‌شدهٔ فعال برای هر کسب‌وکار واقعی مجاز است.
+۱. **Organization و Business Identity Claim:** Organization یک فضای کاری با شناسهٔ پایدار و متعارف V1 است. ادعای اینکه این Organization نمایندهٔ کدام کسب‌وکار واقعی است، در `BusinessIdentityClaim` جدا ثبت می‌شود و با `identifier_type` ثبت‌شده و `identifier_value` نرمال‌شده شناخته می‌شود. قید یکتایی مفهومی روی همین جفت برای Claim راستی‌آزمایی‌شده و فعال برقرار است؛ این قید محدودیت فنی خود را دارد و دو نوع شناسهٔ متفاوت را به‌تنهایی یکی نمی‌کند. ساخت Organization ادعای هویت یا مالکیت حقوقی نیست؛ یک Organization می‌تواند چند ادعا داشته باشد و حداکثر یک ادعای راستی‌آزمایی‌شدهٔ فعال برای هر کسب‌وکار واقعی مجاز است.
 
 ۲. **Membership و PermissionGrant:** نمایندهٔ مجاز باید با Membership فعال و Grant فعال روی همان Membership قابل‌شناسایی باشد. Role هرگز منشأ Permission نیست و `ActorContext.role` در بررسی اجازه خوانده نمی‌شود. اگر D-57 هنوز عملیاتی نشده باشد، Demo باید Fixture صریح و برچسب‌خورده داشته باشد.
 
@@ -234,24 +247,25 @@ flowchart TD
 **هستهٔ هویت و حاکمیت:**
 
 - `Organization`
-- `BusinessIdentityClaim` و سابقهٔ Verification آن
-- `Membership`
+- `BusinessIdentityClaim` با `identifier_type`، `identifier_value` نرمال‌شده و سابقهٔ چرخهٔ Verification آن
+- `Membership` با ارجاع `(identity_provider, external_subject)`؛ بدون User داخلی و بدون Credential
 - `PermissionGrant`
 - سابقهٔ لازم برای لغو Grant و ردیابی تصمیم‌های حاکمیتی، در حدی که ADRهای مربوط تصویب کنند.
 
 **Entityهای عمومی Business Context و Business Truth:**
 
 - `Capability`
-- `Offer` و نسخه‌های آن
-- `Evidence` و referenceهای آن
-- `Publication` یا سابقهٔ Gate انتشار
+- `Offer` و نسخه‌های تغییرناپذیر آن؛ ارجاع Capability روی نسخه
+- `Evidence` با مالکیت تایپ‌شدهٔ جدا برای Capability یا Offer
+- وضعیت انتشار روی Capability/Offer و سابقهٔ افزایشی Gate انتشار؛ Publication منبع حقیقت دوم نیست
+- تصویر منطقیِ Published Business Information و Read Port متعلق به Core برای دادهٔ عمومی موردنیاز V2
 - `Fact`
 - `Goal`
 - `KPI`
 
 **حالت تجربه:**
 
-- حالت `Session`، `Intent` و `Context` در MVP مشتری باید session-only بماند؛ ذخیرهٔ بلندمدت یا Transcript در این Phase طراحی نمی‌شود.
+- `Session`، `assistant conversation context`، `Intent` و `Context` فقط اشیای زمان اجرا هستند؛ هیچ‌کدام Entity یا جدول پایدار Core نیستند. در MVP مشتری session-only می‌مانند و ذخیرهٔ بلندمدت یا Transcript در این Phase طراحی نمی‌شود.
 - `Consent` عمداً در Persistence Phase 1 وجود ندارد. رضایت انتشار همان عمل انتشار توسط عضو مجاز برای شیء مشخص است و رضایت آغاز گفت‌وگو فقط در assistant conversation context و به‌صورت session-only می‌ماند. مدل Consent داده‌ای پس از تصمیم OD-01 طراحی می‌شود.
 
 **Entityهای خارج از مدل تکراری این Phase:**
@@ -266,25 +280,32 @@ flowchart TD
 ### ۵.۳ روابطی که Persistence آینده باید حفظ کند
 
 - Organization ← Membership ← PermissionGrant؛
-- Organization ← BusinessIdentityClaim/Verification؛ برای هر کسب‌وکار واقعی حداکثر یک Claim راستی‌آزمایی‌شدهٔ فعال؛
+- Organization ← BusinessIdentityClaim/Verification؛ Claim دارای `(identifier_type, identifier_value)` نرمال‌شده است و قید یکتایی جزئی برای Claim راستی‌آزمایی‌شده و فعال دارد؛
 - Organization ← Capability ← Offer؛
-- Capability/Offer ← Evidence؛
-- Capability/Offer ← Publication Gate؛
+- Capability/Offer ← Evidence با ارجاع تایپ‌شده و دقیقاً یک مالک؛
+- Capability/Offer ← بُعد انتشار؛ Publication فقط سابقهٔ Gate و ممیزی افزایشی است؛
 - Organization ← Fact/Goal/KPI؛
-- assistant conversation context ← Intent ← Context؛ Session احرازشدهٔ Core فقط در مسیر عضو احرازشده و به‌صورت اختیاری وارد می‌شود؛
 - Recommendation → ActionRecord → OutcomeRecord → EvaluationRecord، با جدایی Entityها و زمان‌های مستقل؛
 - ارتباط workspace یا Business Twin با Organization فقط از قرارداد `ExternalWorkspaceLink` و در V1 انجام می‌شود.
+
+**روابط زمان اجرا که Persistence آینده نباید ذخیره کند:**
+
+- `assistant conversation context ← Intent ← Context`؛ هر سه session-only هستند؛
+- Session احرازشدهٔ Core فقط در مسیر عضو احرازشده و به‌صورت اختیاری وارد orchestration می‌شود؛ در این Phase برای آن Entity پایدار Core طراحی نمی‌شود.
 
 ### ۵.۴ چیزهایی که نباید در Core schema وجود داشته باشد
 
 - جدول یا فیلد مخصوص Clinic مانند `Doctor`، `Specialty`، `Treatment`، `Appointment`، `ClinicCapacity`، `ClinicCatalog` یا vocabulary درمانی؛
 - ادغام Business Identity Claim یا Verification با Organization؛ Claim باید رکورد و تاریخچهٔ مستقل داشته باشد؛
+- User داخلی، گذرواژه یا Credential در Core؛ Membership فقط به `(identity_provider, external_subject)` ارجاع می‌دهد؛
 - دسته‌بندی بستهٔ Clinic یا Verticalهای آینده در Enum/فهرست ثابت Core؛
 - جدول‌های Content Studio یا ستون `organization_id` در شِمای Content Studio؛
 - جدول Business Directory یا Business Twin مخصوص V2؛
+- نبودن دادهٔ عمومی لازم برای V2 در Core یا هر طراحی که Core را وادار به خواندن جدول Module کند؛
 - ذخیرهٔ دادهٔ مشتری، پیام، Transcript یا دادهٔ سلامت؛ `CUSTOMER_DATA` تا R8-a همچنان runtime-blocked است؛
+- مالک چندریختی آزاد برای Evidence مانند `owner_type + owner_id`؛ مالکیت باید تایپ‌شده و دقیقاً یکی باشد؛
 - جدول‌های تکراری برای Recommendation، Action، Outcome و Evaluation؛
-- مرجع مستقیم Core به جدول‌های ذخیره‌سازی Clinic یا هر Module دیگر؛
+- مرجع مستقیم Core به جدول‌های ذخیره‌سازی Clinic یا هر Module دیگر؛ Core فقط قرارداد محتوای عمومی و Read Port متعلق به Core را مصرف می‌کند؛
 - تغییر در `EventLog`، `domainTag` یا فایل‌های منجمد صرفاً برای این Foundation؛
 - تکیه بر `CoreEntity` یا Event Log موجود به‌عنوان جایگزین خاموش برای مدل‌های جدید Capability/Offer؛
 - Grant یا Permissionی که از Role، مالکیت، پاسخ Assistant یا وجود یک رکورد کسب‌وکار به‌طور ضمنی ساخته شود.
@@ -300,13 +321,13 @@ flowchart TD
 Core باید سرویس‌های عمومی زیر را عرضه یا تعریف کند:
 
 - **Organization Identity Reference:** resolve و اعتبارسنجی Organization ID متعارف؛ ساخت Organization با Business Identity Claim/Verification ادغام نمی‌شود.
-- **Business Identity Claim/Verification:** ثبت، بررسی و خواندن وضعیت ادعای هویت طبق D-61؛ بدون اعطای Permission، تغییر Membership یا انتخاب بین مدعیان.
-- **Membership Authorization Check:** بررسی Membership فعال و Grant فعال روی همان Membership برای یک عملیات؛ بدون اعطا یا اصلاح Grant. Role هرگز منشأ Permission نیست و `ActorContext.role` در بررسی اجازه خوانده نمی‌شود.
+- **Business Identity Claim/Verification:** ثبت `identifier_type` و `identifier_value` نرمال‌شده، بررسی چرخهٔ ادعا و خواندن وضعیت آن طبق D-61؛ قید یکتایی Claim فعالِ راستی‌آزمایی‌شده در مرز داده اعمال می‌شود؛ این سرویس Permission، Membership یا اختیار را تغییر نمی‌دهد و بین مدعیان تصمیم‌گیری نمی‌کند.
+- **Membership Authorization Check:** نگاشت `(identity_provider, external_subject)` به Membership فعال و بررسی Grant فعال روی همان Membership برای یک عملیات؛ بدون User داخلی، Credential، اعطا یا اصلاح Grant. Role هرگز منشأ Permission نیست و `ActorContext.role` در بررسی اجازه خوانده نمی‌شود.
 - **Capability Contract Service:** اعتبارسنجی ساختار و ابعاد عمومی Capability؛ بدون تفسیر vocabulary کلینیک.
 - **Offer Contract Service:** اعتبارسنجی نسخه، Scope، شرایط و زمان اعتبار Offer؛ بدون ساخت محتوای صنفی.
-- **Evidence Service:** بررسی provenance، freshness، confidence و confirmation؛ `confirmedBy` از provenance جداست.
-- **Publication Gate:** ارزیابی شروط عمومی و اجرای Gate فقط پس از دریافت اختیار معتبر؛ بدون اعطای Authorization و بدون انتشار خودکار.
-- **Context/Experience Orchestration:** هماهنگی Session، Intent، Context و invalidation؛ بدون Business Truth، Matching یا Business Lookup.
+- **Evidence Service:** بررسی provenance، freshness، confidence و confirmation با مالکیت تایپ‌شدهٔ دقیقاً یکی برای Capability یا Offer؛ `confirmedBy` از provenance جداست و شاهد Verification هویت از مسیر سابقهٔ خود Claim می‌آید.
+- **Publication Gate و Published Read Port:** ارزیابی شروط عمومی و اجرای Gate فقط پس از دریافت اختیار معتبر؛ نگهداری دادهٔ عمومی لازم برای V2 در تصویر متعلق به Core؛ بدون اعطای Authorization، انتشار خودکار یا خواندن جدول Module.
+- **Context/Experience Orchestration:** هماهنگی اشیای runtime شامل Session، assistant conversation context، Intent و Context و invalidation؛ بدون تبدیل آن‌ها به Business Truth، Persistence، Matching یا Business Lookup.
 - **Lifecycle Reference Boundary:** ارجاع کنترل‌شده به Recommendation/Action/Outcome/Evaluation بدون ساخت مدل تکراری یا ادغام آن‌ها.
 
 ### ۶.۲ سرویس‌های Clinic Module
@@ -314,7 +335,7 @@ Core باید سرویس‌های عمومی زیر را عرضه یا تعری�
 Clinic Module باید فقط این مسئولیت‌ها را عرضه کند:
 
 - ثبت و versioning واژگان treatment/service کلینیک؛
-- تولید محتوای کلینیک برای Capability و Offer عمومی Core؛
+- تولید محتوای عمومی کلینیک برای قرارداد Capability و Offer Core و ارسال آن از راه مرز مشخص؛ Core جدول Module را نمی‌خواند؛
 - مفاهیم Doctor/Specialist و ویژگی‌های صنفی پروفایل؛
 - روش راستی‌آزمایی Evidence کلینیکی؛
 - appointment workflow و آداپتور سامانهٔ نوبت، در صورت قرارگرفتن در Scope اجرایی؛
@@ -372,6 +393,11 @@ V2 نباید Core یا Module را برای ایجاد Capability، Offer، Pub
 ۲. تطبیق قراردادها با Identity/Membership/Grant واقعی یا Fixture صریح D-57؛ نبود این‌ها نباید پنهان شود.
 
 ۳. تعریف CCR کوچک برای Persistence، با تعیین محل فیزیکی Storage طبق D-71.
+
+این کار باید آگاهانه به دو گام جدا تقسیم شود:
+
+- **CCR اول:** هویت، اختیار و حقیقت عمومی کسب‌وکار شامل Organization، Claim/Verification، Membership، Permission، Capability، Offer، Evidence و وضعیت/تاریخچهٔ Publication.
+- **CCR دوم:** Persistence قرارداد Recommendation v1.1 و `ActionRecord` با lifecycle مستقل؛ Outcome و Evaluation نیز طبق ADR-0005 و مسیر مصوب خودشان می‌آیند. این جداسازی از افزودن شتاب‌زدهٔ Entityهای چرخهٔ عمر به CCR هویت و حقیقت کسب‌وکار جلوگیری می‌کند.
 
 ۴. پیاده‌سازی و تست Domain؛ سپس طراحی Migration مستقل.
 
