@@ -68,3 +68,11 @@ RESULTING_REPORT_SHA256: b378add742139ae8ced8ff942dcb75d3c11f3fc9e2882742e224aa8
 DELIVERY_COMMIT_SHA: 4bb918091c7bd6ec3ef6f9a956b6f3e55aeb342d
 DELIVERY_STATUS: DOCUMENTATION_DELIVERED_BRANCH_ALIGNMENT_REVIEW
 NEXT_ACTION: Owner review of the branch alignment recommendation C; do not merge, rebase, create schema.prisma, or create migrations before explicit approval and a separate implementation instruction.
+
+EXECUTED_INSTRUCTION_ID: CODEX-20260912-SELECTIVE-ARTIFACT-TRANSFER-PLAN-001
+EXECUTED_AT: 2026-09-12
+RESULTING_REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260912_SELECTIVE_ARTIFACT_TRANSFER_PLAN_REPORT.md
+RESULTING_REPORT_SHA256: d83632943a756083c5edfe2b647053a71990258a54ce6960d9bed1e2d2bcb1b5
+DELIVERY_COMMIT_SHA: c4097c309e8d351669394bf6aab88f9c116a4ef4
+DELIVERY_STATUS: DOCUMENTATION_DELIVERED_TRANSFER_PLAN
+NEXT_ACTION: Owner review of the selective transfer plan; do not execute transfer, merge, rebase, cherry-pick, schema change, or migration before explicit approval and a separate implementation instruction.
