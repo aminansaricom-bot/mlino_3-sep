@@ -23,11 +23,13 @@ Vertical نخست: **Clinic Module**
 
 - V1 مالک هویت سازمانی، حقیقت کسب‌وکار، Capability، Offer، Evidence، Recommendation، Action، Outcome و Evaluation است.
 - V2 مالک Discovery، Matching، Experience و Interaction است و حقیقت کسب‌وکار را ایجاد یا تغییر نمی‌دهد.
-- Core سازوکار هویت، Membership، Permission، Consent، Session، Intent، Orchestration و مرز Experience را نگه می‌دارد؛ منطق تخصصی کلینیک در Core قرار نمی‌گیرد.
+- Core سازوکارهای عمومی هویت، Membership، Permission، Consent، Session، Intent، Orchestration و مرز Experience را نگه می‌دارد و مالک موجودیت‌ها و چرخهٔ عمومی Capability، Offer، Evidence و Publication است؛ منطق تخصصی کلینیک در Core قرار نمی‌گیرد.
 - Platform اجرا می‌کند، اما Authorization یا Grant جدید ایجاد نمی‌کند.
 - Role زمینهٔ کسب‌وکار است و Permission به Membership تعلق دارد.
 - Recommendation، Action، Outcome و Evaluation موجودیت‌های جدا باقی می‌مانند.
 - Capability معتبر اما منتشرنشده می‌تواند در Recommendation داخلی V1 استفاده شود؛ V2 فقط Capability منتشرشده را می‌خواند.
+
+در این Scope، MLINO یک Platform چندVertical است و Clinic فقط نخستین Module اجرایی آن است. عمومی‌بودن Core باید امکان افزودن Verticalهای بعدی را بدون بازسازی مفاهیم اعتماد، انتشار و Offer حفظ کند.
 
 ## ۲. تعریف «کمینهٔ قابل‌نمایش»
 
@@ -78,16 +80,16 @@ MVP نمی‌تواند:
 
 برای دمو، Membership و Permission می‌توانند Fixture ازپیش‌تعریف‌شده و صریح باشند؛ Fixture نباید به‌عنوان سیستم Authorization تولیدی معرفی شود.
 
-### ۳.۳ Capability و Offer در مرز Core
+### ۳.۳ Capability، Offer، Evidence و Publication در Core
 
-در زبان اجرایی این MVP Capability و Offer ضروری‌اند، اما **معنای Business Capability و Offer در Core قرار نمی‌گیرد**. Core فقط چرخهٔ هویت، ارجاع، مجوز، انتشار و مصرف را هماهنگ می‌کند.
+این چهار مفهوم، موجودیت‌ها و semantics عمومی Platform هستند و نباید در هر Vertical دوباره ساخته شوند. V1 حقیقت کسب‌وکار و محتوای ثبت‌شده را مالک می‌ماند؛ Core قرارداد، چرخهٔ عمر، اعتبار و Gate عمومی آن‌ها را تعریف و اجرا می‌کند.
 
-- Business Capability متعلق به V1/Clinic Module است.
-- Business Offer متعلق به V1/Clinic Module است.
-- Core می‌تواند شناسه، وضعیت مرجع و Gate لازم برای عبور آن‌ها را مصرف کند.
-- Core نباید تشخیص دهد یک خدمت کلینیکی چیست، برای چه بیماری مناسب است یا Offer چه معنای پزشکی دارد.
+- **Capability:** موجودیت عمومی با ابعاد توانایی، مخاطب، تأیید و انتشار؛ واژگان خدمات کلینیک در Clinic Module می‌آید.
+- **Offer:** موجودیت عمومی با شکل، نسخه، بازهٔ اعتبار، Scope و شرایط؛ کاتالوگ و محتوای آفر کلینیکی در Clinic Module می‌آید.
+- **Evidence:** منشأ، تازگی و وضعیت تأیید عمومی را نگه می‌دارد؛ منبع و روش راستی‌آزمایی کلینیکی را Clinic Module فراهم می‌کند.
+- **Publication:** Gate عمومی انتشار و پس‌گرفتن است؛ Core شرایط Gate را کنترل می‌کند و Module محتوای قابل‌انتشار را تأمین می‌کند.
 
-این تفکیک با ADR-0011 سازگار است و مانع اضافه‌شدن Moduleهای بعدی به Core می‌شود.
+Core نباید تشخیص دهد یک خدمت کلینیکی چیست، برای چه بیماری مناسب است یا Offer چه معنای پزشکی دارد. این تفکیک با ADR-0011 و تصمیم‌های مصوب D-52، D-53، D-63 و D-68 سازگار است و اضافه‌شدن Moduleهای بعدی را بدون تکثیر Entityهای عمومی ممکن می‌کند.
 
 ### ۳.۴ Action و Experience Boundary
 
@@ -104,18 +106,21 @@ V2 فقط Action Handoff مجاز تجربه را اجرا می‌کند. UI، A
 
 Clinic Module مالک معنا و دادهٔ تخصصی کلینیک است. این Module باید نخستین Vertical را پوشش دهد، بدون آنکه Core را کلینیک‌محور کند.
 
-### ۴.۱ Business-specific data
+### ۴.۱ داده و منطق اختصاصی Clinic Module
 
 حداقل دادهٔ لازم برای Demo:
 
 - Organization/Business ID متعارف V1؛
 - نام و اطلاعات عمومی کسب‌وکار؛
-- یک یا چند خدمت کلینیکی به‌عنوان Capability؛
-- Evidence و منبع هر Capability؛
-- وضعیت انتشار Capability؛
-- Offer مرتبط با Scope روشن؛
-- زمان اعتبار Offer با `valid_from` و `valid_until`؛
-- وضعیت انتشار و تازگی داده.
+- واژگان کلینیکی و دسته‌بندی خدمات درمانی؛
+- محتوای کاتالوگ کلینیک که روی Capability عمومی Core می‌نشیند؛
+- محتوای Offer کلینیکی که روی Offer عمومی Core می‌نشیند؛
+- مفاهیم Doctor/Specialist و ویژگی‌های تخصصی پروفایل؛
+- منبع و روش راستی‌آزمایی Evidence کلینیکی؛
+- workflow نوبت‌دهی و آداپتور سامانهٔ نوبت؛
+- منطق ظرفیت و Fixture محدود دمو.
+
+Capability، Offer، Evidence و Publication به‌عنوان Entity و Gate عمومی در Core باقی می‌مانند؛ Clinic Module فقط vocabulary، content، روش راستی‌آزمایی و منطق صنفی خود را فراهم می‌کند. `Organization/Business ID` نیز هویت متعارف V1 است، نه هویت مستقل Module.
 
 دادهٔ شخصی بیمار، پروندهٔ درمان، اطلاعات سلامت، سابقهٔ مشتری و پیام‌های خصوصی در این MVP وارد نمی‌شوند.
 
@@ -125,13 +130,13 @@ Clinic Module مالک معنا و دادهٔ تخصصی کلینیک است. ا
 
 ۱. نمایندهٔ مجاز با Membership موجود، اطلاعات پایهٔ کلینیک را ثبت/تکمیل می‌کند.
 
-۲. خدمت قابل‌ارائه را به‌عنوان Capability اعلام می‌کند.
+۲. خدمت قابل‌ارائه را با واژگان کلینیکی Module روی Capability عمومی Core اعلام می‌کند.
 
-۳. Capability از نظر منبع، تأیید، Scope و وضعیت انتشار بررسی می‌شود.
+۳. Capability عمومی Core با داده و روش راستی‌آزمایی Clinic Module از نظر منبع، تأیید، Scope و وضعیت انتشار بررسی می‌شود.
 
-۴. Offer مرتبط با همان Capability/Option ثبت می‌شود.
+۴. Offer عمومی Core با محتوای کلینیکی و Scope روشن به همان Capability متصل می‌شود.
 
-۵. Capability و Offer پس از تأیید لازم به لایهٔ Published می‌روند.
+۵. Gate عمومی Publication پس از تأیید لازم Capability و Offer را به لایهٔ Published می‌برد.
 
 ۶. دادهٔ منتشرشده از طریق Read Port به V2 ارائه می‌شود.
 
@@ -175,7 +180,7 @@ Clinic Module یک خدمت کلینیکی محدود را به Capability تب�
 
 ### گام ۳: ایجاد Offer
 
-یک Offer به Capability/Option مشخص و Scope روشن متصل می‌شود. Offer سطح کسب‌وکار به‌تنهایی تخفیف یک خدمت مشخص را ثابت نمی‌کند.
+یک Offer به Capability مشخص و Scope روشن متصل می‌شود. Offer سطح کسب‌وکار به‌تنهایی تخفیف یک خدمت مشخص را ثابت نمی‌کند.
 
 معیار پذیرش:
 
@@ -190,7 +195,7 @@ V1 فقط Capability و Offer تأییدشده و قابل انتشار را د�
 
 معیار پذیرش:
 
-- خروجی Published دارای Business ID، Capability/Option ID، Offer ID، Evidence و Freshness باشد؛
+- خروجی Published دارای Business ID، Capability ID، Offer ID، Evidence و Freshness باشد؛
 - V2 هیچ دسترسی مستقیم به Database یا Event Log نداشته باشد؛
 - دادهٔ Published آزمایشی با برچسب صریح به V2 برسد؛
 - لغو یا انقضای انتشار/Offer در مصرف بعدی قابل تشخیص باشد.
@@ -216,6 +221,10 @@ Observation/Signal → Recommendation → Human Decision → ActionRecord
 
 ## ۶. جریان MVP در V2
 
+### واژگان مرزی V2
+
+در این بخش، Session یعنی **حالت session-only دستیار مشتری** و Session احرازشدهٔ Core نیست. Permission یعنی **دروازهٔ محیط/میزبان برای اجرای Foundation** و Grant سازمانی نیست. Consent یعنی **پذیرش کاربر برای آغاز گفت‌وگو** و جایگزین سیاست R8-a نیست. دستیار مشتری اختیار هیچ شخصی را حمل نمی‌کند.
+
 ### گام ۱: Intent input
 
 کاربر در Session فعال، Consent لازم و Permission موجود، نیاز خود را وارد می‌کند. Intent در Core و به‌صورت session-only نگهداری می‌شود.
@@ -239,8 +248,8 @@ V2 از Published Read Port، Candidateهای مربوط به همان Vertical 
 
 V2 با Eligibility پیش از Ordering:
 
-- Capability/Option واحد را بررسی می‌کند؛
-- شرط‌های اجباری را با Evidence همان Option می‌سنجد؛
+- Capability واحد را بررسی می‌کند؛
+- شرط‌های اجباری را با Evidence همان Capability می‌سنجد؛
 - Offer را فقط با Scope و زمان معتبر مصرف می‌کند؛
 - نتیجه را با Reason و Evidence Reference توضیح می‌دهد؛
 - صفر تا سه نتیجهٔ قطعی و قابل‌ردیابی برمی‌گرداند؛
@@ -308,7 +317,7 @@ Recommendation در اینجا به معنای خروجی تجربهٔ V2 است
 
 - AR expansion و Virtual Storefront؛
 - Marketplace و رتبه‌بندی پولی؛
-- Multi-vertical module؛
+- پیاده‌سازی Vertical دوم در این MVP؛ خود MLINO همچنان یک Platform چندVertical باقی می‌ماند؛
 - Restaurant، Retail، Beauty یا Vertical دوم در این MVP؛
 - Advanced Learning و Cross-business Learning؛
 - Customer Voice و دادهٔ شخصی/سلامت؛
@@ -322,17 +331,17 @@ Recommendation در اینجا به معنای خروجی تجربهٔ V2 است
 
 ۱. **بستن Gate مبنا:** بررسی ارجاع ADRها، تعیین Fixture و سناریوی Clinic، ثبت آزمایشی‌بودن Demo.
 
-۲. **تکمیل Context و Orchestration V2:** Session-only، Revision، Invalidation و جداسازی مسیر جدید از Legacy Matching.
+۲. **تکمیل حداقل Foundation عمومی Core:** Identity، Membership/Permission consumption و Entity/Gate عمومی Capability، Offer، Evidence و Publication؛ بدون منطق کلینیکی و بدون فعال‌کردن تجربهٔ مشتری V2.
 
-۳. **ساخت Published Business Reader/Mock Adapter:** Port فقط‌خواندنی و نگاشت صریح Business/Capability/Offer/Evidence.
+۳. **تکمیل Clinic Module:** واژگان خدمات و درمان، محتوای Capability/Offer روی Entityهای عمومی Core، Doctor/Specialist، workflow نوبت‌دهی و ظرفیت محدود.
 
-۴. **ساخت حداقل قرارداد/مرز Clinic Module:** Business Profile، Capability، Offer، Publication و ظرفیت محدود؛ بدون قرار دادن دادهٔ دامنه در Core.
+۴. **ساخت حلقهٔ ارزش کسب‌وکار V1:** Onboarding، هویت Organization، انتشار دادهٔ معتبر و سپس Signal/Recommendation → Decision → ActionRecord. تا پایان این مرحله مسیر V1 باید به‌تنهایی یک ارزش قابل‌نمایش داشته باشد.
 
-۵. **ساخت Matching MVP:** Eligibility، Offer validity، Evidence و Ordering قطعی.
+۵. **ساخت Published Business Reader/Mock Adapter:** Port فقط‌خواندنی برای خروجی منتشرشدهٔ V1 و نگاشت صریح Business/Capability/Offer/Evidence؛ دسته از دادهٔ V1 و vocabulary ثبت‌شدهٔ Module می‌آید.
 
-۶. **ساخت Experience و Action Handoff:** نتیجه، دلیل، جزئیات و `Open Business Details` بدون Side Effect پایدار.
+۶. **ساخت تجربهٔ مشتری V2 پس از حلقهٔ V1:** Context و Orchestration، Intent، Discovery، Matching با Eligibility پیش از Ordering و Experience/Action Handoff؛ مسیر جدید از Legacy Matching جدا می‌ماند.
 
-۷. **ساخت Demo و تست:** مسیر کامل موفق، بدون نتیجه، Offer نامعتبر، Revision stale، Permission ناکافی و Session منقضی.
+۷. **ساخت Demo و تست:** مسیر کامل V1 سپس V2، شامل بدون نتیجه، Offer نامعتبر، Revision stale، Permission ناکافی و Session منقضی.
 
 Database، API تولیدی و V1↔V2 live integration بعد از این مراحل و فقط با قرارداد/تصمیم اجرایی جدا بررسی می‌شوند.
 
@@ -340,24 +349,24 @@ Database، API تولیدی و V1↔V2 live integration بعد از این مر�
 
 Scope فقط زمانی برای تحویل MVP مناسب است که:
 
-- یک Clinic Fixture از Onboarding تا Published Capability/Offer قابل ردیابی باشد؛
+- یک Clinic Fixture از Onboarding تا Published Capability/Offer عمومی قابل ردیابی باشد؛
 - V1 مالک Business Truth و ActionRecord بماند؛
 - V2 فقط Published Read Port را مصرف کند؛
 - Intent و Context session-only و قابل invalidate باشند؛
-- Matching فقط یک Option واجد همهٔ شرط‌ها را معتبر بداند؛
+- Matching فقط یک Capability/Offer مصداقیِ واجد همهٔ شرط‌ها را معتبر بداند؛ واژهٔ `Option` در این سند Entity مستقل نیست و فقط به مصداق یا Scope ثبت‌شدهٔ Capability/Offer اشاره می‌کند؛
 - Offer آینده، منقضی، نامعتبر یا بدون Scope معتبر وارد نتیجه نشود؛
 - هر Recommendation دلیل و Evidence داشته باشد؛
 - Action Handoff با Permission موجود انجام شود و اختیار جدید نسازد؛
 - هیچ کلیک یا نمایش به‌عنوان Outcome یا موفقیت تجاری گزارش نشود؛
-- تغییر Vertical بعدی نیازمند تغییر Core نباشد؛
+- تغییر vocabulary و Module یک Vertical بعدی نیازمند تغییر Core نباشد؛
 - تست‌ها و Demo بدون دادهٔ شخصی و بدون اتصال Production اجرا شوند.
 
 ## ۱۲. رأی نهایی
 
 **A) Ready for implementation**
 
-این Scope کوچک، قابل‌تفکیک و با ADR-0001 تا ADR-0012 هم‌راستاست. موارد مفقود فعلی، مانند Context/Orchestration V2، Published Adapter و مسیر Capability/Offer کلینیک، کارهای همین MVP هستند و تعارض معماری ایجاد نمی‌کنند.
+این Scope کوچک، قابل‌تفکیک و با ADR-0001 تا ADR-0012 هم‌راستاست. موارد مفقود فعلی، مانند Entityهای عمومی Core، محتوای Clinic Module، حلقهٔ ارزش V1 و سپس تجربهٔ V2، کارهای همین MVP هستند و تعارض معماری ایجاد نمی‌کنند.
 
-شروع اجرا باید از مرحلهٔ Gate مبنا و سپس Foundation V2 باشد. هیچ تیمی نباید برای کوتاه‌کردن مسیر، Clinic vocabulary را وارد Core، V2 را به Database متصل یا Action Handoff را به Outcome واقعی تعبیر کند.
+شروع اجرا باید از Gate مبنا، سپس Core و Clinic Module و حلقهٔ ارزش V1 باشد؛ تجربهٔ مشتری V2 بعد از وجود این حلقه تکمیل می‌شود. هیچ تیمی نباید برای کوتاه‌کردن مسیر، Clinic vocabulary را وارد Core، V2 را به Database متصل یا Action Handoff را به Outcome واقعی تعبیر کند.
 
 من کدکس هستم

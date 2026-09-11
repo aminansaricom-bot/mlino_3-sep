@@ -12,14 +12,15 @@
 ## ۱. اصول اجرای roadmap
 
 - `ADR-0001` تا `ADR-0012` مرجع معماری هستند؛ هیچ تصمیمی در این roadmap باز نمی‌شود.
-- Core سازوکارهای عمومی را مالک است؛ منطق و دادهٔ Clinic در Clinic Module می‌ماند.
-- V1 مالک Business Identity، Business Truth، Capability، Offer، Evidence، Recommendation و ActionRecord است.
+- Core سازوکارها و Entityهای عمومی Capability، Offer، Evidence و Publication را مالک است؛ vocabulary، content و منطق Clinic در Clinic Module می‌ماند.
+- V1 مالک Business Identity و Business Truth و محتوای ثبت‌شدهٔ Capability/Offer/Evidence است؛ Core چرخه و Gate عمومی آن Entityها را نگه می‌دارد و V1 از آن‌ها استفاده می‌کند.
 - V2 مالک Intent experience، Discovery، Matching، Experience و Interaction است.
 - V2 به Database یا Event Log V1 دسترسی مستقیم ندارد و دادهٔ V1 را تغییر نمی‌دهد.
 - Permission فقط از Membership و Grant موجود مصرف می‌شود؛ هیچ Permission یا اختیار جدیدی در MVP ساخته نمی‌شود.
 - Recommendation، Action، Outcome و Evaluation موجودیت‌ها و مراحل جدا هستند.
 - هر دادهٔ آزمایشی با برچسب روشن عرضه می‌شود و هیچ Availability، Booking، Visit، Revenue یا Outcome ساختگی تولید نمی‌شود.
 - هر تغییر معنادار در Intent یا Context، نتیجهٔ Matching قبلی را باطل و ارزیابی مجدد را اجباری می‌کند.
+- MLINO یک Platform چندVertical است؛ Clinic فقط نخستین Module اجرایی این MVP است.
 - پیاده‌سازی از `Reuse → Wrap → Integrate` پیروی می‌کند؛ بازنویسی گسترده و ادغام زودهنگام ممنوع است.
 
 ## ۲. پیش‌شرط مشترک پیش از Phase 1
@@ -32,6 +33,7 @@
 - معلوم باشد Action نخست مشتری `Open Business Details` است؛ Action عملیاتی کسب‌وکار در این MVP اجرا نمی‌شود.
 - وضعیت شاخه، Commit مبنا و نبود تغییر در V1/Schema/API بررسی شود.
 - مسیر Legacy Matching برای مسیر جدید قابل فراخوانی نباشد یا Routing آن صریحاً جدا شده باشد.
+- پیش از هر پیاده‌سازی، دسترسی تیم به ADR-0001 تا ADR-0012 و تطبیق Phase با تصمیم‌های آن‌ها ثبت شود؛ این Gate تصمیم تازه‌ای ایجاد نمی‌کند.
 
 خروجی این Gate، تأیید آمادگی شروع Phase 1 است؛ هیچ Feature کسب‌وکاری در آن ساخته نمی‌شود.
 
@@ -39,7 +41,7 @@
 
 ### هدف
 
-ساخت مسیر عمومی و خنثی از Vertical برای Session، Intent، Context، Permission، Consent، Orchestration و Experience boundary، بدون خواندن دادهٔ کسب‌وکار و بدون فعال‌کردن Matching.
+ساخت حداقل Foundation عمومی و خنثی از Vertical برای Identity، Membership/Permission consumption، Capability، Offer، Evidence، Publication و Gateهای عمومی آن‌ها، بدون منطق Clinic، بدون خواندن دادهٔ کسب‌وکار و بدون فعال‌کردن تجربهٔ مشتری V2 یا Matching.
 
 ### اجزای درگیر
 
@@ -52,6 +54,7 @@
 - Orchestration و Routing مسیر جدید؛
 - Action boundary برای بررسی اختیار موجود و رد نتیجهٔ stale؛
 - Gate صریح `canMatch: false` تا زمان پایان این Phase.
+- چرخه و اعتبار عمومی Capability، Offer، Evidence و Publication، شامل freshness، confirmation و publish/revoke؛ بدون vocabulary یا محتوای کلینیکی.
 
 ### وابستگی‌ها
 
@@ -89,7 +92,7 @@
 - تغییر معنادار، نتیجهٔ قبلی و Tokenهای قدیمی را invalidate کند؛
 - Session پایان‌یافته، Intent، Context و نتیجهٔ جاری را reset/dispose کند؛
 - Permission فقط بررسی و مصرف شود و هیچ Grant یا Business Authority ساخته نشود؛
-- Core هیچ Clinic vocabulary، Business Truth، Capability یا Offer را import یا تولید نکند؛
+- Core هیچ Clinic vocabulary، Business Truth یا محتوای کلینیکی را import یا تولید نکند؛ Entityهای عمومی Capability، Offer، Evidence و Publication باید در Core باقی بمانند؛
 - مسیر جدید به Legacy Matching، Directory، V1 Database یا Provider خارجی متصل نشود؛
 - `canMatch` و دسترسی کسب‌وکار در Foundation همچنان غیرفعال باشد؛
 - هیچ Storage پایدار، Transcript، LLM خارجی یا Network task اضافه نشود.
@@ -103,30 +106,30 @@
 - پایان Session، Pause/Resume صریح، visibility و deadline؛
 - نبود Import از Clinic/V1 و نبود Storage/Network؛
 - اثبات باقی‌ماندن `canMatch: false`.
+- تست Entityهای عمومی Capability، Offer، Evidence و Publication و Gateهای انتشار؛
 
 ## ۴. Phase 2 — حداقل Clinic Module
 
 ### هدف
 
-ایجاد کوچک‌ترین بستهٔ دامنه‌ای Clinic برای Business Profile، Capability، Offer، Evidence و Publication، بدون انتقال واژگان یا جدول‌های Clinic به Core.
+ایجاد کوچک‌ترین بستهٔ دامنه‌ای Clinic برای vocabulary، content و workflow اختصاصی، روی Entityها و Gateهای عمومی Core، بدون انتقال واژگان یا جدول‌های Clinic به Core.
 
 ### اجزای درگیر
 
-- Clinic Business Profile با ارجاع به Organization ID متعارف V1؛
-- یک خدمت کلینیکی به‌عنوان Capability؛
-- Evidence، provenance، confirmation، scope و freshness؛
-- Offer متصل به Capability/Option مشخص؛
-- اعتبار زمانی `valid_from` و `valid_until`؛
-- Publication state برای جداسازی دادهٔ داخلی و قابل‌انتشار؛
+- واژگان کلینیکی و treatment/service vocabulary؛
+- محتوای کاتالوگ Clinic روی Capability عمومی Core؛
+- محتوای Offer کلینیکی روی Offer عمومی Core؛
+- Doctor/Specialist و روش راستی‌آزمایی صنفی؛
+- appointment workflow و آداپتور سامانهٔ نوبت؛
 - ظرفیت/Workflow محدود Clinic با استفاده از اجزای موجود، بدون ادعای Availability زنده؛
-- Read-only Published Business Port برای مصرف بعدی V2.
+- Fixture محدود Clinic برای Demo.
 
 ### وابستگی‌ها
 
 - Phase 1 برای مرز Core و Permission؛
-- Organization Identity و Membership موجود در V1؛
+- تصمیم و قرارداد Identity/Membership V1؛ در صورت آماده‌نبودن حداقل D-57، استفاده از Fixture صریح و برچسب‌خورده برای Demo؛ «موجود» فرض نشود؛
 - Business Context Phase 1 و قواعد Provenance/Confirmation؛
-- قرارداد V1↔V2 پس از تطبیق با دادهٔ واقعی؛
+- راستی‌آزمایی هویت پیش از اولین Publication طبق D-61؛
 - ADR-0011 برای جدایی ذخیره‌سازی/مالکیت Module؛
 - نبود نیاز به Customer Data و R8-a.
 
@@ -134,10 +137,10 @@
 
 مرز منطقی Clinic Module در V1:
 
-- بستهٔ دامنه‌ای Clinic برای Profile، Capability، Offer و Publication؛
+- بستهٔ دامنه‌ای Clinic برای vocabulary، catalog/content، Doctor/Specialist و workflow؛
 - Adapter یا Repository مربوط به دادهٔ Clinic در مرز Module؛
-- نگاشت Evidence و Freshness؛
-- تست‌های Unit/Contract برای Capability، Offer و Publication.
+- اتصال محتوای Module به Entityهای عمومی Core؛
+- تست‌های Unit/Contract برای محتوای Clinic و مرزهای عمومی Core.
 
 مرز خواندن V2:
 
@@ -155,10 +158,10 @@
 - یک Capability با Evidence و وضعیت تأیید/انتشار روشن ثبت شود؛
 - یک Offer با Scope مشخص و زمان اعتبار معتبر ثبت شود؛
 - Offer آینده، منقضی یا تاریخ‌نامعتبر فعال تلقی نشود؛
-- Capability یا Offer منتشرنشده در Published Reader دیده نشود؛
+- Capability یا Offer منتشرنشده در Published Reader دیده نشود؛ Gate انتشار متعلق به Core باشد؛
 - دادهٔ `CUSTOMER_DATA` به Context یا Published خروجی راه پیدا نکند؛
 - دادهٔ آزمایشی و محدودیت‌های آن در خروجی مشخص باشد؛
-- Clinic Module به Core وابستهٔ معکوس نشود و Core جدول دامنه‌ای Clinic نداشته باشد؛
+- Clinic Module Entityهای عمومی Core را دوباره نسازد، وابستگی معکوس ایجاد نکند و Core جدول دامنه‌ای Clinic نداشته باشد؛
 - مسیر Capacity فقط Signal/Recommendation داخلی تولید کند و Availability یا رزرو قطعی ادعا نکند.
 
 ### تست‌های لازم
@@ -166,7 +169,7 @@
 - اعتبارسنجی Profile، Capability، Evidence و Offer؛
 - مرزهای `valid_from`، `valid_until`، پایان نامحدود، آینده، انقضا و تاریخ نامعتبر؛
 - Publication و حذف دادهٔ داخلی از Published Reader؛
-- Scope Offer نسبت به Capability/Option؛
+- Scope Offer نسبت به Capability؛
 - Provenance جدا از Confirmation؛
 - رد Customer Data در وضعیت ACCESS_BLOCKED؛
 - نبود وابستگی Clinic در Core؛
@@ -197,7 +200,7 @@ Observation/Signal → Recommendation → Human Decision → ActionRecord
 ### وابستگی‌ها
 
 - Phase 2 و Clinic Module؛
-- Recommendation Contract v1.0؛
+- چرخهٔ عمر مصوب Recommendation طبق ADR-0008: `draft`، `proposed`، `accepted`، `rejected`، `expired` و `superseded`؛ `feedback` تا OD-01 مسدود است؛
 - ADR-0003 برای قرارداد مشترک Recommendation؛
 - ADR-0005 و ADR-0007/0008 برای جدایی چرخهٔ Recommendation و Action؛
 - Value Engine ظرفیت موجود، فقط در محدودهٔ سناریوی Clinic؛
@@ -206,7 +209,7 @@ Observation/Signal → Recommendation → Human Decision → ActionRecord
 ### فایل‌ها و ماژول‌های مورد انتظار
 
 - بستهٔ Workflow/Onboarding در مرز V1 یا Clinic Module؛
-- سرویس‌های Capability/Offer/Publication؛
+- سرویس‌های Core برای Capability/Offer/Evidence/Publication و سرویس محتوای Clinic روی آن‌ها؛
 - Adapter یا Projection خواندنی Published برای V2؛
 - اتصال محدود Signal/Recommendation به ActionRecord؛
 - تست‌های Domain، Permission، Publication و Lifecycle؛
@@ -217,7 +220,7 @@ Observation/Signal → Recommendation → Human Decision → ActionRecord
 ### Definition of Done
 
 - نمایندهٔ مجاز می‌تواند یک Clinic Demo را به یک Organization متصل کند؛
-- Capability و Offer با مالکیت V1/Clinic و Evidence قابل ردیابی ثبت می‌شوند؛
+- Capability و Offer عمومی Core با محتوای Clinic و مالکیت حقیقت V1 قابل ردیابی ثبت می‌شوند؛
 - انتشار فقط پس از شروط تأیید و Permission انجام می‌شود؛
 - V2 برای خواندن Published نیازمند دسترسی مستقیم به Database نیست؛
 - یک Recommendation داخلی دلیل، Evidence، Target Role، Priority و Expected Impact دارد؛
@@ -242,7 +245,7 @@ Observation/Signal → Recommendation → Human Decision → ActionRecord
 
 ### هدف
 
-تکمیل مسیر کاربر از Intent تا Discovery و Recommendation و سپس Action Handoff، با نمایش جزئیات Published Clinic و بدون وابستگی به Map یا AR.
+تکمیل مسیر کاربر از Intent تا Discovery و Recommendation و سپس Action Handoff، فقط پس از تکمیل حلقهٔ ارزش V1، با نمایش جزئیات Published Clinic و بدون وابستگی به Map یا AR.
 
 ### اجزای درگیر
 
@@ -259,9 +262,9 @@ Observation/Signal → Recommendation → Human Decision → ActionRecord
 
 ### وابستگی‌ها
 
-- Phase 1 برای Session/Intent/Context/Orchestration؛
-- Phase 2 برای Published Clinic data؛
-- Phase 3 برای Business Truth و Publication؛
+- Phase 1 برای Foundation عمومی Core؛ واژه‌های Session/Permission/Consent این مسیر به‌ترتیب session-only customer state، دروازهٔ محیط و رضایت شروع گفت‌وگو هستند و Session احرازشده، Membership Grant یا R8-a را جایگزین نمی‌کنند؛
+- Phase 2 برای vocabulary و content کلینیک روی Entityهای عمومی Core؛
+- Phase 3 برای Business Truth، Identity/Membership/Permission و Publication V1؛
 - قرارداد V2 Matching و Experience؛
 - جداشدن Routing مسیر جدید از Legacy `App.runSearch` و `MatchingService`؛
 - عدم نیاز به اتصال زنده یا LLM خارجی.
@@ -289,15 +292,15 @@ Observation/Signal → Recommendation → Human Decision → ActionRecord
 
 - کاربر Session را آگاهانه شروع می‌کند و Intent را وارد/اصلاح/تأیید می‌کند؛
 - Context جاری قابل مشاهده و session-only است؛
-- Matching فقط Capability/Offer منتشرشده و دارای Evidence کافی را مصرف می‌کند؛
-- شرط اجباری روی یک Capability/Option واحد بررسی می‌شود و Evidenceها بین گزینه‌ها ترکیب نمی‌شوند؛
+- Matching فقط Capability/Offer منتشرشده و دارای Evidence کافی را مصرف می‌کند؛ دسته از دادهٔ V1 و vocabulary ثبت‌شدهٔ Module می‌آید؛
+- شرط اجباری روی یک Capability واحد بررسی می‌شود و Evidenceها بین Capabilityهای مختلف ترکیب نمی‌شوند؛
 - Offer فقط در صورت Scope و زمان معتبر مصرف می‌شود؛
 - نتیجه صفر تا سه گزینه، قطعی و قابل توضیح است؛
 - تغییر Intent/Context/Source، نتیجهٔ قبلی را invalidate می‌کند؛
 - Details فقط دادهٔ Published موجود را نشان می‌دهد؛
 - `Open Business Details` هیچ Viewed، Lead، Visit، Booking، Outcome یا Storage پایدار ایجاد نمی‌کند؛
 - مسیر جدید Legacy Matching، LLM خارجی، Map، AR و Preferenceهای ذخیره‌شده را وارد نمی‌کند؛
-- V2 هیچ Business Truth، Capability، Offer یا Permission جدیدی نمی‌سازد.
+- V2 هیچ Business Truth، Capability، Offer یا Permission جدیدی نمی‌سازد و فقط دادهٔ Published را مصرف می‌کند.
 
 ### تست‌های لازم
 
@@ -408,6 +411,7 @@ Phase 5: End-to-End Demo
 
 - Phase 1 Matching را فعال نمی‌کند؛
 - Phase 2 V2 را به V1 Production متصل نمی‌کند؛
+- Phase 3 باید حلقهٔ ارزش V1 را پیش از شروع تجربهٔ مشتری V2 تکمیل کند؛
 - Phase 3 V2 را به Database/Event Log وصل نمی‌کند؛
 - Phase 4 Action عملیاتی کسب‌وکار یا Outcome نمی‌سازد؛
 - Phase 5 AR یا Marketplace را به Demo اضافه نمی‌کند.
@@ -417,7 +421,8 @@ Phase 5: End-to-End Demo
 | حوزه | مالک اصلی | محدودیت |
 |---|---|---|
 | Core، Session، Intent، Context، Permission و Orchestration | Codex | حساس به معماری و Lifecycle |
-| Clinic Module، Capability، Offer، Publication و Action boundary | Codex | بدون نشت دامنه به Core |
+| Core Entity/Gateهای Capability، Offer، Evidence و Publication و Action boundary | Codex | عمومی و بدون نشت vocabulary به Core |
+| Clinic Module و محتوای کلینیکی | Codex | روی Entityهای عمومی Core؛ بدون تکثیر آن‌ها |
 | V1 Business Workflow و Published Projection | Codex | V1 مالک حقیقت و اختیار باقی می‌ماند |
 | Matching و Eligibility | Codex | فقط روی دادهٔ Published و Evidence |
 | UI و Styling تجربهٔ V2 | Mamad | فقط بر اساس Projection مصوب |
@@ -428,7 +433,7 @@ Phase 5: End-to-End Demo
 - AR expansion؛
 - Virtual Storefront پیشرفته؛
 - Marketplace؛
-- Vertical دوم یا Multi-vertical implementation در این MVP؛
+- پیاده‌سازی Vertical دوم در این MVP؛ خود پلتفرم multi-vertical باقی می‌ماند؛
 - Advanced Learning و Cross-business Learning؛
 - Production integrations و Live V1 Connector؛
 - Database integration برای Recommendation یا Business Brain؛
