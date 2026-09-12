@@ -1,0 +1,8 @@
+BEGIN
+psql:/tmp/g1b_t1.sql:5: ERROR:  new row for relation "offer_versions" violates check constraint "published_version_projection_complete"
+DETAIL:  Failing row contains (conc-old, conc-org, conc-offer, WITHDRAWN, 2026-09-12 12:26:16.539+00, 1, old).
+CONTEXT:  SQL statement "UPDATE offer_versions
+       SET publication_status = 'WITHDRAWN'
+     WHERE id = NEW.offer_version_id"
+PL/pgSQL function apply_publication_projection() line 11 at SQL statement
+EXIT_CODE=3

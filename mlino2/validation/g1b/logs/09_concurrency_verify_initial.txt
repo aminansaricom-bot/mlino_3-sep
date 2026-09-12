@@ -1,0 +1,9 @@
+     id     | publication_status 
+------------+--------------------
+ conc-new   | UNPUBLISHED
+ conc-old   | PUBLISHED
+ conc-rival | UNPUBLISHED
+(3 rows)
+
+DO
+PASS_CONCURRENT_PUBLISH_WITHDRAW

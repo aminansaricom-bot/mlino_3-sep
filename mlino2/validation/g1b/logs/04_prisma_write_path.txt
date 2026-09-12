@@ -1,0 +1,7 @@
+PASS prisma_composite_create
+FAIL prisma_cross_tenant_connect was accepted
+FAIL prisma_cross_tenant_connect stored_organization_id=prisma-org-a
+PASS prisma_partial_unique_claim code=P2002
+PASS prisma_publication_projection_read
+PASS prisma_direct_projection_mutation code=SQLSTATE
+VALIDATION_FAILURE_COUNT=1

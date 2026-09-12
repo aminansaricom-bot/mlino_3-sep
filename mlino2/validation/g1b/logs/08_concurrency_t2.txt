@@ -1,0 +1,15 @@
+ pg_sleep 
+----------
+ 
+(1 row)
+
+BEGIN
+psql:/tmp/g1b_t2.sql:6: ERROR:  duplicate key value violates unique constraint "offer_one_published_version_unique"
+DETAIL:  Key (offer_id)=(conc-offer) already exists.
+CONTEXT:  SQL statement "UPDATE offer_versions
+       SET publication_status = 'PUBLISHED',
+           published_at = NEW.created_at,
+           published_content_revision = NEW.content_revision
+     WHERE id = NEW.offer_version_id"
+PL/pgSQL function apply_publication_projection() line 5 at SQL statement
+EXIT_CODE=3

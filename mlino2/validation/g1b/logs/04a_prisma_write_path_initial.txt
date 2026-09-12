@@ -1,0 +1,4 @@
+PASS prisma_composite_create
+Error: FAIL prisma_cross_tenant_connect was accepted
+    at expectRejected (C:\Users\galexy\mlino code\v2-intent-flow\mlino2\validation\g1b\prisma-write-path.cjs:17:9)
+    at async main (C:\Users\galexy\mlino code\v2-intent-flow\mlino2\validation\g1b\prisma-write-path.cjs:49:3)

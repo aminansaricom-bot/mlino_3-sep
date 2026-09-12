@@ -1,0 +1,10 @@
+BEGIN
+INSERT 0 1
+ pg_sleep 
+----------
+ 
+(1 row)
+
+INSERT 0 1
+COMMIT
+EXIT_CODE=0
