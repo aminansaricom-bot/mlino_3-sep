@@ -1,0 +1,141 @@
+G3 HISTORY REPLAY - PostgreSQL 16
+PASS migration 20260814065924_init
+PASS migration 20260815033018_add_situation_key
+PASS migration 20260815113714_rename_actor_core_entity_id_to_actor_id
+PASS migration 20260906001500_add_ownership_type
+PASS migration 20260910020000_add_external_workspace_link
+PASS generated Core SQL
+PASS manual C1-C15 SQL
+BEGIN
+CREATE FUNCTION
+INSERT 0 2
+INSERT 0 2
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 1
+INSERT 0 2
+ g3_expect_error
+-----------------
+
+(1 row)
+
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/assertions.sql:80: NOTICE:  PASS C1 active identity uniqueness SQLSTATE=23505
+psql:/tmp/assertions.sql:86: NOTICE:  PASS C2 active membership uniqueness SQLSTATE=23505
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/assertions.sql:92: NOTICE:  PASS C3 active permission uniqueness SQLSTATE=23505
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/assertions.sql:99: NOTICE:  PASS C4 profile claim uniqueness SQLSTATE=23505
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/assertions.sql:106: NOTICE:  PASS C6 optional composite shadow pair SQLSTATE=23514
+psql:/tmp/assertions.sql:112: NOTICE:  PASS C7 typed evidence owner XOR SQLSTATE=23514
+ g3_expect_error
+-----------------
+
+(1 row)
+
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/assertions.sql:116: NOTICE:  PASS C8 lifecycle audit completeness SQLSTATE=23514
+ g3_expect_error
+psql:/tmp/assertions.sql:122: NOTICE:  PASS C9 grant basis SQLSTATE=23514
+-----------------
+
+(1 row)
+
+ g3_expect_error
+psql:/tmp/assertions.sql:130: NOTICE:  PASS C10 offer validity and price SQLSTATE=23514
+-----------------
+
+(1 row)
+
+psql:/tmp/assertions.sql:136: NOTICE:  PASS C11 confirmation is separate SQLSTATE=23514
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/assertions.sql:145: NOTICE:  PASS tenant isolation direct scalar FK SQLSTATE=23503
+ g3_expect_error
+-----------------
+
+(1 row)
+
+INSERT 0 1
+DO
+psql:/tmp/assertions.sql:166: NOTICE:  PASS C15 valid Publication event updated projection
+psql:/tmp/assertions.sql:175: NOTICE:  PASS C5 one published version per offer SQLSTATE=23505
+ g3_expect_error
+-----------------
+
+(1 row)
+
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/assertions.sql:180: NOTICE:  PASS C12 Publication append-only SQLSTATE=P0001
+ g3_expect_error
+psql:/tmp/assertions.sql:184: NOTICE:  PASS C13 OfferVersion immutable content SQLSTATE=P0001
+-----------------
+
+(1 row)
+
+INSERT 0 1
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/assertions.sql:196: NOTICE:  PASS C14 decided verification immutable SQLSTATE=P0001
+ g3_expect_error
+-----------------
+
+(1 row)
+
+SAVEPOINT
+psql:/tmp/assertions.sql:201: NOTICE:  PASS C15 direct publication projection mutation SQLSTATE=P0001
+ g3_expect_error
+psql:/tmp/assertions.sql:211: NOTICE:  PASS C15 failed nested transition SQLSTATE=P0001
+-----------------
+
+(1 row)
+
+ROLLBACK
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/assertions.sql:217: NOTICE:  PASS C15 no trigger-depth leak after savepoint SQLSTATE=P0001
+INSERT 0 2
+psql:/tmp/assertions.sql:279: NOTICE:  PASS all Core foreign keys use ON DELETE/UPDATE RESTRICT
+psql:/tmp/assertions.sql:279: NOTICE:  PASS withdraw-old-then-publish-new ordering
+psql:/tmp/assertions.sql:279: NOTICE:  PASS C15 approved projection trigger inventory
+DO
+DROP FUNCTION
+COMMIT
+PASS complete migration-history reconstruction

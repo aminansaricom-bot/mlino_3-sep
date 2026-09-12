@@ -1,0 +1,4 @@
+PASS Prisma migrate diff --from-migrations matched the schema-to-schema SQL before LF canonicalization.
+RAW_MATCHING_SHA256=7c8f989beb31910a5265db17c9aa0f51e9cd4b051c0dc5acfe247736fa35b070
+Both matching outputs were then normalized from CRLF to required LF for repository storage.
+COMMITTED_LF_SHA256=84b535f8a11b8170dc63df4dd8a0ba301266a515d55c410413ff9849729480b7
