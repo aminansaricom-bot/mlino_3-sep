@@ -1,51 +1,43 @@
-HANDOFF_ID: HANDOFF-20260912-G1-CLOSURE-REVIEW
+HANDOFF_ID: HANDOFF-20260912-GUARDIAN-REVIEW-G1B
 AUTHOR: CLAUDE
-PHASE: G1_POSTGRES_VALIDATION_CLOSURE_REVIEW
-STATUS: DELIVERED_AWAITING_INDEPENDENT_REVIEW
-REVIEW_VERDICT: G1 NOT CLOSED. It is close, and it does not depend on G2 or schema.prisma. 12 of the 14 reported PASSes are accepted (4 with limited scope). "Index preserved after manual DDL" is not accepted as a migration test.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REPORTS/20260912_G1_CLOSURE_REVIEW_REPORT.md
-REPORT_SHA256: 21d5f67cb657e813b5e6dc95ce7aa836700258fee72d482a25380b46c363a9b1
+PHASE: ARCHITECTURE_GUARDIAN_REVIEW_G1_G1B
+STATUS: DELIVERED_AWAITING_OWNER_ACTION
+REVIEW_VERDICT: APPROVED_WITH_FIXES. The next step is completing G1b with fixes FX1-FX12. schema.prisma, the product migration and the CCR stay BLOCKED. G1 is still NOT CLOSED, pending the G1b report.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260912_CLAUDE_REVIEW_G1_POSTGRES_VALIDATION.md
+REPORT_SHA256: 82abcc9d763209cdbf254cb987092f0331846b8c573677aeb17809a3c5c43bc4
 ZIP_PATH: (none built this pass)
 CODE_COMMIT_SHA: (none - review only). Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-12T16:10:00+03:30
+CREATED_AT: 2026-09-12T16:00:00+03:30
 NEXT_ACTION:
-Run "G1b" (R1-R4). It needs no G2, no schema.prisma and no repo change: temp folder outside the repo, disposable PostgreSQL 16, the origin/main migration chain copied in, and Prisma 5.22.0 (already installed in the _PUSH_STAGING/implementation/node_modules clone).
-- R1: record the fixture DDL, trigger bodies and per-test SQL as a text appendix in the report (not committed as schema or migration).
-- R2: C15 leak test. After an event insert, a direct projection UPDATE on another target in the same transaction, and after ROLLBACK TO SAVEPOINT, must be rejected. Compare against a pg_trigger_depth() guard (P3). The tested candidate is the transaction-local flag variant whose leak the main plan predicted.
-- R3: Prisma Migrate on 5.22.0:
-  - DR-01: migrate diff must be empty after the manual SQL.
-  - DR-02: a second migration after an unrelated field must contain only that field.
-  - DR-03: the same check for the existing external_workspace_link_active_unique index.
-  - FK-07: onDelete/onUpdate Restrict must show confdeltype/confupdtype 'r', not 'a'.
-  - Also validate and generate with shadow pairs and composite FKs to @@unique([id, organizationId]), plus the Client write pattern.
-- R4: the tests missing from the Codex plan:
-  - C6 shadow pairs, including the MATCH SIMPLE demonstration (FK-05).
-  - C2, C3 and C4.
-  - The circular Organization/Membership FK.
-  - DELETE on publications.
-  - FY2: link rows for a published version.
-  - Wrong-order version replacement, which must fail with 23505.
-Can move to G2:
-- M1: ExternalWorkspaceLink artefacts on the implementation branch.
-- M2: C7-C11 against the final CCR DDL text.
-- M3: re-run with real names.
-- M4: extended concurrency (40 runs, SERIALIZABLE, replacement, claim and publish-vs-withdraw races).
-- M5: normalisation and collation.
-Documentation only:
-- D1: Prisma is 5.22.0 in both lockfiles and installed on main; docs saying 5.20.0 are stale; pin it in the CCR.
-- D2: the recorded plan SHA 72d18031... matches no LF or CRLF version of either plan.
-- D3: two same-named plans (main 62 tests, Codex 13 tests); execution followed Codex's.
-- D4: the ExternalWorkspaceLink to Organization FK is an owner decision (recommend: not in CCR 1).
-- D5: none of P1-P12 applied (correct).
-- D6: update the Codex handoff to G1_CLOSED after G1b.
+1. Owner: hand Codex the exact instruction CODEX-20260912-G1B-COMPLETION-001 (review section 7), with TARGET_HANDOFF_ID HANDOFF-20260911-V2-INTENT-FLOW-FOUNDATION. Codex is running G1b right now without a recorded instruction ID: container mlino-g1b-postgres-20260912, uncommitted mlino2/validation/g1b/**, and a repo-root package.json/package-lock.json created by Prisma auto-install.
+2. Codex: stop, apply FX1-FX12, deliver mlino2/PRISMA_POSTGRESQL_CONSTRAINT_VALIDATION_G1B.md, then STOP for the next guardian review.
+3. Record the SECURITY FINDING in the CCR. Evidence: Prisma 5.22.0 accepted offerVersion.create with organization connect org-b plus composite offer connect (offer-a, org-a), and stored organization_id=prisma-org-a with no error (logs/04_prisma_write_path.log, 15:57). The composite DB FK blocks mixed rows, not wrong-tenant rows. Proposed rule: a write's tenant comes only from auth context, as a direct scalar (organizationId), never from input through a composite connect.
+Evidence accepted from the in-progress G1b (logs 00-15, up to 15:59):
+- 6 SQL assertions PASS.
+- DR: prisma migrate diff from the live DB to followup.prisma produced only ADD COLUMN, with no DROP of the 3 partial indexes, 4 CHECKs or 5 triggers; inventory unchanged.
+- FK-07: all 8 FKs are ON UPDATE RESTRICT ON DELETE RESTRICT.
+- One concurrency run was consistent (T2 got 23505).
+Still open:
+- FX1: direct-scalar variant.
+- FX2: C15 leak in the same transaction and after a savepoint.
+- FX3: publication performer must be a membership, not platform_actor_ref (ADR-0010).
+- FX4: verification organization_id.
+- FX5: shadow-pair optional composite relation plus C6.
+- FX6: origin/main chain and DR-03.
+- FX7: --from-migrations/shadow-DB variant and the exact command.
+- FX8: missing tests.
+- FX9: advisory-lock barriers, 20+20 runs.
+- FX10: hygiene (root package files, docker rm -v).
+- FX11: G1b report with hashes.
+- FX12: negative tests must assert the expected error code.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260912-POSTGRES-VALIDATION-PLAN
-EXECUTED_INSTRUCTION_ID: CLAUDE-20260912-G1-VALIDATION-REVIEW-001 (received from the owner)
+PREVIOUS_HANDOFF_ID: HANDOFF-20260912-G1-CLOSURE-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (received from the owner; standing role - every Codex execution report is reviewed before Codex's next step)
 
-MODEL_ROUTING_NOTE: Executed by Claude Opus 5.
+MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as MLINO Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: Both clones fetched. Codex at 76589be (results ce28f32; Codex plan 7411754); the design and blocker resolution are unchanged. main at a2fb238. The Prisma versions were read from both lockfiles and from the installed node_modules in the main clone. The plan hashes were computed from git objects in both LF and CRLF forms. The push was guarded on origin/main still being a2fb238.
+HANDOFF_PRECONDITION_CHECK: Both clones fetched. Codex origin was unchanged at 76589be; the G1b work is uncommitted in the Codex clone and was read, not modified. The G1b container was inspected read-only: host port 55436, an anonymous volume, isolated from mlino-v1-local-db, which has no published port. No credentials were found in the G1b files. The push was guarded on origin/main still being 421bb24.
 
-SCOPE_CONSTRAINT_NOTE: Only the new mlino_book/MLINO_G1_CLOSURE_REVIEW.md and the AI_HANDOFF files were added or changed on main. No schema.prisma, no migration, no ADR, nothing on the Codex branch. No tests executed.
+SCOPE_CONSTRAINT_NOTE: Only the new AI_HANDOFF/CLAUDE_REVIEWS/20260912_CLAUDE_REVIEW_G1_POSTGRES_VALIDATION.md and the AI_HANDOFF files were added or changed on main. Nothing in the Codex clone or its container was modified. No schema.prisma, no migration, no ADR, no code.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
