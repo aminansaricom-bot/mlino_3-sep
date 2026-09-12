@@ -1,44 +1,46 @@
-HANDOFF_ID: HANDOFF-20260912-GUARDIAN-G1C-REVIEW
+HANDOFF_ID: HANDOFF-20260912-GUARDIAN-G2-REVIEW
 AUTHOR: CLAUDE
-PHASE: ARCHITECTURE_GUARDIAN_REVIEW_G1C_AND_G1_GATE
-STATUS: DELIVERED_AWAITING_OWNER_DECISION
-REVIEW_VERDICT: APPROVED_NEXT_STEP. G1 gate: PASS WITH CONDITIONS (G1-C1..G1-C7; none requires re-running tests). Next step G2 option C, pending owner confirmation. schema.prisma stays BLOCKED until G2 and G3 close.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260912_CLAUDE_REVIEW_G1C_VALIDATION.md
-REPORT_SHA256: a586156cdad4d9551876ec6545408503591580d78569461b19d328274e7f8f81
+PHASE: ARCHITECTURE_GUARDIAN_REVIEW_G2_CORE_BRANCH
+STATUS: DELIVERED_AWAITING_OWNER_ACTION
+REVIEW_VERDICT: APPROVED_NEXT_STEP. G2 gate PASS, with one documentation condition, G2-C1: hash convention. G1-C3 is closed by G2. Next step: G3 CCR draft plus validation of its exact text. schema.prisma stays BLOCKED until the owner approves the CCR.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260912_CLAUDE_REVIEW_G2_CORE_BRANCH.md
+REPORT_SHA256: 4d65b222a0baa39461d5124c41f0d264dd0888f54ddd9eb0e47b82fff08b3f02
 ZIP_PATH: (none built this pass)
 CODE_COMMIT_SHA: (none - review only). Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-12T21:10:00+03:30
+CREATED_AT: 2026-09-12T21:45:00+03:30
 NEXT_ACTION:
-1. Owner confirms G2 option C: a new branch codex/core-prisma-foundation from fresh origin/main; the V2 branch is untouched; documents are copied byte-identical only, with no implementation transfer and no merge.
-2. After confirmation, give Codex CODEX-20260912-G2-CORE-BRANCH-001 (review section 6). Its TARGET_HANDOFF_ID is the new HANDOFF-20260912-CORE-PRISMA-FOUNDATION; the V2 handoff HANDOFF-20260911-V2-INTENT-FLOW-FOUNDATION stays active for the V2 branch only.
-3. Owner decisions for G3 (the CCR):
-   - G1-C1: the C15 mechanism. Guardian recommends B1, a pg_trigger_depth() > 1 guard with a closed list of triggers allowed to write projection columns.
-   - G1-C2: W1 (tenant only from auth context, as a direct scalar) recommended mandatory; W2 optional.
-   - G1-C5: pin Prisma to exactly 5.22.0.
-   - G1-C6: the ExternalWorkspaceLink to Organization FK in CCR 1. Recommended: no.
-   - G1-C4: two CCR rules. Every migrated table must be modeled in schema.prisma, and manual constraint names must match Prisma defaults or be declared with map:.
-Verified independently from the evidence:
-- The C15 leak tests (same transaction, savepoint, pg_trigger_depth variant) are real.
-- The MATCH SIMPLE half-pair demo is real.
-- W1 wrote organizationId=org-b with parents from org-a and got P2003; W2 rejected the contradictory input with Unknown argument.
-- Concurrency: READ COMMITTED 20 runs with 23505; SERIALIZABLE 12 runs with 40001 and 8 with 23505; the error log is empty.
-- The --from-migrations baseline diff is empty, and the follow-up diff only adds a column.
-- The inventory SHA-256 is identical; DR-03 and FK-07 pass on the live and history paths.
-- The orphan volume was removed and the protected V1 volume remains; no secrets; scope is clean.
-Findings:
-- N1: checksums verify 47/47 on the CRLF working tree but only 16/47 against LF git blobs (core.autocrlf=true, no .gitattributes). Fix in G2 via an LF-canonical manifest plus .gitattributes.
-- N2: the noisy initial diff log was not preserved.
-- N3: the fixture adds an ExternalWorkspaceLink FK; this is not a decision.
-- N4: Prisma auto-installed at the repo root again (cleaned and evidenced).
-- N5: Codex's G2 documents contradict each other. Resolved as option C; this supersedes the merge advice in MLINO_PRE_PRISMA_DECISION_NOTE section 1.
+1. Owner gives decisions D1-D5, preferably together with the G3 instruction:
+   - D1: C15 mechanism. Guardian recommends B1, pg_trigger_depth() > 1 with a closed trigger list.
+   - D2: W1 mandatory, W2 optional.
+   - D3: pin Prisma to exactly 5.22.0.
+   - D4: no ExternalWorkspaceLink to Organization FK in CCR 1.
+   - D5: adopt the two G1-C4 rules (model every migrated table; manual constraint names must match Prisma's or use map:).
+2. Give Codex CODEX-20260912-G3-CCR-DRAFT-001 (review section 5) with OWNER_DECISIONS filled in. Branch codex/core-prisma-foundation; TARGET_HANDOFF_ID HANDOFF-20260912-CORE-PRISMA-FOUNDATION.
+   - Output: implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_CORE_FOUNDATION_SCHEMA.md (DRAFT), validation evidence in mlino2/validation/g3/, and a report. Then STOP for guardian review.
+3. After the guardian reviews the CCR and the owner approves it, a separate instruction for the schema.prisma change and migration.
+Verified independently:
+- The branch base is origin/main 28438f2, linear, with no merge, rebase or cherry-pick.
+- Only the 11 allowed files, all added.
+- The 7 documents have git blob IDs identical to the source f4d326f.
+- .gitattributes is exactly "mlino2/validation/** -text"; implementation/ is untouched.
+- The V2 branch (f4d326f) and main (28438f2) are unchanged.
+- Manifest: 83/83 LF-canonical hashes recomputed and matching; manifest SHA-256 546bc02b...
+- The handoff file is correct, the report hash matches, and no leftover package files remain.
+G2-C1: the report's schema.prisma and five migration SHA-256 values are CRLF working-tree hashes. The canonical LF git-blob values are in review section 2 (schema.prisma e1c79133...). From now on, every hash is computed over git show bytes.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260912-GUARDIAN-APPROVE-GOVERNANCE-FIXES
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role; triggered by the owner relaying the G1c report)
+PREVIOUS_HANDOFF_ID: HANDOFF-20260912-GUARDIAN-G1C-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role; triggered by the owner relaying the G2 report)
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as MLINO Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: The Codex clone was fetched; origin equals local HEAD at f4d326f. The scope diff from ebca267 shows no forbidden paths. The evidence was read directly: assertions, write path, concurrency, diff, inventory and cleanup logs. Checksums were verified both against the working tree and against git blobs. Docker volumes were listed independently. The push was guarded on origin/main still being 3a6cd2c.
+HANDOFF_PRECONDITION_CHECK:
+- Fetched and pruned: origin/codex/core-prisma-foundation is at ee7fb95.
+- Checked merge-base, name-status diff, git blob ID equality for the 7 documents, and the .gitattributes bytes.
+- Recomputed the manifest over all 83 source blobs.
+- Compared LF, CRLF and working-tree hashes for the schema and migrations.
+- Checked the parent-folder leftovers.
+- The push was guarded on origin/main still being 28438f2.
 
-SCOPE_CONSTRAINT_NOTE: Only the new AI_HANDOFF/CLAUDE_REVIEWS/20260912_CLAUDE_REVIEW_G1C_VALIDATION.md and the AI_HANDOFF files were added or changed on main. Nothing on the Codex branch, in Docker or in any database was modified. No schema.prisma, no migration, no ADR, no code.
+SCOPE_CONSTRAINT_NOTE: Only the new AI_HANDOFF/CLAUDE_REVIEWS/20260912_CLAUDE_REVIEW_G2_CORE_BRANCH.md and the AI_HANDOFF files were added or changed on main. Nothing on either Codex branch, in Docker or in any database was modified. No schema.prisma, no migration, no ADR, no code.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
