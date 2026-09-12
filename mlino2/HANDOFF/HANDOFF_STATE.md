@@ -108,3 +108,10 @@ RESULTING_REPORT_SHA256: 4f4dfba7ede37f98854ccd50851ab75ef55358148eebc8eb9cf381a
 DELIVERY_COMMIT_SHA: 56594161df32c2d1acab713d27fe470b7b7136bc
 DELIVERY_STATUS: DOCUMENTATION_DELIVERED_PRISMA_PREIMPLEMENTATION_GATE
 NEXT_ACTION: Owner review of BLOCKED_BEFORE_SCHEMA_IMPLEMENTATION status; do not create schema.prisma, migrations, or perform branch synchronization before explicit approval and a separate implementation instruction.
+
+BLOCKED_BY_HANDOFF_MISMATCH:
+  REQUEST: CODEX-20260912-POSTGRES-VALIDATION-IMPLEMENTATION-001
+  TARGET_HANDOFF_ID: MISSING
+  DETECTED_AT: 2026-09-12
+  REASON: The request does not provide TARGET_HANDOFF_ID. The live Handoff is HANDOFF-20260911-V2-INTENT-FLOW-FOUNDATION, whose active next action is owner review of the pre-implementation Prisma gate; PostgreSQL validation implementation is not an authorized next action under the live Handoff.
+  ACTION: Refused creation of PostgreSQL validation environment, SQL scripts, tests, and MLINO_POSTGRES_VALIDATION_REPORT.md until a matching TARGET_HANDOFF_ID and authorized next action are issued.
