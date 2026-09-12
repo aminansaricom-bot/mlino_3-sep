@@ -1,0 +1,29 @@
+Prisma schema loaded from ..\..\AppData\Local\Temp\mlino-g1c-20260912-run1\fixture\prisma\schema.prisma
+Datasource "db": PostgreSQL database "mlino_g1c", schema "public" at "[DISPOSABLE_DB]"
+
+6 migrations found in prisma/migrations
+
+Applying migration `20260814065924_init`
+Applying migration `20260815033018_add_situation_key`
+Applying migration `20260815113714_rename_actor_core_entity_id_to_actor_id`
+Applying migration `20260906001500_add_ownership_type`
+Applying migration `20260910020000_add_external_workspace_link`
+Applying migration `20260912000100_g1c_core_fixture`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260814065924_init/
+    └─ migration.sql
+  └─ 20260815033018_add_situation_key/
+    └─ migration.sql
+  └─ 20260815113714_rename_actor_core_entity_id_to_actor_id/
+    └─ migration.sql
+  └─ 20260906001500_add_ownership_type/
+    └─ migration.sql
+  └─ 20260910020000_add_external_workspace_link/
+    └─ migration.sql
+  └─ 20260912000100_g1c_core_fixture/
+    └─ migration.sql
+      
+All migrations have been successfully applied.

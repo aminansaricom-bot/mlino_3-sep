@@ -1,0 +1,1 @@
+Name=/mlino-g1c-postgres AutoRemove=true Image=postgres:16-alpine Mounts=db9b37d1aae5ece6fe6d3dd1c6eff23d1e98f29fc744e7b3cb220f8e2d9421dc:/var/lib/postgresql/data 

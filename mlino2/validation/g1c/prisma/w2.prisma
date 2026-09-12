@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = env("G1C_CLIENT_OUTPUT_W2")
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("G1C_DATABASE_URL")
+}
+
+enum PublicationStatus {
+  UNPUBLISHED
+  PUBLISHED
+  WITHDRAWN
+}
+
+model Organization {
+  id           String       @id @db.Text
+  capabilities Capability[]
+  offers       Offer[]
+
+  @@map("organizations")
+}
+
+model Capability {
+  id             String         @id @default(uuid()) @db.Text
+  organizationId String         @map("organization_id") @db.Text
+  lifecycleState String         @default("ACTIVE") @map("lifecycle_state") @db.Text
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  offers         Offer[]
+  offerVersions  OfferVersion[]
+
+  @@unique([id, organizationId], map: "capabilities_id_organization_id_key")
+  @@map("capabilities")
+}
+
+model Offer {
+  id             String         @id @default(uuid()) @db.Text
+  organizationId String         @map("organization_id") @db.Text
+  capabilityId   String         @map("capability_id") @db.Text
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  capability     Capability     @relation(fields: [capabilityId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict)
+  versions       OfferVersion[]
+
+  @@unique([id, organizationId], map: "offers_id_organization_id_key")
+  @@map("offers")
+}
+
+model OfferVersion {
+  id                       String            @id @default(uuid()) @db.Text
+  organizationId           String            @map("organization_id") @db.Text
+  offerId                  String            @map("offer_id") @db.Text
+  capabilityId             String            @map("capability_id") @db.Text
+  publicationStatus        PublicationStatus @default(UNPUBLISHED) @map("publication_status")
+  publishedAt              DateTime?         @map("published_at") @db.Timestamptz(3)
+  publishedContentRevision Int?              @map("published_content_revision")
+  content                  String            @db.Text
+  offer                    Offer             @relation(fields: [offerId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict)
+  capability               Capability        @relation(fields: [capabilityId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, organizationId], map: "offer_versions_id_organization_id_key")
+  @@map("offer_versions")
+}
+

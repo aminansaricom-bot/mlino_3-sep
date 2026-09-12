@@ -1,0 +1,8 @@
+PASS prisma_composite_valid_write
+PASS W1_direct_scalar_tenant_guard code=P2003
+PASS prisma_partial_unique_claim code=P2002
+PASS prisma_publication_projection_read
+PASS prisma_direct_projection_mutation code=P2010 sqlstate=P0001
+PASS W2_valid_without_redundant_organization_relation
+PASS W2_redundant_organization_input_unavailable type=PrismaClientValidationError unknown=organization
+PRISMA_G1C_WRITE_PATH_PASS

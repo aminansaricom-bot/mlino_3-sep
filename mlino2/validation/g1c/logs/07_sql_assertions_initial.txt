@@ -1,0 +1,12 @@
+INSERT 0 3
+INSERT 0 3
+UPDATE 1
+PASS_G1C_CIRCULAR_FK_VALID
+DO
+PASS_G1C_CIRCULAR_FK_TENANT_GUARD code=23514
+DO
+PASS_G1C_C2_MEMBERSHIP_UNIQUENESS code=23505
+ERROR:  42601: VALUES lists must all be the same length
+LINE 5:   ('g1c-member-inactive', 'g1c-org-a', 'idp-main', 'subject-...
+           ^
+LOCATION:  transformInsertStmt, analyze.c:824

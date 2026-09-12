@@ -1,0 +1,24 @@
+COMMAND: prisma validate --schema [TEMP]/standalone/core.prisma
+Prisma schema loaded from standalone\core.prisma
+The schema at standalone\core.prisma is valid 🚀
+COMMAND: prisma generate --schema [TEMP]/standalone/core.prisma
+Prisma schema loaded from standalone\core.prisma
+
+✔ Generated Prisma Client (v5.22.0) to .\clients\w1 in 356ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Help us improve the Prisma ORM for everyone. Share your feedback in a short 2-min survey: https://pris.ly/orm/survey/release-5-22
+
+COMMAND: prisma validate --schema [TEMP]/standalone/w2.prisma
+Prisma schema loaded from standalone\w2.prisma
+The schema at standalone\w2.prisma is valid 🚀
+COMMAND: prisma generate --schema [TEMP]/standalone/w2.prisma
+Prisma schema loaded from standalone\w2.prisma
+
+✔ Generated Prisma Client (v5.22.0) to .\clients\w2 in 197ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+

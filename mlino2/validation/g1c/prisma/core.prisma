@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = env("G1C_CLIENT_OUTPUT_W1")
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("G1C_DATABASE_URL")
+}
+
+enum ClaimStatus {
+  PENDING
+  VERIFIED
+  SUSPENDED
+  REJECTED
+  EXPIRED
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PublicationStatus {
+  UNPUBLISHED
+  PUBLISHED
+  WITHDRAWN
+}
+
+enum PublicationEventKind {
+  PUBLISHED
+  WITHDRAWN
+}
+
+model Organization {
+  id                                  String                  @id @db.Text
+  foundingMembershipId                String?                 @map("founding_membership_id") @db.Text
+  foundingMembershipOrganizationId    String?                 @map("founding_membership_organization_id") @db.Text
+  foundingMembership                   Membership?             @relation("OrganizationFounder", fields: [foundingMembershipId, foundingMembershipOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "organizations_founding_membership_fkey")
+  memberships                         Membership[]            @relation("OrganizationMemberships")
+  claims                              BusinessIdentityClaim[]
+  profiles                            BusinessProfile[]
+  grants                              PermissionGrant[]
+  capabilities                        Capability[]
+  offers                              Offer[]
+  offerVersions                       OfferVersion[]
+  publications                        Publication[]
+
+  @@map("organizations")
+}
+
+model Membership {
+  id                    String            @id @default(uuid()) @db.Text
+  organizationId        String            @map("organization_id") @db.Text
+  identityProvider      String            @map("identity_provider") @db.Text
+  externalSubject       String            @map("external_subject") @db.Text
+  lifecycleStatus       String            @default("ACTIVE") @map("lifecycle_status") @db.Text
+  organization          Organization      @relation("OrganizationMemberships", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  foundedOrganizations  Organization[]    @relation("OrganizationFounder")
+  grants                PermissionGrant[]
+  performedPublications Publication[]
+
+  @@unique([id, organizationId], map: "memberships_id_organization_id_key")
+  @@map("memberships")
+}
+
+model BusinessIdentityClaim {
+  id              String                 @id @default(uuid()) @db.Text
+  organizationId  String                 @map("organization_id") @db.Text
+  identifierType  String                 @map("identifier_type") @db.Text
+  identifierValue String                 @map("identifier_value") @db.Text
+  claimStatus     ClaimStatus            @map("claim_status")
+  verifiedAt      DateTime?              @map("verified_at") @db.Timestamptz(3)
+  organization    Organization           @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  verifications   IdentityVerification[]
+  profiles        BusinessProfile[]      @relation("ProfileIdentityClaim")
+
+  @@unique([id, organizationId], map: "business_identity_claims_id_organization_id_key")
+  @@map("business_identity_claims")
+}
+
+model IdentityVerification {
+  id               String                 @id @default(uuid()) @db.Text
+  organizationId   String                 @map("organization_id") @db.Text
+  claimId          String                 @map("claim_id") @db.Text
+  attemptNumber    Int                    @map("attempt_number")
+  status           VerificationStatus
+  platformActorRef String?                @map("platform_actor_ref") @db.Text
+  decidedAt        DateTime?              @map("decided_at") @db.Timestamptz(3)
+  decisionReason   String?                @map("decision_reason") @db.Text
+  claim            BusinessIdentityClaim  @relation(fields: [claimId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "identity_verifications_claim_fkey")
+
+  @@unique([claimId, organizationId, attemptNumber], map: "identity_verifications_claim_org_attempt_key")
+  @@map("identity_verifications")
+}
+
+model BusinessProfile {
+  id                              String                  @id @default(uuid()) @db.Text
+  organizationId                  String                  @map("organization_id") @db.Text
+  name                            String                  @db.Text
+  identityClaimId                 String?                 @map("identity_claim_id") @db.Text
+  identityClaimOrganizationId     String?                 @map("identity_claim_organization_id") @db.Text
+  organization                    Organization            @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  identityClaim                   BusinessIdentityClaim?  @relation("ProfileIdentityClaim", fields: [identityClaimId, identityClaimOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "business_profiles_identity_claim_fkey")
+
+  @@unique([id, organizationId], map: "business_profiles_id_organization_id_key")
+  @@map("business_profiles")
+}
+
+model PermissionGrant {
+  id             String       @id @default(uuid()) @db.Text
+  organizationId String       @map("organization_id") @db.Text
+  membershipId   String       @map("membership_id") @db.Text
+  permissionKey  String       @map("permission_key") @db.Text
+  grantedAt      DateTime     @default(now()) @map("granted_at") @db.Timestamptz(3)
+  revokedAt      DateTime?    @map("revoked_at") @db.Timestamptz(3)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  membership     Membership   @relation(fields: [membershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grants_membership_fkey")
+
+  @@unique([id, organizationId], map: "permission_grants_id_organization_id_key")
+  @@map("permission_grants")
+}
+
+model Capability {
+  id             String         @id @default(uuid()) @db.Text
+  organizationId String         @map("organization_id") @db.Text
+  lifecycleState String         @default("ACTIVE") @map("lifecycle_state") @db.Text
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  offers         Offer[]
+  offerVersions  OfferVersion[]
+
+  @@unique([id, organizationId], map: "capabilities_id_organization_id_key")
+  @@map("capabilities")
+}
+
+model Offer {
+  id             String         @id @default(uuid()) @db.Text
+  organizationId String         @map("organization_id") @db.Text
+  capabilityId   String         @map("capability_id") @db.Text
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  capability     Capability     @relation(fields: [capabilityId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "offers_capability_fkey")
+  versions       OfferVersion[]
+
+  @@unique([id, organizationId], map: "offers_id_organization_id_key")
+  @@map("offers")
+}
+
+model OfferVersion {
+  id                       String            @id @default(uuid()) @db.Text
+  organizationId           String            @map("organization_id") @db.Text
+  offerId                  String            @map("offer_id") @db.Text
+  capabilityId             String            @map("capability_id") @db.Text
+  publicationStatus        PublicationStatus @default(UNPUBLISHED) @map("publication_status")
+  publishedAt              DateTime?         @map("published_at") @db.Timestamptz(3)
+  publishedContentRevision Int?              @map("published_content_revision")
+  content                  String            @db.Text
+  organization             Organization      @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  offer                    Offer             @relation(fields: [offerId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "offer_versions_offer_fkey")
+  capability               Capability        @relation(fields: [capabilityId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "offer_versions_capability_fkey")
+  publications             Publication[]
+
+  @@unique([id, organizationId], map: "offer_versions_id_organization_id_key")
+  @@map("offer_versions")
+}
+
+model Publication {
+  id                      String               @id @default(uuid()) @db.Text
+  organizationId          String               @map("organization_id") @db.Text
+  offerVersionId          String               @map("offer_version_id") @db.Text
+  eventKind               PublicationEventKind @map("event_kind")
+  contentRevision         Int?                 @map("content_revision")
+  performedByMembershipId String               @map("performed_by_membership_id") @db.Text
+  reason                  String               @db.Text
+  occurredAt              DateTime             @default(now()) @map("occurred_at") @db.Timestamptz(3)
+  organization            Organization         @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  offerVersion            OfferVersion         @relation(fields: [offerVersionId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publications_offer_version_fkey")
+  performedByMembership   Membership           @relation(fields: [performedByMembershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publications_performer_membership_fkey")
+
+  @@map("publications")
+}

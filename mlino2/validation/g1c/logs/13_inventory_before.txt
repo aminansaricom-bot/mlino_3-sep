@@ -1,0 +1,46 @@
+  object_type  |                  object_name                   |                                                                                                              definition                                                                                                              
+---------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ CHECK         | business_profile_identity_claim_pair_complete  | CHECK ((num_nonnulls(identity_claim_id, identity_claim_organization_id) = ANY (ARRAY[0, 2])))
+ CHECK         | claim_active_requires_verified_at              | CHECK (((claim_status = ANY (ARRAY['VERIFIED'::"ClaimStatus", 'SUSPENDED'::"ClaimStatus"])) = (verified_at IS NOT NULL)))
+ CHECK         | organization_founding_membership_pair_complete | CHECK ((num_nonnulls(founding_membership_id, founding_membership_organization_id) = ANY (ARRAY[0, 2])))
+ CHECK         | organization_founding_membership_same_org      | CHECK (((founding_membership_organization_id IS NULL) OR (founding_membership_organization_id = id)))
+ CHECK         | publication_revision_required                  | CHECK (((event_kind = 'WITHDRAWN'::"PublicationEventKind") OR (content_revision IS NOT NULL)))
+ CHECK         | published_version_projection_complete          | CHECK (((publication_status <> 'PUBLISHED'::"PublicationStatus") OR ((published_at IS NOT NULL) AND (published_content_revision IS NOT NULL))))
+ CHECK         | verification_decision_audit_complete           | CHECK ((((status = ANY (ARRAY['APPROVED'::"VerificationStatus", 'REJECTED'::"VerificationStatus"])) = (decided_at IS NOT NULL)) AND ((decided_at IS NULL) OR ((platform_actor_ref IS NOT NULL) AND (decision_reason IS NOT NULL)))))
+ FK            | _EventCoreEntities_A_fkey                      | FOREIGN KEY ("A") REFERENCES core_entities(id) ON UPDATE CASCADE ON DELETE CASCADE delete=c update=c
+ FK            | _EventCoreEntities_B_fkey                      | FOREIGN KEY ("B") REFERENCES event_log(id) ON UPDATE CASCADE ON DELETE CASCADE delete=c update=c
+ FK            | business_identity_claims_organization_id_fkey  | FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | business_profiles_identity_claim_fkey          | FOREIGN KEY (identity_claim_id, identity_claim_organization_id) REFERENCES business_identity_claims(id, organization_id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | business_profiles_organization_id_fkey         | FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | capabilities_organization_id_fkey              | FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | depth_publications_offer_version_id_fkey       | FOREIGN KEY (offer_version_id) REFERENCES depth_offer_versions(id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | external_workspace_links_organization_id_fkey  | FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | identity_verifications_claim_fkey              | FOREIGN KEY (claim_id, organization_id) REFERENCES business_identity_claims(id, organization_id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | memberships_organization_id_fkey               | FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | offer_versions_capability_fkey                 | FOREIGN KEY (capability_id, organization_id) REFERENCES capabilities(id, organization_id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | offer_versions_offer_fkey                      | FOREIGN KEY (offer_id, organization_id) REFERENCES offers(id, organization_id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | offer_versions_organization_id_fkey            | FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | offers_capability_fkey                         | FOREIGN KEY (capability_id, organization_id) REFERENCES capabilities(id, organization_id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | offers_organization_id_fkey                    | FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | organizations_founding_membership_fkey         | FOREIGN KEY (founding_membership_id, founding_membership_organization_id) REFERENCES memberships(id, organization_id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | permission_grants_membership_fkey              | FOREIGN KEY (membership_id, organization_id) REFERENCES memberships(id, organization_id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | permission_grants_organization_id_fkey         | FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | profile_claim_control_fkey                     | FOREIGN KEY (identity_claim_id, identity_claim_organization_id) REFERENCES business_identity_claims(id, organization_id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | publications_offer_version_fkey                | FOREIGN KEY (offer_version_id, organization_id) REFERENCES offer_versions(id, organization_id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | publications_organization_id_fkey              | FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ FK            | publications_performer_membership_fkey         | FOREIGN KEY (performed_by_membership_id, organization_id) REFERENCES memberships(id, organization_id) ON UPDATE RESTRICT ON DELETE RESTRICT delete=r update=r
+ PARTIAL_INDEX | business_profile_claim_unique                  | CREATE UNIQUE INDEX business_profile_claim_unique ON public.business_profiles USING btree (identity_claim_id, identity_claim_organization_id) WHERE (identity_claim_id IS NOT NULL)
+ PARTIAL_INDEX | claim_active_identifier_unique                 | CREATE UNIQUE INDEX claim_active_identifier_unique ON public.business_identity_claims USING btree (identifier_type, identifier_value) WHERE (claim_status = ANY (ARRAY['VERIFIED'::"ClaimStatus", 'SUSPENDED'::"ClaimStatus"]))
+ PARTIAL_INDEX | external_workspace_link_active_unique          | CREATE UNIQUE INDEX external_workspace_link_active_unique ON public.external_workspace_links USING btree (system, external_workspace_id) WHERE (status = 'ACTIVE'::"ExternalLinkStatus")
+ PARTIAL_INDEX | membership_active_unique                       | CREATE UNIQUE INDEX membership_active_unique ON public.memberships USING btree (organization_id, identity_provider, external_subject) WHERE (lifecycle_status = 'ACTIVE'::text)
+ PARTIAL_INDEX | offer_one_published_version_unique             | CREATE UNIQUE INDEX offer_one_published_version_unique ON public.offer_versions USING btree (offer_id) WHERE (publication_status = 'PUBLISHED'::"PublicationStatus")
+ PARTIAL_INDEX | permission_grant_active_unique                 | CREATE UNIQUE INDEX permission_grant_active_unique ON public.permission_grants USING btree (organization_id, membership_id, permission_key) WHERE (revoked_at IS NULL)
+ TRIGGER       | depth_projection_guard                         | CREATE TRIGGER depth_projection_guard BEFORE UPDATE ON public.depth_offer_versions FOR EACH ROW EXECUTE FUNCTION reject_depth_direct_update()
+ TRIGGER       | depth_publication_after_insert                 | CREATE TRIGGER depth_publication_after_insert AFTER INSERT ON public.depth_publications FOR EACH ROW EXECUTE FUNCTION apply_depth_projection()
+ TRIGGER       | offer_version_immutable_guard                  | CREATE TRIGGER offer_version_immutable_guard BEFORE UPDATE ON public.offer_versions FOR EACH ROW EXECUTE FUNCTION immutable_published_offer_version()
+ TRIGGER       | offer_version_projection_guard                 | CREATE TRIGGER offer_version_projection_guard BEFORE UPDATE ON public.offer_versions FOR EACH ROW EXECUTE FUNCTION reject_direct_projection_update()
+ TRIGGER       | publication_projection_after_insert            | CREATE TRIGGER publication_projection_after_insert AFTER INSERT ON public.publications FOR EACH ROW EXECUTE FUNCTION apply_publication_projection()
+ TRIGGER       | publications_append_only                       | CREATE TRIGGER publications_append_only BEFORE DELETE OR UPDATE ON public.publications FOR EACH ROW EXECUTE FUNCTION reject_publication_mutation()
+ TRIGGER       | verification_immutable_guard                   | CREATE TRIGGER verification_immutable_guard BEFORE DELETE OR UPDATE ON public.identity_verifications FOR EACH ROW EXECUTE FUNCTION immutable_decided_verification()
+(42 rows)
+

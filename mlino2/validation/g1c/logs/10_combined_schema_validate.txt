@@ -1,0 +1,6 @@
+COMMAND: prisma validate --schema [TEMP]/prisma/schema.prisma
+Prisma schema loaded from ..\..\AppData\Local\Temp\mlino-g1c-20260912-run1\fixture\prisma\schema.prisma
+The schema at ..\..\AppData\Local\Temp\mlino-g1c-20260912-run1\fixture\prisma\schema.prisma is valid 🚀
+COMMAND: prisma validate --schema [TEMP]/prisma/schema-followup.prisma
+Prisma schema loaded from ..\..\AppData\Local\Temp\mlino-g1c-20260912-run1\fixture\prisma\schema-followup.prisma
+The schema at ..\..\AppData\Local\Temp\mlino-g1c-20260912-run1\fixture\prisma\schema-followup.prisma is valid 🚀

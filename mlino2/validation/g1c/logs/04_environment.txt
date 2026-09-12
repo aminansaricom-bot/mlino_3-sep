@@ -1,0 +1,5 @@
+PostgreSQL=16.14
+Container=mlino-g1c-postgres
+ContainerPolicy=--rm
+PortBinding=127.0.0.1:55437
+Authentication=trust-disposable-local-only

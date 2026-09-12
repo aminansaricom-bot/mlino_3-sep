@@ -1,0 +1,43 @@
+PASS concurrency isolation=READ COMMITTED iteration=1 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=2 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=3 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=4 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=5 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=6 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=7 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=8 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=9 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=10 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=11 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=12 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=13 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=14 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=15 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=16 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=17 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=18 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=19 loser_code=23505 barrier=advisory
+PASS concurrency isolation=READ COMMITTED iteration=20 loser_code=23505 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=1 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=2 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=3 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=4 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=5 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=6 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=7 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=8 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=9 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=10 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=11 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=12 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=13 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=14 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=15 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=16 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=17 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=18 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=19 loser_code=40001 barrier=advisory
+PASS concurrency isolation=SERIALIZABLE iteration=20 loser_code=40001 barrier=advisory
+SUMMARY READ COMMITTED:23505=20
+SUMMARY SERIALIZABLE:40001=20
+PASS_G1C_CONCURRENCY_40_RUNS

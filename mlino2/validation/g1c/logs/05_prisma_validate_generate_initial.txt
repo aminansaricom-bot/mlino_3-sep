@@ -1,0 +1,37 @@
+COMMAND: prisma validate --schema mlino2/validation/g1c/prisma/core.prisma
+Prisma schema loaded from mlino2\validation\g1c\prisma\core.prisma
+The schema at mlino2\validation\g1c\prisma\core.prisma is valid 🚀
+COMMAND: prisma generate --schema mlino2/validation/g1c/prisma/core.prisma
+Prisma schema loaded from mlino2\validation\g1c\prisma\core.prisma
+Warning: [Prisma auto-install on generate] Prisma could not find a package.json file in the inferred project root C:\Users\galexy\mlino code\v2-intent-flow. During the next step, when an auto-install of Prisma package(s) will be attempted, it will then be created by your package manager on the appropriate level if necessary.
+
+✔ Installed the @prisma/client and prisma packages in your project
+
+✔ Generated Prisma Client (v5.22.0) to .\..\..\AppData\Local\Temp\mlino-g1c-20260912-run1\clients\w1 in 236ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+┌─────────────────────────────────────────────────────────┐
+│  Update available 5.22.0 -> 8.0.0-rc.14                 │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+COMMAND: prisma validate --schema mlino2/validation/g1c/prisma/w2.prisma
+Prisma schema loaded from mlino2\validation\g1c\prisma\w2.prisma
+The schema at mlino2\validation\g1c\prisma\w2.prisma is valid 🚀
+COMMAND: prisma generate --schema mlino2/validation/g1c/prisma/w2.prisma
+Prisma schema loaded from mlino2\validation\g1c\prisma\w2.prisma
+
+✔ Generated Prisma Client (v5.22.0) to .\..\..\AppData\Local\Temp\mlino-g1c-20260912-run1\clients\w2 in 130ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Help us improve the Prisma ORM for everyone. Share your feedback in a short 2-min survey: https://pris.ly/orm/survey/release-5-22
+
