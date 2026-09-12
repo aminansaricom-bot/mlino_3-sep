@@ -15,3 +15,21 @@ REMOTE_CONTENT_CONFIRMATION: refs/heads/codex/core-prisma-foundation@2cf6caa467a
 MAIN_STATUS: UNCHANGED
 VALIDATION: Prisma 5.22.0 validate PASS; seven copied Git blobs MATCH; G1 evidence manifest 83 entries; implementation diff empty
 NEXT_ACTION: Architecture Guardian independent review of G2. Do not start G3, schema.prisma, migration, Backend, merge, rebase or cherry-pick without a separate approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_FOUNDATION_SCHEMA_CCR_G3
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260912-G3-CCR-DRAFT-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260912_CLAUDE_REVIEW_G2_CORE_BRANCH.md@89aef7ab70573283621f1396efade87d7e5d21db
+OWNER_DECISIONS: D1=B1; D2=W1 mandatory and W2 optional; D3=Prisma 5.22.0; D4=no ExternalWorkspaceLink FK in first CCR; D5=migration modeling and mapped-name rules approved
+BASE_COMMIT: ee7fb95372b7ca1805f14dec8fee0a5e6a5fb1ec
+DELIVERY_COMMIT: 1c53ba27f940dc5c9a0bccf30a2b7e39181463fd
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260912_CODEX_G3_CCR_DRAFT_REPORT.md
+REPORT_SHA256: 67d7967a8f987213e9d6ec5307ba48600d9d80b230f87203e0832da27198c845
+BRANCH: codex/core-prisma-foundation
+CCR_STATUS: DRAFT_PENDING_OWNER_APPROVAL
+VALIDATION: Prisma 5.22.0 PASS; PostgreSQL 16.15 migration replay PASS; C1-C15 PASS; W1 Prisma P2003 PASS; concurrency PASS; protected inventory preserved; teardown PASS
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G3. Do not modify schema.prisma, create an application migration, approve the CCR, or begin any later phase without a new approved instruction.
