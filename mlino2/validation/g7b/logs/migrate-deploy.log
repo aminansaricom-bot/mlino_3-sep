@@ -1,0 +1,14 @@
+Prisma schema loaded from ..\..\AppData\Local\Temp\mlino-g7b-main\implementation\prisma\schema.prisma
+Datasource "db": PostgreSQL database "mlino_v1", schema "public" at "127.0.0.1:5435"
+
+6 migrations found in prisma/migrations
+
+Applying migration `20260913010000_add_core_foundation`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260913010000_add_core_foundation/
+    └─ migration.sql
+      
+All migrations have been successfully applied.

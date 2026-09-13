@@ -1,0 +1,6 @@
+PATH=C:\Users\galexy\AppData\Local\Temp\mlino-g7b-main
+PRECHECK_RESULT=BLOCKED_BY_GIT_DUBIOUS_OWNERSHIP
+HEAD_OBSERVED=NO
+STATUS_OBSERVED=NO
+CLEANUP_RESULT=SEE_worktree-cleanup.log
+PRE_CREATION_STATE=SEE_worktree-setup.log

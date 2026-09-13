@@ -1,0 +1,4 @@
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "mlino_v1", schema "public" at "localhost:5432"
+Error: Schema engine error:
+
