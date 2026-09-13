@@ -128,3 +128,29 @@ ROLLBACK_STATUS: NOT_REQUIRED
 MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 NEXT_ACTION: Architecture Guardian review and a separate corrective G7b instruction. Do not retry backup, apply migration, run Docker Compose, or begin any later step without that instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: LOCAL_CORE_MIGRATION_G7B
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G7B-APPLY-CORE-MIGRATION-LOCAL-RETRY-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G7_BACKUP_HARD_STOP.md@eb9b72b24ba8b343051c5e0365a04dfe77bb8b39
+BASE_INSTRUCTION: CODEX-20260913-G7-APPLY-CORE-MIGRATION-LOCAL-001
+OWNER_APPROVAL: G7 approved; scope unchanged
+BACKUP_PATH: C:\Users\galexy\mlino-backups\mlino_v1_pre_core_20260913T121927Z.dump
+BACKUP_SIZE_BYTES: 22242
+BACKUP_SHA256: f3d2208ad55ad4e19ee2d4c458d85d41694cc8ac0eb082784283381b049b3c09
+BACKUP_PG_RESTORE_OBJECT_LINES: 68
+DELIVERY_COMMIT: b62546ec2e1aafd009a2cf80c654ac78d495619b
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G7B_APPLY_CORE_MIGRATION_REPORT.md
+REPORT_SHA256: 9e7232cb151f49cecde0c7bbdba9bba0c0c1e4555724089e074bb0b063336c04
+BRANCH: codex/core-prisma-foundation
+MIGRATION_STATUS: APPLIED — only 20260913010000_add_core_foundation; six finished migrations; zero rolled back
+DATA_PRESERVATION: PASS — all pre-existing business table counts unchanged; _prisma_migrations 5 to 6
+CORE_SCHEMA_VALIDATION: PASS — 12 empty Core tables; C1-C5; C6-C11; 13 non-internal triggers; 30 Core FKs RESTRICT/RESTRICT; ExternalWorkspaceLink index present
+SERVICE_STATUS: PostgreSQL running/healthy/restarts 0; V1 read API running/restarts 0; unauthenticated request HTTP 401
+ROLLBACK_STATUS: NOT_REQUIRED
+CLEANUP: container temp dump removed; temporary worktree removed/pruned; read-only Prisma fingerprint unchanged; host backup retained
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G7b. Do not rebuild, regenerate Prisma Client in the running service, modify the database, or begin any later step without a new approved instruction.
