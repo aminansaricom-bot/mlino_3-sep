@@ -198,3 +198,20 @@ MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 IMPLEMENTATION_STATUS: UNCHANGED
 NEXT_ACTION: Architecture Guardian independent review of G9. Do not implement services, repositories, APIs, Prisma or Docker without a new approved instruction and owner decisions for open items.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_SERVICE_LAYER_DESIGN_G9B
+STATUS: BLOCKED_BY_GW2_FETCH_FAILURE
+INSTRUCTION_ID: CODEX-20260913-G9B-CORE-SERVICE-LAYER-DESIGN-FIXES-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G9_CORE_SERVICE_LAYER_DESIGN.md
+DECISION: APPROVED_WITH_FIXES
+SCOPE: DOCUMENT_ONLY
+DELIVERY_COMMIT: PENDING
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G9B_CORE_SERVICE_LAYER_DESIGN_FIXES_REPORT.md
+VALIDATION: STOPPED_BEFORE_EDIT — git fetch origin failed with Schannel SEC_E_NO_CREDENTIALS; no G9b fixes applied
+LIMITATION: Local origin/main copy of the review was readable, but GW2 requires a successful fetch before work may proceed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+IMPLEMENTATION_STATUS: UNCHANGED
+NEXT_ACTION: Restore Git authentication and reissue G9b. Do not edit the design document or start implementation before the review is fetched from origin/main.
