@@ -1,7 +1,7 @@
 # طراحی لایهٔ سرویس Core برای MLINO V1
 
-**مرحله:** G9b — اصلاح طراحی مستنداتی، بدون پیاده‌سازی
-**وضعیت:** DRAFT — منتظر بازبینی Guardian و تصمیم مالک برای گزینه‌های باز
+**مرحله:** G10a — نخستین برش پیاده‌سازی authority
+**وضعیت:** FINAL — owner-approved
 **دامنه:** طراحی boundaryهای سرویس برای مدل‌های Core موجود؛ بدون API، repository، Prisma یا migration
 **مرجع اصلاح:** بازبینی pin‌شدهٔ G9 در commit `e79585ba3431b662fd32819a57f92bd88b3c855d` با SHA-256 محتوای فایل `35def70586113d2a0f08c9f1155d31a09e688aed2d9a48ae5efc01fae2ff32c7`
 
