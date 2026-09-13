@@ -3,7 +3,7 @@ import { AuthContext, requireActiveMembership, requireMembershipPermission, requ
 import { mapCoreDatabaseError } from './error-adapter';
 import { CoreDomainError, conflict, validationFailed } from './errors';
 import { PlatformIdentityVerifier, requireVerifiedPlatformActor } from './platform-identity-verifier';
-import { lockOrganization, memberOrganizationMissingError } from './repositories';
+import { expireOpenVerificationAttempts, lockOrganization, memberOrganizationMissingError } from './repositories';
 
 export interface SubmitIdentityClaimInput {
   organizationId: string;
@@ -38,12 +38,13 @@ export class IdentityClaimService {
     });
   }
 
-  async read(context: AuthContext, claimId: string) {
+  async read(context: AuthContext, claimId: string, organizationId = context.organizationId) {
     validateAuthContext(context);
     requireNonEmpty(claimId, 'claimId');
+    requireNonEmpty(organizationId, 'organizationId');
     return this.db.$transaction(async (tx) => {
-      await requireActiveMembership(tx, context);
-      return tx.businessIdentityClaim.findUnique({ where: { id_organizationId: { id: claimId, organizationId: context.organizationId } } });
+      await requireActiveMembership(tx, { ...context, organizationId });
+      return tx.businessIdentityClaim.findUnique({ where: { id_organizationId: { id: claimId, organizationId } } });
     }).catch((error: unknown) => {
       throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);
     });
@@ -59,13 +60,15 @@ export class IdentityClaimService {
       const claim = await tx.businessIdentityClaim.findUnique({ where: { id_organizationId: { id: claimId, organizationId } } });
       if (!claim) throw validationFailed('identity claim not found in organization');
       if (!isAllowedPlatformTransition(claim.claimStatus, nextStatus)) throw conflict('identity claim transition is not allowed');
+      const changedAt = new Date();
+      await expireOpenVerificationAttempts(tx, organizationId, claimId, nextStatus, actor.ref, changedAt);
       return tx.businessIdentityClaim.update({
         where: { id_organizationId: { id: claimId, organizationId } },
         data: {
           claimStatus: nextStatus,
           statusChangedByPlatformIdentityRef: actor.ref,
           statusChangeReason: reason,
-          statusChangedAt: new Date(),
+          statusChangedAt: changedAt,
         },
       });
     }).catch((error: unknown) => {

@@ -13,6 +13,18 @@ export async function lockIdentityClaim(db: Prisma.TransactionClient, organizati
   if (rows.length !== 1) throw validationFailed('identity claim not found in organization');
 }
 
+export async function expireOpenVerificationAttempts(db: Prisma.TransactionClient, organizationId: string, claimId: string, claimStatus: string, platformIdentityRef: string, at: Date): Promise<void> {
+  await db.identityVerification.updateMany({
+    where: { organizationId, claimId, status: { in: ['PENDING', 'UNDER_REVIEW'] } },
+    data: {
+      status: 'EXPIRED',
+      reviewedByPlatformIdentityRef: platformIdentityRef,
+      decisionReason: `superseded: claim ${claimStatus}`,
+      decidedAt: at,
+    },
+  });
+}
+
 export const memberOrganizationMissingError = () => authorizationDenied('active organization membership required');
 
 export class OrganizationRepository {

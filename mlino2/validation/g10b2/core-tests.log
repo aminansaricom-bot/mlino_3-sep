@@ -1,0 +1,30 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand implementation/test/core
+
+FAIL test/core/identity-claim-verification.spec.ts (6.86 s)
+  ● G10b identity claim and verification slice › expires every open attempt on a claim status change and rejects the stale S12-A decision
+
+    CoreDomainError: identity claim is not eligible for verification
+
+      11 | export const authorizationDenied = (message = 'authorization denied') => new CoreDomainError('AUTHORIZATION_DENIED', message);
+      12 | export const tenantMismatch = (message = 'tenant boundary rejected') => new CoreDomainError('TENANT_MISMATCH', message);
+    > 13 | export const validationFailed = (message: string) => new CoreDomainError('VALIDATION_FAILED', message);
+         |                                                      ^
+      14 | export const conflict = (message: string) => new CoreDomainError('CONFLICT', message);
+      15 |
+
+      at validationFailed (core/errors.ts:13:54)
+      at core/identity-verification-service.ts:37:98
+      at Proxy._transactionWithCallback (node_modules/@prisma/client/runtime/library.js:130:8000)
+      at Object.<anonymous> (test/core/identity-claim-verification.spec.ts:142:26)
+
+PASS test/core/core-authority.spec.ts
+PASS test/core/error-adapter.spec.ts
+PASS test/core/db-guard.spec.ts
+
+Test Suites: 1 failed, 3 passed, 4 total
+Tests:       1 failed, 48 passed, 49 total
+Snapshots:   0 total
+Time:        9.718 s
+Ran all test suites matching /implementation\\test\\core/i.

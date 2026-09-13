@@ -108,7 +108,9 @@ describe('G10b identity claim and verification slice', () => {
     const suspendedClaim = await submitClaim(suspended.owner, suspended.organizationId);
     await verifyClaim(suspended.organizationId, suspended.owner, suspendedClaim.id);
     await claims.transition('platform-token', suspended.organizationId, suspendedClaim.id, 'SUSPENDED', 'temporary suspension');
-    const resumed = await verifyClaim(suspended.organizationId, suspended.owner, (await verifications.start(suspended.owner, { organizationId: suspended.organizationId, claimId: suspendedClaim.id, methodKey: 'renewed-document' })).claimId);
+    const resumedAttempt = await verifications.start(suspended.owner, { organizationId: suspended.organizationId, claimId: suspendedClaim.id, methodKey: 'renewed-document' });
+    await verifications.markUnderReview('platform-token', suspended.organizationId, resumedAttempt.id);
+    const resumed = await verifications.decide('platform-token', { organizationId: suspended.organizationId, verificationId: resumedAttempt.id, decision: 'VERIFIED', decisionReason: 'renewed verification' });
     expect(resumed.status).toBe('VERIFIED');
 
     const rejected = await setup('terminal-rejected');
@@ -133,12 +135,51 @@ describe('G10b identity claim and verification slice', () => {
     await expectDomainFailure(verifications.markUnderReview('wrong-token', setupResult.organizationId, attempt.id), 'AUTHORIZATION_DENIED');
   });
 
+  it('expires every open attempt on a claim status change and rejects the stale S12-A decision', async () => {
+    const setupResult = await setup('stale-attempt');
+    const claim = await submitClaim(setupResult.owner, setupResult.organizationId);
+    const firstAttempt = await verifications.start(setupResult.owner, { organizationId: setupResult.organizationId, claimId: claim.id, methodKey: 'a1' });
+    const staleAttempt = await verifications.start(setupResult.owner, { organizationId: setupResult.organizationId, claimId: claim.id, methodKey: 'a2' });
+    await verifications.markUnderReview('platform-token', setupResult.organizationId, firstAttempt.id);
+    await verifications.decide('platform-token', { organizationId: setupResult.organizationId, verificationId: firstAttempt.id, decision: 'VERIFIED', decisionReason: 'A1 verified' });
+    await claims.transition('platform-token', setupResult.organizationId, claim.id, 'SUSPENDED', 'temporary suspension');
+    const expired = await prisma.identityVerification.findUnique({ where: { id_organizationId: { id: staleAttempt.id, organizationId: setupResult.organizationId } } });
+    expect(expired).toMatchObject({ status: 'EXPIRED', decisionReason: 'superseded: claim VERIFIED' });
+    await expectDomainFailure(verifications.decide('platform-token', { organizationId: setupResult.organizationId, verificationId: staleAttempt.id, decision: 'VERIFIED', decisionReason: 'stale decision' }), 'CONFLICT');
+    const fresh = await verifications.start(setupResult.owner, { organizationId: setupResult.organizationId, claimId: claim.id, methodKey: 'fresh-document' });
+    await verifications.markUnderReview('platform-token', setupResult.organizationId, fresh.id);
+    await expect(verifications.decide('platform-token', { organizationId: setupResult.organizationId, verificationId: fresh.id, decision: 'VERIFIED', decisionReason: 'fresh decision' })).resolves.toMatchObject({ status: 'VERIFIED' });
+  });
+
+  it('expires open attempts when a claim transitions to EXPIRED', async () => {
+    const setupResult = await setup('expire-open');
+    const claim = await submitClaim(setupResult.owner, setupResult.organizationId);
+    const first = await verifications.start(setupResult.owner, { organizationId: setupResult.organizationId, claimId: claim.id, methodKey: 'pending-a' });
+    const second = await verifications.start(setupResult.owner, { organizationId: setupResult.organizationId, claimId: claim.id, methodKey: 'pending-b' });
+    await claims.transition('platform-token', setupResult.organizationId, claim.id, 'EXPIRED', 'expired claim');
+    const attempts = await prisma.identityVerification.findMany({ where: { organizationId: setupResult.organizationId, claimId: claim.id, id: { in: [first.id, second.id] } } });
+    expect(attempts).toHaveLength(2);
+    expect(attempts.every((attempt) => attempt.status === 'EXPIRED' && attempt.decisionReason === 'superseded: claim EXPIRED')).toBe(true);
+  });
+
+  it('rejects invalid decisions, non-pending review transitions, and already-decided attempts', async () => {
+    const setupResult = await setup('runtime-validation');
+    const claim = await submitClaim(setupResult.owner, setupResult.organizationId);
+    const attempt = await verifications.start(setupResult.owner, { organizationId: setupResult.organizationId, claimId: claim.id, methodKey: 'document' });
+    await verifications.markUnderReview('platform-token', setupResult.organizationId, attempt.id);
+    await expectDomainFailure(verifications.markUnderReview('platform-token', setupResult.organizationId, attempt.id), 'CONFLICT');
+    await expectDomainFailure(verifications.decide('platform-token', { organizationId: setupResult.organizationId, verificationId: attempt.id, decision: 'UNKNOWN' as never, decisionReason: 'invalid' }), 'VALIDATION_FAILED');
+    await verifications.decide('platform-token', { organizationId: setupResult.organizationId, verificationId: attempt.id, decision: 'REJECTED', decisionReason: 'final decision' });
+    await expectDomainFailure(verifications.decide('platform-token', { organizationId: setupResult.organizationId, verificationId: attempt.id, decision: 'REJECTED', decisionReason: 'second decision' }), 'CONFLICT');
+  });
+
   it('enforces W1 across organizations and allows read only for an active membership', async () => {
     const first = await setup('w1-first');
     const second = await setup('w1-second');
     const claim = await submitClaim(first.owner, first.organizationId);
     await expectDomainFailure(claims.submit(second.owner, { organizationId: first.organizationId, identifierType: 'registration', identifierValue: 'cross-org' }), 'TENANT_MISMATCH');
-    await expectDomainFailure(verifications.start(second.owner, { organizationId: first.organizationId, claimId: claim.id, methodKey: 'cross-org' }), 'VALIDATION_FAILED');
+    await expectDomainFailure(verifications.start(second.owner, { organizationId: first.organizationId, claimId: claim.id, methodKey: 'cross-org' }), 'TENANT_MISMATCH');
+    await expectDomainFailure(claims.read(second.owner, claim.id, first.organizationId), 'AUTHORIZATION_DENIED');
     expect((await claims.read(first.owner, claim.id))?.id).toBe(claim.id);
   });
 

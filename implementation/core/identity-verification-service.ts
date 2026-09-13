@@ -1,9 +1,9 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { AuthContext, requireMembershipPermission, requireNonEmpty, validateAuthContext } from './auth-context';
+import { AuthContext, requireMembershipPermission, requireNonEmpty, requireSameOrganization, validateAuthContext } from './auth-context';
 import { mapCoreDatabaseError } from './error-adapter';
 import { CoreDomainError, conflict, validationFailed } from './errors';
 import { PlatformIdentityVerifier, requireVerifiedPlatformActor } from './platform-identity-verifier';
-import { lockIdentityClaim, lockOrganization, memberOrganizationMissingError } from './repositories';
+import { expireOpenVerificationAttempts, lockIdentityClaim, lockOrganization, memberOrganizationMissingError } from './repositories';
 
 export type VerificationDecision = 'VERIFIED' | 'REJECTED';
 
@@ -26,7 +26,7 @@ export class IdentityVerificationService {
 
   async start(context: AuthContext, input: StartVerificationInput) {
     validateAuthContext(context);
-    if (context.organizationId !== input.organizationId) throw validationFailed('organization context does not match request');
+    requireSameOrganization(context, input.organizationId);
     requireNonEmpty(input.claimId, 'claimId');
     requireNonEmpty(input.methodKey, 'methodKey');
     return this.db.$transaction(async (tx) => {
@@ -73,6 +73,7 @@ export class IdentityVerificationService {
     requireNonEmpty(input.organizationId, 'organizationId');
     requireNonEmpty(input.verificationId, 'verificationId');
     requireNonEmpty(input.decisionReason, 'decisionReason');
+    if (input.decision !== 'VERIFIED' && input.decision !== 'REJECTED') throw validationFailed('decision must be VERIFIED or REJECTED');
     return this.db.$transaction(async (tx) => {
       await lockOrganization(tx, input.organizationId);
       const attempt = await tx.identityVerification.findUnique({ where: { id_organizationId: { id: input.verificationId, organizationId: input.organizationId } } });
@@ -81,6 +82,7 @@ export class IdentityVerificationService {
       const claim = await tx.businessIdentityClaim.findUnique({ where: { id_organizationId: { id: attempt.claimId, organizationId: input.organizationId } } });
       if (!claim || !['PENDING', 'SUSPENDED'].includes(claim.claimStatus)) throw conflict('identity claim is not eligible for a verification decision');
       if (!['PENDING', 'UNDER_REVIEW'].includes(attempt.status)) throw conflict('verification attempt is not decidable');
+      if (claim.claimStatus === 'SUSPENDED' && (!claim.statusChangedAt || attempt.startedAt <= claim.statusChangedAt)) throw conflict('reinstatement requires a new verification attempt');
       const decidedAt = new Date();
       const updatedAttempt = await tx.identityVerification.update({
         where: { id_organizationId: { id: input.verificationId, organizationId: input.organizationId } },
@@ -96,6 +98,7 @@ export class IdentityVerificationService {
           statusChangedAt: decidedAt,
         },
       });
+      await expireOpenVerificationAttempts(tx, input.organizationId, attempt.claimId, input.decision, actor.ref, decidedAt);
       return updatedAttempt;
     }).catch((error: unknown) => {
       throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);

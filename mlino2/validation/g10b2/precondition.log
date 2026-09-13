@@ -1,0 +1,10 @@
+INSTRUCTION_ID=CODEX-20260913-G10B2-CLAIM-VERIFICATION-FIXES-001
+TARGET_HANDOFF_ID=HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+git fetch origin: FAILED
+fetch error: schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS (0x8009030e) - No credentials are available in the security package
+GW2-P pinned commit: b52f1493823c394f052d103dbf48d68c8036ab1d
+git cat-file -e pinned^{commit}: EXIT 0
+git merge-base --is-ancestor pinned origin/main: EXIT 0
+git show pinned:review-reference | sha256: 209824ea5203cddd04ae0d8a133f7ad9812a19470a773c4541a8e81904b36152
+expected review SHA256: 209824ea5203cddd04ae0d8a133f7ad9812a19470a773c4541a8e81904b36152
+GW2-P: PASS
