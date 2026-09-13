@@ -319,3 +319,21 @@ MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 PUSH_STAGING_STATUS: UNTOUCHED
 NEXT_ACTION: Architecture Guardian independent review of G10A3. Do not start G10B or modify schema/migrations/API before a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_CLAIM_VERIFICATION_G10B
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G10B-CORE-CLAIM-VERIFICATION-SLICE-001
+REVIEW_REFERENCE: pinned G10a3 review 563cd3a818d2705c303cba2f4cea86357d6209c2
+OWNER_DECISION: S12-A; G10B authorized
+SCOPE: CODE — additive identity claim and verification slice only
+CODE_COMMITS: d828d1e57282dc8ef8ce5799188cb98295b9379a, 6f02e3f44ad4ff11267b5d8732e3f67e245b18bc, ee4111f5bd6ebc4ea18c3626ba55d139b3aee608
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G10B_CORE_CLAIM_VERIFICATION_SLICE_REPORT.md
+REPORT_SHA256: da426302bcb347c7e160516bd3f6b962abc7805e28581ac0fe3fe975464de5c2
+VALIDATION: PASS — fetch succeeded; six migrations, build, 4 Core suites/47 tests and 23 suites/296 full V1 tests passed on disposable tmpfs PostgreSQL:5499; volume set unchanged; container removed
+LIMITATION: initial G10B run exposed three test defects; they were corrected and the final validation passed; no credentials, token, git config or credential helper changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian independent review of G10B. Do not start G10C or modify schema/migrations/API before a new approved instruction.
