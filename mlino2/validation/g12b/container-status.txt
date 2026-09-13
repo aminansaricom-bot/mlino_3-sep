@@ -1,0 +1,2 @@
+CONTAINER ID   IMAGE         COMMAND                  CREATED         STATUS         PORTS                                         NAMES
+e2f8babb917e   postgres:16   "docker-entrypoint.s…"   5 seconds ago   Up 5 seconds   0.0.0.0:5499->5432/tcp, [::]:5499->5432/tcp   mlino-g12b-postgres
