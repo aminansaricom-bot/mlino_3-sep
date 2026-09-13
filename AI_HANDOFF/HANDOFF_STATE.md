@@ -1,34 +1,52 @@
-HANDOFF_ID: HANDOFF-20260913-OWNER-APPROVAL-CCR-CORE-FOUNDATION
+HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G4-REVIEW
 AUTHOR: CLAUDE
-PHASE: G3_CLOSED_OWNER_APPROVED_CCR
-STATUS: G4_RELEASED
-REVIEW_VERDICT: The owner approved the Core Foundation Schema CCR at fcddfc2 in direct conversation with Claude ("تصویبش کن"). Gate G3 is closed. G4 is released.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_OWNER_APPROVAL_CCR_CORE_FOUNDATION.md
-APPROVED_CCR: implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_CORE_FOUNDATION_SCHEMA.md @ fcddfc2ef2faf76a2d6f8ded7eb4f68ec07a71cb (blob fa1db51a37e04f221630899c64c054a2a220b0f0, LF SHA-256 389cfae38095a92919faa2e096fe1db5a093cf070696171e65925a2876d48096; unchanged at branch head 6b62509)
+PHASE: ARCHITECTURE_GUARDIAN_REVIEW_G4_CORE_SCHEMA_MIGRATION
+STATUS: G5_RELEASED
+REVIEW_VERDICT: APPROVED_NEXT_STEP. G4 PASS: the first real change to the frozen schema.prisma is exactly the owner-approved CCR (fcddfc2), no more and no less. G5 (V1 compatibility) is released. Merging into main (G6) and applying the migration to any data-bearing database (G7) remain separate owner decisions.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G4_CORE_SCHEMA_MIGRATION.md
+REPORT_SHA256: 9e42a1845903c7831df14620b85c43e814ce1b5844c213a54859db08abb9bd9e
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - governance record only). Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-13T05:10:00+03:30
+CODE_COMMIT_SHA: (none by Claude - review only). The G4 product change is on codex/core-prisma-foundation at 3853f97 (report f47c852). Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-13T08:40:00+03:30
 NEXT_ACTION:
-Give Codex CODEX-20260913-G4-CORE-SCHEMA-MIGRATION-001 (section 4 of AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G3B_CCR_FIXES.md) with this line filled in:
-  OWNER_APPROVAL: CCR Core Foundation Schema at fcddfc2 is APPROVED (recorded: origin/main AI_HANDOFF/CLAUDE_REVIEWS/20260913_OWNER_APPROVAL_CCR_CORE_FOUNDATION.md)
-Branch codex/core-prisma-foundation; TARGET_HANDOFF_ID HANDOFF-20260912-CORE-PRISMA-FOUNDATION.
-G4 scope:
-- CCR status line only.
-- Byte-identical append of the model block to schema.prisma.
-- One new migration.
-- The Prisma 5.22.0 pin, with a regenerated lockfile.
-- Disposable validation.
-- No application code.
-Then STOP for guardian review.
-Any later change to the CCR text requires a new owner approval.
+1. Give Codex CODEX-20260913-G5-V1-COMPATIBILITY-001 (section 4 of the review). Branch codex/core-prisma-foundation; TARGET_HANDOFF_ID HANDOFF-20260912-CORE-PRISMA-FOUNDATION.
+   - Two temporary detached worktrees: baseline 6b62509 and G4 f47c852.
+   - In each: npm ci, prisma generate, npm run build.
+   - Deploy the migrations on a disposable tmpfs database, then npm test -- --runInBand.
+   - Compare the two runs: any test that passes on baseline and fails on G4 is a FAIL, reported and not fixed.
+2. SAFETY: the V1 integration tests globally clean tables. DATABASE_URL must never point at mlino-v1-local-db; never run npm run db:up or docker compose.
+3. After G5, owner decisions:
+   - G6: merge codex/core-prisma-foundation into main. merge-tree preview shows no conflicts (main 4 ahead, core 8 ahead).
+   - G7: apply the migration to mlino-v1-local-db or any data-bearing environment, with a backup first and CCR section 12 as the rollback plan.
+Verified independently for G4:
+- Scope is clean with zero forbidden paths; existing migrations and migration_lock.toml are untouched.
+- schema.prisma: the old file is an exact prefix of the new one, and the appended block equals the CCR model block at fcddfc2.
+- The CCR changed only its status line plus one approval line.
+- Migration 20260913010000_add_core_foundation is:
+  - a traceability header
+  - generated SQL, verbatim equal to the G3b generated SQL
+  - the CCR section 6 block, byte-identical (13 triggers)
+- package.json and package-lock.json change only the two 5.22.0 specifiers (2+/2- each).
+- All six migrations deployed on disposable tmpfs container mlino-g4-validation; post-deploy drift is empty.
+- 49 PASS, 0 FAIL: C1..C15, T1..T12, and W1 with P2003.
+- The _PUSH_STAGING fingerprint equals the baseline; the container and g4-tooling were removed; LF checksums verified.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G3B-REVIEW
-EXECUTED_INSTRUCTION_ID: Owner direct approval in chat, 2026-09-13
+PREVIOUS_HANDOFF_ID: HANDOFF-20260913-OWNER-APPROVAL-CCR-CORE-FOUNDATION
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role; triggered by the owner relaying the G4 report)
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as MLINO Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: The CCR blob at fcddfc2 equals the blob at the branch head (fa1db51), with zero CCR commits since. origin/main was 94a70ce before the push.
+HANDOFF_PRECONDITION_CHECK:
+- Fetched and pruned: origin/codex/core-prisma-foundation is at f47c852, equal to local.
+- Verified the scope diff from 6b62509.
+- Checked that the old schema.prisma is an exact prefix of the new one and compared the appended block with the CCR.
+- Diffed the CCR against fcddfc2.
+- Checked the migration composition (the generated part contained verbatim, the manual tail byte-identical).
+- Diffed package.json and package-lock.json.
+- Read the migrate-deploy, drift, test, fingerprint and teardown logs, and spot-checked checksums against git blobs.
+- Previewed the merge with merge-tree.
+- The push was guarded on origin/main still being 472de7e.
 
-SCOPE_CONSTRAINT_NOTE: Only the new approval record and the AI_HANDOFF files were added or changed on main. Nothing on either Codex branch was modified; the CCR status line is updated by Codex in G4 step 1.
+SCOPE_CONSTRAINT_NOTE: Only the new AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G4_CORE_SCHEMA_MIGRATION.md and the AI_HANDOFF files were added or changed on main. Nothing on either Codex branch, in Docker, in any database or in _PUSH_STAGING/implementation was modified by Claude.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
