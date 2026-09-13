@@ -1,0 +1,90 @@
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_PRISMA_BRANCH_ALIGNMENT_G2
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260912-G2-CORE-BRANCH-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260912_CLAUDE_REVIEW_G1C_VALIDATION.md@28438f22d8cfb04f114834e8b164af7c65dcea11
+OWNER_CONFIRMATION: G2 option C confirmed by the owner.
+BASE_COMMIT: 28438f22d8cfb04f114834e8b164af7c65dcea11
+SOURCE_COMMIT: f4d326f7d2046eee997dba4198f662c6e5d1e84e
+DELIVERY_COMMIT: 2cf6caa467a7d90a0fa4991ca5b6fad17ac07719
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260912_CODEX_G2_CORE_BRANCH_REPORT.md
+REPORT_SHA256: e88fdbbac5cc94ab2f659f7bd4424229345d109990d081a68f6e7f045b1750df
+BRANCH: codex/core-prisma-foundation
+REMOTE_CONTENT_CONFIRMATION: refs/heads/codex/core-prisma-foundation@2cf6caa467a7d90a0fa4991ca5b6fad17ac07719
+MAIN_STATUS: UNCHANGED
+VALIDATION: Prisma 5.22.0 validate PASS; seven copied Git blobs MATCH; G1 evidence manifest 83 entries; implementation diff empty
+NEXT_ACTION: Architecture Guardian independent review of G2. Do not start G3, schema.prisma, migration, Backend, merge, rebase or cherry-pick without a separate approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_FOUNDATION_SCHEMA_CCR_G3
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260912-G3-CCR-DRAFT-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260912_CLAUDE_REVIEW_G2_CORE_BRANCH.md@89aef7ab70573283621f1396efade87d7e5d21db
+OWNER_DECISIONS: D1=B1; D2=W1 mandatory and W2 optional; D3=Prisma 5.22.0; D4=no ExternalWorkspaceLink FK in first CCR; D5=migration modeling and mapped-name rules approved
+BASE_COMMIT: ee7fb95372b7ca1805f14dec8fee0a5e6a5fb1ec
+DELIVERY_COMMIT: 1c53ba27f940dc5c9a0bccf30a2b7e39181463fd
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260912_CODEX_G3_CCR_DRAFT_REPORT.md
+REPORT_SHA256: 67d7967a8f987213e9d6ec5307ba48600d9d80b230f87203e0832da27198c845
+BRANCH: codex/core-prisma-foundation
+CCR_STATUS: DRAFT_PENDING_OWNER_APPROVAL
+VALIDATION: Prisma 5.22.0 PASS; PostgreSQL 16.15 migration replay PASS; C1-C15 PASS; W1 Prisma P2003 PASS; concurrency PASS; protected inventory preserved; teardown PASS
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G3. Do not modify schema.prisma, create an application migration, approve the CCR, or begin any later phase without a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_FOUNDATION_SCHEMA_CCR_G3B_FIXES
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G3B-CCR-FIXES-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G3_CCR_DRAFT.md@3e19b541d1db2f629ca758faaba4dbbf1b30fbda
+OWNER_DECISION_D6: A — database auto-increments content_revision for public Profile/Capability field changes
+BASE_COMMIT: 48834d189c95cc7130913944d123102c380a174a
+DELIVERY_COMMIT: fcddfc2ef2faf76a2d6f8ded7eb4f68ec07a71cb
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G3B_CCR_FIXES_REPORT.md
+REPORT_SHA256: 45c2ec7ff1623113aa57c8199d7dc2496265c2607039519fbc0ab330fc08ffa4
+BRANCH: codex/core-prisma-foundation
+CCR_STATUS: DRAFT_PENDING_OWNER_APPROVAL
+VALIDATION: R1-R7 PASS; C1-C15 PASS; T1-T12 PASS; W1 Prisma P2003 PASS; origin/main migration replay PASS; protected inventory preserved; teardown PASS
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G3b. Do not approve the CCR, modify schema.prisma, create an application migration, or begin any later phase without a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_FOUNDATION_SCHEMA_MIGRATION_G4
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G4-CORE-SCHEMA-MIGRATION-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G3B_CCR_FIXES.md@94a70ce10cb95a0d5bade8624a93db076fb3d8c0
+OWNER_APPROVAL: CCR Core Foundation Schema at fcddfc2 is APPROVED
+BASE_COMMIT: 6b625093b2fd39fba9a26c2073a849e97411caa4
+DELIVERY_COMMIT: 3853f9755bf0c3ee7a40d97baf00ff236b127f63
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G4_CORE_SCHEMA_MIGRATION_REPORT.md
+REPORT_SHA256: e1313b833b8b67af345e798f068602dc8c6ec419c956a40ae8adbdaad2633f7f
+BRANCH: codex/core-prisma-foundation
+CCR_STATUS: APPROVED_BY_OWNER
+VALIDATION: Prisma 5.22.0 validate PASS; six-migration deploy PASS; post-deploy drift empty; C1-C15 PASS; T1-T12 PASS; W1 Prisma P2003 PASS; protected inventory recorded; fingerprint and teardown PASS
+V1_FULL_SUITE_STATUS: NOT_RUN — deferred by the approved G4 instruction to a later gate
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G4. Do not run the V1 full suite against the regenerated client, merge, or begin any later gate without a separate approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: V1_COMPATIBILITY_GATE_G5
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G5-V1-COMPATIBILITY-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G4_CORE_SCHEMA_MIGRATION.md@3ef9fe9f0f867b9130116c6980a4407bcf605eb4
+BASE_COMMIT: 6b625093b2fd39fba9a26c2073a849e97411caa4
+CORE_COMMIT: f47c852bbfb48f9561c693b533a9df120f7ca708
+DELIVERY_COMMIT: 807af102224299628fc162a6f082ddaeefd46e24
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G5_V1_COMPATIBILITY_REPORT.md
+REPORT_SHA256: 65430972a3cbc6fc77272914585773acdfdccadc38b50f5b8c9fd3ac8248f5dd
+BRANCH: codex/core-prisma-foundation
+VALIDATION: baseline and G4 Prisma generate PASS; build PASS with zero TypeScript errors; migration deploy 5/5 and 6/6; V1 tests 249/249 in both; baseline-pass/G4-fail count zero; all 12 new Core models and all 8 existing models present
+ENVIRONMENT: two disposable PostgreSQL 16 containers with tmpfs/no volume; both removed; two detached temporary worktrees removed and pruned
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G5. Do not merge, run G6/G7, or apply migration to any data-bearing database without a separate approved instruction and owner decision.

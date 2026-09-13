@@ -1,0 +1,27 @@
+BEGIN
+INSERT 0 1
+ pg_sleep
+----------
+
+(1 row)
+
+COMMIT
+ pg_sleep
+----------
+
+(1 row)
+
+psql:/tmp/concurrency-session-b.sql:10: ERROR:  23505: duplicate key value violates unique constraint "offer_version_published_unique"
+DETAIL:  Key (offer_id)=(offer-concurrent-2) already exists.
+CONTEXT:  SQL statement "UPDATE offer_versions
+         SET publication_status = 'PUBLISHED',
+             published_at = NEW.occurred_at
+       WHERE id = NEW.offer_version_id
+         AND organization_id = NEW.organization_id
+         AND publication_status IN ('UNPUBLISHED', 'WITHDRAWN')"
+PL/pgSQL function core_apply_publication_projection() line 45 at SQL statement
+SCHEMA NAME:  public
+TABLE NAME:  offer_versions
+CONSTRAINT NAME:  offer_version_published_unique
+LOCATION:  _bt_check_unique, nbtinsert.c:666
+PASS concurrent publication produced one winner and SQLSTATE 23505 for the loser

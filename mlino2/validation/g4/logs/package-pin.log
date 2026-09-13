@@ -1,0 +1,6 @@
+package.json @prisma/client=5.22.0
+package.json prisma=5.22.0
+package-lock root @prisma/client=5.22.0
+package-lock root prisma=5.22.0
+package-lock resolved @prisma/client=5.22.0
+package-lock resolved prisma=5.22.0

@@ -1,0 +1,3 @@
+NAME=/mlino-g4-validation STATUS=running MOUNTS=[] TMPFS={"/var/lib/postgresql/data":""}
+STOP_RESULT=mlino-g4-validation
+CONTAINER_REMAINING_COUNT=0

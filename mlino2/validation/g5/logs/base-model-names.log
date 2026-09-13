@@ -1,0 +1,8 @@
+AdmissionObservability
+CoreEntity
+DomainSignalProducerRegistry
+EventLog
+ExternalWorkspaceLink
+OpportunityCurrentState
+OpportunityInteractionState
+RevenueRecoveryRawAggregate

@@ -1,0 +1,4 @@
+NAME=/mlino-g5-base-db IMAGE=postgres:16-alpine STATUS=running MOUNTS=[] TMPFS={"/var/lib/postgresql/data":""}
+NAME=/mlino-g5-core-db IMAGE=postgres:16-alpine STATUS=running MOUNTS=[] TMPFS={"/var/lib/postgresql/data":""}
+STOPPED=mlino-g5-base-db,mlino-g5-core-db
+G5_CONTAINER_REMAINING_COUNT=0

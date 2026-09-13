@@ -1,0 +1,7 @@
+BASE_MODEL_COUNT=8
+CORE_MODEL_COUNT=20
+EXPECTED_NEW_COUNT=12
+MISSING_EXISTING_COUNT=0
+MISSING_NEW_COUNT=0
+UNEXPECTED_ADDITION_COUNT=0
+NEW_MODELS=Organization,BusinessIdentityClaim,IdentityVerification,Membership,PermissionGrant,BusinessProfile,Capability,Offer,OfferVersion,OfferVersionCapability,Evidence,Publication

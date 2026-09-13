@@ -1,241 +1,3 @@
-// MLINO V1 Core — Prisma Schema
-// مبنا: PHASE_4A_IMPLEMENTATION_DESIGN/02_DATABASE/V1_DATABASE_DESIGN.md
-// وضعیت: Wave 1 — فقط جداول لازم برای FP-01/FP-03 و نوشتن Value Engineها فعال هستند.
-// جداول Projection (OpportunityCurrentState/OpportunityInteractionState/RevenueRecoveryRawAggregate)
-// طرح‌شان اینجا حاضر است اما پیاده‌سازی سرویس آن‌ها به FP-02 (پس از Wave 1) موکول شده.
-
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-enum EntityType {
-  Individual
-  Interaction
-}
-
-enum EventType {
-  OCCURRENCE
-  AMENDMENT
-  RETRACTION
-}
-
-enum ProducerType {
-  external
-  internal
-}
-
-enum ProducerKind {
-  value_engine
-  interaction_layer
-}
-
-enum OpportunityState {
-  ACTIVE
-  EXPIRED
-}
-
-enum InteractionType {
-  SEEN
-  ACKNOWLEDGED
-  DISMISSED
-}
-
-// CCR فیلد «نوع مالکیت» (مصوب مالک محصول، ۵ سپتامبر ۲۰۲۶) —
-// implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_OWNERSHIP_TYPE.md
-// مبنای سیاستی: V1_MINIMUM_AC2_ACCESS_POLICY.md v1.1 (قواعد ۳/۴/۶، §۲.۱، §۴).
-// عمداً فقط یک مقدار: مقادیر INDIVIDUAL و AGGREGATE در V1 تعریف نمی‌شوند —
-// حتی به‌عنوان مقدار غیرفعال — تا از تعمیم زودهنگام در سطح Type جلوگیری شود
-// (همان اشتباه CCR «Evidence Namespace v1.2» که طبق CR-02 رد شد).
-// مسیر آینده: INDIVIDUAL مشروط به R8-a، AGGREGATE مشروط به R8-b — هرکدام CCR جداگانه.
-enum OwnershipType {
-  ORGANIZATIONAL
-}
-
-// CCR «ExternalWorkspaceLink» — مصوب مالک محصول (۱۰ سپتامبر ۲۰۲۶)
-// مرجع: implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_EXTERNAL_WORKSPACE_LINK.md
-// معماری: mlino_book/adr/ADR-0004-workspace-organization-mapping.md
-//
-// نگاشت هویت کسب‌وکار بین V1 و سیستم‌های بیرونی. V1 منبع حقیقت متعارف است؛
-// سیستم بیرونی هیچ ستون مالکیتی نمی‌گیرد و نگاشت فقط اینجا زندگی می‌کند.
-
-// عمداً تک‌مقداری — همان درس CR-02: تعمیم زودهنگام در سطح Type ممنوع.
-// افزودن سیستم بعدی، CCR جداگانه می‌خواهد.
-enum ExternalSystem {
-  CONTENT_STUDIO
-}
-
-// فقط دو حالت. `SUSPENDED` در بازبینی OD-10 حذف شد — حالت گمانه‌ای بدون
-// سناریوی واقعی اضافه نمی‌شود. `REVOKED` نهایی است: وصل دوباره یعنی رکورد جدید.
-enum ExternalLinkStatus {
-  ACTIVE
-  REVOKED
-}
-
-// فهرست بسته (تصمیم OD-10 بند ۴). گسترش این طبقه‌بندی، CCR جداگانه می‌خواهد.
-enum ExternalLinkBasis {
-  MANUAL
-  SYSTEM_MIGRATION
-  ADMIN_ACTION
-  INTEGRATION
-}
-
-// ناوردای هویت تاریخی: ردیف لغوشده هرگز حذف یا بازنویسی نمی‌شود، چون سیستم
-// باید بتواند جواب بدهد «در زمان T این workspace به کدام سازمان وصل بود؟».
-// به همین دلیل هم linkedAt و هم revokedAt ثبت می‌شوند — بدون هر دو، بازه‌ی
-// زمانی هر پیوند مشخص نیست.
-//
-// قید «حداکثر یک پیوند فعال به‌ازای هر workspace» با یک ایندکس یکتای *جزئی*
-// اجبار می‌شود که Prisma بومی بیانش نمی‌کند؛ در همان migration با SQL خام
-// ساخته شده. جزئیات و دلیل: migration 20260910_add_external_workspace_link.
-model ExternalWorkspaceLink {
-  id                  String         @id @default(uuid())
-  organizationId      String         @map("organization_id")
-  system              ExternalSystem
-  externalWorkspaceId String         @map("external_workspace_id")
-
-  status ExternalLinkStatus @default(ACTIVE)
-  basis  ExternalLinkBasis
-
-  linkedAt         DateTime  @map("linked_at")
-  linkedByActorId  String    @map("linked_by_actor_id")
-  revokedAt        DateTime? @map("revoked_at")
-  revokedByActorId String?   @map("revoked_by_actor_id")
-  note             String?
-
-  @@index([organizationId])
-  @@index([system, externalWorkspaceId])
-  @@map("external_workspace_links")
-}
-
-model CoreEntity {
-  id             String   @id @default(uuid())
-  organizationId String   @map("organization_id")
-  entityType     EntityType @map("entity_type")
-  domainTag      String   @map("domain_tag")
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  events         EventLog[] @relation("EventCoreEntities")
-
-  @@index([organizationId, entityType])
-  @@map("core_entities")
-}
-
-model EventLog {
-  id              String       @id @default(uuid())
-  uniqueKey       String       @unique @map("unique_key")
-  eventType       EventType    @map("event_type")
-  eventTime       DateTime     @map("event_time")
-  ingestionTime   DateTime     @default(now()) @map("ingestion_time")
-  sourceRef       String       @map("source_ref")
-  producerType    ProducerType @map("producer_type")
-  producerId      String?      @map("producer_id")
-  kernelVersion   String       @map("kernel_version")
-  confidenceLevel Float        @map("confidence_level")
-  domainTag       String       @map("domain_tag")
-  causalLinks     Json?        @map("causal_links")
-  amendsEventId   String?      @map("amends_event_id")
-  organizationId  String       @map("organization_id")
-  payload         Json
-  // CONTRACT RESOLUTION R5: producer-computed stable business-situation
-  // identity, persisted so a future lookup (FP-02+) can find "the existing
-  // Opportunity for this situation". Nullable — only detection-family
-  // OCCURRENCE candidates carry one; opportunity.interaction Amendments do
-  // not. No uniqueness constraint yet — see
-  // CONTRACT_RESOLUTION/DB_IMPACT_REVIEW.md for why.
-  situationKey    String?      @map("situation_key")
-  // CCR «نوع مالکیت» — فاز ۱ (مصوب): مقدار در مرز Admission پر می‌شود، نه توسط Producer.
-  // Producerها هیچ اطلاعات اضافه‌ای برای این تصمیم ندارند چون تنها مقدار ممکن ORGANIZATIONAL است.
-  // فاز ۲ (با فعال‌شدن INDIVIDUAL): ارسال صریح توسط Producer — نیازمند CCR جدید.
-  ownershipType   OwnershipType @default(ORGANIZATIONAL) @map("ownership_type")
-
-  coreEntities    CoreEntity[] @relation("EventCoreEntities")
-
-  @@index([organizationId, domainTag, eventTime])
-  @@index([amendsEventId])
-  @@index([organizationId, domainTag, situationKey])
-  @@map("event_log")
-}
-
-model AdmissionObservability {
-  id               String   @id @default(uuid())
-  organizationId   String?  @map("organization_id")
-  producerId       String?  @map("producer_id")
-  domainTag        String?  @map("domain_tag")
-  rawPayload       Json     @map("raw_payload")
-  rejectionReason  String   @map("rejection_reason")
-  rejectedAt       DateTime @default(now()) @map("rejected_at")
-
-  @@map("admission_observability")
-}
-
-model DomainSignalProducerRegistry {
-  producerId         String       @id @map("producer_id")
-  producerKind       ProducerKind @map("producer_kind")
-  allowedDomainTags  String[]     @map("allowed_domain_tags")
-  active             Boolean      @default(true)
-  registeredAt       DateTime     @default(now()) @map("registered_at")
-
-  @@map("domain_signal_producer_registry")
-}
-
-// --- جداول Projection — طرح آماده، پیاده‌سازی سرویس در FP-02 (پس از Wave 1) ---
-
-model OpportunityCurrentState {
-  opportunityCorrelationId String            @id @map("opportunity_correlation_id")
-  organizationId           String            @map("organization_id")
-  domainTag                String            @map("domain_tag")
-  state                    OpportunityState
-  materialityScore         Float             @map("materiality_score")
-  materialityBasis         String            @map("materiality_basis")
-  intendedAudience         String            @map("intended_audience")
-  evidenceRefs              Json             @map("evidence_refs")
-  expiresAt                 DateTime?        @map("expires_at")
-  latestEventId              String          @map("latest_event_id")
-  lastComputedAt              DateTime       @map("last_computed_at")
-  // CCR «نوع مالکیت» — Projection این مقدار را از رویداد بنیان‌گذار حمل می‌کند.
-  // مصرف‌کننده‌ی آن، Adapter واقعی AC-2 است (قاعده‌ی ۴ سیاست v1.1).
-  ownershipType              OwnershipType   @default(ORGANIZATIONAL) @map("ownership_type")
-
-  @@index([organizationId, domainTag, state])
-  @@index([organizationId, state, expiresAt])
-  @@map("opportunity_current_state")
-}
-
-model OpportunityInteractionState {
-  opportunityCorrelationId String   @map("opportunity_correlation_id")
-  // PHASE 5A.1 (Q3): renamed from actorCoreEntityId/actor_core_entity_id —
-  // this is an ActorId (FP-03 authorization identity), never a CoreEntityId.
-  // The old name predated the R6 contract correction and, left unfixed here,
-  // would have reintroduced the exact actor/subject conflation R6 removed —
-  // right where it matters most (the actor-state Projection table). Zero
-  // code consumers existed at rename time (schema-only, FP-02 not yet
-  // implemented) — see 03_ACTOR_IDENTITY/ACTOR_IDENTITY_PERSISTENCE_CLOSURE.md.
-  actorId                  String   @map("actor_id")
-  interactionType          InteractionType @map("interaction_type")
-  latestEventId              String @map("latest_event_id")
-  updatedAt                   DateTime @map("updated_at")
-
-  @@id([opportunityCorrelationId, actorId])
-  @@map("opportunity_interaction_state")
-}
-
-model RevenueRecoveryRawAggregate {
-  organizationId String   @map("organization_id")
-  domainTag      String   @map("domain_tag")
-  periodStart    DateTime @map("period_start")
-  periodEnd      DateTime @map("period_end")
-  openCount      Int      @map("open_count")
-  computedAt     DateTime @map("computed_at")
-
-  @@id([organizationId, domainTag, periodStart, periodEnd])
-  @@map("revenue_recovery_raw_aggregate")
-}
-
 enum OrganizationLifecycle {
   ACTIVE
   ARCHIVED
@@ -336,10 +98,10 @@ model Organization {
   archivedByPlatformIdentityRef String?               @map("archived_by_platform_identity_ref") @db.VarChar(255)
   archiveReason                 String?               @map("archive_reason") @db.Text
 
-  archivedByMembership Membership? @relation("OrganizationArchivedByMembership", fields: [archivedByMembershipId, archivedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "organization_archived_by_membership_fk")
+  archivedByMembership OrganizationMembership? @relation("OrganizationArchivedByMembership", fields: [archivedByMembershipId, archivedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "organization_archived_by_membership_fk")
   identityClaims       BusinessIdentityClaim[]   @relation("OrganizationIdentityClaims")
   identityVerifications IdentityVerification[]   @relation("OrganizationIdentityVerifications")
-  memberships          Membership[]  @relation("Memberships")
+  memberships          OrganizationMembership[]  @relation("OrganizationMemberships")
   permissionGrants     PermissionGrant[]         @relation("OrganizationPermissionGrants")
   businessProfiles     BusinessProfile[]         @relation("OrganizationBusinessProfiles")
   capabilities         Capability[]              @relation("OrganizationCapabilities")
@@ -370,7 +132,7 @@ model BusinessIdentityClaim {
   updatedAt                                   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   organization          Organization             @relation("OrganizationIdentityClaims", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "business_identity_claim_organization_fk")
-  submittedByMembership Membership   @relation("ClaimSubmittedByMembership", fields: [submittedByMembershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "claim_submitted_by_membership_fk")
+  submittedByMembership OrganizationMembership   @relation("ClaimSubmittedByMembership", fields: [submittedByMembershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "claim_submitted_by_membership_fk")
   verifications         IdentityVerification[]   @relation("ClaimVerifications")
   businessProfiles      BusinessProfile[]        @relation("BusinessProfileIdentityClaim")
 
@@ -403,7 +165,7 @@ model IdentityVerification {
   @@map("identity_verifications")
 }
 
-model Membership {
+model OrganizationMembership {
   id                                    String           @id @default(uuid()) @db.Text
   organizationId                        String           @map("organization_id") @db.Text
   identityProvider                      String           @map("identity_provider") @db.VarChar(100)
@@ -416,9 +178,9 @@ model Membership {
   revokedByPlatformIdentityRef          String?          @map("revoked_by_platform_identity_ref") @db.VarChar(255)
   revocationReason                      String?          @map("revocation_reason") @db.Text
 
-  organization               Organization             @relation("Memberships", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "membership_organization_fk")
-  revokedByMembership        Membership?  @relation("MembershipRevokedByMembership", fields: [revokedByMembershipId, revokedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "membership_revoked_by_membership_fk")
-  revokedMemberships         Membership[] @relation("MembershipRevokedByMembership")
+  organization               Organization             @relation("OrganizationMemberships", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "membership_organization_fk")
+  revokedByMembership        OrganizationMembership?  @relation("MembershipRevokedByMembership", fields: [revokedByMembershipId, revokedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "membership_revoked_by_membership_fk")
+  revokedMemberships         OrganizationMembership[] @relation("MembershipRevokedByMembership")
   archivedOrganizations      Organization[]           @relation("OrganizationArchivedByMembership")
   submittedIdentityClaims    BusinessIdentityClaim[]  @relation("ClaimSubmittedByMembership")
   receivedPermissionGrants   PermissionGrant[]        @relation("PermissionGrantRecipient")
@@ -431,7 +193,7 @@ model Membership {
   @@unique([id, organizationId], map: "membership_id_organization_unique")
   @@index([organizationId, membershipStatus], map: "membership_organization_status_idx")
   @@index([identityProvider, externalSubject], map: "membership_external_subject_idx")
-  @@map("memberships")
+  @@map("organization_memberships")
 }
 
 model PermissionGrant {
@@ -452,9 +214,9 @@ model PermissionGrant {
   revocationReason                      String?     @map("revocation_reason") @db.Text
 
   organization        Organization            @relation("OrganizationPermissionGrants", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_organization_fk")
-  membership          Membership  @relation("PermissionGrantRecipient", fields: [membershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_membership_fk")
-  grantedByMembership Membership? @relation("PermissionGrantGrantedBy", fields: [grantedByMembershipId, grantedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_granted_by_membership_fk")
-  revokedByMembership Membership? @relation("PermissionGrantRevokedBy", fields: [revokedByMembershipId, revokedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_revoked_by_membership_fk")
+  membership          OrganizationMembership  @relation("PermissionGrantRecipient", fields: [membershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_membership_fk")
+  grantedByMembership OrganizationMembership? @relation("PermissionGrantGrantedBy", fields: [grantedByMembershipId, grantedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_granted_by_membership_fk")
+  revokedByMembership OrganizationMembership? @relation("PermissionGrantRevokedBy", fields: [revokedByMembershipId, revokedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_revoked_by_membership_fk")
 
   @@unique([id, organizationId], map: "permission_grant_id_organization_unique")
   @@index([organizationId, membershipId, grantStatus], map: "permission_grant_member_status_idx")
@@ -514,7 +276,7 @@ model Capability {
   updatedAt                     DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   organization          Organization            @relation("OrganizationCapabilities", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "capability_organization_fk")
-  confirmedByMembership Membership? @relation("CapabilityConfirmedByMembership", fields: [confirmedByMembershipId, confirmedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "capability_confirmed_by_membership_fk")
+  confirmedByMembership OrganizationMembership? @relation("CapabilityConfirmedByMembership", fields: [confirmedByMembershipId, confirmedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "capability_confirmed_by_membership_fk")
   offerVersionLinks     OfferVersionCapability[] @relation("CapabilityOfferVersionLinks")
   evidenceItems         Evidence[]               @relation("EvidenceCapability")
   publicationEvents     Publication[]            @relation("PublicationCapability")
@@ -614,7 +376,7 @@ model Evidence {
   organization          Organization            @relation("OrganizationEvidence", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "evidence_organization_fk")
   capability            Capability?             @relation("EvidenceCapability", fields: [capabilityId, capabilityOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "evidence_capability_fk")
   offerVersion          OfferVersion?           @relation("EvidenceOfferVersion", fields: [offerVersionId, offerVersionOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "evidence_offer_version_fk")
-  confirmedByMembership Membership? @relation("EvidenceConfirmedByMembership", fields: [confirmedByMembershipId, confirmedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "evidence_confirmed_by_membership_fk")
+  confirmedByMembership OrganizationMembership? @relation("EvidenceConfirmedByMembership", fields: [confirmedByMembershipId, confirmedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "evidence_confirmed_by_membership_fk")
 
   @@unique([id, organizationId], map: "evidence_id_organization_unique")
   @@index([organizationId, capabilityId, evidenceStatus, freshUntil], map: "evidence_capability_status_fresh_idx")
@@ -644,7 +406,7 @@ model Publication {
   businessProfile     BusinessProfile?       @relation("PublicationBusinessProfile", fields: [businessProfileId, businessProfileOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_business_profile_fk")
   capability          Capability?            @relation("PublicationCapability", fields: [capabilityId, capabilityOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_capability_fk")
   offerVersion        OfferVersion?          @relation("PublicationOfferVersion", fields: [offerVersionId, offerVersionOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_offer_version_fk")
-  performedByMembership Membership @relation("PublicationPerformedByMembership", fields: [performedByMembershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_performed_by_membership_fk")
+  performedByMembership OrganizationMembership @relation("PublicationPerformedByMembership", fields: [performedByMembershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_performed_by_membership_fk")
 
   @@unique([id, organizationId], map: "publication_id_organization_unique")
   @@index([organizationId, businessProfileId, occurredAt], map: "publication_business_profile_time_idx")

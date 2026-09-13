@@ -1,0 +1,1 @@
+NAME=/mlino-g4-validation STATUS=running MOUNTS=[] TMPFS={"/var/lib/postgresql/data":""}

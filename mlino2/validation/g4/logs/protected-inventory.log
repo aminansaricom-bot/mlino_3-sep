@@ -1,0 +1,153 @@
+Output format is unaligned.
+FK|_EventCoreEntities_A_fkey|c|c
+FK|_EventCoreEntities_B_fkey|c|c
+FK|business_identity_claim_organization_fk|r|r
+FK|business_profile_identity_claim_fk|r|r
+FK|business_profile_organization_fk|r|r
+FK|capability_confirmed_by_membership_fk|r|r
+FK|capability_organization_fk|r|r
+FK|claim_submitted_by_membership_fk|r|r
+FK|evidence_capability_fk|r|r
+FK|evidence_confirmed_by_membership_fk|r|r
+FK|evidence_offer_version_fk|r|r
+FK|evidence_organization_fk|r|r
+FK|identity_verification_claim_fk|r|r
+FK|identity_verification_organization_fk|r|r
+FK|membership_organization_fk|r|r
+FK|membership_revoked_by_membership_fk|r|r
+FK|offer_organization_fk|r|r
+FK|offer_version_capability_capability_fk|r|r
+FK|offer_version_capability_offer_version_fk|r|r
+FK|offer_version_capability_organization_fk|r|r
+FK|offer_version_offer_fk|r|r
+FK|offer_version_organization_fk|r|r
+FK|organization_archived_by_membership_fk|r|r
+FK|permission_grant_granted_by_membership_fk|r|r
+FK|permission_grant_membership_fk|r|r
+FK|permission_grant_organization_fk|r|r
+FK|permission_grant_revoked_by_membership_fk|r|r
+FK|publication_business_profile_fk|r|r
+FK|publication_capability_fk|r|r
+FK|publication_offer_version_fk|r|r
+FK|publication_organization_fk|r|r
+FK|publication_performed_by_membership_fk|r|r
+INDEX|_EventCoreEntities_AB_unique|CREATE UNIQUE INDEX "_EventCoreEntities_AB_unique" ON public."_EventCoreEntities" USING btree ("A", "B")
+INDEX|_EventCoreEntities_B_index|CREATE INDEX "_EventCoreEntities_B_index" ON public."_EventCoreEntities" USING btree ("B")
+INDEX|_prisma_migrations_pkey|CREATE UNIQUE INDEX _prisma_migrations_pkey ON public._prisma_migrations USING btree (id)
+INDEX|admission_observability_pkey|CREATE UNIQUE INDEX admission_observability_pkey ON public.admission_observability USING btree (id)
+INDEX|business_identity_claim_active_identifier_unique|CREATE UNIQUE INDEX business_identity_claim_active_identifier_unique ON public.business_identity_claims USING btree (identifier_type, identifier_value) WHERE (claim_status = ANY (ARRAY['VERIFIED'::"ClaimStatus", 'SUSPENDED'::"ClaimStatus"]))
+INDEX|business_identity_claim_id_organization_unique|CREATE UNIQUE INDEX business_identity_claim_id_organization_unique ON public.business_identity_claims USING btree (id, organization_id)
+INDEX|business_identity_claim_identifier_idx|CREATE INDEX business_identity_claim_identifier_idx ON public.business_identity_claims USING btree (identifier_type, identifier_value)
+INDEX|business_identity_claim_organization_status_idx|CREATE INDEX business_identity_claim_organization_status_idx ON public.business_identity_claims USING btree (organization_id, claim_status)
+INDEX|business_identity_claims_pkey|CREATE UNIQUE INDEX business_identity_claims_pkey ON public.business_identity_claims USING btree (id)
+INDEX|business_profile_claim_unique|CREATE UNIQUE INDEX business_profile_claim_unique ON public.business_profiles USING btree (business_identity_claim_id) WHERE (business_identity_claim_id IS NOT NULL)
+INDEX|business_profile_id_organization_unique|CREATE UNIQUE INDEX business_profile_id_organization_unique ON public.business_profiles USING btree (id, organization_id)
+INDEX|business_profile_organization_lifecycle_idx|CREATE INDEX business_profile_organization_lifecycle_idx ON public.business_profiles USING btree (organization_id, lifecycle_status)
+INDEX|business_profile_publication_location_idx|CREATE INDEX business_profile_publication_location_idx ON public.business_profiles USING btree (publication_status, latitude, longitude)
+INDEX|business_profile_publication_updated_idx|CREATE INDEX business_profile_publication_updated_idx ON public.business_profiles USING btree (organization_id, publication_status, updated_at)
+INDEX|business_profiles_pkey|CREATE UNIQUE INDEX business_profiles_pkey ON public.business_profiles USING btree (id)
+INDEX|capabilities_pkey|CREATE UNIQUE INDEX capabilities_pkey ON public.capabilities USING btree (id)
+INDEX|capability_freshness_idx|CREATE INDEX capability_freshness_idx ON public.capabilities USING btree (organization_id, fresh_until)
+INDEX|capability_id_organization_unique|CREATE UNIQUE INDEX capability_id_organization_unique ON public.capabilities USING btree (id, organization_id)
+INDEX|capability_organization_key_unique|CREATE UNIQUE INDEX capability_organization_key_unique ON public.capabilities USING btree (organization_id, capability_key)
+INDEX|capability_organization_status_audience_idx|CREATE INDEX capability_organization_status_audience_idx ON public.capabilities USING btree (organization_id, capability_status, audience)
+INDEX|capability_publication_category_idx|CREATE INDEX capability_publication_category_idx ON public.capabilities USING btree (organization_id, publication_status, category_key)
+INDEX|core_entities_organization_id_entity_type_idx|CREATE INDEX core_entities_organization_id_entity_type_idx ON public.core_entities USING btree (organization_id, entity_type)
+INDEX|core_entities_pkey|CREATE UNIQUE INDEX core_entities_pkey ON public.core_entities USING btree (id)
+INDEX|domain_signal_producer_registry_pkey|CREATE UNIQUE INDEX domain_signal_producer_registry_pkey ON public.domain_signal_producer_registry USING btree (producer_id)
+INDEX|event_log_amends_event_id_idx|CREATE INDEX event_log_amends_event_id_idx ON public.event_log USING btree (amends_event_id)
+INDEX|event_log_organization_id_domain_tag_event_time_idx|CREATE INDEX event_log_organization_id_domain_tag_event_time_idx ON public.event_log USING btree (organization_id, domain_tag, event_time)
+INDEX|event_log_organization_id_domain_tag_situation_key_idx|CREATE INDEX event_log_organization_id_domain_tag_situation_key_idx ON public.event_log USING btree (organization_id, domain_tag, situation_key)
+INDEX|event_log_pkey|CREATE UNIQUE INDEX event_log_pkey ON public.event_log USING btree (id)
+INDEX|event_log_unique_key_key|CREATE UNIQUE INDEX event_log_unique_key_key ON public.event_log USING btree (unique_key)
+INDEX|evidence_capability_status_fresh_idx|CREATE INDEX evidence_capability_status_fresh_idx ON public.evidence USING btree (organization_id, capability_id, evidence_status, fresh_until)
+INDEX|evidence_id_organization_unique|CREATE UNIQUE INDEX evidence_id_organization_unique ON public.evidence USING btree (id, organization_id)
+INDEX|evidence_offer_version_status_fresh_idx|CREATE INDEX evidence_offer_version_status_fresh_idx ON public.evidence USING btree (organization_id, offer_version_id, evidence_status, fresh_until)
+INDEX|evidence_pkey|CREATE UNIQUE INDEX evidence_pkey ON public.evidence USING btree (id)
+INDEX|evidence_source_confirmation_idx|CREATE INDEX evidence_source_confirmation_idx ON public.evidence USING btree (organization_id, source_kind, confirmation_status)
+INDEX|external_workspace_link_active_unique|CREATE UNIQUE INDEX external_workspace_link_active_unique ON public.external_workspace_links USING btree (system, external_workspace_id) WHERE (status = 'ACTIVE'::"ExternalLinkStatus")
+INDEX|external_workspace_links_organization_id_idx|CREATE INDEX external_workspace_links_organization_id_idx ON public.external_workspace_links USING btree (organization_id)
+INDEX|external_workspace_links_pkey|CREATE UNIQUE INDEX external_workspace_links_pkey ON public.external_workspace_links USING btree (id)
+INDEX|external_workspace_links_system_external_workspace_id_idx|CREATE INDEX external_workspace_links_system_external_workspace_id_idx ON public.external_workspace_links USING btree (system, external_workspace_id)
+INDEX|identity_verification_claim_attempt_unique|CREATE UNIQUE INDEX identity_verification_claim_attempt_unique ON public.identity_verifications USING btree (claim_id, attempt_number)
+INDEX|identity_verification_id_organization_unique|CREATE UNIQUE INDEX identity_verification_id_organization_unique ON public.identity_verifications USING btree (id, organization_id)
+INDEX|identity_verification_organization_status_idx|CREATE INDEX identity_verification_organization_status_idx ON public.identity_verifications USING btree (organization_id, status, started_at)
+INDEX|identity_verifications_pkey|CREATE UNIQUE INDEX identity_verifications_pkey ON public.identity_verifications USING btree (id)
+INDEX|membership_active_subject_unique|CREATE UNIQUE INDEX membership_active_subject_unique ON public.memberships USING btree (organization_id, identity_provider, external_subject) WHERE (membership_status = 'ACTIVE'::"MembershipStatus")
+INDEX|membership_external_subject_idx|CREATE INDEX membership_external_subject_idx ON public.memberships USING btree (identity_provider, external_subject)
+INDEX|membership_id_organization_unique|CREATE UNIQUE INDEX membership_id_organization_unique ON public.memberships USING btree (id, organization_id)
+INDEX|membership_organization_status_idx|CREATE INDEX membership_organization_status_idx ON public.memberships USING btree (organization_id, membership_status)
+INDEX|memberships_pkey|CREATE UNIQUE INDEX memberships_pkey ON public.memberships USING btree (id)
+INDEX|offer_id_organization_unique|CREATE UNIQUE INDEX offer_id_organization_unique ON public.offers USING btree (id, organization_id)
+INDEX|offer_organization_key_unique|CREATE UNIQUE INDEX offer_organization_key_unique ON public.offers USING btree (organization_id, offer_key)
+INDEX|offer_organization_lifecycle_idx|CREATE INDEX offer_organization_lifecycle_idx ON public.offers USING btree (organization_id, lifecycle_status)
+INDEX|offer_version_capability_pk|CREATE UNIQUE INDEX offer_version_capability_pk ON public.offer_version_capabilities USING btree (offer_version_id, capability_id)
+INDEX|offer_version_capability_reverse_idx|CREATE INDEX offer_version_capability_reverse_idx ON public.offer_version_capabilities USING btree (capability_id, offer_version_id)
+INDEX|offer_version_id_organization_unique|CREATE UNIQUE INDEX offer_version_id_organization_unique ON public.offer_versions USING btree (id, organization_id)
+INDEX|offer_version_number_unique|CREATE UNIQUE INDEX offer_version_number_unique ON public.offer_versions USING btree (offer_id, version_number)
+INDEX|offer_version_offer_publication_idx|CREATE INDEX offer_version_offer_publication_idx ON public.offer_versions USING btree (organization_id, offer_id, publication_status)
+INDEX|offer_version_publication_time_idx|CREATE INDEX offer_version_publication_time_idx ON public.offer_versions USING btree (organization_id, publication_status, published_at)
+INDEX|offer_version_published_unique|CREATE UNIQUE INDEX offer_version_published_unique ON public.offer_versions USING btree (offer_id) WHERE (publication_status = 'PUBLISHED'::"PublicationStatus")
+INDEX|offer_version_validity_idx|CREATE INDEX offer_version_validity_idx ON public.offer_versions USING btree (organization_id, valid_from, valid_until)
+INDEX|offer_versions_pkey|CREATE UNIQUE INDEX offer_versions_pkey ON public.offer_versions USING btree (id)
+INDEX|offers_pkey|CREATE UNIQUE INDEX offers_pkey ON public.offers USING btree (id)
+INDEX|opportunity_current_state_organization_id_domain_tag_state_idx|CREATE INDEX opportunity_current_state_organization_id_domain_tag_state_idx ON public.opportunity_current_state USING btree (organization_id, domain_tag, state)
+INDEX|opportunity_current_state_organization_id_state_expires_at_idx|CREATE INDEX opportunity_current_state_organization_id_state_expires_at_idx ON public.opportunity_current_state USING btree (organization_id, state, expires_at)
+INDEX|opportunity_current_state_pkey|CREATE UNIQUE INDEX opportunity_current_state_pkey ON public.opportunity_current_state USING btree (opportunity_correlation_id)
+INDEX|opportunity_interaction_state_pkey|CREATE UNIQUE INDEX opportunity_interaction_state_pkey ON public.opportunity_interaction_state USING btree (opportunity_correlation_id, actor_id)
+INDEX|organization_lifecycle_created_idx|CREATE INDEX organization_lifecycle_created_idx ON public.organizations USING btree (lifecycle_status, created_at)
+INDEX|organizations_pkey|CREATE UNIQUE INDEX organizations_pkey ON public.organizations USING btree (id)
+INDEX|permission_grant_active_unique|CREATE UNIQUE INDEX permission_grant_active_unique ON public.permission_grants USING btree (organization_id, membership_id, permission_key) WHERE (grant_status = 'ACTIVE'::"GrantStatus")
+INDEX|permission_grant_id_organization_unique|CREATE UNIQUE INDEX permission_grant_id_organization_unique ON public.permission_grants USING btree (id, organization_id)
+INDEX|permission_grant_key_status_idx|CREATE INDEX permission_grant_key_status_idx ON public.permission_grants USING btree (organization_id, permission_key, grant_status)
+INDEX|permission_grant_member_status_idx|CREATE INDEX permission_grant_member_status_idx ON public.permission_grants USING btree (organization_id, membership_id, grant_status)
+INDEX|permission_grants_pkey|CREATE UNIQUE INDEX permission_grants_pkey ON public.permission_grants USING btree (id)
+INDEX|publication_actor_time_idx|CREATE INDEX publication_actor_time_idx ON public.publications USING btree (organization_id, performed_by_membership_id, occurred_at)
+INDEX|publication_business_profile_time_idx|CREATE INDEX publication_business_profile_time_idx ON public.publications USING btree (organization_id, business_profile_id, occurred_at)
+INDEX|publication_capability_time_idx|CREATE INDEX publication_capability_time_idx ON public.publications USING btree (organization_id, capability_id, occurred_at)
+INDEX|publication_id_organization_unique|CREATE UNIQUE INDEX publication_id_organization_unique ON public.publications USING btree (id, organization_id)
+INDEX|publication_offer_version_time_idx|CREATE INDEX publication_offer_version_time_idx ON public.publications USING btree (organization_id, offer_version_id, occurred_at)
+INDEX|publications_pkey|CREATE UNIQUE INDEX publications_pkey ON public.publications USING btree (id)
+INDEX|revenue_recovery_raw_aggregate_pkey|CREATE UNIQUE INDEX revenue_recovery_raw_aggregate_pkey ON public.revenue_recovery_raw_aggregate USING btree (organization_id, domain_tag, period_start, period_end)
+CHECK|business_identity_claim_status_audit_check|CHECK ((((claim_status = 'PENDING'::"ClaimStatus") AND (status_changed_by_platform_identity_ref IS NULL) AND (status_change_reason IS NULL) AND (status_changed_at IS NULL) AND (verified_at IS NULL)) OR ((claim_status = ANY (ARRAY['VERIFIED'::"ClaimStatus", 'SUSPENDED'::"ClaimStatus"])) AND (status_changed_by_platform_identity_ref IS NOT NULL) AND (status_change_reason IS NOT NULL) AND (status_changed_at IS NOT NULL) AND (verified_at IS NOT NULL)) OR ((claim_status = 'REJECTED'::"ClaimStatus") AND (status_changed_by_platform_identity_ref IS NOT NULL) AND (status_change_reason IS NOT NULL) AND (status_changed_at IS NOT NULL)) OR ((claim_status = 'EXPIRED'::"ClaimStatus") AND (status_change_reason IS NOT NULL) AND (status_changed_at IS NOT NULL))))
+CHECK|business_profile_claim_pair_check|CHECK ((((business_identity_claim_id IS NULL) AND (business_identity_claim_organization_id IS NULL)) OR ((business_identity_claim_id IS NOT NULL) AND (business_identity_claim_organization_id IS NOT NULL) AND (business_identity_claim_organization_id = organization_id))))
+CHECK|business_profile_revision_check|CHECK (((content_revision >= 1) AND (((publication_status = 'UNPUBLISHED'::"PublicationStatus") AND (published_content_revision IS NULL)) OR ((publication_status = ANY (ARRAY['PUBLISHED'::"PublicationStatus", 'WITHDRAWN'::"PublicationStatus"])) AND ((published_content_revision >= 1) AND (published_content_revision <= content_revision))))))
+CHECK|capability_confirmation_check|CHECK ((((confirmation_status = 'UNCONFIRMED'::"ConfirmationStatus") AND (confirmed_by_membership_id IS NULL) AND (confirmed_by_organization_id IS NULL) AND (confirmed_at IS NULL)) OR ((confirmation_status = 'HUMAN_CONFIRMED'::"ConfirmationStatus") AND (confirmed_by_membership_id IS NOT NULL) AND (confirmed_by_organization_id = organization_id) AND (confirmed_at IS NOT NULL))))
+CHECK|capability_confirmer_pair_check|CHECK ((((confirmed_by_membership_id IS NULL) AND (confirmed_by_organization_id IS NULL)) OR ((confirmed_by_membership_id IS NOT NULL) AND (confirmed_by_organization_id IS NOT NULL) AND (confirmed_by_organization_id = organization_id))))
+CHECK|capability_revision_check|CHECK (((content_revision >= 1) AND (((publication_status = 'UNPUBLISHED'::"PublicationStatus") AND (published_content_revision IS NULL)) OR ((publication_status = ANY (ARRAY['PUBLISHED'::"PublicationStatus", 'WITHDRAWN'::"PublicationStatus"])) AND ((published_content_revision >= 1) AND (published_content_revision <= content_revision))))))
+CHECK|evidence_capability_pair_check|CHECK ((((capability_id IS NULL) AND (capability_organization_id IS NULL)) OR ((capability_id IS NOT NULL) AND (capability_organization_id IS NOT NULL) AND (capability_organization_id = organization_id))))
+CHECK|evidence_confidence_check|CHECK (((confidence IS NULL) OR ((confidence >= (0)::numeric) AND (confidence <= (1)::numeric))))
+CHECK|evidence_confirmation_check|CHECK ((((confirmation_status = 'UNCONFIRMED'::"ConfirmationStatus") AND (confirmed_by_membership_id IS NULL) AND (confirmed_by_organization_id IS NULL) AND (confirmed_at IS NULL)) OR ((confirmation_status = 'HUMAN_CONFIRMED'::"ConfirmationStatus") AND (confirmed_by_membership_id IS NOT NULL) AND (confirmed_by_organization_id = organization_id) AND (confirmed_at IS NOT NULL))))
+CHECK|evidence_confirmer_pair_check|CHECK ((((confirmed_by_membership_id IS NULL) AND (confirmed_by_organization_id IS NULL)) OR ((confirmed_by_membership_id IS NOT NULL) AND (confirmed_by_organization_id IS NOT NULL) AND (confirmed_by_organization_id = organization_id))))
+CHECK|evidence_offer_version_pair_check|CHECK ((((offer_version_id IS NULL) AND (offer_version_organization_id IS NULL)) OR ((offer_version_id IS NOT NULL) AND (offer_version_organization_id IS NOT NULL) AND (offer_version_organization_id = organization_id))))
+CHECK|evidence_owner_xor_check|CHECK ((num_nonnulls(capability_id, offer_version_id) = 1))
+CHECK|identity_verification_decision_audit_check|CHECK ((((status = ANY (ARRAY['PENDING'::"VerificationAttemptStatus", 'UNDER_REVIEW'::"VerificationAttemptStatus"])) AND (reviewed_by_platform_identity_ref IS NULL) AND (decision_reason IS NULL) AND (decided_at IS NULL)) OR ((status = ANY (ARRAY['VERIFIED'::"VerificationAttemptStatus", 'REJECTED'::"VerificationAttemptStatus"])) AND (reviewed_by_platform_identity_ref IS NOT NULL) AND (decision_reason IS NOT NULL) AND (decided_at IS NOT NULL)) OR ((status = 'EXPIRED'::"VerificationAttemptStatus") AND (decision_reason IS NOT NULL) AND (decided_at IS NOT NULL))))
+CHECK|membership_revocation_actor_pair_check|CHECK ((((revoked_by_membership_id IS NULL) AND (revoked_by_organization_id IS NULL)) OR ((revoked_by_membership_id IS NOT NULL) AND (revoked_by_organization_id IS NOT NULL) AND (revoked_by_organization_id = organization_id))))
+CHECK|membership_revocation_audit_check|CHECK ((((membership_status = 'ACTIVE'::"MembershipStatus") AND (revoked_at IS NULL) AND (revoked_by_membership_id IS NULL) AND (revoked_by_platform_identity_ref IS NULL) AND (revocation_reason IS NULL)) OR ((membership_status = 'REVOKED'::"MembershipStatus") AND (revoked_at IS NOT NULL) AND (revocation_reason IS NOT NULL) AND (num_nonnulls(revoked_by_membership_id, revoked_by_platform_identity_ref) = 1))))
+CHECK|offer_version_price_check|CHECK ((((on_request = true) AND (price_amount IS NULL) AND (price_currency IS NULL)) OR ((on_request = false) AND (price_amount IS NOT NULL) AND (price_amount >= (0)::numeric) AND (price_currency IS NOT NULL))))
+CHECK|offer_version_publication_projection_check|CHECK ((((publication_status = 'UNPUBLISHED'::"PublicationStatus") AND (published_at IS NULL)) OR ((publication_status = ANY (ARRAY['PUBLISHED'::"PublicationStatus", 'WITHDRAWN'::"PublicationStatus"])) AND (published_at IS NOT NULL))))
+CHECK|offer_version_validity_check|CHECK (((valid_until IS NULL) OR (valid_until > valid_from)))
+CHECK|organization_archive_actor_pair_check|CHECK ((((archived_by_membership_id IS NULL) AND (archived_by_organization_id IS NULL)) OR ((archived_by_membership_id IS NOT NULL) AND (archived_by_organization_id IS NOT NULL) AND (archived_by_organization_id = id))))
+CHECK|organization_archive_audit_check|CHECK ((((lifecycle_status = 'ACTIVE'::"OrganizationLifecycle") AND (archived_at IS NULL) AND (archived_by_membership_id IS NULL) AND (archived_by_platform_identity_ref IS NULL) AND (archive_reason IS NULL)) OR ((lifecycle_status = 'ARCHIVED'::"OrganizationLifecycle") AND (archived_at IS NOT NULL) AND (archive_reason IS NOT NULL) AND (num_nonnulls(archived_by_membership_id, archived_by_platform_identity_ref) = 1))))
+CHECK|permission_grant_basis_check|CHECK (((((basis_key)::text = 'founding'::text) AND (granted_by_membership_id IS NULL) AND (granted_by_organization_id IS NULL)) OR (((basis_key)::text = 'member_grant'::text) AND (granted_by_membership_id IS NOT NULL) AND (granted_by_organization_id = organization_id))))
+CHECK|permission_grant_grantor_pair_check|CHECK ((((granted_by_membership_id IS NULL) AND (granted_by_organization_id IS NULL)) OR ((granted_by_membership_id IS NOT NULL) AND (granted_by_organization_id IS NOT NULL) AND (granted_by_organization_id = organization_id))))
+CHECK|permission_grant_revocation_audit_check|CHECK ((((grant_status = 'ACTIVE'::"GrantStatus") AND (revoked_at IS NULL) AND (revoked_by_membership_id IS NULL) AND (revoked_by_platform_identity_ref IS NULL) AND (revocation_reason IS NULL)) OR ((grant_status = 'REVOKED'::"GrantStatus") AND (revoked_at IS NOT NULL) AND (revocation_reason IS NOT NULL) AND (num_nonnulls(revoked_by_membership_id, revoked_by_platform_identity_ref) = 1))))
+CHECK|permission_grant_revoker_pair_check|CHECK ((((revoked_by_membership_id IS NULL) AND (revoked_by_organization_id IS NULL)) OR ((revoked_by_membership_id IS NOT NULL) AND (revoked_by_organization_id IS NOT NULL) AND (revoked_by_organization_id = organization_id))))
+CHECK|publication_business_profile_pair_check|CHECK ((((business_profile_id IS NULL) AND (business_profile_organization_id IS NULL)) OR ((business_profile_id IS NOT NULL) AND (business_profile_organization_id IS NOT NULL) AND (business_profile_organization_id = organization_id))))
+CHECK|publication_capability_pair_check|CHECK ((((capability_id IS NULL) AND (capability_organization_id IS NULL)) OR ((capability_id IS NOT NULL) AND (capability_organization_id IS NOT NULL) AND (capability_organization_id = organization_id))))
+CHECK|publication_content_revision_check|CHECK (((((business_profile_id IS NOT NULL) OR (capability_id IS NOT NULL)) AND (content_revision IS NOT NULL) AND (content_revision >= 1)) OR ((offer_version_id IS NOT NULL) AND (content_revision IS NULL))))
+CHECK|publication_offer_version_pair_check|CHECK ((((offer_version_id IS NULL) AND (offer_version_organization_id IS NULL)) OR ((offer_version_id IS NOT NULL) AND (offer_version_organization_id IS NOT NULL) AND (offer_version_organization_id = organization_id))))
+CHECK|publication_target_xor_check|CHECK ((num_nonnulls(business_profile_id, capability_id, offer_version_id) = 1))
+TRIGGER|business_profile_content_revision_before_update|CREATE TRIGGER business_profile_content_revision_before_update BEFORE UPDATE OF name, description, latitude, longitude, address_text, contact_information, links, business_hours, business_identity_claim_id, content_revision ON public.business_profiles FOR EACH ROW EXECUTE FUNCTION core_bump_business_profile_content_revision()
+TRIGGER|business_profile_publication_initial_guard|CREATE TRIGGER business_profile_publication_initial_guard BEFORE INSERT ON public.business_profiles FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection()
+TRIGGER|business_profile_publication_projection_guard|CREATE TRIGGER business_profile_publication_projection_guard BEFORE UPDATE OF publication_status, published_content_revision ON public.business_profiles FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection()
+TRIGGER|capability_content_revision_before_update|CREATE TRIGGER capability_content_revision_before_update BEFORE UPDATE OF name, short_description, category_key, audience, content_revision ON public.capabilities FOR EACH ROW EXECUTE FUNCTION core_bump_capability_content_revision()
+TRIGGER|capability_publication_initial_guard|CREATE TRIGGER capability_publication_initial_guard BEFORE INSERT ON public.capabilities FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection()
+TRIGGER|capability_publication_projection_guard|CREATE TRIGGER capability_publication_projection_guard BEFORE UPDATE OF publication_status, published_content_revision ON public.capabilities FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection()
+TRIGGER|identity_verification_decided_immutable_before_change|CREATE TRIGGER identity_verification_decided_immutable_before_change BEFORE DELETE OR UPDATE ON public.identity_verifications FOR EACH ROW EXECUTE FUNCTION core_enforce_verification_immutability()
+TRIGGER|offer_version_capability_immutable_before_change|CREATE TRIGGER offer_version_capability_immutable_before_change BEFORE INSERT OR DELETE OR UPDATE ON public.offer_version_capabilities FOR EACH ROW EXECUTE FUNCTION core_enforce_offer_version_capability_immutability()
+TRIGGER|offer_version_immutable_before_change|CREATE TRIGGER offer_version_immutable_before_change BEFORE DELETE OR UPDATE ON public.offer_versions FOR EACH ROW EXECUTE FUNCTION core_enforce_offer_version_immutability()
+TRIGGER|offer_version_publication_initial_guard|CREATE TRIGGER offer_version_publication_initial_guard BEFORE INSERT ON public.offer_versions FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection()
+TRIGGER|offer_version_publication_projection_guard|CREATE TRIGGER offer_version_publication_projection_guard BEFORE UPDATE OF publication_status, published_at ON public.offer_versions FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection()
+TRIGGER|publication_apply_projection_after_insert|CREATE TRIGGER publication_apply_projection_after_insert AFTER INSERT ON public.publications FOR EACH ROW EXECUTE FUNCTION core_apply_publication_projection()
+TRIGGER|publication_immutable_before_change|CREATE TRIGGER publication_immutable_before_change BEFORE DELETE OR UPDATE ON public.publications FOR EACH ROW EXECUTE FUNCTION core_reject_publication_mutation()

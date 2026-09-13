@@ -1,0 +1,6 @@
+mlino-g3-postgres-20260913
+CONTAINER_REMAINS=0
+G3_NAMED_VOLUME_REMAINS=0
+PASS disposable container removed; no G3 named volume exists
+VERIFIED_CLEANUP_TARGET=C:\Users\galexy\mlino code\g3-tooling
+TOOLING_REMAINS=False

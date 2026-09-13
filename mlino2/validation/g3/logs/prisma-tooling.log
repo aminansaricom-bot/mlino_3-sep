@@ -1,0 +1,23 @@
+CHECKPOINT_DISABLE=1
+PRISMA_GENERATE_SKIP_AUTOINSTALL=1
+TEMP_GENERATOR_OUTPUT=C:/Users/galexy/mlino code/g3-tooling/generated-client
+prisma                  : 5.22.0
+@prisma/client          : Not found
+Computed binaryTarget   : windows
+Operating System        : win32
+Architecture            : x64
+Node.js                 : v24.18.0
+Query Engine (Node-API) : libquery-engine 605197351a3c8bdd595af2d2a9bc3025bca48ea2 (at ..\..\..\..\mlino code\_PUSH_STAGING\implementation\node_modules\@prisma\engines\query_engine-windows.dll.node)
+Schema Engine           : schema-engine-cli 605197351a3c8bdd595af2d2a9bc3025bca48ea2 (at ..\..\..\..\mlino code\_PUSH_STAGING\implementation\node_modules\@prisma\engines\schema-engine-windows.exe)
+Schema Wasm             : @prisma/prisma-schema-wasm 5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2
+Default Engines Hash    : 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+Studio                  : 0.503.0
+Prisma schema loaded from ..\g3-tooling\core-schema.prisma
+The schema at ..\g3-tooling\core-schema.prisma is valid 🚀
+Prisma schema loaded from ..\g3-tooling\core-schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to .\..\g3-tooling\generated-client in 416ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints

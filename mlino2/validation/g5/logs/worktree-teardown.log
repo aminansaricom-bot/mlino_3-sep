@@ -1,0 +1,30 @@
+BASE_PATH=C:\Users\galexy\AppData\Local\Temp\mlino-g5-base
+CORE_PATH=C:\Users\galexy\AppData\Local\Temp\mlino-g5-core
+BASE_EXISTS_AFTER=False
+CORE_EXISTS_AFTER=False
+---WORKTREES_BEFORE---
+worktree C:/Users/galexy/mlino code/v2-intent-flow
+HEAD f4d326f7d2046eee997dba4198f662c6e5d1e84e
+branch refs/heads/codex/v2-intent-flow-foundation
+
+worktree C:/Users/galexy/AppData/Local/Temp/mlino-g5-base
+HEAD 6b625093b2fd39fba9a26c2073a849e97411caa4
+detached
+
+worktree C:/Users/galexy/AppData/Local/Temp/mlino-g5-core
+HEAD f47c852bbfb48f9561c693b533a9df120f7ca708
+detached
+
+worktree C:/Users/galexy/mlino code/core-prisma-foundation
+HEAD f47c852bbfb48f9561c693b533a9df120f7ca708
+branch refs/heads/codex/core-prisma-foundation
+
+---WORKTREES_AFTER---
+worktree C:/Users/galexy/mlino code/v2-intent-flow
+HEAD f4d326f7d2046eee997dba4198f662c6e5d1e84e
+branch refs/heads/codex/v2-intent-flow-foundation
+
+worktree C:/Users/galexy/mlino code/core-prisma-foundation
+HEAD f47c852bbfb48f9561c693b533a9df120f7ca708
+branch refs/heads/codex/core-prisma-foundation
+

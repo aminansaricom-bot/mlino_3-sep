@@ -1,0 +1,161 @@
+BEGIN
+CREATE FUNCTION
+INSERT 0 1
+INSERT 0 1
+DO
+psql:/tmp/t1-t12.sql:41: NOTICE:  PASS T1 Profile publication at matching revision
+INSERT 0 1
+psql:/tmp/t1-t12.sql:55: NOTICE:  PASS T2 Profile mismatched revision SQLSTATE=P0001
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+DO
+psql:/tmp/t1-t12.sql:87: NOTICE:  PASS T3 all Profile public fields increment revision; stale content hidden
+psql:/tmp/t1-t12.sql:91: NOTICE:  PASS T3 direct Profile revision mutation SQLSTATE=P0001
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+psql:/tmp/t1-t12.sql:97: NOTICE:  PASS T4 Profile published_content_revision guard SQLSTATE=P0001
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+INSERT 0 1
+DO
+psql:/tmp/t1-t12.sql:117: NOTICE:  PASS T5 Profile republished at greater revision
+psql:/tmp/t1-t12.sql:127: NOTICE:  PASS T5 Profile equal revision republish SQLSTATE=P0001
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+psql:/tmp/t1-t12.sql:137: NOTICE:  PASS T5 Profile smaller revision republish SQLSTATE=P0001
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+INSERT 0 3
+INSERT 0 1
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+psql:/tmp/t1-t12.sql:163: NOTICE:  PASS T6 Capability mismatched revision SQLSTATE=P0001
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+DO
+psql:/tmp/t1-t12.sql:186: NOTICE:  PASS T6 Capability publication, revision increment and visibility
+ g3b_expect_error 
+psql:/tmp/t1-t12.sql:191: NOTICE:  PASS T4 Capability published_content_revision guard SQLSTATE=P0001
+------------------
+ 
+(1 row)
+
+INSERT 0 1
+psql:/tmp/t1-t12.sql:210: NOTICE:  PASS T6 Capability republished at greater revision
+DO
+ g3b_expect_error 
+psql:/tmp/t1-t12.sql:219: NOTICE:  PASS T6 Capability equal revision republish SQLSTATE=P0001
+------------------
+ 
+(1 row)
+
+psql:/tmp/t1-t12.sql:228: NOTICE:  PASS T6 Capability smaller revision republish SQLSTATE=P0001
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+psql:/tmp/t1-t12.sql:233: NOTICE:  PASS T4 OfferVersion published_at guard SQLSTATE=P0001
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+psql:/tmp/t1-t12.sql:240: NOTICE:  PASS T7 INSERT link on published OfferVersion SQLSTATE=P0001
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+psql:/tmp/t1-t12.sql:264: NOTICE:  PASS T7 DELETE link on published OfferVersion SQLSTATE=P0001
+
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+DELETE 1
+INSERT 0 1
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+psql:/tmp/t1-t12.sql:289: NOTICE:  PASS T9 UPDATE draft link always rejected SQLSTATE=P0001
+psql:/tmp/t1-t12.sql:291: NOTICE:  PASS T8 draft link INSERT and DELETE
+DO
+psql:/tmp/t1-t12.sql:296: NOTICE:  PASS T10 Publication DELETE SQLSTATE=P0001
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+psql:/tmp/t1-t12.sql:306: NOTICE:  PASS T11 Claim SUSPENDED without platform actor SQLSTATE=23514
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+ g3b_expect_error 
+psql:/tmp/t1-t12.sql:314: NOTICE:  PASS T11 Membership REVOKED without actor SQLSTATE=23514
+------------------
+ 
+(1 row)
+
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+psql:/tmp/t1-t12.sql:324: NOTICE:  PASS T11 Membership REVOKED with two actors SQLSTATE=23514
+
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+psql:/tmp/t1-t12.sql:332: NOTICE:  PASS T11 Grant REVOKED without actor SQLSTATE=23514
+ g3b_expect_error 
+------------------
+ 
+(1 row)
+
+psql:/tmp/t1-t12.sql:342: NOTICE:  PASS T11 Grant REVOKED with two actors SQLSTATE=23514
+DO
+psql:/tmp/t1-t12.sql:384: NOTICE:  PASS T12 exact trigger allow-list (12/12)
+DROP FUNCTION
+COMMIT
