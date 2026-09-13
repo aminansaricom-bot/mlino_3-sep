@@ -1,34 +1,48 @@
-HANDOFF_ID: HANDOFF-20260913-OWNER-APPROVAL-G7
+HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G7-HARD-STOP-REVIEW
 AUTHOR: CLAUDE
-PHASE: G7_OWNER_APPROVED
-STATUS: G7_RELEASED
-REVIEW_VERDICT: The owner approved G7 in direct conversation ("تصویبش کن"): back up mlino-v1-local-db and apply only migration 20260913010000_add_core_foundation. BACKUP_DIR is the guardian default C:\Users\galexy\mlino-backups\ because the owner gave no other path.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_OWNER_APPROVAL_G7_LOCAL_MIGRATION.md
+PHASE: ARCHITECTURE_GUARDIAN_REVIEW_G7_BACKUP_HARD_STOP
+STATUS: G7B_RELEASED
+REVIEW_VERDICT: APPROVED_WITH_FIXES. G7 stopped correctly at its hard stop in the backup step. The state is safe: the database was untouched with five migrations, the sixth was not applied, and no backup file exists. G7b retries G7 from the start with a robust backup method. The owner's G7 approval scope is unchanged and remains valid.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G7_BACKUP_HARD_STOP.md
+REPORT_SHA256: 75738aea5b6b2e70fb516aa1cd5763e40eac35016709c40831b49ddb0ae61357
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - governance record only). main at 0a5b3c0 carries the migration via merge f40a3f5. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-13T16:55:00+03:30
+CODE_COMMIT_SHA: (none by Claude - review only). Core branch head 7aa9b33 (G7 stop evidence bd0e62e). Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-13T17:30:00+03:30
 NEXT_ACTION:
-Give Codex CODEX-20260913-G7-APPLY-CORE-MIGRATION-LOCAL-001 (section 4 of AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G6_MERGE.md) with:
-  OWNER_APPROVAL: G7 approved: back up and apply migration 20260913010000_add_core_foundation to mlino-v1-local-db (recorded: origin/main AI_HANDOFF/CLAUDE_REVIEWS/20260913_OWNER_APPROVAL_G7_LOCAL_MIGRATION.md)
-  BACKUP_DIR: C:\Users\galexy\mlino-backups\
-Preconditions at approval: mlino-v1-local-db is healthy (StartedAt 2026-09-12T21:34:05Z, Restarts 0); mlino-v1-read-api is up; main is 0a5b3c0 with six migrations in the tree; the backup directory does not exist yet.
-Hard stops:
-- The backup or pg_restore --list fails.
-- migrate status shows anything other than exactly one pending migration.
-- Any verification check fails, in which case roll back per CCR section 12.
-Never:
-- run V1 tests on this database, or docker compose build / up --build / down -v
-- rebuild images
-- commit the backup
-- log credentials or row data
+Give Codex CODEX-20260913-G7B-APPLY-CORE-MIGRATION-LOCAL-RETRY-001 (section 4 of the review above). No new owner approval is needed.
+The instruction does:
+1. A fresh pre-state, which must equal g7/logs/pre-table-counts.log.
+2. The robust backup:
+   - B1: mkdir -p the backup directory.
+   - B2: a Gregorian UTC timestamp from date -u.
+   - B3: pg_dump -Fc -f inside the container; never through the host shell.
+   - B4: in-container sha256 plus pg_restore --list.
+   - B5: docker cp to the host, then match the host SHA-256.
+   - B6: remove the temp file inside the container.
+   Any B1-B5 failure is a hard stop.
+3. Then base G7 steps 3-8 unchanged: exactly one pending migration, then migrate deploy, then verification a-f, with rollback per CCR section 12 on failure.
+Evidence goes in mlino2/validation/g7b/; g7 is immutable.
+Still forbidden until G7b closes: docker compose build or up --build on any clone of main.
+Pre-state known from g7 evidence: 10 public tables. Only _prisma_migrations (5 rows) and domain_signal_producer_registry (4 rows) have data, so the practical data risk is low; the backup is still mandatory.
+Verified independently:
+- mlino-v1-local-db is healthy (StartedAt unchanged, Restarts 0).
+- The C:\Users\galexy\mlino-backups directory does not exist, and there are no stray dumps.
+- The g7 commit scope is clean (6 evidence files, the report, an append-only handoff).
+- The evidence holds names and counts only, with no credentials.
+- main, V2 and _PUSH_STAGING are unchanged.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G6-REVIEW
-EXECUTED_INSTRUCTION_ID: Owner direct approval in chat, 2026-09-13
+PREVIOUS_HANDOFF_ID: HANDOFF-20260913-OWNER-APPROVAL-G7
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role; triggered by the owner relaying the G7 hard-stop report)
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as MLINO Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: Fetched; main is 0a5b3c0 and local is clean. docker inspect shows mlino-v1-local-db healthy and not restarted. No database query was made by Claude. The push was guarded on origin/main still being 0a5b3c0.
+HANDOFF_PRECONDITION_CHECK:
+- Fetched and pruned: core is 7aa9b33 and main is 53180d5.
+- Checked the scope diff from b59a2d5.
+- Ran a secret scan of the g7 evidence and read pre-table-counts.log and FAILURE_RECORD.md.
+- Ran docker inspect, and used ls for the backup directory and stray files.
+- The push was guarded on origin/main still being 53180d5.
 
-SCOPE_CONSTRAINT_NOTE: Only the new approval record and the AI_HANDOFF files were added or changed on main. Claude executed no migration, backup or Docker action.
+SCOPE_CONSTRAINT_NOTE: Only the new AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G7_BACKUP_HARD_STOP.md and the AI_HANDOFF files were added or changed on main. Claude ran no Docker, database or backup action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
