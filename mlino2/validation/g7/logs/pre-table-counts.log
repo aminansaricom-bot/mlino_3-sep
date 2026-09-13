@@ -1,0 +1,10 @@
+_EventCoreEntities|0
+_prisma_migrations|5
+admission_observability|0
+core_entities|0
+domain_signal_producer_registry|4
+event_log|0
+external_workspace_links|0
+opportunity_current_state|0
+opportunity_interaction_state|0
+revenue_recovery_raw_aggregate|0
