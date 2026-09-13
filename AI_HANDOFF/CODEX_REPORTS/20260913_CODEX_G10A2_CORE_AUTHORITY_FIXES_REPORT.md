@@ -76,7 +76,7 @@ container با `docker rm -f` حذف شد. مقایسهٔ `volumes-before-final.
 
 - commit کد و آزمون و شواهد اصلی: `edc88464303030843c339820db2b131c49d01490`
 - commit تکمیل شواهد log: `3fb8a0f76006620d2a2dbb2291c186549a621c79`
-- commit گزارش و Handoff: پس از ثبت این فایل ایجاد می‌شود.
+- commit اولیهٔ گزارش و Handoff: `92a3dbfdafa76517819a908f751068295a39dd78`
 
 ## ۹. Remaining risks and open questions
 
