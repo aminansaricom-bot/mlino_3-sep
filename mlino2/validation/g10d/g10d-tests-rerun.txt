@@ -1,0 +1,59 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/core/g10d-offer.spec.ts
+
+FAIL test/core/g10d-offer.spec.ts (6.286 s)
+  G10d Core offer and OfferVersion slice
+    √ offer key conflict, allowlists, and lifecycle or publication fields are not settable (269 ms)
+    √ createVersion numbers versions 1, 2, 3 and concurrent creates get distinct numbers (187 ms)
+    √ price and validity checks map to validation failures (124 ms)
+    √ OfferVersion content cannot be updated or deleted (101 ms)
+    √ capability links work before publication and are blocked after publication or withdrawal (242 ms)
+    √ OfferVersion publication is idempotent, withdrawable and republishable (177 ms)
+    × publishing a second version replaces the first in withdrawal-then-publication order (104 ms)
+    √ S14-A resets confirmation only after a real public change (138 ms)
+    √ W1 and missing offer or publication permissions are denied (226 ms)
+    × concurrent publication of two versions leaves exactly one published without a raw error (98 ms)
+
+  ● G10d Core offer and OfferVersion slice › publishing a second version replaces the first in withdrawal-then-publication order
+
+    CoreDomainError: offer version price is invalid
+
+      11 | export const authorizationDenied = (message = 'authorization denied') => new CoreDomainError('AUTHORIZATION_DENIED', message);
+      12 | export const tenantMismatch = (message = 'tenant boundary rejected') => new CoreDomainError('TENANT_MISMATCH', message);
+    > 13 | export const validationFailed = (message: string) => new CoreDomainError('VALIDATION_FAILED', message);
+         |                                                      ^
+      14 | export const conflict = (message: string) => new CoreDomainError('CONFLICT', message);
+      15 |
+
+      at validationFailed (core/errors.ts:13:54)
+      at mapCoreDatabaseError (core/error-adapter.ts:45:80)
+      at core/offer-service.ts:75:76
+      at Object.<anonymous> (test/core/g10d-offer.spec.ts:133:20)
+
+  ● G10d Core offer and OfferVersion slice › concurrent publication of two versions leaves exactly one published without a raw error
+
+    CoreDomainError: offer version price is invalid
+
+      11 | export const authorizationDenied = (message = 'authorization denied') => new CoreDomainError('AUTHORIZATION_DENIED', message);
+      12 | export const tenantMismatch = (message = 'tenant boundary rejected') => new CoreDomainError('TENANT_MISMATCH', message);
+    > 13 | export const validationFailed = (message: string) => new CoreDomainError('VALIDATION_FAILED', message);
+         |                                                      ^
+      14 | export const conflict = (message: string) => new CoreDomainError('CONFLICT', message);
+      15 |
+
+      at validationFailed (core/errors.ts:13:54)
+      at mapCoreDatabaseError (core/error-adapter.ts:45:80)
+      at core/offer-service.ts:75:76
+      at Object.<anonymous> (test/core/g10d-offer.spec.ts:176:20)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 8 passed, 10 total
+Snapshots:   0 total
+Time:        6.758 s, estimated 9 s
+Ran all test suites matching /test\\core\\g10d-offer.spec.ts/i.
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice

@@ -34,7 +34,7 @@ export class PublicationService {
       const membership = await requireActiveMembership(tx, context);
       const grant = await tx.permissionGrant.findFirst({ where: { organizationId: context.organizationId, membershipId: membership.id, permissionKey: 'publication.manage', grantStatus: 'ACTIVE' }, select: { id: true } });
       if (!grant) throw new CoreDomainError('AUTHORIZATION_DENIED', 'required permission grant missing');
-      if (target === 'OFFER_VERSION') throw validationFailed('OfferVersion publication is outside this slice');
+      if (target === 'OFFER_VERSION') return this.changeOfferVersion(tx, context.organizationId, targetId, reason, eventKind, membership.id, grant.id);
       const row = await this.lockTarget(tx, target, targetId, context.organizationId);
       if (!row) throw validationFailed('publication target not found in organization');
 
@@ -56,6 +56,29 @@ export class PublicationService {
     });
   }
 
+  private async changeOfferVersion(tx: Prisma.TransactionClient, organizationId: string, versionId: string, reason: string, eventKind: 'PUBLISHED' | 'WITHDRAWN', membershipId: string, grantId: string) {
+    const offerRows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`SELECT o.id FROM offers o JOIN offer_versions v ON v.offer_id = o.id AND v.organization_id = o.organization_id WHERE v.id = ${versionId} AND v.organization_id = ${organizationId} FOR UPDATE`);
+    if (offerRows.length !== 1) throw validationFailed('offer version not found in organization');
+    const versionRows = await tx.$queryRaw<Array<{ id: string; offer_id: string; publication_status: string; published_at: Date | null }>>(Prisma.sql`SELECT id, offer_id, publication_status, published_at FROM offer_versions WHERE id = ${versionId} AND organization_id = ${organizationId} FOR UPDATE`);
+    if (versionRows.length !== 1) throw validationFailed('offer version not found in organization');
+    const version = versionRows[0];
+    if (eventKind === 'WITHDRAWN') {
+      if (version.publication_status !== 'PUBLISHED') throw conflict('target is not published');
+      const publication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', versionId, organizationId, 'WITHDRAWN', null, membershipId, grantId, reason) });
+      return { outcome: 'WITHDRAWN' as const, publication };
+    }
+    if (version.publication_status === 'PUBLISHED') return { outcome: 'ALREADY_PUBLISHED' as const, revision: null };
+    const oldRows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`SELECT id FROM offer_versions WHERE offer_id = ${version.offer_id} AND organization_id = ${organizationId} AND id <> ${versionId} AND publication_status = 'PUBLISHED' FOR UPDATE`);
+    if (oldRows.length > 1) throw conflict('multiple published offer versions found');
+    if (oldRows.length === 1) {
+      const withdrawnPublication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', oldRows[0].id, organizationId, 'WITHDRAWN', null, membershipId, grantId, `replaced by ${versionId}`) });
+      const publication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', versionId, organizationId, 'PUBLISHED', null, membershipId, grantId, reason) });
+      return { outcome: 'REPLACED' as const, withdrawnPublication, publication };
+    }
+    const publication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', versionId, organizationId, 'PUBLISHED', null, membershipId, grantId, reason) });
+    return { outcome: 'PUBLISHED' as const, publication };
+  }
+
   private validateTarget(target: PublicationTarget): void {
     if (target !== 'BUSINESS_PROFILE' && target !== 'CAPABILITY' && target !== 'OFFER_VERSION') throw validationFailed('unsupported publication target');
   }
@@ -66,7 +89,7 @@ export class PublicationService {
     return rows[0];
   }
 
-  private publicationData(target: PublicationTarget, id: string, organizationId: string, eventKind: 'PUBLISHED' | 'WITHDRAWN', contentRevision: number, membershipId: string, grantId: string, reason: string) {
+  private publicationData(target: PublicationTarget, id: string, organizationId: string, eventKind: 'PUBLISHED' | 'WITHDRAWN', contentRevision: number | null, membershipId: string, grantId: string, reason: string) {
     const targetFields = target === 'BUSINESS_PROFILE'
       ? { businessProfileId: id, businessProfileOrganizationId: organizationId }
       : target === 'CAPABILITY'

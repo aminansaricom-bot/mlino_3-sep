@@ -1,0 +1,82 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand
+
+PASS test/foundation/opportunity-read/opportunity-read.spec.ts (5.933 s)
+FAIL test/core/g10c-profile-capability.spec.ts
+  ● G10c Core profile, capability and publication slice › publication rejects OfferVersion targets in this slice
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"outcome": "PUBLISHED", "publication": {"businessProfileId": null, "businessProfileOrganizationId": null, "capabilityId": null, "capabilityOrganizationId": null, "contentRevision": null, "eventKind": "PUBLISHED", "gateSnapshot": {"grantId": "c12dbdfd-78b3-4a91-9713-64f6bdc7b1d9", "policyVersion": "core-publication-v1"}, "id": "ac26ac2d-460d-4936-b91e-3d5c3946ecc8", "occurredAt": 2026-09-13T20:33:23.691Z, "offerVersionId": "1bbd61c4-8665-4285-83c3-667eac4abbc6", "offerVersionOrganizationId": "g10c-1789331602212-offer-rejected-9iwoe0", "organizationId": "g10c-1789331602212-offer-rejected-9iwoe0", "performedByMembershipId": "0d086025-67d8-45dc-8da4-49d2981d1d92", "permissionKey": "publication.manage", "reason": "out of slice"}}
+
+      39 |
+      40 | function expectCode(action: Promise<unknown>, code: CoreDomainError['code']) {
+    > 41 |   return expect(action).rejects.toMatchObject({ name: 'CoreDomainError', code });
+         |          ^
+      42 | }
+      43 |
+      44 | describe('G10c Core profile, capability and publication slice', () => {
+
+      at expect (node_modules/expect/build/index.js:113:15)
+      at expectCode (test/core/g10c-profile-capability.spec.ts:41:10)
+      at Object.<anonymous> (test/core/g10c-profile-capability.spec.ts:218:11)
+
+PASS test/value-engines/cancellation/cancellation-detector.spec.ts
+PASS test/core/identity-claim-verification.spec.ts
+PASS test/foundation/business-context.spec.ts
+PASS test/value-engines/capacity/capacity-detector.spec.ts
+PASS test/foundation/opportunity-projection/rebuild-projection.spec.ts
+PASS test/core/core-authority.spec.ts
+PASS test/foundation/recommendation/recommendation-contract.spec.ts
+PASS test/foundation/workspace-link.spec.ts
+PASS test/foundation/event-admission-validation.spec.ts
+PASS test/http/read-api.spec.ts
+PASS test/feed/opportunity-feed.spec.ts
+PASS test/value-engines/followup/followup-detector.spec.ts
+PASS test/foundation/opportunity-projection/situation-lookup.spec.ts
+PASS test/foundation/access-decision/org-membership-ac2-port.spec.ts
+PASS test/foundation/event-admission.spec.ts
+PASS test/foundation/event-admission-concurrency.spec.ts
+PASS test/foundation/ownership-type.spec.ts
+PASS test/foundation/auth-adapter.spec.ts
+PASS test/test-db-guard.spec.ts
+PASS test/briefing/proactive-briefing.spec.ts
+PASS test/foundation/situation-key.spec.ts
+PASS test/core/error-adapter.spec.ts
+PASS test/core/db-guard.spec.ts
+PASS test/core/g10d-offer.spec.ts
+
+Summary of all failing tests
+FAIL test/core/g10c-profile-capability.spec.ts
+  ● G10c Core profile, capability and publication slice › publication rejects OfferVersion targets in this slice
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"outcome": "PUBLISHED", "publication": {"businessProfileId": null, "businessProfileOrganizationId": null, "capabilityId": null, "capabilityOrganizationId": null, "contentRevision": null, "eventKind": "PUBLISHED", "gateSnapshot": {"grantId": "c12dbdfd-78b3-4a91-9713-64f6bdc7b1d9", "policyVersion": "core-publication-v1"}, "id": "ac26ac2d-460d-4936-b91e-3d5c3946ecc8", "occurredAt": 2026-09-13T20:33:23.691Z, "offerVersionId": "1bbd61c4-8665-4285-83c3-667eac4abbc6", "offerVersionOrganizationId": "g10c-1789331602212-offer-rejected-9iwoe0", "organizationId": "g10c-1789331602212-offer-rejected-9iwoe0", "performedByMembershipId": "0d086025-67d8-45dc-8da4-49d2981d1d92", "permissionKey": "publication.manage", "reason": "out of slice"}}
+
+      39 |
+      40 | function expectCode(action: Promise<unknown>, code: CoreDomainError['code']) {
+    > 41 |   return expect(action).rejects.toMatchObject({ name: 'CoreDomainError', code });
+         |          ^
+      42 | }
+      43 |
+      44 | describe('G10c Core profile, capability and publication slice', () => {
+
+      at expect (node_modules/expect/build/index.js:113:15)
+      at expectCode (test/core/g10c-profile-capability.spec.ts:41:10)
+      at Object.<anonymous> (test/core/g10c-profile-capability.spec.ts:218:11)
+
+
+Test Suites: 1 failed, 25 passed, 26 total
+Tests:       1 failed, 336 passed, 337 total
+Snapshots:   0 total
+Time:        34.824 s
+Ran all test suites.
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice

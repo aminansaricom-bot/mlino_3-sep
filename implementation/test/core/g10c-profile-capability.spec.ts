@@ -211,11 +211,11 @@ describe('G10c Core profile, capability and publication slice', () => {
     expect(await prisma.publication.count({ where: { organizationId: a.organizationId, capabilityId: capability.id } })).toBe(countAfterFirst + 3);
   });
 
-  test('publication rejects OfferVersion targets in this slice', async () => {
+  test('publication supports OfferVersion targets in G10d', async () => {
     const a = await newOrganization('offer-rejected');
     const offer = await prisma.offer.create({ data: { organizationId: a.organizationId, offerKey: `${TEST_PREFIX}offer` } });
     const version = await prisma.offerVersion.create({ data: { organizationId: a.organizationId, offerId: offer.id, versionNumber: 1, name: 'Offer', offerShape: 'ITEM', onRequest: true, validFrom: new Date() } });
-    await expectCode(publications.publish(a.context, 'OFFER_VERSION', version.id, 'out of slice'), 'VALIDATION_FAILED');
+    await expect(publications.publish(a.context, 'OFFER_VERSION', version.id, 'offer version publish')).resolves.toMatchObject({ outcome: 'PUBLISHED' });
     await expectCode(publications.publish(a.context, 'UNKNOWN' as unknown as 'BUSINESS_PROFILE', 'missing', 'invalid target'), 'VALIDATION_FAILED');
   });
 
