@@ -29,9 +29,9 @@
 | Caller boundary | ساختن AuthContext معتبر و ارسال فرمان | تعیین organizationId از ورودی کنترل‌شده توسط کاربر |
 | Public read boundary | خواندن projection عمومی منتشرشده برای V2، در مسیر جدا و فقط‌خواندنی | خواندن جدول ماژول یا انتشار دادهٔ داخلی |
 
-این محل پیشنهادی است و انتخاب نهایی محل فیزیکی Repository و Service به S8 وابسته است؛ ADR-0002 مرز repositoryها را مستقل نگه می‌دارد و ADR-0011 مرز Core/Module را حفظ می‌کند.
+طبق تصمیم S8، کد در `implementation/` و در یک پوشهٔ مستقل Core، جدا از `value-engines` قرار می‌گیرد؛ ماژول‌ها فقط از مرز عمومی Service استفاده می‌کنند. ADR-0002 مرز repositoryها را مستقل نگه می‌دارد و ADR-0011 مرز Core/Module را حفظ می‌کند.
 
-هر فرمان با `AuthContext` مفهومی وارد می‌شود: external subject، سازمان انتخاب‌شده، Membership و Grantهای معتبر، و در صورت کنش پلتفرمی platform identity reference.
+هر فرمان با `AuthContext` مفهومی وارد می‌شود: external subject، یک issuer قراردادی برای MVP، سازمان انتخاب‌شده، Membership و Grantهای معتبر، و در صورت کنش پلتفرمی platform identity reference. طبق S2، سازمان انتخاب‌شده فقط وقتی معتبر است که برای همان `identity_provider` و `external_subject` یک Membership با وضعیت `ACTIVE` در همان سازمان وجود داشته باشد؛ در غیر این صورت رد یکنواخت انجام می‌شود.
 
 قاعدهٔ اجباری W1:
 
@@ -39,7 +39,7 @@
 
 الگوی امضای پیشنهادی هر متد repository این است: `method(organizationId, ...)`. هیچ `findUnique({ id })` بدون سازمان مجاز نیست؛ الگوی مجاز `where: { id, organizationId }` یا معادل مرکب آن است. `organizationId` هرگز از body، شناسهٔ موجودیت، nested relation، نام کسب‌وکار یا lookup قابل‌کنترل توسط caller پذیرفته نمی‌شود.
 
-W2 فقط گزینهٔ آینده برای کاهش relationهای تکراری tenant است و انتخاب نشده است.
+طبق S3، W1 به‌صورت قطعی و اجباری باقی می‌ماند؛ W2 به‌عنوان گزینه‌ای علاوه بر W1 پذیرفته نشده و فقط با تصمیم جداگانهٔ آینده قابل طرح است.
 
 W1 و Database دو نقش جدا دارند: FKهای مرکب `(id, organization_id)` و CHECKهای زوج shadow فقط سازگاری درون‌ردیفی را تضمین می‌کنند؛ DB نمی‌داند سازمان ریشه همان سازمان caller است. این بخش فقط با W1 تضمین می‌شود. FK مرکب در حالت `MATCH SIMPLE` با NULL شدن بخشی از کلید می‌تواند بررسی نشود و C6 با CHECKهای جفتی این حفره را می‌بندد؛ این قیود در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:513-584` هستند. تنها خواندن بین‌سازمانی مجاز، public projection جدا و read-only برای V2 است و جزئیات آن به S9 وابسته است.
 
@@ -76,11 +76,11 @@ Membership به external identity provider subject متصل است؛ schema آن
 - Role هرگز منبع permission نیست.
 - platform identity reference با business Membership جایگزین نمی‌شود.
 - Platform طبق ADR-0010 می‌تواند عملیات مجاز را اجرا یا لغو کند، اما authority تازه ایجاد نمی‌کند.
-- Publication همیشه `performed_by_membership_id` می‌خواهد؛ platform ref به‌تنهایی هرگز Publication ایجاد نمی‌کند. این الزام در schema/migration بخش Publication و قیدهای آن در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:626-695` و `:403-490` قابل ردیابی است.
+- Publication همیشه `performed_by_membership_id` می‌خواهد؛ platform ref به‌تنهایی هرگز Publication ایجاد نمی‌کند. این الزام در `origin/main:implementation/prisma/schema.prisma:637` و قیدهای tenant در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:403-490` قابل ردیابی است. طبق S7، `gate_snapshot` باید شناسهٔ Grant به‌کاررفته و نسخهٔ policy را داشته باشد؛ `permission_key`، actor و زمان همان ستون‌های موجود هستند و تکرار نمی‌شوند.
 
 ### تصمیم باز R4 — bootstrap
 
-Schema نشان می‌دهد Organization با شناسهٔ AC-2 ساخته‌شده/تخصیص‌یافته کار می‌کند و grant مؤسس می‌تواند مسیر عادی grantor را دور بزند؛ جزئیات CHECKهای grant در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:658-683` است. این سند مالک تصمیم را نمی‌گیرد:
+Schema نشان می‌دهد Organization با شناسهٔ AC-2 ساخته‌شده/تخصیص‌یافته کار می‌کند و grant مؤسس می‌تواند مسیر عادی grantor را دور بزند؛ جزئیات CHECKهای grant در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:675-683` است. طبق تصمیم R4، AC-2 مالک شناسهٔ سازمان است و Organization، founding Membership و founding Grant در یک transaction و فقط یک‌بار برای هر سازمان ساخته می‌شوند. این سند تصمیم مالک را تغییر نمی‌دهد:
 
 | گزینه | پیامد | توصیهٔ اجرایی برای بررسی مالک |
 |---|---|---|
@@ -88,7 +88,7 @@ Schema نشان می‌دهد Organization با شناسهٔ AC-2 ساخته‌�
 | R4-B: AC-2 bootstrap را انجام دهد | با مالکیت AC-2 هم‌راستا، اما نیازمند قرارداد AC-2 | توصیه: گزینهٔ اصلی بررسی، مشروط به قرارداد رسمی AC-2 |
 | R4-C: ترکیب پلتفرم و AC-2 | انعطاف بیشتر، اما مسیرهای بیشتر و ریسک ambiguity | توصیه نمی‌شود مگر نیاز عملیاتی اثبات شود |
 
-هر گزینه باید این invariantها را حفظ کند: Organization، founding Membership و founding Grant در یک transaction ساخته شوند؛ bootstrap فقط یک‌بار برای هر organization رخ دهد؛ grant مؤسس به‌عنوان مسیر استثنایی و audit‌شده ثبت شود.
+قاعدهٔ مصوب R4 این است: AC-2 با قرارداد رسمی مالک شناسهٔ سازمان است؛ Organization، founding Membership و founding Grant در یک transaction و فقط یک‌بار برای هر سازمان ساخته می‌شوند. DB به‌تنهایی «فقط یک‌بار»، «فقط داخل bootstrap»، نگه‌داشتن کلید توسط grantor، ممنوعیت self-grant یا ممنوعیت revoke آخرین مدیر grant را enforce نمی‌کند؛ Service طبق S10 این قواعد را enforce می‌کند و برای آن‌ها آزمون منفی لازم است.
 
 ### جدول مجوز عملیات
 
@@ -102,7 +102,13 @@ Schema نشان می‌دهد Organization با شناسهٔ AC-2 ساخته‌�
 | publish/withdraw | `publication.manage` | فقط Membership دارای Grant؛ platform ref به‌تنهایی نه |
 | revoke Membership | `membership.revoke` | Membership دارای Grant یا platform ref طبق policy |
 | revoke Permission Grant | `permission_grant.revoke` | Membership دارای Grant یا platform ref طبق policy |
-| تغییر وضعیت Claim | `identity_claim.review` | platform ref برای وضعیت‌های پلتفرمی؛ Membership فقط در مسیر مجاز claim |
+| تغییر وضعیت Claim | `identity_claim.review` | فقط platform ref برای وضعیت‌های پلتفرمی؛ Membership actor این گذارها نیست |
+| ایجاد Membership | `membership.create` | فقط Membership دارای کلید مدیریت عضویت |
+| اعطای Permission Grant | `permission_grant.issue` | Membership دارای کلید مدیریت Grant و خود کلید اعطاشده |
+| ثبت Claim | `identity_claim.submit` | Membership مجاز برای submit |
+| شروع Verification | `identity_verification.start` | Membership مجاز؛ تصمیم نهایی با platform ref |
+| تأیید انسانی Capability | `capability.confirm` | Membership دارای Grant |
+| تأیید انسانی Evidence | `evidence.confirm` | Membership دارای Grant |
 | تصمیم Verification | `identity_verification.decide` | platform identity reference |
 
 این جدول نام نهایی transport یا permission registry را تثبیت نمی‌کند؛ فقط actor boundary لازم را مشخص می‌کند.
@@ -111,17 +117,19 @@ Schema نشان می‌دهد Organization با شناسهٔ AC-2 ساخته‌�
 
 Business Identity Claim از Organization جداست و Verification مالکیت سازمان نیست؛ Claim و Verification در schema به‌ترتیب در `origin/main:implementation/prisma/schema.prisma:356-404` آمده‌اند. Trigger گذار برای Claim وجود ندارد؛ CHECKهای Claim فقط کامل بودن audit فیلدها را کنترل می‌کنند و در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:609-630` دیده می‌شوند. بنابراین ماشین حالت در Service اجرا می‌شود.
 
-پنج وضعیت Claim باید در service با جدول زیر کنترل شوند؛ وضعیت دقیق `REJECTED → VERIFIED` تصمیم مالک است و این سند آن را مجاز فرض نمی‌کند:
+پنج وضعیت Claim باید در Service با جدول زیر کنترل شوند. طبق S11، `REJECTED` و `EXPIRED` پایانی هستند؛ ارسال دوباره باید یک ردیف Claim تازه بسازد و سابقهٔ رد را دست‌نخورده نگه دارد. `REJECTED → VERIFIED` مجاز نیست.
 
 | وضعیت فعلی | وضعیت بعدی پیشنهادی برای تصمیم مالک | actor | transaction |
 |---|---|---|---|
 | PENDING | VERIFIED یا REJECTED | platform ref | تصمیم Verification و Claim در یک transaction |
 | PENDING | EXPIRED | system actor بدون actor انسانی | transaction سیستمی |
+| VERIFIED | EXPIRED | system actor بر اساس `valid_until` | transaction سیستمی؛ تاریخچهٔ Verification حفظ می‌شود |
 | VERIFIED | SUSPENDED | platform ref | همراه audit دلیل |
+| SUSPENDED | EXPIRED | system actor بر اساس `valid_until` | transaction سیستمی |
 | SUSPENDED | VERIFIED یا REJECTED | platform ref | فقط اگر transition تصویب شود |
-| REJECTED | PENDING یا EXPIRED | platform ref/system طبق مسیر | ایجاد attempt تازه؛ نه بازنویسی attempt قبلی |
+| REJECTED | — | هیچ‌کس | پایانی؛ ارسال دوباره Claim تازه می‌سازد |
 
-Verification تصمیم‌گرفته‌شده immutable است؛ trigger آن با پیام `decided identity verification is immutable` در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:828-844` تعریف شده است. Verification decision و Claim transition باید در یک transaction ثبت شوند تا تصمیم و وضعیت Claim از هم جدا نشوند. `attempt_number` باید پیش از درج attempt با ترتیب قفل ثابت یا retry روی unique conflict مدیریت شود؛ قید `claim_attempt_unique` در همان بخش Claim migration ثبت شده است.
+Verification تصمیم‌گرفته‌شده immutable است؛ trigger آن با پیام `decided identity verification is immutable` در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:828-844` تعریف شده است. Verification decision و Claim transition باید در یک transaction ثبت شوند تا تصمیم و وضعیت Claim از هم جدا نشوند. `attempt_number` باید پیش از درج attempt با ترتیب قفل ثابت یا retry روی unique conflict مدیریت شود؛ attempt متعلق به IdentityVerification است و قید `identity_verification_claim_attempt_unique` در `origin/main:implementation/prisma/schema.prisma:401` ثبت شده است. شناسهٔ Claim با وضعیت VERIFIED یا SUSPENDED در برابر conflict یکتایی C1 در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:493-495` قرار دارد؛ خطای `23505` به `IdentifierAlreadyClaimed` نگاشت می‌شود.
 
 ## ۷. تراکنش، revision انتشار و چرخهٔ Offer
 
@@ -150,7 +158,7 @@ OfferVersion از لحظهٔ ایجاد immutable است؛ «ویرایش draft�
 - پس از نخستین انتشار، حتی withdraw نیز `published_at` را تهی نمی‌کند؛ بنابراین پیوندها بعداً قابل تغییر نیستند.
 - Trigger و قفل والد در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:791-826` است.
 
-برای جایگزینی نسخهٔ منتشرشدهٔ Offer، ردیف Offer باید ابتدا با ترتیب قفل ثابت قفل شود؛ سپس در **یک transaction** و دقیقاً به‌ترتیب زیر عمل شود: withdraw نسخهٔ قدیمی، سپس publish نسخهٔ جدید. index یکتای جزئی `offer_version_published_unique` در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:509-513` deferrable نیست، پس دو transaction جدا یا ترتیب معکوس مجاز نیست.
+برای جایگزینی نسخهٔ منتشرشدهٔ Offer، ردیف Offer باید ابتدا با ترتیب قفل ثابت قفل شود؛ سپس در **یک transaction** و دقیقاً به‌ترتیب زیر عمل شود: withdraw نسخهٔ قدیمی، سپس publish نسخهٔ جدید. طبق S4، انتشار تکراری با همان revision نتیجهٔ موفق «قبلاً در revision N منتشر شده» است و ستون تازه یا CCR idempotency لازم نیست. index یکتای جزئی `offer_version_published_unique` در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:509-513` deferrable نیست، پس دو transaction جدا یا ترتیب معکوس مجاز نیست.
 
 Publication منبع حقیقت رخداد انتشار است و projection فقط از insert در Publication نوشته می‌شود. برای OfferVersion، Publication باید `content_revision = NULL` داشته باشد؛ projection آن فقط `publication_status` و `published_at` است، چون OfferVersion ستون `published_content_revision` ندارد. فیلدهای OfferVersion در `origin/main:implementation/prisma/schema.prisma:547-577` و projection آن در migration خطوط `931-1005` است.
 
@@ -213,12 +221,12 @@ SQLSTATE جدا برای هر Trigger فقط یک گزینهٔ CCR آینده ب
 | PermissionGrant | status، زمان و actor revoke |
 | BusinessProfile | `updated_at`, `content_revision`, publication projection |
 | Capability | `updated_at`, `content_revision`, publication projection |
-| Offer | `created_at`, `updated_at` و lifecycle container |
+| Offer | `created_at`, `retired_at` و lifecycle container |
 | OfferVersion | `version_number`, `created_at`, publication projection |
 | Evidence | source/provenance و owner typed |
 | Publication | رخداد append-only، `occurred_at`, actor Membership، permission snapshot |
 
-تاریخچهٔ مستقل فقط برای Verification attemptها و رخدادهای Publication است؛ F4 اجازهٔ ساخت history عمومی برای هر جدول را نمی‌دهد. ستون‌ها و audit checks در `origin/main:implementation/prisma/schema.prisma:327-655` و migration `:609-755` قابل ردیابی‌اند.
+Evidence دقیقاً یک owner typed دارد: `num_nonnulls(capability_id, offer_version_id) = 1` (C7 در `origin/main:implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:587-589`). تاریخچهٔ مستقل فقط برای Verification attemptها و رخدادهای Publication است؛ F4 اجازهٔ ساخت history عمومی برای هر جدول را نمی‌دهد. ستون‌ها و audit checks در `origin/main:implementation/prisma/schema.prisma:327-655` و migration `:609-755` قابل ردیابی‌اند.
 
 ### راهبرد آزمون
 
@@ -237,28 +245,31 @@ SQLSTATE جدا برای هر Trigger فقط یک گزینهٔ CCR آینده ب
 - unique race برای `version_number` و published version
 - rollback کامل در permission، validation و constraint failure
 - tenant isolation و مسیر جداگانهٔ public V2 read
+- آزمون منفی S10 برای self-grant، اعطای کلیدی که grantor ندارد، founding خارج از bootstrap و revoke آخرین grant administrator
+- آزمون منفی S11 برای reuse کردن Claim با وضعیت REJECTED؛ ارسال دوباره باید Claim تازه بسازد
 
 هیچ‌یک از این آزمون‌ها در این سند اجرا نشده‌اند؛ این بخش فقط strategy است.
 
 ## ۱۱. تصمیم‌های باز مالک و ماتریس انطباق ADR
 
-### گزینه‌های باز
+### تصمیم‌های مصوب مالک — DECIDED
 
-| شناسه | گزینه‌ها | پیامدها | یک توصیه برای بررسی مالک |
-|---|---|---|---|
-| S1 | internal service، HTTP، یا هر دو | internal ساده‌تر؛ HTTP مرز روشن‌تر؛ هر دو هزینهٔ بیشتر | ابتدا internal service و HTTP فقط با نیاز اثبات‌شده |
-| S2 | AuthContext با issuer/subject استاندارد یا adapter چندissuer | استاندارد ساده‌تر؛ چندissuer انعطاف بیشتر | یک issuer قراردادشده برای MVP |
-| S3 | W1 یا پذیرش W2 | W1 صریح و امن؛ W2 پیچیدگی کمتر در relationها | W1 اجباری بماند تا تصمیم جداگانه |
-| S4 | idempotency در service یا transport | transport retry ساده‌تر؛ service پوشش عمیق‌تر | idempotency در مرز فرمان publish/withdraw |
-| S5 | platform identity adapter مستقل یا سرویس مرکزی | adapter مستقل قابل‌آزمایش؛ مرکزی یکپارچه‌تر | adapter مستقل با audit صریح |
-| S6 | خطای دامنهٔ پایدار یا payload transport استاندارد | دامنه مستقل‌تر؛ payload مصرف‌کننده‌پسندتر | domain error مستقل و adapter transport جدا |
-| S7 | snapshot حداقلی یا کامل permission در Publication | حداقلی کم‌هزینه؛ کامل audit قوی‌تر | حداقل key، actor و زمان |
-| S8 | جای‌گذاری repository/service در V1 | یک repository انسجام بیشتر؛ boundary جدا استقلال بیشتر | بر اساس ADR-0002 در V1 با boundary داخلی روشن |
-| S9 | public read contract نسخه‌دار یا projection مستقیم | contract امن‌تر؛ projection مستقیم coupling دارد | contract نسخه‌دار و فقط‌خواندنی برای V2 |
-| R4 | پلتفرم، AC-2 یا ترکیب برای bootstrap | به‌ترتیب سادگی، هم‌راستایی، یا انعطاف با پیچیدگی بیشتر | AC-2 با قرارداد رسمی و transaction اتمیک |
+| شناسه | تصمیم مالک | وضعیت |
+|---|---|---|
+| S1 | service داخلی درون‌فرایندی در V1؛ HTTP فقط با نیاز اثبات‌شده و تصمیم جداگانه | DECIDED |
+| S2 | یک issuer قراردادی برای MVP؛ سازمان انتخاب‌شده باید Membership فعال برای همان identity provider و external subject در همان سازمان داشته باشد؛ غیر این‌صورت رد یکنواخت | DECIDED |
+| S3 | W1 طبق D2 قطعی و اجباری است؛ W2 پذیرفته نمی‌شود و فقط با تصمیم آینده قابل طرح است | DECIDED |
+| S4 | ستون تازه و CCR لازم نیست؛ publish تکراری با همان revision نتیجهٔ موفق «قبلاً در revision N منتشر شده» است | DECIDED |
+| S5 | adapter مستقل برای platform identity reference با audit صریح | DECIDED |
+| S6 | خطای domain پایدار و adapter جدا برای transport؛ SQLSTATE جدا فقط در CCR آینده | DECIDED |
+| S7 | `gate_snapshot` شامل شناسهٔ Grant به‌کاررفته و نسخهٔ policy است؛ permission key، actor و زمان ستون‌های موجودند | DECIDED |
+| S8 | کد در `implementation/` و پوشهٔ مستقل Core، جدا از `value-engines`؛ ماژول‌ها فقط از مرز عمومی Service استفاده می‌کنند | DECIDED |
+| S9 | قرارداد نسخه‌دار و فقط‌خواندنی برای V2، فقط روی دادهٔ منتشرشده | DECIDED |
+| R4 | AC-2 مالک شناسهٔ سازمان؛ Organization، founding Membership و founding Grant در یک transaction و فقط یک‌بار برای هر سازمان | DECIDED |
+| S10 | Grant فقط توسط Membership دارای کلید مدیریت Grant و خود کلید اعطاشده؛ self-grant ممنوع؛ founding فقط داخل bootstrap؛ revoke آخرین دارندهٔ کلید مدیریت ممنوع؛ افزودن Membership فقط با کلید مدیریت عضویت؛ فعلاً Service و آزمون منفی، DB guard فقط با CCR آینده | DECIDED |
+| S11 | REJECTED و EXPIRED پایانی‌اند؛ ارسال دوباره Claim تازه می‌سازد و سابقهٔ رد دست‌نخورده می‌ماند | DECIDED |
 
-توصیه‌های این جدول تصمیم مالک نیستند و هیچ‌کدام اجرا نشده‌اند.
-
+این تصمیم‌ها عیناً به‌عنوان تصمیم مالک ثبت شده‌اند و هیچ‌کدام مجوز پیاده‌سازی مستقل ایجاد نمی‌کنند.
 ### ماتریس ADR
 
 | ADR | انطباق |
