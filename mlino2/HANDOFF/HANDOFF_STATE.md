@@ -179,3 +179,22 @@ MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 IMPLEMENTATION_STATUS: UNCHANGED
 NEXT_ACTION: Architecture Guardian independent review of G8. Do not apply further migration, rebuild again, remove the pre-g8 tag, modify the database, or begin Core service implementation without a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_SERVICE_LAYER_DESIGN_G9
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G9-CORE-SERVICE-LAYER-DESIGN-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G8_V1_RUNTIME_REBUILD.md
+DECISION: APPROVED_NEXT_STEP — G8 closed; Core Foundation G1-G8 complete
+DELIVERY_COMMIT: dfe6a9f6fd8843ebcb02d6f71ea5cae90e67ddab
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G9_CORE_SERVICE_LAYER_DESIGN_REPORT.md
+REPORT_SHA256: 2c1c78f51a578d42b09b5b30f1773036953525b04bd4168e249776871a2e4a34
+DESIGN_PATH: mlino2/MLINO_CORE_SERVICE_LAYER_DESIGN.md
+SCOPE: DOCUMENT_ONLY
+VALIDATION: Design document created with 11 sections; W1 mandatory; W2 option only; ADR-0009/0010 permission model; same-transaction Publication projection; D6=A; 13-trigger mapping; error model; tmpfs-only test strategy; S1-S9 owner decisions; ADR-0001..0012 matrix
+LIMITATION: git fetch origin failed due unavailable Schannel credentials; local origin/main schema and migration were read successfully; no Docker, database, Prisma or code action performed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+IMPLEMENTATION_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G9. Do not implement services, repositories, APIs, Prisma or Docker without a new approved instruction and owner decisions for open items.
