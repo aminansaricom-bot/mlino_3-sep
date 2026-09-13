@@ -70,3 +70,21 @@ V1_FULL_SUITE_STATUS: NOT_RUN — deferred by the approved G4 instruction to a l
 MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 NEXT_ACTION: Architecture Guardian independent review of G4. Do not run the V1 full suite against the regenerated client, merge, or begin any later gate without a separate approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: V1_COMPATIBILITY_GATE_G5
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G5-V1-COMPATIBILITY-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G4_CORE_SCHEMA_MIGRATION.md@3ef9fe9f0f867b9130116c6980a4407bcf605eb4
+BASE_COMMIT: 6b625093b2fd39fba9a26c2073a849e97411caa4
+CORE_COMMIT: f47c852bbfb48f9561c693b533a9df120f7ca708
+DELIVERY_COMMIT: 807af102224299628fc162a6f082ddaeefd46e24
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G5_V1_COMPATIBILITY_REPORT.md
+REPORT_SHA256: 65430972a3cbc6fc77272914585773acdfdccadc38b50f5b8c9fd3ac8248f5dd
+BRANCH: codex/core-prisma-foundation
+VALIDATION: baseline and G4 Prisma generate PASS; build PASS with zero TypeScript errors; migration deploy 5/5 and 6/6; V1 tests 249/249 in both; baseline-pass/G4-fail count zero; all 12 new Core models and all 8 existing models present
+ENVIRONMENT: two disposable PostgreSQL 16 containers with tmpfs/no volume; both removed; two detached temporary worktrees removed and pruned
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G5. Do not merge, run G6/G7, or apply migration to any data-bearing database without a separate approved instruction and owner decision.
