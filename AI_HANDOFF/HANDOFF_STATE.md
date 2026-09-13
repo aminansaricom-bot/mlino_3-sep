@@ -1,39 +1,37 @@
-HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G10C-REVIEW
+HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G10C2-REVIEW
 AUTHOR: CLAUDE
-PHASE: G10C_REVIEWED_G10C2_RELEASED
+PHASE: G10C2_REVIEWED_G10C3_RELEASED
 STATUS: APPROVED_WITH_FIXES
-REVIEW_VERDICT: G10c (codex/core-g10c-profile-capability; 06f5e91 and dedd015; base main 6a224dd) has a correct publication core:
-- R1: FOR UPDATE on the target row; publish with the current revision; republish only at a higher revision; withdraw with the published revision.
-- S4/E2: ALREADY_PUBLISHED with no insert. S7: exact gate_snapshot grantId.
-- Publication insert only.
-- Profile D6 via an allowlist; S13-A claim link; capability human confirmation.
-Environment clean: live DB untouched; tmpfs; volume lists identical; 25 suites and 322 tests; manifest 5/5; merge-tree bb9287e clean.
-R1-G10c (red): CapabilityService.updatePublicFields passes the caller input straight to Prisma (data: input). A capability.manage holder can set HUMAN_CONFIRMED with any member as confirmer, bypassing capability.confirm and forging the confirmer (ADR-0006/0009). It can also change capabilityKey, capabilityStatus and freshUntil.
-Yellow:
-- Y1: no capability publication tests.
-- Y2: missing-permission tests only for capability.manage.
-- Y3: the "initial guard" test actually tests the projection guard.
-- Y4: non-uniform publish result.
-- Y5: no runtime target validation.
-- Y6: S13-A tested with PENDING only.
-- Y7: an empty name is allowed on profile update.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G10C_PROFILE_CAPABILITY.md
+REVIEW_VERDICT: G10c2 (codex/core-g10c-profile-capability; 4cbdaa9 code/tests; a99e96d docs only) closes R1 and Y2-Y7.
+- R1: assertAllowedKeys on create and update in both services; the forged confirmation/key/status/freshUntil/revision/projection test shows the row unchanged; HUMAN_CONFIRMED is reachable only via confirm().
+- Y2: missing-permission tests.
+- Y3: a real initial-guard test.
+- Y4: uniform outcome results.
+- Y5: runtime target validation.
+- Y6: SUSPENDED/REJECTED/cross-org claim tests.
+- Y7: empty name rejected.
+Environment clean: live DB untouched; tmpfs; volume lists identical; 25 suites and 326 tests; manifest 4/4; merge-tree 2f839fe clean.
+Y1 NOT applied: there is no 'CAPABILITY' publish/withdraw test in the final spec (grep is empty), yet the report claims it was tested. This is the third overclaim in this stream.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G10C2_PROFILE_CAPABILITY_FIXES.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). The G10c branch is at dedd015. main is 6a224dd before this commit. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-14T04:00:00+03:30
-NEXT_ACTION: Relay CODEX-20260914-G10C2-PROFILE-CAPABILITY-FIXES-001 (section 4 of the review), targeting THIS handoff ID and pinned. It stays within the G10c authorization. The G10c merge is blocked until the G10c2 review passes; then a short owner confirmation.
+CODE_COMMIT_SHA: (none - review only). The G10c branch is at a99e96d. main is c9dded7 before this commit. Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-14T04:40:00+03:30
+NEXT_ACTION: Relay CODEX-20260914-G10C3-CAPABILITY-PUBLICATION-TESTS-001 (section 3), targeting THIS handoff ID and pinned.
+- Test-only: an end-to-end capability publication test; a minimal publication-service fix only if a defect is found.
+- The report must correct the G10c2 Y1 claim.
+Then a short review and a short owner confirmation to merge G10c.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G12B-MERGE-G10C
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260914-G10C-CORE-PROFILE-CAPABILITY-SLICE-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G10C-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260914-G10C2-PROFILE-CAPABILITY-FIXES-001
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
 HANDOFF_PRECONDITION_CHECK:
-- Fetched; the G10c branch is at dedd015 with merge-base 6a224dd.
-- Scope and secret scan; read all three services, the adapter diff and the spec line by line.
-- Initial/rerun/full test logs, volume before/after; manifest 5/5.
-- Live DB counts and read-api image; read-only merge-tree.
+- Fetched; the first fetch hit a DNS failure, then ls-remote confirmed main at c9dded7. The G10c branch is at a99e96d.
+- Scope; read the code/test diff; grepped the final spec for CAPABILITY.
+- a99e96d --stat is docs only.
+- Test logs, volume before/after; manifest 4/4; live DB and read-api; merge-tree.
 
 SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main. No credential, Docker write, database write or Codex-branch action.
 
