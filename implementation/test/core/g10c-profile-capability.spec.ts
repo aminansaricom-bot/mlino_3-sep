@@ -167,6 +167,50 @@ describe('G10c Core profile, capability and publication slice', () => {
     expect(await prisma.publication.count({ where: { organizationId: a.organizationId, businessProfileId: profile.id } })).toBe(4);
   });
 
+  test('capability publication covers publish, idempotency, republish, withdraw and re-publish', async () => {
+    const a = await newOrganization('capability-publication');
+    const capability = await capabilities.create(a.context, {
+      organizationId: a.organizationId,
+      capabilityKey: 'capability-publication',
+      name: 'Publishable capability',
+      categoryKey: 'test',
+      audience: CapabilityAudience.CUSTOMER_FACING,
+    });
+    const first = await publications.publish(a.context, 'CAPABILITY', capability.id, 'publish capability');
+    expect(first.outcome).toBe('PUBLISHED');
+    if (first.outcome !== 'PUBLISHED') throw new Error('expected capability publication');
+    const grant = await prisma.permissionGrant.findFirstOrThrow({ where: { organizationId: a.organizationId, membershipId: a.membership.id, permissionKey: 'publication.manage', grantStatus: 'ACTIVE' } });
+    expect(first.publication.capabilityId).toBe(capability.id);
+    expect(first.publication.organizationId).toBe(a.organizationId);
+    expect(first.publication.businessProfileId).toBeNull();
+    expect(first.publication.offerVersionId).toBeNull();
+    expect(first.publication.gateSnapshot).toMatchObject({ grantId: grant.id, policyVersion: 'core-publication-v1' });
+    const published = await prisma.capability.findUniqueOrThrow({ where: { id_organizationId: { id: capability.id, organizationId: a.organizationId } } });
+    expect(published.publicationStatus).toBe(PublicationStatus.PUBLISHED);
+    expect(published.publishedContentRevision).toBe(published.contentRevision);
+    const countAfterFirst = await prisma.publication.count({ where: { organizationId: a.organizationId, capabilityId: capability.id } });
+
+    await expect(publications.publish(a.context, 'CAPABILITY', capability.id, 'same capability revision')).resolves.toMatchObject({ outcome: 'ALREADY_PUBLISHED', revision: published.contentRevision });
+    expect(await prisma.publication.count({ where: { organizationId: a.organizationId, capabilityId: capability.id } })).toBe(countAfterFirst);
+
+    const edited = await capabilities.updatePublicFields(a.context, capability.id, { shortDescription: 'Updated description' });
+    const republished = await publications.publish(a.context, 'CAPABILITY', capability.id, 'republish capability');
+    expect(republished.outcome).toBe('PUBLISHED');
+    expect(await prisma.publication.count({ where: { organizationId: a.organizationId, capabilityId: capability.id } })).toBe(countAfterFirst + 1);
+    expect(edited.contentRevision).toBeGreaterThan(published.contentRevision);
+
+    const withdrawn = await publications.withdraw(a.context, 'CAPABILITY', capability.id, 'withdraw capability');
+    expect(withdrawn.outcome).toBe('WITHDRAWN');
+    if (withdrawn.outcome !== 'WITHDRAWN') throw new Error('expected capability withdrawal');
+    expect(withdrawn.publication.capabilityId).toBe(capability.id);
+    expect(withdrawn.publication.contentRevision).toBe(edited.contentRevision);
+    await expectCode(publications.withdraw(a.context, 'CAPABILITY', capability.id, 'withdraw again'), 'CONFLICT');
+
+    const publishedAgain = await publications.publish(a.context, 'CAPABILITY', capability.id, 'publish after withdrawal');
+    expect(publishedAgain.outcome).toBe('PUBLISHED');
+    expect(await prisma.publication.count({ where: { organizationId: a.organizationId, capabilityId: capability.id } })).toBe(countAfterFirst + 3);
+  });
+
   test('publication rejects OfferVersion targets in this slice', async () => {
     const a = await newOrganization('offer-rejected');
     const offer = await prisma.offer.create({ data: { organizationId: a.organizationId, offerKey: `${TEST_PREFIX}offer` } });

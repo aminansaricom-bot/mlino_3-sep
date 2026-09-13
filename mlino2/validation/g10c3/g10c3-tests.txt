@@ -1,0 +1,26 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/core/g10c-profile-capability.spec.ts
+
+PASS test/core/g10c-profile-capability.spec.ts (6.236 s)
+  G10c Core profile, capability and publication slice
+    √ profile create starts unpublished and D6 bumps every public field without service projection writes (383 ms)
+    √ projection guard rejects a direct projection update and maps it (104 ms)
+    √ initial guard rejects a direct create with PUBLISHED (76 ms)
+    √ capability key is organization-unique, public updates bump D6, and confirmation is one-way (141 ms)
+    √ S13-A links only a verified same-organization claim and unlink clears both fields (177 ms)
+    √ publication uses current revisions, is idempotent, withdraws, and records the exact gate grant (202 ms)
+    √ capability publication covers publish, idempotency, republish, withdraw and re-publish (195 ms)
+    √ publication rejects OfferVersion targets in this slice (76 ms)
+    √ W1 cross-organization and missing permission are denied (141 ms)
+    √ missing permissions are denied for profile, capability confirmation and publication operations (328 ms)
+    √ S13-A rejects suspended, rejected and cross-organization claims (193 ms)
+    √ profile update rejects an explicitly empty name (73 ms)
+    √ concurrent public edit and publish preserve revision consistency (140 ms)
+    √ error adapter maps the two new named constraints (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       14 passed, 14 total
+Snapshots:   0 total
+Time:        6.8 s
+Ran all test suites matching /test\\core\\g10c-profile-capability.spec.ts/i.
