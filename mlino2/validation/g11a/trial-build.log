@@ -1,0 +1,78 @@
+
+> mlino-v1-core@0.1.0 build
+> tsc -p tsconfig.json
+
+core/auth-context.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'Prisma'.
+core/bootstrap-service.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'PrismaClient'.
+core/bootstrap-service.ts(24,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/error-adapter.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'Prisma'.
+core/error-adapter.ts(5,69): error TS18046: 'error' is of type 'unknown'.
+core/error-adapter.ts(14,24): error TS18046: 'error' is of type 'unknown'.
+core/identity-claim-service.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'PrismaClient'.
+core/identity-claim-service.ts(24,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/identity-claim-service.ts(44,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/identity-claim-service.ts(57,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/identity-verification-service.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'Prisma'.
+core/identity-verification-service.ts(1,18): error TS2305: Module '"@prisma/client"' has no exported member 'PrismaClient'.
+core/identity-verification-service.ts(33,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/identity-verification-service.ts(61,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/identity-verification-service.ts(79,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/membership-service.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'PrismaClient'.
+core/membership-service.ts(20,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/membership-service.ts(36,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/membership-service.ts(56,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/permission-grant-service.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'PrismaClient'.
+core/permission-grant-service.ts(16,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/permission-grant-service.ts(36,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/permission-grant-service.ts(53,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+core/repositories.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'Prisma'.
+core/repositories.ts(1,18): error TS2305: Module '"@prisma/client"' has no exported member 'PrismaClient'.
+foundation/event-admission/event-admission.service.ts(68,56): error TS7006: Parameter 'e' implicitly has an 'any' type.
+foundation/event-log/event-log.service.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'Prisma'.
+foundation/event-log/event-log.service.ts(96,7): error TS18046: 'err' is of type 'unknown'.
+foundation/event-log/event-log.service.ts(97,8): error TS18046: 'err' is of type 'unknown'.
+foundation/opportunity-projection/compute-projection.ts(1,15): error TS2305: Module '"@prisma/client"' has no exported member 'EventLog'.
+foundation/opportunity-projection/rebuild-projection.service.ts(40,41): error TS7006: Parameter 'e' implicitly has an 'any' type.
+foundation/opportunity-projection/rebuild-projection.service.ts(102,43): error TS7006: Parameter 'f' implicitly has an 'any' type.
+foundation/opportunity-projection/rebuild-projection.service.ts(104,36): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+foundation/opportunity-projection/situation-lookup.service.ts(99,68): error TS7006: Parameter 'e' implicitly has an 'any' type.
+foundation/opportunity-projection/situation-lookup.service.ts(106,38): error TS7006: Parameter 'r' implicitly has an 'any' type.
+foundation/opportunity-projection/situation-lookup.service.ts(111,53): error TS7006: Parameter 'e' implicitly has an 'any' type.
+foundation/opportunity-projection/situation-lookup.service.ts(116,29): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+foundation/opportunity-projection/situation-lookup.service.ts(116,34): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+foundation/opportunity-read/access-candidate.ts(40,52): error TS7006: Parameter 'e' implicitly has an 'any' type.
+foundation/opportunity-read/access-candidate.ts(48,53): error TS2339: Property 'coreEntities' does not exist on type '{}'.
+foundation/opportunity-read/access-candidate.ts(48,71): error TS7006: Parameter 'e' implicitly has an 'any' type.
+foundation/opportunity-read/opportunity-read.service.ts(61,34): error TS7006: Parameter 'r' implicitly has an 'any' type.
+foundation/opportunity-read/opportunity-read.service.ts(65,8): error TS7006: Parameter 'r' implicitly has an 'any' type.
+foundation/opportunity-read/opportunity-read.service.ts(74,21): error TS7006: Parameter 'r' implicitly has an 'any' type.
+foundation/opportunity-read/opportunity-read.service.ts(78,66): error TS7006: Parameter 'r' implicitly has an 'any' type.
+foundation/opportunity-read/opportunity-read.service.ts(80,60): error TS7006: Parameter 'r' implicitly has an 'any' type.
+foundation/opportunity-read/opportunity-read.service.ts(139,28): error TS7006: Parameter 'r' implicitly has an 'any' type.
+foundation/prisma-client.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'PrismaClient'.
+foundation/workspace-link/workspace-link.service.ts(16,10): error TS2305: Module '"@prisma/client"' has no exported member 'ExternalLinkBasis'.
+foundation/workspace-link/workspace-link.service.ts(16,29): error TS2305: Module '"@prisma/client"' has no exported member 'ExternalLinkStatus'.
+foundation/workspace-link/workspace-link.service.ts(16,49): error TS2305: Module '"@prisma/client"' has no exported member 'ExternalSystem'.
+foundation/workspace-link/workspace-link.service.ts(187,22): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/core/identity-claim-verification.spec.ts(162,28): error TS7006: Parameter 'attempt' implicitly has an 'any' type.
+test/core/identity-claim-verification.spec.ts(194,26): error TS7006: Parameter 'attempt' implicitly has an 'any' type.
+test/feed/opportunity-feed.spec.ts(182,37): error TS7006: Parameter 'e' implicitly has an 'any' type.
+test/foundation/event-admission-concurrency.spec.ts(96,33): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/foundation/opportunity-projection/rebuild-projection.spec.ts(176,18): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/foundation/opportunity-projection/rebuild-projection.spec.ts(217,30): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/foundation/opportunity-projection/rebuild-projection.spec.ts(281,23): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/foundation/opportunity-projection/rebuild-projection.spec.ts(282,23): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/foundation/workspace-link.spec.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'ExternalLinkStatus'.
+test/value-engines/cancellation/cancellation-detector.spec.ts(138,43): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/cancellation/cancellation-detector.spec.ts(139,42): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/cancellation/cancellation-detector.spec.ts(162,27): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/cancellation/cancellation-detector.spec.ts(201,30): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/cancellation/cancellation-detector.spec.ts(202,30): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/cancellation/cancellation-detector.spec.ts(236,40): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/cancellation/cancellation-detector.spec.ts(237,39): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/capacity/capacity-detector.spec.ts(208,43): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/capacity/capacity-detector.spec.ts(209,42): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/capacity/capacity-detector.spec.ts(234,40): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/followup/followup-detector.spec.ts(144,43): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/followup/followup-detector.spec.ts(145,42): error TS7006: Parameter 'r' implicitly has an 'any' type.
+test/value-engines/followup/followup-detector.spec.ts(170,27): error TS7006: Parameter 'r' implicitly has an 'any' type.

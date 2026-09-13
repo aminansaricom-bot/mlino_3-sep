@@ -1,0 +1,14 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand implementation/test/core
+
+PASS test/core/identity-claim-verification.spec.ts (8.321 s)
+PASS test/core/core-authority.spec.ts
+PASS test/core/error-adapter.spec.ts
+PASS test/core/db-guard.spec.ts
+
+Test Suites: 4 passed, 4 total
+Tests:       50 passed, 50 total
+Snapshots:   0 total
+Time:        12.727 s
+Ran all test suites matching /implementation\\test\\core/i.
