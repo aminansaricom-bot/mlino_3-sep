@@ -88,3 +88,23 @@ ENVIRONMENT: two disposable PostgreSQL 16 containers with tmpfs/no volume; both 
 MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 NEXT_ACTION: Architecture Guardian independent review of G5. Do not merge, run G6/G7, or apply migration to any data-bearing database without a separate approved instruction and owner decision.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_FOUNDATION_MERGE_G6
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G6-MERGE-CORE-INTO-MAIN-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G5_V1_COMPATIBILITY.md@ba9bd139e2637083ce264a3baab951db2b49f0bc
+OWNER_APPROVAL: G6 approved: merge codex/core-prisma-foundation into main
+APPROVAL_RECORD: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_OWNER_APPROVAL_G6_MERGE.md@496ff800672bc81c2830d8fbefe56802d03a4e16
+MAIN_HEAD_BEFORE: 496ff800672bc81c2830d8fbefe56802d03a4e16
+CORE_HEAD: 31c9ec15db525cfc40eea63e4aa38e77ddb246ff
+MERGE_COMMIT: f40a3f5ff68337682ddc659be658807225f25bc1
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G6_MERGE_REPORT.md
+REPORT_SHA256: f59ac192e0225c5e4c6a576c9c8dc85214bcc0446983700d2705ce724fa8138d
+BRANCH: codex/core-prisma-foundation
+VALIDATION: conflict-free merge; implementation diff vs reviewed Core head empty; expected/actual merge file set 145/145 with zero mismatch; Guardian paths unchanged; exactly six migrations; remote main confirmed at merge commit
+TEMP_WORKTREE_STATUS: REMOVED_AND_PRUNED
+DOCKER_DATABASE_STATUS: NOT_TOUCHED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G6. G7 remains forbidden without separate owner approval and instruction; do not run Docker, docker compose, Prisma migration, npm, or connect to any database.
