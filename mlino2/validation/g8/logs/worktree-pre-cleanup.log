@@ -1,0 +1,2 @@
+PRECHECK=BLOCKED
+DETAIL=fatal: detected dubious ownership in repository at 'C:/Users/galexy/AppData/Local/Temp/mlino-g8-main' 'C:/Users/galexy/AppData/Local/Temp/mlino-g8-main/.git' is owned by: 	DESKTOP-520E9A1/CodexSandboxOffline (S-1-5-21-2821398657-3546238625-1732720645-1004) but the current user is: 	DESKTOP-520E9A1/galexy (S-1-5-21-2821398657-3546238625-1732720645-1001) To add an exception for this directory, call:  	git config --global --add safe.directory C:/Users/galexy/AppData/Local/Temp/mlino-g8-main

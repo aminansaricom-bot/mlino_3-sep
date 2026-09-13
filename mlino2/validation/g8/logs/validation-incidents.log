@@ -1,0 +1,8 @@
+ATTEMPT=1
+RESULT=NOT_VALIDATION_EVIDENCE
+CAUSE=Initial inline PowerShell quoting failed while executing the read-only table-count query.
+DATABASE_EFFECT=NONE
+ATTEMPT=2
+RESULT=NOT_VALIDATION_EVIDENCE
+CAUSE=Initial post-state assertion script used incorrect field offsets and migration-name regex.
+DATABASE_EFFECT=NONE (local log parsing only)

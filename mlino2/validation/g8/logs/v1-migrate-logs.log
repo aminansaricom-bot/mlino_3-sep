@@ -1,0 +1,7 @@
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "mlino_v1", schema "public" at "db:5432"
+
+6 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
