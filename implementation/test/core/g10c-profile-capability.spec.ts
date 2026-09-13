@@ -80,7 +80,7 @@ describe('G10c Core profile, capability and publication slice', () => {
     }
   });
 
-  test('direct initial projection write is rejected and mapped', async () => {
+  test('projection guard rejects a direct projection update and maps it', async () => {
     const a = await newOrganization('initial-guard');
     const profile = await profiles.create(a.context, { organizationId: a.organizationId, name: 'Guarded profile' });
     try {
@@ -91,12 +91,35 @@ describe('G10c Core profile, capability and publication slice', () => {
     }
   });
 
+  test('initial guard rejects a direct create with PUBLISHED', async () => {
+    const a = await newOrganization('initial-create-guard');
+    try {
+      await prisma.businessProfile.create({ data: { organizationId: a.organizationId, name: 'Invalid', publicationStatus: PublicationStatus.PUBLISHED } });
+      throw new Error('expected initial projection guard to fail');
+    } catch (error) {
+      expect(mapCoreDatabaseError(error).message).toBe('initial publication state is invalid');
+    }
+  });
+
   test('capability key is organization-unique, public updates bump D6, and confirmation is one-way', async () => {
     const a = await newOrganization('capability');
     const capability = await capabilities.create(a.context, { organizationId: a.organizationId, capabilityKey: 'dental-cleaning', name: 'Cleaning', categoryKey: 'care', audience: CapabilityAudience.CUSTOMER_FACING });
     await expectCode(capabilities.create(a.context, { organizationId: a.organizationId, capabilityKey: 'dental-cleaning', name: 'Duplicate', categoryKey: 'care' }), 'CONFLICT');
     const updated = await capabilities.updatePublicFields(a.context, capability.id, { name: 'Cleaning updated' });
     expect(updated.contentRevision).toBe(2);
+    const beforeForgedUpdate = await prisma.capability.findUniqueOrThrow({ where: { id_organizationId: { id: capability.id, organizationId: a.organizationId } } });
+    await expectCode(capabilities.updatePublicFields(a.context, capability.id, {
+      name: 'forged',
+      confirmationStatus: 'HUMAN_CONFIRMED',
+      confirmedByMembershipId: 'forged',
+      confirmedAt: new Date(),
+      capabilityKey: 'forged',
+      capabilityStatus: 'ACTIVE',
+      freshUntil: new Date(),
+      contentRevision: 99,
+      publicationStatus: 'PUBLISHED',
+    } as unknown as Parameters<CapabilityService['updatePublicFields']>[2]), 'VALIDATION_FAILED');
+    expect(await prisma.capability.findUniqueOrThrow({ where: { id_organizationId: { id: capability.id, organizationId: a.organizationId } } })).toMatchObject({ name: beforeForgedUpdate.name, contentRevision: beforeForgedUpdate.contentRevision, confirmationStatus: 'UNCONFIRMED' });
     const confirmed = await capabilities.confirm(a.context, capability.id);
     expect(confirmed.confirmationStatus).toBe('HUMAN_CONFIRMED');
     expect(confirmed.confirmedByMembershipId).toBe(a.membership.id);
@@ -124,19 +147,21 @@ describe('G10c Core profile, capability and publication slice', () => {
     const a = await newOrganization('publication');
     const profile = await profiles.create(a.context, { organizationId: a.organizationId, name: 'Publishable profile' });
     const first = await publications.publish(a.context, 'BUSINESS_PROFILE', profile.id, 'initial publish');
-    expect((first as { eventKind: string }).eventKind).toBe('PUBLISHED');
+    expect((first as { outcome: string }).outcome).toBe('PUBLISHED');
+    const firstPublication = (first as { publication: { gateSnapshot: unknown } }).publication;
     const afterFirst = await prisma.businessProfile.findUniqueOrThrow({ where: { id_organizationId: { id: profile.id, organizationId: a.organizationId } } });
     expect(afterFirst.publishedContentRevision).toBe(afterFirst.contentRevision);
     const grant = await prisma.permissionGrant.findFirstOrThrow({ where: { organizationId: a.organizationId, membershipId: a.membership.id, permissionKey: 'publication.manage', grantStatus: 'ACTIVE' } });
-    expect(((first as unknown as { gateSnapshot: { grantId: string; policyVersion: string } }).gateSnapshot).grantId).toBe(grant.id);
-    expect(((first as unknown as { gateSnapshot: { grantId: string; policyVersion: string } }).gateSnapshot).policyVersion).toBe('core-publication-v1');
+    expect(((firstPublication.gateSnapshot as { grantId: string; policyVersion: string })).grantId).toBe(grant.id);
+    expect(((firstPublication.gateSnapshot as { grantId: string; policyVersion: string })).policyVersion).toBe('core-publication-v1');
     const countAfterFirst = await prisma.publication.count({ where: { organizationId: a.organizationId, businessProfileId: profile.id } });
     await expect(publications.publish(a.context, 'BUSINESS_PROFILE', profile.id, 'same revision')).resolves.toMatchObject({ outcome: 'ALREADY_PUBLISHED', revision: afterFirst.contentRevision });
     expect(await prisma.publication.count({ where: { organizationId: a.organizationId, businessProfileId: profile.id } })).toBe(countAfterFirst);
     await profiles.updatePublicFields(a.context, profile.id, { description: 'new revision' });
     await publications.publish(a.context, 'BUSINESS_PROFILE', profile.id, 'republish');
     expect(await prisma.publication.count({ where: { organizationId: a.organizationId, businessProfileId: profile.id } })).toBe(2);
-    await publications.withdraw(a.context, 'BUSINESS_PROFILE', profile.id, 'withdraw');
+    const withdrawn = await publications.withdraw(a.context, 'BUSINESS_PROFILE', profile.id, 'withdraw');
+    expect(withdrawn.outcome).toBe('WITHDRAWN');
     await expectCode(publications.withdraw(a.context, 'BUSINESS_PROFILE', profile.id, 'second withdraw'), 'CONFLICT');
     await publications.publish(a.context, 'BUSINESS_PROFILE', profile.id, 'publish again');
     expect(await prisma.publication.count({ where: { organizationId: a.organizationId, businessProfileId: profile.id } })).toBe(4);
@@ -147,6 +172,7 @@ describe('G10c Core profile, capability and publication slice', () => {
     const offer = await prisma.offer.create({ data: { organizationId: a.organizationId, offerKey: `${TEST_PREFIX}offer` } });
     const version = await prisma.offerVersion.create({ data: { organizationId: a.organizationId, offerId: offer.id, versionNumber: 1, name: 'Offer', offerShape: 'ITEM', onRequest: true, validFrom: new Date() } });
     await expectCode(publications.publish(a.context, 'OFFER_VERSION', version.id, 'out of slice'), 'VALIDATION_FAILED');
+    await expectCode(publications.publish(a.context, 'UNKNOWN' as unknown as 'BUSINESS_PROFILE', 'missing', 'invalid target'), 'VALIDATION_FAILED');
   });
 
   test('W1 cross-organization and missing permission are denied', async () => {
@@ -156,6 +182,49 @@ describe('G10c Core profile, capability and publication slice', () => {
     const grant = await prisma.permissionGrant.findFirstOrThrow({ where: { organizationId: a.organizationId, membershipId: a.membership.id, permissionKey: 'capability.manage', grantStatus: 'ACTIVE' } });
     await grants.revoke(a.context, grant.id, 'g10c missing permission');
     await expectCode(capabilities.create(a.context, { organizationId: a.organizationId, capabilityKey: 'blocked', name: 'Blocked', categoryKey: 'test' }), 'AUTHORIZATION_DENIED');
+  });
+
+  test('missing permissions are denied for profile, capability confirmation and publication operations', async () => {
+    const profileOrg = await newOrganization('missing-profile');
+    const profile = await profiles.create(profileOrg.context, { organizationId: profileOrg.organizationId, name: 'Profile' });
+    const profileGrant = await prisma.permissionGrant.findFirstOrThrow({ where: { organizationId: profileOrg.organizationId, membershipId: profileOrg.membership.id, permissionKey: 'business_profile.manage', grantStatus: 'ACTIVE' } });
+    await grants.revoke(profileOrg.context, profileGrant.id, 'remove profile permission');
+    await expectCode(profiles.create(profileOrg.context, { organizationId: profileOrg.organizationId, name: 'blocked' }), 'AUTHORIZATION_DENIED');
+    await expectCode(profiles.updatePublicFields(profileOrg.context, profile.id, { description: 'blocked' }), 'AUTHORIZATION_DENIED');
+    await expectCode(profiles.linkIdentityClaim(profileOrg.context, profile.id, 'missing'), 'AUTHORIZATION_DENIED');
+    await expectCode(profiles.unlinkIdentityClaim(profileOrg.context, profile.id), 'AUTHORIZATION_DENIED');
+
+    const capabilityOrg = await newOrganization('missing-confirm');
+    const capability = await capabilities.create(capabilityOrg.context, { organizationId: capabilityOrg.organizationId, capabilityKey: 'confirm-me', name: 'Confirm me', categoryKey: 'test' });
+    const confirmGrant = await prisma.permissionGrant.findFirstOrThrow({ where: { organizationId: capabilityOrg.organizationId, membershipId: capabilityOrg.membership.id, permissionKey: 'capability.confirm', grantStatus: 'ACTIVE' } });
+    await grants.revoke(capabilityOrg.context, confirmGrant.id, 'remove confirmation permission');
+    await expectCode(capabilities.confirm(capabilityOrg.context, capability.id), 'AUTHORIZATION_DENIED');
+
+    const publicationOrg = await newOrganization('missing-publication');
+    const publicationProfile = await profiles.create(publicationOrg.context, { organizationId: publicationOrg.organizationId, name: 'Publish me' });
+    const publicationGrant = await prisma.permissionGrant.findFirstOrThrow({ where: { organizationId: publicationOrg.organizationId, membershipId: publicationOrg.membership.id, permissionKey: 'publication.manage', grantStatus: 'ACTIVE' } });
+    await grants.revoke(publicationOrg.context, publicationGrant.id, 'remove publication permission');
+    await expectCode(publications.publish(publicationOrg.context, 'BUSINESS_PROFILE', publicationProfile.id, 'blocked'), 'AUTHORIZATION_DENIED');
+    await expectCode(publications.withdraw(publicationOrg.context, 'BUSINESS_PROFILE', publicationProfile.id, 'blocked'), 'AUTHORIZATION_DENIED');
+  });
+
+  test('S13-A rejects suspended, rejected and cross-organization claims', async () => {
+    const a = await newOrganization('claim-statuses');
+    const profile = await profiles.create(a.context, { organizationId: a.organizationId, name: 'Claim profile' });
+    for (const status of ['SUSPENDED', 'REJECTED'] as const) {
+      const claim = await prisma.businessIdentityClaim.create({ data: { organizationId: a.organizationId, identifierType: 'status', identifierValue: `${TEST_PREFIX}${status}`, submittedByMembershipId: a.membership.id, claimStatus: status, statusChangedByPlatformIdentityRef: 'platform:g10c', statusChangeReason: 'test status', statusChangedAt: new Date(), ...(status === 'SUSPENDED' ? { verifiedAt: new Date() } : {}) } });
+      await expectCode(profiles.linkIdentityClaim(a.context, profile.id, claim.id), 'VALIDATION_FAILED');
+    }
+    const b = await newOrganization('claim-other-org');
+    const otherClaim = await prisma.businessIdentityClaim.create({ data: { organizationId: b.organizationId, identifierType: 'other-org', identifierValue: `${TEST_PREFIX}other`, submittedByMembershipId: b.membership.id, claimStatus: 'VERIFIED', verifiedAt: new Date(), statusChangedByPlatformIdentityRef: 'platform:g10c', statusChangeReason: 'test verification', statusChangedAt: new Date() } });
+    await expectCode(profiles.linkIdentityClaim(a.context, profile.id, otherClaim.id), 'VALIDATION_FAILED');
+  });
+
+  test('profile update rejects an explicitly empty name', async () => {
+    const a = await newOrganization('empty-name');
+    const profile = await profiles.create(a.context, { organizationId: a.organizationId, name: 'Original' });
+    await expectCode(profiles.updatePublicFields(a.context, profile.id, { name: '   ' }), 'VALIDATION_FAILED');
+    expect((await prisma.businessProfile.findUniqueOrThrow({ where: { id_organizationId: { id: profile.id, organizationId: a.organizationId } } })).name).toBe('Original');
   });
 
   test('concurrent public edit and publish preserve revision consistency', async () => {

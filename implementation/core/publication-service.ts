@@ -16,10 +16,12 @@ export class PublicationService {
   constructor(private readonly db: PrismaClient) {}
 
   async publish(context: AuthContext, target: PublicationTarget, targetId: string, reason: string) {
+    this.validateTarget(target);
     return this.change(context, target, targetId, reason, 'PUBLISHED');
   }
 
   async withdraw(context: AuthContext, target: PublicationTarget, targetId: string, reason: string) {
+    this.validateTarget(target);
     return this.change(context, target, targetId, reason, 'WITHDRAWN');
   }
 
@@ -47,10 +49,15 @@ export class PublicationService {
       }
 
       const data = this.publicationData(target, targetId, context.organizationId, eventKind, eventKind === 'PUBLISHED' ? revision : publishedRevision!, membership.id, grant.id, reason);
-      return tx.publication.create({ data });
+      const publication = await tx.publication.create({ data });
+      return eventKind === 'PUBLISHED' ? { outcome: 'PUBLISHED' as const, publication } : { outcome: 'WITHDRAWN' as const, publication };
     }).catch((error: unknown) => {
       throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);
     });
+  }
+
+  private validateTarget(target: PublicationTarget): void {
+    if (target !== 'BUSINESS_PROFILE' && target !== 'CAPABILITY' && target !== 'OFFER_VERSION') throw validationFailed('unsupported publication target');
   }
 
   private async lockTarget(tx: Prisma.TransactionClient, target: PublicationTarget, id: string, organizationId: string) {

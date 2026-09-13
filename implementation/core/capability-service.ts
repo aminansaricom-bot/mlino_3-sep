@@ -29,6 +29,7 @@ export class CapabilityService {
     requireNonEmpty(input.capabilityKey, 'capabilityKey');
     requireNonEmpty(input.name, 'name');
     requireNonEmpty(input.categoryKey, 'categoryKey');
+    this.assertAllowedKeys(input, ['organizationId', 'capabilityKey', 'name', 'shortDescription', 'categoryKey', 'audience']);
     return this.db.$transaction(async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'capability.manage');
@@ -50,6 +51,7 @@ export class CapabilityService {
   async updatePublicFields(context: AuthContext, capabilityId: string, input: CapabilityPublicFields) {
     validateAuthContext(context);
     requireNonEmpty(capabilityId, 'capabilityId');
+    this.assertAllowedKeys(input, ['name', 'shortDescription', 'categoryKey', 'audience']);
     if (Object.keys(input).length === 0) throw validationFailed('at least one public field is required');
     return this.db.$transaction(async (tx) => {
       await lockOrganization(tx, context.organizationId);
@@ -78,5 +80,10 @@ export class CapabilityService {
     }).catch((error: unknown) => {
       throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);
     });
+  }
+
+  private assertAllowedKeys(input: object, allowed: readonly string[]): void {
+    const unknownKeys = Object.keys(input).filter((key) => !allowed.includes(key));
+    if (unknownKeys.length > 0) throw validationFailed(`unknown capability field: ${unknownKeys[0]}`);
   }
 }

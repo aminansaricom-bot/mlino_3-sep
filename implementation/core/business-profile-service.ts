@@ -27,6 +27,7 @@ export class BusinessProfileService {
     validateAuthContext(context);
     requireSameOrganization(context, input.organizationId);
     requireNonEmpty(input.name, 'name');
+    this.assertAllowedKeys(input, ['organizationId', 'name', 'description', 'latitude', 'longitude', 'addressText', 'contactInformation', 'links', 'businessHours']);
     return this.db.$transaction(async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'business_profile.manage');
@@ -39,6 +40,8 @@ export class BusinessProfileService {
   async updatePublicFields(context: AuthContext, profileId: string, input: BusinessProfilePublicFields) {
     validateAuthContext(context);
     requireNonEmpty(profileId, 'profileId');
+    this.assertAllowedKeys(input, ['name', 'description', 'latitude', 'longitude', 'addressText', 'contactInformation', 'links', 'businessHours']);
+    if (input.name !== undefined) requireNonEmpty(input.name, 'name');
     const data = this.publicData(input);
     if (Object.keys(data).length === 0) throw validationFailed('at least one public field is required');
     return this.db.$transaction(async (tx) => {
@@ -104,5 +107,10 @@ export class BusinessProfileService {
     if (input.links !== undefined) data.links = input.links;
     if (input.businessHours !== undefined) data.businessHours = input.businessHours;
     return data;
+  }
+
+  private assertAllowedKeys(input: object, allowed: readonly string[]): void {
+    const unknownKeys = Object.keys(input).filter((key) => !allowed.includes(key));
+    if (unknownKeys.length > 0) throw validationFailed(`unknown business profile field: ${unknownKeys[0]}`);
   }
 }
