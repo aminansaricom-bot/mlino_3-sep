@@ -1,29 +1,35 @@
-HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G9B-STOP-REVIEW
+HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G9B-RUN2-REVIEW
 AUTHOR: CLAUDE
-PHASE: G9B_STOP_REVIEWED_G9B_002_RELEASED
-STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT:
-- Codex's G9b stop was correct. git fetch failed (SEC_E_NO_CREDENTIALS), no fixes were applied, and the design doc is unchanged (6664b986...).
-- Scope was the report plus an append-only handoff (3286e95, ec67c39).
-- The shared refs already held origin/main at e79585b from the Guardian's fetch, but Codex had no way to prove that.
-- New governance rule GW2-P: when fetch fails, Codex may proceed only if all three checks pass on a pinned review commit and SHA-256 (cat-file, ancestor of origin/main, sha256 of git show). Otherwise it stops.
-- Credentials, token files and git config are never touched.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G9B_GW2_FETCH_STOP.md
+PHASE: G9B_RUN2_REVIEWED_OWNER_DECISIONS_PENDING
+STATUS: APPROVED_WITH_FIXES
+REVIEW_VERDICT: The G9b Run2 design (4b69fdc6..., codex 0159971/645f6e2) closes the G9 red items R1-R3 and mostly R6. GW2-P passed for both references and the migration hash is corrected. All 10 trigger messages in the error table match the migration.
+Remaining gap is authority creation (R5/S10). The permission table omits these operations:
+- create Membership
+- issue Grant
+- submit Claim
+- start Verification
+- human-confirm Capability/Evidence
+There is no anti-escalation rule, and the DB does not enforce founding-once, grantor-holds-key or no self-grant.
+Also:
+- Membership is wrongly shown as a claim status actor.
+- REJECTED->PENDING wipes the claim audit (S11).
+- Evidence exactly-one (C7) was not actually added.
+- Offer has no updated_at.
+- Three citations are wrong.
+- S3 is framed as W1-or-W2, but W1 is fixed by D2.
+The minor fixes F1-F9 go into G9c together with the owner decisions.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G9B_RUN2_DESIGN_FIXES.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). The Codex core branch is at ec67c39. main is e79585b before this commit. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-13T17:50:00+03:30
-NEXT_ACTION: Give Codex CODEX-20260913-G9B-CORE-SERVICE-LAYER-DESIGN-FIXES-002 (section 3 of the review).
-- G9 review pin: e79585ba3431b662fd32819a57f92bd88b3c855d, sha256 35def705...32c7.
-- The pin for this review is relayed with the instruction.
-- The report goes to ..._G9B_CORE_SERVICE_LAYER_DESIGN_FIXES_RUN2_REPORT.md.
-Owner (optional): restore Codex's Git credential access so that plain GW2 works again.
+CODE_COMMIT_SHA: (none - review only). The Codex core branch is at 645f6e2. main is 59322dc before this commit. Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-13T18:20:00+03:30
+NEXT_ACTION: The owner decides S1-S11 and R4; section 4 of the review gives Guardian recommendations. The Guardian then issues CODEX-20260913-G9C-CORE-SERVICE-LAYER-OWNER-DECISIONS-001, pinned, to record the decisions and apply F1-F9 (document only). Codex waits until then.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G9-REVIEW
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing the CODEX-20260913-G9B-CORE-SERVICE-LAYER-DESIGN-FIXES-001 stop
+PREVIOUS_HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G9B-STOP-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260913-G9B-CORE-SERVICE-LAYER-DESIGN-FIXES-002
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as MLINO Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: Fetched; core is at ec67c39. Checked the diff scope, the report and design hashes, the origin/main reflog, the remote and credential config (read only), and the pinned sha256 of the G9 review at e79585b.
+HANDOFF_PRECONDITION_CHECK: Fetched; core is at 645f6e2 and the scope is 3 allowed files with no deletions in the handoff or earlier reports. diff --check is clean. I checked the report and design hashes and re-verified the GW2-P pins. Every design claim was checked against schema.prisma:327-655 and the migration (403-1009).
 
 SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main. No credential, Docker, database or Codex-branch action.
 
