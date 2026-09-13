@@ -58,7 +58,13 @@ export class CapabilityService {
       await requireMembershipPermission(tx, context, 'capability.manage');
       const capability = await tx.capability.findUnique({ where: { id_organizationId: { id: capabilityId, organizationId: context.organizationId } } });
       if (!capability) throw validationFailed('capability not found in organization');
-      return tx.capability.update({ where: { id_organizationId: { id: capabilityId, organizationId: context.organizationId } }, data: input });
+      const changed = (Object.keys(input) as Array<keyof CapabilityPublicFields>).some((key) => input[key] !== undefined && !samePublicValue(input[key], capability[key]));
+      return tx.capability.update({
+        where: { id_organizationId: { id: capabilityId, organizationId: context.organizationId } },
+        data: changed && capability.confirmationStatus === 'HUMAN_CONFIRMED'
+          ? { ...input, confirmationStatus: 'UNCONFIRMED', confirmedByMembershipId: null, confirmedByOrganizationId: null, confirmedAt: null }
+          : input,
+      });
     }).catch((error: unknown) => {
       throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);
     });
@@ -86,4 +92,10 @@ export class CapabilityService {
     const unknownKeys = Object.keys(input).filter((key) => !allowed.includes(key));
     if (unknownKeys.length > 0) throw validationFailed(`unknown capability field: ${unknownKeys[0]}`);
   }
+}
+
+function samePublicValue(left: unknown, right: unknown): boolean {
+  if (left === right) return true;
+  if (left === null || right === null || left === undefined || right === undefined) return false;
+  return JSON.stringify(left) === JSON.stringify(right);
 }

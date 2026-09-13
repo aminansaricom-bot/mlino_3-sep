@@ -1,0 +1,107 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/core/g10d-offer.spec.ts
+
+FAIL test/core/g10d-offer.spec.ts (8.971 s)
+  G10d Core offer and OfferVersion slice
+    × offer key conflict, allowlists, and lifecycle or publication fields are not settable (244 ms)
+    × createVersion numbers versions 1, 2, 3 and concurrent creates get distinct numbers (93 ms)
+    × price and validity checks map to validation failures (104 ms)
+    √ OfferVersion content cannot be updated or deleted (108 ms)
+    √ capability links work before publication and are blocked after publication or withdrawal (284 ms)
+    √ OfferVersion publication is idempotent, withdrawable and republishable (193 ms)
+    × publishing a second version replaces the first in withdrawal-then-publication order (109 ms)
+    √ S14-A resets confirmation only after a real public change (151 ms)
+    √ W1 and missing offer or publication permissions are denied (259 ms)
+    × concurrent publication of two versions leaves exactly one published without a raw error (112 ms)
+
+  ● G10d Core offer and OfferVersion slice › offer key conflict, allowlists, and lifecycle or publication fields are not settable
+
+    CoreDomainError: Core operation failed
+
+      58 |   if (code === 'P2000') return validationFailed('Core value exceeds its database limit');
+      59 |   if (code === 'P0001') return validationFailed('Core invariant rejected the operation');
+    > 60 |   return new CoreDomainError('INTERNAL_ERROR', 'Core operation failed');
+         |          ^
+      61 | }
+      62 |
+
+      at mapCoreDatabaseError (core/error-adapter.ts:60:10)
+      at core/offer-service.ts:75:76
+      at Object.<anonymous> (test/core/g10d-offer.spec.ts:65:21)
+
+  ● G10d Core offer and OfferVersion slice › createVersion numbers versions 1, 2, 3 and concurrent creates get distinct numbers
+
+    CoreDomainError: Core operation failed
+
+      58 |   if (code === 'P2000') return validationFailed('Core value exceeds its database limit');
+      59 |   if (code === 'P0001') return validationFailed('Core invariant rejected the operation');
+    > 60 |   return new CoreDomainError('INTERNAL_ERROR', 'Core operation failed');
+         |          ^
+      61 | }
+      62 |
+
+      at mapCoreDatabaseError (core/error-adapter.ts:60:10)
+      at core/offer-service.ts:75:76
+      at Object.<anonymous> (test/core/g10d-offer.spec.ts:73:19)
+
+  ● G10d Core offer and OfferVersion slice › price and validity checks map to validation failures
+
+    expect(received).rejects.toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "code": "VALIDATION_FAILED",
+    +   "code": "INTERNAL_ERROR",
+        "name": "CoreDomainError",
+      }
+
+      39 |
+      40 | function expectCode(action: Promise<unknown>, code: CoreDomainError['code']) {
+    > 41 |   return expect(action).rejects.toMatchObject({ name: 'CoreDomainError', code });
+         |                                 ^
+      42 | }
+      43 |
+      44 | async function createOfferFixture(label: string) {
+
+      at Object.toMatchObject (node_modules/expect/build/index.js:218:22)
+      at expectCode (test/core/g10d-offer.spec.ts:41:33)
+      at Object.<anonymous> (test/core/g10d-offer.spec.ts:83:11)
+
+  ● G10d Core offer and OfferVersion slice › publishing a second version replaces the first in withdrawal-then-publication order
+
+    CoreDomainError: Core operation failed
+
+      58 |   if (code === 'P2000') return validationFailed('Core value exceeds its database limit');
+      59 |   if (code === 'P0001') return validationFailed('Core invariant rejected the operation');
+    > 60 |   return new CoreDomainError('INTERNAL_ERROR', 'Core operation failed');
+         |          ^
+      61 | }
+      62 |
+
+      at mapCoreDatabaseError (core/error-adapter.ts:60:10)
+      at core/offer-service.ts:75:76
+      at Object.<anonymous> (test/core/g10d-offer.spec.ts:133:20)
+
+  ● G10d Core offer and OfferVersion slice › concurrent publication of two versions leaves exactly one published without a raw error
+
+    CoreDomainError: Core operation failed
+
+      58 |   if (code === 'P2000') return validationFailed('Core value exceeds its database limit');
+      59 |   if (code === 'P0001') return validationFailed('Core invariant rejected the operation');
+    > 60 |   return new CoreDomainError('INTERNAL_ERROR', 'Core operation failed');
+         |          ^
+      61 | }
+      62 |
+
+      at mapCoreDatabaseError (core/error-adapter.ts:60:10)
+      at core/offer-service.ts:75:76
+      at Object.<anonymous> (test/core/g10d-offer.spec.ts:176:20)
+
+Test Suites: 1 failed, 1 total
+Tests:       5 failed, 5 passed, 10 total
+Snapshots:   0 total
+Time:        11.4 s
+Ran all test suites matching /test\\core\\g10d-offer.spec.ts/i.

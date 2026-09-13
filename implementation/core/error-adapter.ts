@@ -42,12 +42,15 @@ export function mapCoreDatabaseError(error: unknown): CoreDomainError {
   for (const [triggerMessage, domainError] of Object.entries(triggerMessages)) {
     if (message.includes(triggerMessage)) return domainError;
   }
+  if (diagnostic.includes('offer_version_price_check')) return validationFailed('offer version price is invalid');
+  if (diagnostic.includes('offer_version_validity_check')) return validationFailed('offer version validity range is invalid');
   if (code === 'P2002' || code === '23505') {
     if (diagnostic.includes('business_identity_claim_active_identifier_unique') || (diagnostic.includes('identifier_type') && diagnostic.includes('identifier_value'))) return conflict('identifier already claimed');
     if (diagnostic.includes('membership_active_subject_unique')) return conflict('active membership already exists');
     if (diagnostic.includes('permission_grant_active_unique')) return conflict('active permission grant already exists');
     if (diagnostic.includes('business_profile_claim_unique')) return conflict('identity claim already linked to a profile');
     if (diagnostic.includes('capability_organization_key_unique') || (diagnostic.includes('organization_id') && diagnostic.includes('capability_key'))) return conflict('capability key already exists');
+    if (diagnostic.includes('offer_organization_key_unique') || (diagnostic.includes('organization_id') && diagnostic.includes('offer_key'))) return conflict('offer key already exists');
     if (diagnostic.includes('offer_version_number_unique')) return conflict('offer version number already exists');
     if (diagnostic.includes('offer_version_published_unique')) return conflict('another offer version is already published');
     return conflict('unique constraint conflict');

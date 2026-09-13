@@ -1,0 +1,41 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand
+
+PASS test/core/g10c-profile-capability.spec.ts (6.365 s)
+PASS test/foundation/opportunity-read/opportunity-read.spec.ts
+PASS test/core/identity-claim-verification.spec.ts
+PASS test/http/read-api.spec.ts
+PASS test/core/core-authority.spec.ts
+PASS test/core/g10d-offer.spec.ts
+PASS test/foundation/opportunity-projection/rebuild-projection.spec.ts
+PASS test/value-engines/cancellation/cancellation-detector.spec.ts
+PASS test/foundation/opportunity-projection/situation-lookup.spec.ts
+PASS test/value-engines/capacity/capacity-detector.spec.ts
+PASS test/value-engines/followup/followup-detector.spec.ts
+PASS test/foundation/workspace-link.spec.ts
+PASS test/foundation/access-decision/org-membership-ac2-port.spec.ts
+PASS test/foundation/event-admission-concurrency.spec.ts
+PASS test/feed/opportunity-feed.spec.ts
+PASS test/foundation/event-admission-validation.spec.ts
+PASS test/foundation/event-admission.spec.ts
+PASS test/foundation/ownership-type.spec.ts
+PASS test/foundation/business-context.spec.ts
+PASS test/foundation/recommendation/recommendation-contract.spec.ts
+PASS test/test-db-guard.spec.ts
+PASS test/foundation/auth-adapter.spec.ts
+PASS test/core/db-guard.spec.ts
+PASS test/briefing/proactive-briefing.spec.ts
+PASS test/foundation/situation-key.spec.ts
+PASS test/core/error-adapter.spec.ts
+
+Test Suites: 26 passed, 26 total
+Tests:       337 passed, 337 total
+Snapshots:   0 total
+Time:        26.088 s, estimated 35 s
+Ran all test suites.
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice

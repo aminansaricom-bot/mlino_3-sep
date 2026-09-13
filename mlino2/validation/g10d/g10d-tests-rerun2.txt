@@ -1,0 +1,27 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/core/g10d-offer.spec.ts
+
+PASS test/core/g10d-offer.spec.ts (6.02 s)
+  G10d Core offer and OfferVersion slice
+    √ offer key conflict, allowlists, and lifecycle or publication fields are not settable (266 ms)
+    √ createVersion numbers versions 1, 2, 3 and concurrent creates get distinct numbers (194 ms)
+    √ price and validity checks map to validation failures (122 ms)
+    √ OfferVersion content cannot be updated or deleted (102 ms)
+    √ capability links work before publication and are blocked after publication or withdrawal (251 ms)
+    √ OfferVersion publication is idempotent, withdrawable and republishable (201 ms)
+    √ publishing a second version replaces the first in withdrawal-then-publication order (161 ms)
+    √ S14-A resets confirmation only after a real public change (161 ms)
+    √ W1 and missing offer or publication permissions are denied (240 ms)
+    √ concurrent publication of two versions leaves exactly one published without a raw error (183 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       10 passed, 10 total
+Snapshots:   0 total
+Time:        6.529 s, estimated 7 s
+Ran all test suites matching /test\\core\\g10d-offer.spec.ts/i.
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice
