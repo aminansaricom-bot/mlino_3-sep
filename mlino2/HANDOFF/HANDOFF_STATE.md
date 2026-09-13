@@ -337,3 +337,22 @@ MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 PUSH_STAGING_STATUS: UNTOUCHED
 NEXT_ACTION: Architecture Guardian independent review of G10B. Do not start G10C or modify schema/migrations/API before a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_CLAIM_VERIFICATION_G10B2
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G10B2-CLAIM-VERIFICATION-FIXES-001
+REVIEW_REFERENCE: pinned G10B review b52f1493823c394f052d103dbf48d68c8036ab1d
+DECISION: APPROVED_WITH_FIXES
+SCOPE: CODE — G10b stale-attempt and runtime-validation fixes only
+CODE_COMMITS: cfe376fbdf0fe97f2b0192154a4b99e4cbffd6ed, f4d11352925e2946b7fab6518acbf44317061764
+REPORT_COMMIT: 139449cf85e1dba863635dd682e8e79745969941
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G10B2_CLAIM_VERIFICATION_FIXES_REPORT.md
+REPORT_SHA256: b54ba61f3c0f34ce7a5f59167d1aa430379d02dc784ee44a3e69b04f8f45888d
+VALIDATION: PASS — fetch failed with SEC_E_NO_CREDENTIALS; GW2-P passed; six migrations, build, 4 Core suites/50 tests and 23 suites/299 full V1 tests passed on disposable tmpfs PostgreSQL:5499; volume set unchanged; container removed
+LIMITATION: no credentials, token, git config or credential helper changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian independent review of G10B2. Do not start G10C or modify schema/migrations/API before a new approved instruction.
