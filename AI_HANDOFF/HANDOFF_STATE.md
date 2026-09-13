@@ -1,38 +1,41 @@
-HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10B2-REVIEW
+HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G11A-REVIEW
 AUTHOR: CLAUDE
-PHASE: G10B_CLOSED_G11A_RELEASED
+PHASE: G11A_ACCEPTED_MERGE_PENDING_OWNER
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: G10b2 (codex cfe376f, f4d1135, 139449c, 65168f1) closes R1:
-- open attempts are expired in the same tx on every claim status change
-- SUSPENDED requires attempt.startedAt > statusChangedAt
-- the exact A1/A2 scenario is tested
-Y1-Y5 are applied. Environment clean: GW2-P passed; live DB untouched; tmpfs; NO_VOLUME_CHANGE; 23 suites and 299 tests; manifest 4/4.
-The G10b claim/verification slice is CLOSED.
-Pre-merge items:
-- M1: remove the read() organizationId parameter (W1 shape).
-- M2: single clock for startedAt versus statusChangedAt.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G10B2_CLAIM_VERIFICATION_FIXES.md
+REVIEW_VERDICT: G11a (codex 6487a56, e4466f3, 3c903e0, 003b2ae, 0624296) is accepted.
+- M1: read() takes the org from AuthContext only.
+- M2: startedAt comes from the application clock.
+- The trial merge of origin/main 41f6a20 + core was conflict-free and never committed or pushed. On a fresh disposable DB: build, 50 Core tests and 299 full V1 tests.
+- The head passed the same validation.
+- My independent merge-tree gives tree 67859e1 with no conflicts.
+- Environment clean: live DB untouched; temp worktree removed; NO_VOLUME_CHANGE; manifest 5/5.
+Merge scope extracted by the Guardian (section 3 of the review):
+- 11 core files, 5 test/core files, the CCR, and one tsconfig include line; docs and evidence outside implementation/.
+- prisma, shared-contracts, package, jest, compose and setup-env are unchanged; no deletions.
+- No V1 file imports core/. The Dockerfile does not copy core and .dockerignore excludes test, so the read-api image is unaffected.
+The CCR draft is incomplete (missing file list, tsconfig line, import/Docker evidence, authority decisions, the _PUSH_STAGING hazard, a concrete rollback, and hashes for all 17 files). It is completed in G11b-1.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G11A_CORE_SERVICE_MERGE_PREP.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). The Codex core branch is at 65168f1. main is b52f149 before this commit. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-13T23:40:00+03:30
-NEXT_ACTION: Give Codex CODEX-20260913-G11A-CORE-SERVICE-MERGE-PREP-001 (section 5 of the review), pinned. No owner approval is needed for the preparation:
-- M1 and M2
-- the CCR draft CONTRACT_CHANGE_REQUEST_CORE_SERVICE_LAYER.md
-- a trial merge of origin/main + core in a temp worktree with the full V1 suite on a disposable DB, never pushed
-After the G11a review: the owner approves the CCR and the merge (G11b); the Guardian executes the merge into main.
+CODE_COMMIT_SHA: (none - review only). The Codex core branch is at 0624296. main is 41f6a20 before this commit. Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-14T00:15:00+03:30
+NEXT_ACTION: Ask the owner to approve: "Core service layer CCR approved with the scope of section 3 of this review; merge of G10a and G10b into main is authorized." Then:
+1. Record the approval.
+2. Issue CODEX-20260913-G11B1-CORE-SERVICE-CCR-FINAL-001 (document only; CCR complete and APPROVED).
+3. The Guardian reviews it, re-runs merge-tree (the tree must differ from 67859e1 only in the CCR), and executes a --no-ff merge into main with a guarded push and post-merge verification.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10B-REVIEW
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260913-G10B2-CLAIM-VERIFICATION-FIXES-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10B2-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260913-G11A-CORE-SERVICE-MERGE-PREP-001
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as MLINO Architecture Guardian.
 
 HANDOFF_PRECONDITION_CHECK:
-- Fetched; remote core is at 65168f1.
-- Scope and secret scan.
-- Read the full code/test diff since b3dd604.
-- Read the precondition GW2-P log, and the initial/final/full test logs.
-- Checked volume before-cleanup versus after (identical), the cleanup log, and the manifest (4/4).
-- Read-only counts on the live DB; checked anonymous volume CreatedAt; checked the report hash.
+- Fetched; core is at 0624296.
+- Scope and secret scan; read the M1/M2 diff and the CCR.
+- Read the precondition, head/trial test, merge-result, conflicts, diffstat, volume and cleanup evidence.
+- Manifest 5/5.
+- Independent merge-tree, name-status of the merged tree, and the no-import grep.
+- Read the Dockerfile and .dockerignore; confirmed empty diffs for prisma, contracts and config.
+- Live DB counts; checked the worktree list and %TEMP%.
 
 SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main. No credential, Docker write, database write or Codex-branch action.
 
