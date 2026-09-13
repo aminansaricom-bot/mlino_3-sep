@@ -1,3 +1,8 @@
+import path from 'node:path';
+import { assertSafeTestDatabase } from './test-db-guard';
+
+assertSafeTestDatabase(process.env, path.resolve(__dirname, '../.env'));
+
 // REMEDIATION R7 (Central Review — JWT fail-closed): auth-adapter.ts no
 // longer provides any hardcoded fallback secret in production code — that
 // insecure default was the finding. Tests satisfy the now-mandatory
