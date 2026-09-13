@@ -1,41 +1,42 @@
-HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10A2-REVIEW
+HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10A3-REVIEW
 AUTHOR: CLAUDE
-PHASE: G10A2_REVIEWED_G10A3_RELEASED
-STATUS: APPROVED_WITH_FIXES
-REVIEW_VERDICT: G10a2 (codex edc8846 through c877ce1) closes all four G10a security gaps in code:
-- A1: fail-closed PlatformIdentityVerifier port; platformIdentityRef removed from AuthContext; separate revokeByPlatform methods.
-- A2: verified bootstrap actor; reason "bootstrap:<ref>".
-- A3: the last admin is an ACTIVE grant on an ACTIVE membership, checked in both revoke paths, with an organization row FOR UPDATE lock.
-- A4: the adapter is wired everywhere, with 10 trigger messages.
-- A5: in-spec guard and prefix-scoped cleanup.
-- A6 and A7 closed.
-The environment is clean: scope OK; live DB untouched; tmpfs; NO_VOLUME_CHANGE; 21 suites and 269 tests.
-The initial concurrency failure was correct behaviour (three admins), not a bug.
-Remaining:
-- B1: the final race test double-revokes ONE grant and does not prove S10-d.
-- B2: the required duplicate grant and duplicate membership tests are missing.
-- B3: lockOrganization runs before auth and throws a plain Error, so INTERNAL_ERROR differs from AUTHORIZATION_DENIED (an org-existence oracle); state checks come before the permission check.
-- B4: the db-guard .env check is resolved from cwd and never matches.
-- B5: no LF manifest.
-- B6: the trigger test is weak, and bootstrap sniffs the 'Unique constraint' string.
-- B7: the report overclaims the race proof.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G10A2_CORE_AUTHORITY_FIXES.md
+PHASE: G10A_CLOSED_S12_G10B_PENDING_OWNER
+STATUS: APPROVED_NEXT_STEP
+REVIEW_VERDICT: G10a3 (codex 462d8b9, 4513c77, 630f89a) closes B1-B7 with tests:
+- B1: a real race test (two different admin grants, and two admin memberships): exactly one succeeds; last-admin CONFLICT; final count 1.
+- B2: duplicate membership and duplicate grant → CONFLICT.
+- B3: uniform AUTHORIZATION_DENIED (same code and message) for an unknown org versus an unauthorized one; permission check before state checks.
+- B4: module-relative .env check; guard inside clearCoreRows; guard unit tests.
+- B5: manifest 7/7 verified.
+- B6: exact message asserted; the adapter-based bootstrap conflict.
+- B7: accurate report.
+Environment: live V1 DB untouched; tmpfs; NO_VOLUME_CHANGE; 22 suites and 277 tests.
+Line endings are not a finding: V1 blobs on main are CRLF too.
+The G10a authority slice is CLOSED.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G10A3_CORE_AUTHORITY_FINAL.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). The Codex core branch is at c877ce1. main is 21220d9 before this commit. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-13T21:00:00+03:30
-NEXT_ACTION: Give Codex CODEX-20260913-G10A3-CORE-AUTHORITY-FINAL-FIXES-001 (section 4 of the review), pinned. It stays within the G10a authorization; no new approval needed. After G10a3 passes: present S12 to the owner, then G10b; the merge to main is a separate gate.
+CODE_COMMIT_SHA: (none - review only). The Codex core branch is at 630f89a. main is 54adf86 before this commit. Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-13T21:45:00+03:30
+NEXT_ACTION: Owner decides S12.
+- The Guardian recommends S12-A: SUSPENDED→VERIFIED only through a new VERIFIED verification attempt; SUSPENDED→REJECTED directly by a verified platform actor, terminal.
+The owner also authorizes G10b, CODEX-20260913-G10B-CORE-CLAIM-VERIFICATION-SLICE-001 (section 4 of the review):
+- IdentityClaimService and IdentityVerificationService
+- the S11/S12 state machine, with decision and claim transition in one tx
+- a FOR UPDATE claim lock for attempts; C1 conflict
+Then record the approval and relay the pinned instruction. Recommendation: merge G10a+G10b into main together after the G10b review (a separate gate).
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10A-REVIEW
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260913-G10A2-CORE-AUTHORITY-FIXES-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10A2-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260913-G10A3-CORE-AUTHORITY-FINAL-FIXES-001
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as MLINO Architecture Guardian.
 
 HANDOFF_PRECONDITION_CHECK:
-- Fetched; remote core is at c877ce1.
-- Scope and secret scan.
-- Read all core and test/core files line by line.
-- Read the initial and final test logs (the concurrency failure payload).
-- Checked the volume before/after-final files and the container tmpfs.
+- Fetched; remote core is at 630f89a.
+- Scope and secret scan (the user:pass hits are dummy guard-test URLs).
+- Read the full code/test diff since c877ce1.
+- Read the initial, rerun and full test logs, the tmpfs, NO_VOLUME_CHANGE and container-remove evidence.
+- Manifest verified 7/7 (CR-stripped).
+- Line-ending survey of new versus existing V1 blobs.
 - Read-only counts on the live DB; checked anonymous volume CreatedAt; checked the report hash.
 
 SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main. No credential, Docker write, database write or Codex-branch action.
