@@ -1,7 +1,7 @@
 # CCR: V1 Test Database Guard
 
 **Status:** DRAFT  
-**Scope:** G12a — V1 test safety only
+**Scope:** G12a/G12b — V1 test safety only
 
 ## Problem
 
@@ -53,5 +53,23 @@ LF SHA-256 values for the exact scoped files are recorded in:
 
 ## Rollback
 
-Revert the G12a commit. This removes the test guard, its unit tests, CCR, and
-validation evidence without changing production data or schema history.
+Revert the G12a merge commit with `git revert -m 1 <merge-commit>`. This
+removes the test guard, its unit tests, CCR, and validation evidence without
+changing production data or schema history. G12b is a follow-up hardening of
+the same test-only boundary and is reverted with its own commit if needed.
+
+## G12b hardening
+
+G12b closes three dotenv-parity gaps. Every `DATABASE_URL` assignment in both
+`implementation/.env` and `implementation/prisma/.env` is inspected; one
+unsafe assignment is sufficient to reject, matching last-wins safety rather
+than trusting only the first line. The parser accepts an optional `export `
+prefix and optional single or double quotes. An explicitly set environment
+value still takes precedence over both files and must itself be the disposable
+localhost/5499 target.
+
+G12b validation uses the same disposable tmpfs PostgreSQL on port `5499`, the
+full V1 suite with the guard active, and an end-to-end refusal using an
+unresolvable `@db:` URL. No `5435` URL, live database, or `_PUSH_STAGING` is
+used. Evidence and an LF manifest are stored under
+`mlino2/validation/g12b/`.
