@@ -154,3 +154,28 @@ CLEANUP: container temp dump removed; temporary worktree removed/pruned; read-on
 MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 NEXT_ACTION: Architecture Guardian independent review of G7b. Do not rebuild, regenerate Prisma Client in the running service, modify the database, or begin any later step without a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: V1_RUNTIME_REBUILD_G8
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G8-V1-RUNTIME-REBUILD-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G7B_LOCAL_MIGRATION.md@789aa67
+OWNER_APPROVAL: G8 approved: rebuild the V1 read API image from main and restart it
+APPROVAL_RECORD: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_OWNER_APPROVAL_G8_RUNTIME_REBUILD.md@789aa67
+BACKUP_PATH: C:\Users\galexy\mlino-backups\mlino_v1_pre_g8_20260913T125154Z.dump
+BACKUP_SIZE_BYTES: 103407
+BACKUP_SHA256: 88e22257ecd64a19e3388fc2f1356b147e7e818707994613671a25fa09f0570f
+PRE_G8_IMAGE: sha256:6e092dddeeecbd09579005db577204338b4d9e67d3f1271d5baf3416f6283c84
+PRE_G8_TAG: mlino-v1-read-api:pre-g8
+CURRENT_READ_API_IMAGE: sha256:a07858b3da15e63ac0c925c44eaee51903adfdcb6b715cd99dfc1667de10cda8
+DELIVERY_COMMIT: 134aa0917bbad76a48db0ca35e71c759472591cd
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G8_V1_RUNTIME_REBUILD_REPORT.md
+REPORT_SHA256: 7150ce186997878002b5aaac6e49c28f447586193cfc9f988f8bae36f9aa78f1
+BRANCH: codex/core-prisma-foundation
+VALIDATION: PASS — v1-migrate no-op; six migrations; row counts unchanged; DB container and volume stable; new read-api image; no Prisma log errors; unauthenticated HTTP 401
+CLEANUP: temporary origin/main worktree removed and pruned; pre-g8 tag retained; backup retained
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+IMPLEMENTATION_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G8. Do not apply further migration, rebuild again, remove the pre-g8 tag, modify the database, or begin Core service implementation without a new approved instruction.
