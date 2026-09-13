@@ -1,0 +1,10 @@
+INSTRUCTION_ID=CODEX-20260913-G11A-CORE-SERVICE-MERGE-PREP-001
+TARGET_HANDOFF_ID=HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+git fetch origin: FAILED
+fetch error: schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS (0x8009030e) - No credentials are available in the security package
+GW2-P pinned commit: 41f6a20fcd3e273c4e75302fe87c25dfa03e6017
+git cat-file -e pinned^{commit}: EXIT 0
+git merge-base --is-ancestor pinned origin/main: EXIT 0
+git show pinned:review-reference | sha256: 56f57846de235e747cda89adec1c70a829e368440fd93d542e19ab573a9b0d12
+expected review SHA256: 56f57846de235e747cda89adec1c70a829e368440fd93d542e19ab573a9b0d12
+GW2-P: PASS

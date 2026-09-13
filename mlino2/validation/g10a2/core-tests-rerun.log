@@ -1,0 +1,12 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand implementation/test/core
+
+PASS test/core/core-authority.spec.ts
+PASS test/core/error-adapter.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        4.86 s, estimated 6 s
+Ran all test suites matching /implementation\\test\\core/i.

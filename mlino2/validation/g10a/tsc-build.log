@@ -1,0 +1,5 @@
+
+> mlino-v1-core@0.1.0 build
+> tsc -p tsconfig.json
+
+core/bootstrap-service.ts(2,20): error TS2305: Module '"./errors"' has no exported member 'requireNonEmpty'.

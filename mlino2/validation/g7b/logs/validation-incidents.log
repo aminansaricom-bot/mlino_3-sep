@@ -1,0 +1,16 @@
+ATTEMPT=1
+RESULT=NOT_VALIDATION_EVIDENCE
+CAUSE=Used container internal port 5432 from host; published host port is 5435.
+DATABASE_EFFECT=NONE (migrate status is read-only)
+ATTEMPT=2
+RESULT=NOT_VALIDATION_EVIDENCE
+CAUSE=Fingerprint helper was first invoked with Git/bin/bash.exe, whose PATH resolved Windows find and lacked coreutils.
+ENVIRONMENT_EFFECT=NONE (read-only command failed before hashing)
+ATTEMPT=3
+RESULT=NOT_VALIDATION_EVIDENCE
+CAUSE=Git usr/bin/bash.exe inherited Windows PATH until helper explicitly set /usr/bin:/bin.
+ENVIRONMENT_EFFECT=NONE (read-only command failed before hashing)
+ATTEMPT=4
+RESULT=CLEANUP_COMPLETED_WITH_PRECHECK_LIMITATION
+CAUSE=Escalated user context rejected git -C temporary worktree precheck as dubious ownership; worktree removal was executed from the registered parent repository and succeeded.
+EVIDENCE=worktree-cleanup.log plus current git worktree list; earlier worktree-setup.log proves detached exact head and clean status.

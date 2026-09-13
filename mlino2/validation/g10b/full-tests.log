@@ -1,0 +1,33 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand
+
+PASS test/core/identity-claim-verification.spec.ts (5.211 s)
+PASS test/core/core-authority.spec.ts
+PASS test/foundation/opportunity-read/opportunity-read.spec.ts
+PASS test/http/read-api.spec.ts
+PASS test/foundation/opportunity-projection/rebuild-projection.spec.ts
+PASS test/value-engines/cancellation/cancellation-detector.spec.ts
+PASS test/value-engines/capacity/capacity-detector.spec.ts
+PASS test/foundation/access-decision/org-membership-ac2-port.spec.ts
+PASS test/foundation/opportunity-projection/situation-lookup.spec.ts
+PASS test/value-engines/followup/followup-detector.spec.ts
+PASS test/foundation/event-admission-concurrency.spec.ts
+PASS test/foundation/workspace-link.spec.ts
+PASS test/foundation/event-admission-validation.spec.ts
+PASS test/feed/opportunity-feed.spec.ts
+PASS test/foundation/event-admission.spec.ts
+PASS test/foundation/ownership-type.spec.ts
+PASS test/core/error-adapter.spec.ts
+PASS test/foundation/auth-adapter.spec.ts
+PASS test/foundation/business-context.spec.ts
+PASS test/foundation/recommendation/recommendation-contract.spec.ts
+PASS test/core/db-guard.spec.ts
+PASS test/briefing/proactive-briefing.spec.ts
+PASS test/foundation/situation-key.spec.ts
+
+Test Suites: 23 passed, 23 total
+Tests:       296 passed, 296 total
+Snapshots:   0 total
+Time:        18.09 s, estimated 20 s
+Ran all test suites.

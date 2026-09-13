@@ -88,3 +88,309 @@ ENVIRONMENT: two disposable PostgreSQL 16 containers with tmpfs/no volume; both 
 MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 NEXT_ACTION: Architecture Guardian independent review of G5. Do not merge, run G6/G7, or apply migration to any data-bearing database without a separate approved instruction and owner decision.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_FOUNDATION_MERGE_G6
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G6-MERGE-CORE-INTO-MAIN-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G5_V1_COMPATIBILITY.md@ba9bd139e2637083ce264a3baab951db2b49f0bc
+OWNER_APPROVAL: G6 approved: merge codex/core-prisma-foundation into main
+APPROVAL_RECORD: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_OWNER_APPROVAL_G6_MERGE.md@496ff800672bc81c2830d8fbefe56802d03a4e16
+MAIN_HEAD_BEFORE: 496ff800672bc81c2830d8fbefe56802d03a4e16
+CORE_HEAD: 31c9ec15db525cfc40eea63e4aa38e77ddb246ff
+MERGE_COMMIT: f40a3f5ff68337682ddc659be658807225f25bc1
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G6_MERGE_REPORT.md
+REPORT_SHA256: f59ac192e0225c5e4c6a576c9c8dc85214bcc0446983700d2705ce724fa8138d
+BRANCH: codex/core-prisma-foundation
+VALIDATION: conflict-free merge; implementation diff vs reviewed Core head empty; expected/actual merge file set 145/145 with zero mismatch; Guardian paths unchanged; exactly six migrations; remote main confirmed at merge commit
+TEMP_WORKTREE_STATUS: REMOVED_AND_PRUNED
+DOCKER_DATABASE_STATUS: NOT_TOUCHED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G6. G7 remains forbidden without separate owner approval and instruction; do not run Docker, docker compose, Prisma migration, npm, or connect to any database.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: LOCAL_CORE_MIGRATION_G7_BACKUP_HARD_STOP
+STATUS: BLOCKED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G7-APPLY-CORE-MIGRATION-LOCAL-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G6_MERGE.md@53180d5028cdaa6589e02d60e69c6746c801b5ed
+OWNER_APPROVAL: G7 approved: back up and apply migration 20260913010000_add_core_foundation to mlino-v1-local-db
+BACKUP_DIR: C:\Users\galexy\mlino-backups\
+DELIVERY_COMMIT: bd0e62e8b8bdd98548724c57a2eb3a634bd1b9b0
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G7_APPLY_CORE_MIGRATION_REPORT.md
+REPORT_SHA256: 0b2d18d99f9e29667216302dfb9c98b05cc871f8bdef0e0bca7a2252e49081b8
+BRANCH: codex/core-prisma-foundation
+PRE_STATE: database running/healthy, restart count 0, exactly five expected completed migrations, ten public tables counted
+BACKUP_STATUS: FAILED_BEFORE_PG_DUMP — destination directory creation failed; no backup file exists
+DATABASE_CHANGE_STATUS: NONE — migration 20260913010000_add_core_foundation was not applied; post-stop check still shows exactly five migrations
+ROLLBACK_STATUS: NOT_REQUIRED
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian review and a separate corrective G7b instruction. Do not retry backup, apply migration, run Docker Compose, or begin any later step without that instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: LOCAL_CORE_MIGRATION_G7B
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G7B-APPLY-CORE-MIGRATION-LOCAL-RETRY-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G7_BACKUP_HARD_STOP.md@eb9b72b24ba8b343051c5e0365a04dfe77bb8b39
+BASE_INSTRUCTION: CODEX-20260913-G7-APPLY-CORE-MIGRATION-LOCAL-001
+OWNER_APPROVAL: G7 approved; scope unchanged
+BACKUP_PATH: C:\Users\galexy\mlino-backups\mlino_v1_pre_core_20260913T121927Z.dump
+BACKUP_SIZE_BYTES: 22242
+BACKUP_SHA256: f3d2208ad55ad4e19ee2d4c458d85d41694cc8ac0eb082784283381b049b3c09
+BACKUP_PG_RESTORE_OBJECT_LINES: 68
+DELIVERY_COMMIT: b62546ec2e1aafd009a2cf80c654ac78d495619b
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G7B_APPLY_CORE_MIGRATION_REPORT.md
+REPORT_SHA256: 9e7232cb151f49cecde0c7bbdba9bba0c0c1e4555724089e074bb0b063336c04
+BRANCH: codex/core-prisma-foundation
+MIGRATION_STATUS: APPLIED — only 20260913010000_add_core_foundation; six finished migrations; zero rolled back
+DATA_PRESERVATION: PASS — all pre-existing business table counts unchanged; _prisma_migrations 5 to 6
+CORE_SCHEMA_VALIDATION: PASS — 12 empty Core tables; C1-C5; C6-C11; 13 non-internal triggers; 30 Core FKs RESTRICT/RESTRICT; ExternalWorkspaceLink index present
+SERVICE_STATUS: PostgreSQL running/healthy/restarts 0; V1 read API running/restarts 0; unauthenticated request HTTP 401
+ROLLBACK_STATUS: NOT_REQUIRED
+CLEANUP: container temp dump removed; temporary worktree removed/pruned; read-only Prisma fingerprint unchanged; host backup retained
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G7b. Do not rebuild, regenerate Prisma Client in the running service, modify the database, or begin any later step without a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: V1_RUNTIME_REBUILD_G8
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G8-V1-RUNTIME-REBUILD-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G7B_LOCAL_MIGRATION.md@789aa67
+OWNER_APPROVAL: G8 approved: rebuild the V1 read API image from main and restart it
+APPROVAL_RECORD: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_OWNER_APPROVAL_G8_RUNTIME_REBUILD.md@789aa67
+BACKUP_PATH: C:\Users\galexy\mlino-backups\mlino_v1_pre_g8_20260913T125154Z.dump
+BACKUP_SIZE_BYTES: 103407
+BACKUP_SHA256: 88e22257ecd64a19e3388fc2f1356b147e7e818707994613671a25fa09f0570f
+PRE_G8_IMAGE: sha256:6e092dddeeecbd09579005db577204338b4d9e67d3f1271d5baf3416f6283c84
+PRE_G8_TAG: mlino-v1-read-api:pre-g8
+CURRENT_READ_API_IMAGE: sha256:a07858b3da15e63ac0c925c44eaee51903adfdcb6b715cd99dfc1667de10cda8
+DELIVERY_COMMIT: 134aa0917bbad76a48db0ca35e71c759472591cd
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G8_V1_RUNTIME_REBUILD_REPORT.md
+REPORT_SHA256: 7150ce186997878002b5aaac6e49c28f447586193cfc9f988f8bae36f9aa78f1
+BRANCH: codex/core-prisma-foundation
+VALIDATION: PASS — v1-migrate no-op; six migrations; row counts unchanged; DB container and volume stable; new read-api image; no Prisma log errors; unauthenticated HTTP 401
+CLEANUP: temporary origin/main worktree removed and pruned; pre-g8 tag retained; backup retained
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+IMPLEMENTATION_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G8. Do not apply further migration, rebuild again, remove the pre-g8 tag, modify the database, or begin Core service implementation without a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_SERVICE_LAYER_DESIGN_G9
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G9-CORE-SERVICE-LAYER-DESIGN-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G8_V1_RUNTIME_REBUILD.md
+DECISION: APPROVED_NEXT_STEP — G8 closed; Core Foundation G1-G8 complete
+DELIVERY_COMMIT: dfe6a9f6fd8843ebcb02d6f71ea5cae90e67ddab
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G9_CORE_SERVICE_LAYER_DESIGN_REPORT.md
+REPORT_SHA256: 2c1c78f51a578d42b09b5b30f1773036953525b04bd4168e249776871a2e4a34
+DESIGN_PATH: mlino2/MLINO_CORE_SERVICE_LAYER_DESIGN.md
+SCOPE: DOCUMENT_ONLY
+VALIDATION: Design document created with 11 sections; W1 mandatory; W2 option only; ADR-0009/0010 permission model; same-transaction Publication projection; D6=A; 13-trigger mapping; error model; tmpfs-only test strategy; S1-S9 owner decisions; ADR-0001..0012 matrix
+LIMITATION: git fetch origin failed due unavailable Schannel credentials; local origin/main schema and migration were read successfully; no Docker, database, Prisma or code action performed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+IMPLEMENTATION_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G9. Do not implement services, repositories, APIs, Prisma or Docker without a new approved instruction and owner decisions for open items.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_SERVICE_LAYER_DESIGN_G9B
+STATUS: BLOCKED_BY_GW2_FETCH_FAILURE
+INSTRUCTION_ID: CODEX-20260913-G9B-CORE-SERVICE-LAYER-DESIGN-FIXES-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G9_CORE_SERVICE_LAYER_DESIGN.md
+DECISION: APPROVED_WITH_FIXES
+SCOPE: DOCUMENT_ONLY
+DELIVERY_COMMIT: PENDING
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G9B_CORE_SERVICE_LAYER_DESIGN_FIXES_REPORT.md
+VALIDATION: STOPPED_BEFORE_EDIT — git fetch origin failed with Schannel SEC_E_NO_CREDENTIALS; no G9b fixes applied
+LIMITATION: Local origin/main copy of the review was readable, but GW2 requires a successful fetch before work may proceed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+IMPLEMENTATION_STATUS: UNCHANGED
+NEXT_ACTION: Restore Git authentication and reissue G9b. Do not edit the design document or start implementation before the review is fetched from origin/main.
+
+HANDOFF_CORRECTION: G9b precondition-stop delivery finalized
+DELIVERY_COMMIT: 3286e95
+REPORT_SHA256: 589d525d8185d3ed79d7b4b3a1b45766f2d8475d665ad4bf060ffd9958a7d9af
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_SERVICE_LAYER_DESIGN_G9B_RUN2
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G9B-CORE-SERVICE-LAYER-DESIGN-FIXES-002
+REVIEW_REFERENCE: pinned G9 review e79585ba3431b662fd32819a57f92bd88b3c855d
+GOVERNANCE_REFERENCE: pinned GW2-P review 59322dcbbfa8bbeb15b89933f77e1cd635e63452
+DECISION: APPROVED_NEXT_STEP
+SCOPE: DOCUMENT_ONLY
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G9B_CORE_SERVICE_LAYER_DESIGN_FIXES_RUN2_REPORT.md
+DESIGN_PATH: mlino2/MLINO_CORE_SERVICE_LAYER_DESIGN.md
+VALIDATION: GW2-P passed for both references; R1-R6 and Y1-Y9 applied; git diff --check passed; no code, Prisma, Docker or database action
+LIMITATION: git fetch origin failed with SEC_E_NO_CREDENTIALS; no credential, token, git config or helper was changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+IMPLEMENTATION_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G9b Run2. Do not implement services, repositories, APIs, Prisma or Docker before review and owner decisions.
+
+DELIVERY_COMMIT: 0159971
+REPORT_SHA256: 70333f736a12d2f7211b249b75e5b90ab9fad4ae743cc3bd235832fbfd2ef77f
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_SERVICE_LAYER_OWNER_DECISIONS_G9C
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G9C-CORE-SERVICE-LAYER-OWNER-DECISIONS-001
+REVIEW_REFERENCE: pinned G9b Run2 fix list c6667bb34bf3ed0424bffbafd11ad0e5d26087f4
+OWNER_DECISION_REFERENCE: pinned owner decisions 15833023717985abadd6b8c70f0de5b6a977d529
+DECISION: APPROVED_NEXT_STEP
+SCOPE: DOCUMENT_ONLY
+DESIGN_PATH: mlino2/MLINO_CORE_SERVICE_LAYER_DESIGN.md
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G9C_CORE_SERVICE_LAYER_OWNER_DECISIONS_REPORT.md
+VALIDATION: GW2-P passed for both references; S1-S11 and R4 marked DECIDED; F1-F9 applied; git diff --check passed; no implementation action
+LIMITATION: git fetch origin failed with SEC_E_NO_CREDENTIALS; no credentials or git configuration changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+IMPLEMENTATION_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian review of G9c. Do not start G10 or any implementation before review and final owner approval.
+
+DELIVERY_COMMIT: 861bf3c
+REPORT_SHA256: a6fa1ca02082f54c1e8a1a59a2c6f65d5c81e28031b5b3d8a25a8d1b1e8a6783
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_AUTHORITY_SLICE_G10A
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G10A-CORE-AUTHORITY-SLICE-001
+REVIEW_REFERENCE: pinned G9c owner decisions review 57ba5a765eebb76af17189346accdeba4759bbe6
+OWNER_APPROVAL: pinned final design approval f39b28debd40a96d7d514bfbc0912140e6645fae
+DESIGN_REFERENCE: 091d422 / cd041054c34d9e3827f5d590ff6dcb07c82e51b208f7d489443501ceecb561a8
+SCOPE: CODE — additive Core authority slice only
+CODE_COMMIT: aa225d1
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G10A_CORE_AUTHORITY_SLICE_REPORT.md
+VALIDATION: PASS — guard passed; six migrations applied to disposable tmpfs PostgreSQL on 5499; Prisma 5.22.0 generated; tsc passed; 20 suites and 255 tests passed; volume set unchanged; container removed
+LIMITATION: first build caught one import error; corrected and full validation rerun from a fresh disposable database; no forbidden file changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian independent review of G10a. Do not start G10b or modify schema/migrations without new approved instruction.
+
+DELIVERY_COMMIT: aa225d1
+REPORT_COMMIT: 6c85212
+REPORT_SHA256: 578f154e82f73a3726286267c762b5a59f7508253c65874a017007647db6305d
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_AUTHORITY_FIXES_G10A2
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G10A2-CORE-AUTHORITY-FIXES-001
+REVIEW_REFERENCE: pinned G10a review 21220d90b06970e2df1bf066636f7d0cbddbd503
+DECISION: APPROVED_WITH_FIXES
+SCOPE: CODE — additive Core authority fixes only
+CODE_COMMITS: edc88464303030843c339820db2b131c49d01490, 3fb8a0f76006620d2a2dbb2291c186549a621c79
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G10A2_CORE_AUTHORITY_FIXES_REPORT.md
+REPORT_SHA256: 2cc700098b8a1ce2854a8f3209709da3a904f131b9586fc61fe4fcc54f17423d
+VALIDATION: PASS — GW2-P passed; six migrations, build, 21 suites and 269 tests passed on disposable tmpfs PostgreSQL:5499; volume set unchanged; container removed
+LIMITATION: git fetch origin failed with SEC_E_NO_CREDENTIALS; no credentials or git configuration changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian independent review of G10A2. Do not start G10B or modify schema/migrations/API before a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_AUTHORITY_FINAL_FIXES_G10A3
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G10A3-CORE-AUTHORITY-FINAL-FIXES-001
+REVIEW_REFERENCE: pinned G10A2 review 54adf86214424bf0229c437ca734f7ff45a3a872
+DECISION: APPROVED_WITH_FIXES
+SCOPE: CODE — final Core authority fixes only
+CODE_COMMITS: 462d8b90d37708d82400aaf39f27a5b057943679, 4513c77d698b3923b98f863e3d5ae3b088a2a3e7
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G10A3_CORE_AUTHORITY_FINAL_FIXES_REPORT.md
+REPORT_SHA256: 28af762e180fa8d73daf05884b5f770a679104e799b3a902dfe7b20573de995d
+VALIDATION: PASS — fetch succeeded; six migrations, build, 22 suites and 277 tests passed on disposable tmpfs PostgreSQL:5499; volume set unchanged; container removed
+LIMITATION: no credential, token, git config or credential helper changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian independent review of G10A3. Do not start G10B or modify schema/migrations/API before a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_CLAIM_VERIFICATION_G10B
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G10B-CORE-CLAIM-VERIFICATION-SLICE-001
+REVIEW_REFERENCE: pinned G10a3 review 563cd3a818d2705c303cba2f4cea86357d6209c2
+OWNER_DECISION: S12-A; G10B authorized
+SCOPE: CODE — additive identity claim and verification slice only
+CODE_COMMITS: d828d1e57282dc8ef8ce5799188cb98295b9379a, 6f02e3f44ad4ff11267b5d8732e3f67e245b18bc, ee4111f5bd6ebc4ea18c3626ba55d139b3aee608
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G10B_CORE_CLAIM_VERIFICATION_SLICE_REPORT.md
+REPORT_SHA256: da426302bcb347c7e160516bd3f6b962abc7805e28581ac0fe3fe975464de5c2
+VALIDATION: PASS — fetch succeeded; six migrations, build, 4 Core suites/47 tests and 23 suites/296 full V1 tests passed on disposable tmpfs PostgreSQL:5499; volume set unchanged; container removed
+LIMITATION: initial G10B run exposed three test defects; they were corrected and the final validation passed; no credentials, token, git config or credential helper changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian independent review of G10B. Do not start G10C or modify schema/migrations/API before a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_CLAIM_VERIFICATION_G10B2
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G10B2-CLAIM-VERIFICATION-FIXES-001
+REVIEW_REFERENCE: pinned G10B review b52f1493823c394f052d103dbf48d68c8036ab1d
+DECISION: APPROVED_WITH_FIXES
+SCOPE: CODE — G10b stale-attempt and runtime-validation fixes only
+CODE_COMMITS: cfe376fbdf0fe97f2b0192154a4b99e4cbffd6ed, f4d11352925e2946b7fab6518acbf44317061764
+REPORT_COMMIT: 139449cf85e1dba863635dd682e8e79745969941
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G10B2_CLAIM_VERIFICATION_FIXES_REPORT.md
+REPORT_SHA256: b54ba61f3c0f34ce7a5f59167d1aa430379d02dc784ee44a3e69b04f8f45888d
+VALIDATION: PASS — fetch failed with SEC_E_NO_CREDENTIALS; GW2-P passed; six migrations, build, 4 Core suites/50 tests and 23 suites/299 full V1 tests passed on disposable tmpfs PostgreSQL:5499; volume set unchanged; container removed
+LIMITATION: no credentials, token, git config or credential helper changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian independent review of G10B2. Do not start G10C or modify schema/migrations/API before a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_SERVICE_MERGE_PREPARATION_G11A
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G11A-CORE-SERVICE-MERGE-PREP-001
+REVIEW_REFERENCE: pinned G10B2 review 41f6a20fcd3e273c4e75302fe87c25dfa03e6017
+DECISION: APPROVED_NEXT_STEP — M1/M2, CCR draft and trial merge only
+SCOPE: CODE + DOCUMENT + TEMPORARY TRIAL MERGE; no real main merge
+CODE_AND_EVIDENCE_COMMITS: 6487a56f8956f7c83707b5e16a351613ba2cc22a, e4466f3b72b8a7bf869b6df3e269114e74fcd7b4, 3c903e0de752d882a2ed937a29b0507f5debc8db
+REPORT_COMMIT: 003b2ae6e97a7a1559d0f96c0305ceceb70ba673
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G11A_CORE_SERVICE_MERGE_PREP_REPORT.md
+REPORT_SHA256: 2d7a039eb3ee3f688c294cf5efca5733f129acdaaefa2e8cc9c1a8ad42dbfea0
+VALIDATION: PASS — fetch failed with SEC_E_NO_CREDENTIALS; GW2-P passed; head and trial each passed build, 4 Core suites/50 tests and 23 suites/299 full V1 tests on disposable tmpfs PostgreSQL:5499; trial merge had no conflicts, no trial commit or push, worktree removed
+LIMITATION: trial initially required Prisma Client generation in the disposable worktree; after generation validation passed; no credentials, token, git config or credential helper changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian review of G11a and owner approval before G11b real merge. Do not merge main or start G10C/G11b automatically.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_SERVICE_CCR_FINAL_G11B1
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G11B1-CORE-SERVICE-CCR-FINAL-001
+REVIEW_REFERENCE: pinned G11a review b599706d35b2d4716da7767ba3dc9a53b8e606a3
+OWNER_APPROVAL_REFERENCE: pinned 45926ce609e74d100b4e9bef48182baa93a369da
+DECISION: APPROVED — CCR scope approved; main merge authorized for Guardian only
+SCOPE: DOCUMENT ONLY — CCR finalization and LF manifest; no main merge
+COMMITS: 3cb44204230900823271741b60778eec1af790c3, 8fa1e1d863fa7bf590c626e855d1d0822ac690fb, 6c1b2557b341ee42544e9262011bf10113e0c88d
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G11B1_CORE_SERVICE_CCR_FINAL_REPORT.md
+REPORT_SHA256: cd91471f95a34dc0bea964400d0572b0511bacbdf11ab0170fb8f511c6f8355c
+VALIDATION: PASS — both pinned GW2-P checks passed; CCR status APPROVED; LF manifest contains 17 paths; no code, schema, migration, tsconfig or main change
+LIMITATION: git fetch failed with SEC_E_NO_CREDENTIALS; no credentials, token, git config or credential helper changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian review of G11b1, then Guardian-only G11b2 merge. Codex must not merge main or start later work automatically.

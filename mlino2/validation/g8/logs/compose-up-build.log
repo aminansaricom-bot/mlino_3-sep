@@ -1,0 +1,235 @@
+ Image implementation-v1-migrate Building
+ Image implementation-v1-read-api Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.22kB done
+#1 DONE 0.0s
+
+#2 [v1-migrate internal] load build definition from Dockerfile
+#2 transferring dockerfile: 2.59kB 0.1s done
+#2 transferring dockerfile: 2.59kB 0.1s done
+#2 DONE 0.1s
+
+#3 [v1-read-api internal] load metadata for docker.io/library/node:20-slim
+#3 DONE 1.7s
+
+#4 [v1-migrate internal] load .dockerignore
+#4 transferring context: 79B 0.0s done
+#4 DONE 0.1s
+
+#5 [v1-read-api internal] load build context
+#5 DONE 0.0s
+
+#6 [v1-read-api build  1/16] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+#6 resolve docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 0.0s done
+#6 resolve docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 0.0s done
+#6 DONE 0.0s
+
+#5 [v1-migrate internal] load build context
+#5 transferring context: 435.23kB 0.3s done
+#5 DONE 0.4s
+
+#5 [v1-migrate internal] load build context
+#5 DONE 0.4s
+
+#7 [v1-migrate build  2/16] WORKDIR /app
+#7 CACHED
+
+#8 [v1-read-api runtime 3/9] RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates     && rm -rf /var/lib/apt/lists/*
+#8 CACHED
+
+#9 [v1-migrate build  3/16] RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates     && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [v1-migrate build  4/16] COPY package.json package-lock.json ./
+#10 DONE 0.1s
+
+#11 [v1-read-api runtime 4/9] COPY package.json package-lock.json ./
+#11 DONE 0.1s
+
+#10 [v1-read-api build  4/16] COPY package.json package-lock.json ./
+#10 DONE 0.1s
+
+#12 [v1-migrate build  5/16] RUN npm ci
+#12 5.242 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+#12 9.340 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#12 9.609 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#12 ...
+
+#13 [v1-read-api runtime 5/9] RUN npm ci --omit=dev
+#13 3.656 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+#13 55.40
+#13 55.40 added 27 packages, and audited 28 packages in 55s
+#13 55.40
+#13 55.41 2 packages are looking for funding
+#13 55.41   run `npm fund` for details
+#13 55.41
+#13 55.41 1 moderate severity vulnerability
+#13 55.41
+#13 55.41 To address all issues (including breaking changes), run:
+#13 55.41   npm audit fix --force
+#13 55.41
+#13 55.41 Run `npm audit` for details.
+#13 55.41 npm notice
+#13 55.41 npm notice New major version of npm available! 10.8.2 -> 12.0.2
+#13 55.41 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+#13 55.41 npm notice To update run: npm install -g npm@12.0.2
+#13 55.41 npm notice
+#13 DONE 55.6s
+
+#12 [v1-migrate build  5/16] RUN npm ci
+#12 58.93
+#12 58.93 added 305 packages, and audited 306 packages in 58s
+#12 58.93
+#12 58.93 36 packages are looking for funding
+#12 58.93   run `npm fund` for details
+#12 58.93
+#12 58.93 2 vulnerabilities (1 moderate, 1 high)
+#12 58.93
+#12 58.93 To address issues that do not require attention, run:
+#12 58.93   npm audit fix
+#12 58.93
+#12 58.93 To address all issues (including breaking changes), run:
+#12 58.93   npm audit fix --force
+#12 58.93
+#12 58.93 Run `npm audit` for details.
+#12 58.94 npm notice
+#12 58.94 npm notice New major version of npm available! 10.8.2 -> 12.0.2
+#12 58.94 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+#12 58.94 npm notice To update run: npm install -g npm@12.0.2
+#12 58.94 npm notice
+#12 DONE 59.0s
+
+#14 [v1-migrate build  6/16] COPY prisma ./prisma
+#14 DONE 0.2s
+
+#14 [v1-read-api build  6/16] COPY prisma ./prisma
+#14 DONE 0.2s
+
+#15 [v1-migrate build  7/16] RUN npx prisma generate
+#15 1.782 Prisma schema loaded from prisma/schema.prisma
+#15 2.906
+#15 2.906 ✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 480ms
+#15 2.906
+#15 2.906 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+#15 2.906
+#15 2.906 Tip: Easily identify and fix slow SQL queries in your app. Optimize helps you enhance your visibility: https://pris.ly/--optimize
+#15 2.906
+#15 DONE 3.2s
+
+#15 [v1-migrate build  7/16] RUN npx prisma generate
+#15 DONE 3.2s
+
+#16 [v1-migrate build  8/16] COPY tsconfig.json ./
+#16 DONE 0.1s
+
+#17 [v1-migrate build  9/16] COPY shared-contracts ./shared-contracts
+#17 DONE 0.1s
+
+#17 [v1-read-api build  9/16] COPY shared-contracts ./shared-contracts
+#17 DONE 0.1s
+
+#18 [v1-migrate build 10/16] COPY foundation ./foundation
+#18 DONE 0.1s
+
+#19 [v1-migrate build 11/16] COPY feed ./feed
+#19 DONE 0.1s
+
+#20 [v1-read-api build 12/16] COPY briefing ./briefing
+#20 DONE 0.1s
+
+#20 [v1-migrate build 12/16] COPY briefing ./briefing
+#20 DONE 0.1s
+
+#21 [v1-read-api build 13/16] COPY value-engines ./value-engines
+#21 DONE 0.1s
+
+#22 [v1-migrate build 14/16] COPY composition ./composition
+#22 DONE 0.1s
+
+#22 [v1-read-api build 14/16] COPY composition ./composition
+#22 DONE 0.1s
+
+#23 [v1-read-api build 15/16] COPY http ./http
+#23 DONE 0.1s
+
+#24 [v1-read-api build 16/16] RUN npm run build
+#24 0.546
+#24 0.546 > mlino-v1-core@0.1.0 build
+#24 0.546 > tsc -p tsconfig.json
+#24 0.546
+#24 DONE 4.0s
+
+#24 [v1-read-api build 16/16] RUN npm run build
+#24 DONE 4.0s
+
+#25 [v1-migrate] exporting to image
+#25 exporting layers
+#25 ...
+
+#26 [v1-read-api runtime 6/9] COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+#26 DONE 0.4s
+
+#27 [v1-read-api runtime 7/9] COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
+#27 DONE 0.2s
+
+#25 [v1-migrate] exporting to image
+#25 ...
+
+#28 [v1-read-api runtime 8/9] COPY prisma ./prisma
+#28 DONE 0.1s
+
+#29 [v1-read-api runtime 9/9] COPY --from=build /app/dist ./dist
+#29 DONE 0.1s
+
+#25 [v1-migrate] exporting to image
+#25 ...
+
+#30 [v1-read-api] exporting to image
+#30 exporting layers 7.7s done
+#30 exporting manifest sha256:3e3a1bf39883ddd3711b0ab413fd55dabcf816356b5e8f6aae5eac677d31056b 0.0s done
+#30 exporting config sha256:b9417acf73c46ba7e3f4666ee9a1367d37e8f69d9ef7819e03c0968f977012a7 0.0s done
+#30 exporting attestation manifest sha256:2036b1911ae8cc2343c4c1168ede5b2081f09a225730dba0fb26102249fc7ed1
+#30 exporting attestation manifest sha256:2036b1911ae8cc2343c4c1168ede5b2081f09a225730dba0fb26102249fc7ed1 0.0s done
+#30 exporting manifest list sha256:a07858b3da15e63ac0c925c44eaee51903adfdcb6b715cd99dfc1667de10cda8 0.0s done
+#30 naming to docker.io/library/implementation-v1-read-api:latest done
+#30 unpacking to docker.io/library/implementation-v1-read-api:latest
+#30 unpacking to docker.io/library/implementation-v1-read-api:latest 2.3s done
+#30 DONE 10.3s
+
+#25 [v1-migrate] exporting to image
+#25 ...
+
+#31 [v1-read-api] resolving provenance for metadata file
+#31 DONE 0.0s
+
+#25 [v1-migrate] exporting to image
+#25 exporting layers 12.7s done
+#25 exporting manifest sha256:4ce45d17f332fe8f55a13aba5a927a751b1456eb92a7e1c123bc12395d5b0c94 0.0s done
+#25 exporting config sha256:e8e1b7ad50d20400c92dacb0c25dd246bfa69ff5b3d3a49c829200895b5a3613 0.0s done
+#25 exporting attestation manifest sha256:1066a35e01abbbeaafc444eddaf5f67010053e967f285d592fec0accf96b2f6d 0.0s done
+#25 exporting manifest list sha256:814505da0a05f8fd5813957b73a31091864f8bf4ad31ddf40f6b47483c436e18
+#25 exporting manifest list sha256:814505da0a05f8fd5813957b73a31091864f8bf4ad31ddf40f6b47483c436e18 0.0s done
+#25 naming to docker.io/library/implementation-v1-migrate:latest done
+#25 unpacking to docker.io/library/implementation-v1-migrate:latest
+#25 unpacking to docker.io/library/implementation-v1-migrate:latest 5.6s done
+#25 DONE 18.5s
+
+#32 [v1-migrate] resolving provenance for metadata file
+#32 DONE 0.0s
+ Image implementation-v1-migrate Built
+ Image implementation-v1-read-api Built
+ Container mlino-v1-local-db Running
+ Container mlino-v1-migrate Recreate
+ Container mlino-v1-migrate Recreated
+ Container mlino-v1-read-api Recreate
+ Container mlino-v1-read-api Recreated
+ Container mlino-v1-local-db Waiting
+ Container mlino-v1-local-db Healthy
+ Container mlino-v1-migrate Starting
+ Container mlino-v1-migrate Started
+ Container mlino-v1-local-db Waiting
+ Container mlino-v1-migrate Waiting
+ Container mlino-v1-local-db Healthy
+ Container mlino-v1-migrate Exited
+ Container mlino-v1-read-api Starting
+ Container mlino-v1-read-api Started
