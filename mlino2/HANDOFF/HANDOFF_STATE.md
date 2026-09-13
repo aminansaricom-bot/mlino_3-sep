@@ -407,6 +407,19 @@ VALIDATION: PASS — 24 suites / 309 tests; build and disposable migration succe
 CREATED_AT: 2026-09-14
 
 ---
+HANDOFF_ID: HANDOFF-20260914-CORE-G10D
+AUTHOR: CODEX
+PHASE: G10D_CORE_OFFER_SLICE
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G10D-CORE-OFFER-SLICE-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G10D_CORE_OFFER_SLICE_REPORT.md
+COMMITS: b07f5433d41ba34b2bf8790d3d2673667caae528
+VALIDATION: PASS — build و Prisma generate موفق؛ ۶ migration روی PostgreSQL موقت 5499؛ ۱۰ تست G10d و ۲۶ suite / ۳۳۷ تست کامل V1 موفق؛ volumeها ثابت و کانتینر حذف شد.
+SCOPE: Offer، OfferVersion، capability links، OfferVersion publication و S14-A؛ بدون schema/migration/Evidence/HTTP.
+NEXT_ACTION: Guardian review؛ هیچ merge با main یا G10e شروع نشده است.
+CREATED_AT: 2026-09-14
+
+---
 HANDOFF_ID: HANDOFF-20260914-V1-TEST-GUARD
 AUTHOR: CODEX
 PHASE: G12B_V1_TEST_DB_GUARD_HARDENING
