@@ -375,3 +375,22 @@ MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 PUSH_STAGING_STATUS: UNTOUCHED
 NEXT_ACTION: Architecture Guardian review of G11a and owner approval before G11b real merge. Do not merge main or start G10C/G11b automatically.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_SERVICE_CCR_FINAL_G11B1
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G11B1-CORE-SERVICE-CCR-FINAL-001
+REVIEW_REFERENCE: pinned G11a review b599706d35b2d4716da7767ba3dc9a53b8e606a3
+OWNER_APPROVAL_REFERENCE: pinned 45926ce609e74d100b4e9bef48182baa93a369da
+DECISION: APPROVED — CCR scope approved; main merge authorized for Guardian only
+SCOPE: DOCUMENT ONLY — CCR finalization and LF manifest; no main merge
+COMMITS: 3cb44204230900823271741b60778eec1af790c3, 8fa1e1d863fa7bf590c626e855d1d0822ac690fb, 6c1b2557b341ee42544e9262011bf10113e0c88d
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G11B1_CORE_SERVICE_CCR_FINAL_REPORT.md
+REPORT_SHA256: cd91471f95a34dc0bea964400d0572b0511bacbdf11ab0170fb8f511c6f8355c
+VALIDATION: PASS — both pinned GW2-P checks passed; CCR status APPROVED; LF manifest contains 17 paths; no code, schema, migration, tsconfig or main change
+LIMITATION: git fetch failed with SEC_E_NO_CREDENTIALS; no credentials, token, git config or credential helper changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian review of G11b1, then Guardian-only G11b2 merge. Codex must not merge main or start later work automatically.
