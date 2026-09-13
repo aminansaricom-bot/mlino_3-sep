@@ -261,3 +261,21 @@ NEXT_ACTION: Architecture Guardian review of G9c. Do not start G10 or any implem
 
 DELIVERY_COMMIT: 861bf3c
 REPORT_SHA256: a6fa1ca02082f54c1e8a1a59a2c6f65d5c81e28031b5b3d8a25a8d1b1e8a6783
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_AUTHORITY_SLICE_G10A
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G10A-CORE-AUTHORITY-SLICE-001
+REVIEW_REFERENCE: pinned G9c owner decisions review 57ba5a765eebb76af17189346accdeba4759bbe6
+OWNER_APPROVAL: pinned final design approval f39b28debd40a96d7d514bfbc0912140e6645fae
+DESIGN_REFERENCE: 091d422 / cd041054c34d9e3827f5d590ff6dcb07c82e51b208f7d489443501ceecb561a8
+SCOPE: CODE — additive Core authority slice only
+CODE_COMMIT: aa225d1
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G10A_CORE_AUTHORITY_SLICE_REPORT.md
+VALIDATION: PASS — guard passed; six migrations applied to disposable tmpfs PostgreSQL on 5499; Prisma 5.22.0 generated; tsc passed; 20 suites and 255 tests passed; volume set unchanged; container removed
+LIMITATION: first build caught one import error; corrected and full validation rerun from a fresh disposable database; no forbidden file changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian independent review of G10a. Do not start G10b or modify schema/migrations without new approved instruction.
