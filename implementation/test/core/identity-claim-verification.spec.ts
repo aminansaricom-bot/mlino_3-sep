@@ -179,7 +179,8 @@ describe('G10b identity claim and verification slice', () => {
     const claim = await submitClaim(first.owner, first.organizationId);
     await expectDomainFailure(claims.submit(second.owner, { organizationId: first.organizationId, identifierType: 'registration', identifierValue: 'cross-org' }), 'TENANT_MISMATCH');
     await expectDomainFailure(verifications.start(second.owner, { organizationId: first.organizationId, claimId: claim.id, methodKey: 'cross-org' }), 'TENANT_MISMATCH');
-    await expectDomainFailure(claims.read(second.owner, claim.id, first.organizationId), 'AUTHORIZATION_DENIED');
+    const crossOrgReadContext: AuthContext = { ...second.owner, organizationId: first.organizationId };
+    await expectDomainFailure(claims.read(crossOrgReadContext, claim.id), 'AUTHORIZATION_DENIED');
     expect((await claims.read(first.owner, claim.id))?.id).toBe(claim.id);
   });
 

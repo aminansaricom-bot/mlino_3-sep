@@ -38,13 +38,12 @@ export class IdentityClaimService {
     });
   }
 
-  async read(context: AuthContext, claimId: string, organizationId = context.organizationId) {
+  async read(context: AuthContext, claimId: string) {
     validateAuthContext(context);
     requireNonEmpty(claimId, 'claimId');
-    requireNonEmpty(organizationId, 'organizationId');
     return this.db.$transaction(async (tx) => {
-      await requireActiveMembership(tx, { ...context, organizationId });
-      return tx.businessIdentityClaim.findUnique({ where: { id_organizationId: { id: claimId, organizationId } } });
+      await requireActiveMembership(tx, context);
+      return tx.businessIdentityClaim.findUnique({ where: { id_organizationId: { id: claimId, organizationId: context.organizationId } } });
     }).catch((error: unknown) => {
       throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);
     });

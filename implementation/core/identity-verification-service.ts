@@ -29,6 +29,7 @@ export class IdentityVerificationService {
     requireSameOrganization(context, input.organizationId);
     requireNonEmpty(input.claimId, 'claimId');
     requireNonEmpty(input.methodKey, 'methodKey');
+    const applicationNow = new Date(); // single-clock rule: application time is authoritative for lifecycle timestamps
     return this.db.$transaction(async (tx) => {
       await lockOrganization(tx, context.organizationId, memberOrganizationMissingError());
       await requireMembershipPermission(tx, context, 'identity_verification.start');
@@ -45,6 +46,7 @@ export class IdentityVerificationService {
           methodKey: input.methodKey,
           evidenceLocator: input.evidenceLocator,
           status: 'PENDING',
+          startedAt: applicationNow,
         },
       });
     }).catch((error: unknown) => {
