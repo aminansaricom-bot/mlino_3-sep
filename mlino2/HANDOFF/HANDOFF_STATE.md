@@ -356,3 +356,22 @@ MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 PUSH_STAGING_STATUS: UNTOUCHED
 NEXT_ACTION: Architecture Guardian independent review of G10B2. Do not start G10C or modify schema/migrations/API before a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_SERVICE_MERGE_PREPARATION_G11A
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G11A-CORE-SERVICE-MERGE-PREP-001
+REVIEW_REFERENCE: pinned G10B2 review 41f6a20fcd3e273c4e75302fe87c25dfa03e6017
+DECISION: APPROVED_NEXT_STEP — M1/M2, CCR draft and trial merge only
+SCOPE: CODE + DOCUMENT + TEMPORARY TRIAL MERGE; no real main merge
+CODE_AND_EVIDENCE_COMMITS: 6487a56f8956f7c83707b5e16a351613ba2cc22a, e4466f3b72b8a7bf869b6df3e269114e74fcd7b4, 3c903e0de752d882a2ed937a29b0507f5debc8db
+REPORT_COMMIT: 003b2ae6e97a7a1559d0f96c0305ceceb70ba673
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G11A_CORE_SERVICE_MERGE_PREP_REPORT.md
+REPORT_SHA256: 2d7a039eb3ee3f688c294cf5efca5733f129acdaaefa2e8cc9c1a8ad42dbfea0
+VALIDATION: PASS — fetch failed with SEC_E_NO_CREDENTIALS; GW2-P passed; head and trial each passed build, 4 Core suites/50 tests and 23 suites/299 full V1 tests on disposable tmpfs PostgreSQL:5499; trial merge had no conflicts, no trial commit or push, worktree removed
+LIMITATION: trial initially required Prisma Client generation in the disposable worktree; after generation validation passed; no credentials, token, git config or credential helper changed
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+PUSH_STAGING_STATUS: UNTOUCHED
+NEXT_ACTION: Architecture Guardian review of G11a and owner approval before G11b real merge. Do not merge main or start G10C/G11b automatically.
