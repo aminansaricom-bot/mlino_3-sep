@@ -1,0 +1,7 @@
+COMMAND=npm ci
+EXIT_CODE=0
+LOCKFILE_SHA256=7424e2775543c2533fceb48a360971b9d17fef187502c3920d00729d485acad5
+mlino-v1-core@0.1.0 C:\Users\galexy\AppData\Local\Temp\mlino-g5-core\implementation
+├── @prisma/client@5.22.0
+└── prisma@5.22.0
+

@@ -1,0 +1,7 @@
+EXIT_CODE=0
+PASS_SPEC_LINES=19
+FAIL_SPEC_LINES=0
+Test Suites: 19 passed, 19 total
+Tests:       249 passed, 249 total
+Snapshots:   0 total
+Time:        11.539 s, estimated 24 s

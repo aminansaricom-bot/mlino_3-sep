@@ -1,0 +1,2 @@
+NAME=/mlino-g5-base-db IMAGE=postgres:16-alpine STATUS=running MOUNTS=[] TMPFS={"/var/lib/postgresql/data":""}
+NAME=/mlino-g5-core-db IMAGE=postgres:16-alpine STATUS=running MOUNTS=[] TMPFS={"/var/lib/postgresql/data":""}
