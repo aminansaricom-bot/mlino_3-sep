@@ -1,0 +1,8 @@
+DATE_UTC=2026-09-13T04:31:33.8542668Z
+OS=Microsoft Windows NT 10.0.26200.0
+NODE=v24.18.0
+NPM=11.16.0
+POSTGRESQL=16.14
+PRISMA=5.22.0
+CONTAINER=mlino-g4-validation
+STORAGE=tmpfs; no named volume

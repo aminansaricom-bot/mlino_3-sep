@@ -1,6 +1,7 @@
 # CONTRACT_CHANGE_REQUEST — شِمای Core Foundation
 
-**وضعیت:** DRAFT — pending owner approval
+**وضعیت:** APPROVED — مصوب مالک، ۲۰۲۶-۰۹-۱۳
+**تصویب مالک:** `CCR Core Foundation Schema at fcddfc2 is APPROVED`
 **تاریخ:** ۲۰۲۶-۰۹-۱۲
 **INSTRUCTION_ID:** `CODEX-20260912-G3-CCR-DRAFT-001`
 **TARGET_HANDOFF_ID:** `HANDOFF-20260912-CORE-PRISMA-FOUNDATION`
