@@ -1,0 +1,456 @@
+G3B FULL REPLAY - PostgreSQL 16
+PASS migration 20260814065924_init
+PASS migration 20260815033018_add_situation_key
+PASS migration 20260815113714_rename_actor_core_entity_id_to_actor_id
+PASS migration 20260906001500_add_ownership_type
+PASS migration 20260910020000_add_external_workspace_link
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+PASS generated-core-migration.sql
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+PASS manual-constraints.sql
+BEGIN
+CREATE FUNCTION
+INSERT 0 2
+INSERT 0 2
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 1
+INSERT 0 2
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/base-assertions.sql:80: NOTICE:  PASS C1 active identity uniqueness SQLSTATE=23505
+psql:/tmp/base-assertions.sql:86: NOTICE:  PASS C2 active membership uniqueness SQLSTATE=23505
+ g3_expect_error
+-----------------
+
+(1 row)
+
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/base-assertions.sql:92: NOTICE:  PASS C3 active permission uniqueness SQLSTATE=23505
+psql:/tmp/base-assertions.sql:99: NOTICE:  PASS C4 profile claim uniqueness SQLSTATE=23505
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/base-assertions.sql:106: NOTICE:  PASS C6 optional composite shadow pair SQLSTATE=23514
+ g3_expect_error
+-----------------
+
+(1 row)
+
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/base-assertions.sql:112: NOTICE:  PASS C7 typed evidence owner XOR SQLSTATE=23514
+ g3_expect_error
+psql:/tmp/base-assertions.sql:116: NOTICE:  PASS C8 lifecycle audit completeness SQLSTATE=23514
+-----------------
+
+(1 row)
+
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/base-assertions.sql:122: NOTICE:  PASS C9 grant basis SQLSTATE=23514
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/base-assertions.sql:130: NOTICE:  PASS C10 offer validity and price SQLSTATE=23514
+psql:/tmp/base-assertions.sql:136: NOTICE:  PASS C11 confirmation is separate SQLSTATE=23514
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/base-assertions.sql:145: NOTICE:  PASS tenant isolation direct scalar FK SQLSTATE=23503
+ g3_expect_error
+-----------------
+
+(1 row)
+
+INSERT 0 1
+psql:/tmp/base-assertions.sql:166: NOTICE:  PASS C15 valid Publication event updated projection
+DO
+ g3_expect_error
+psql:/tmp/base-assertions.sql:175: NOTICE:  PASS C5 one published version per offer SQLSTATE=23505
+-----------------
+
+(1 row)
+
+psql:/tmp/base-assertions.sql:180: NOTICE:  PASS C12 Publication append-only SQLSTATE=P0001
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/base-assertions.sql:184: NOTICE:  PASS C13 OfferVersion immutable content SQLSTATE=P0001
+ g3_expect_error
+-----------------
+
+(1 row)
+
+INSERT 0 1
+psql:/tmp/base-assertions.sql:196: NOTICE:  PASS C14 decided verification immutable SQLSTATE=P0001
+ g3_expect_error
+-----------------
+
+(1 row)
+
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/base-assertions.sql:201: NOTICE:  PASS C15 direct publication projection mutation SQLSTATE=P0001
+SAVEPOINT
+ g3_expect_error
+-----------------
+
+(1 row)
+
+ROLLBACK
+psql:/tmp/base-assertions.sql:211: NOTICE:  PASS C15 failed nested transition SQLSTATE=P0001
+ g3_expect_error
+-----------------
+
+(1 row)
+
+psql:/tmp/base-assertions.sql:217: NOTICE:  PASS C15 no trigger-depth leak after savepoint SQLSTATE=P0001
+INSERT 0 2
+psql:/tmp/base-assertions.sql:279: NOTICE:  PASS all Core foreign keys use ON DELETE/UPDATE RESTRICT
+psql:/tmp/base-assertions.sql:279: NOTICE:  PASS withdraw-old-then-publish-new ordering
+DO
+psql:/tmp/base-assertions.sql:279: NOTICE:  PASS C15 approved projection trigger inventory
+DROP FUNCTION
+COMMIT
+PASS base-assertions.sql
+BEGIN
+CREATE FUNCTION
+INSERT 0 1
+INSERT 0 1
+DO
+psql:/tmp/t1-t12.sql:41: NOTICE:  PASS T1 Profile publication at matching revision
+INSERT 0 1
+psql:/tmp/t1-t12.sql:55: NOTICE:  PASS T2 Profile mismatched revision SQLSTATE=P0001
+ g3b_expect_error
+------------------
+
+(1 row)
+
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+psql:/tmp/t1-t12.sql:87: NOTICE:  PASS T3 all Profile public fields increment revision; stale content hidden
+DO
+psql:/tmp/t1-t12.sql:91: NOTICE:  PASS T3 direct Profile revision mutation SQLSTATE=P0001
+ g3b_expect_error
+------------------
+
+(1 row)
+
+ g3b_expect_error
+psql:/tmp/t1-t12.sql:97: NOTICE:  PASS T4 Profile published_content_revision guard SQLSTATE=P0001
+------------------
+
+(1 row)
+
+INSERT 0 1
+psql:/tmp/t1-t12.sql:117: NOTICE:  PASS T5 Profile republished at greater revision
+DO
+psql:/tmp/t1-t12.sql:127: NOTICE:  PASS T5 Profile equal revision republish SQLSTATE=P0001
+ g3b_expect_error
+------------------
+
+(1 row)
+
+psql:/tmp/t1-t12.sql:137: NOTICE:  PASS T5 Profile smaller revision republish SQLSTATE=P0001
+ g3b_expect_error
+------------------
+
+(1 row)
+
+INSERT 0 3
+INSERT 0 1
+psql:/tmp/t1-t12.sql:163: NOTICE:  PASS T6 Capability mismatched revision SQLSTATE=P0001
+ g3b_expect_error
+------------------
+
+(1 row)
+
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+DO
+psql:/tmp/t1-t12.sql:186: NOTICE:  PASS T6 Capability publication, revision increment and visibility
+psql:/tmp/t1-t12.sql:191: NOTICE:  PASS T4 Capability published_content_revision guard SQLSTATE=P0001
+ g3b_expect_error
+------------------
+
+(1 row)
+
+INSERT 0 1
+psql:/tmp/t1-t12.sql:210: NOTICE:  PASS T6 Capability republished at greater revision
+DO
+ g3b_expect_error
+------------------
+
+(1 row)
+
+psql:/tmp/t1-t12.sql:219: NOTICE:  PASS T6 Capability equal revision republish SQLSTATE=P0001
+psql:/tmp/t1-t12.sql:228: NOTICE:  PASS T6 Capability smaller revision republish SQLSTATE=P0001
+ g3b_expect_error
+------------------
+
+(1 row)
+
+psql:/tmp/t1-t12.sql:233: NOTICE:  PASS T4 OfferVersion published_at guard SQLSTATE=P0001
+ g3b_expect_error
+------------------
+
+(1 row)
+
+ g3b_expect_error
+psql:/tmp/t1-t12.sql:240: NOTICE:  PASS T7 INSERT link on published OfferVersion SQLSTATE=P0001
+------------------
+
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+ g3b_expect_error
+------------------
+
+(1 row)
+
+psql:/tmp/t1-t12.sql:264: NOTICE:  PASS T7 DELETE link on published OfferVersion SQLSTATE=P0001
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+DELETE 1
+INSERT 0 1
+ g3b_expect_error
+------------------
+
+(1 row)
+
+psql:/tmp/t1-t12.sql:289: NOTICE:  PASS T9 UPDATE draft link always rejected SQLSTATE=P0001
+DO
+psql:/tmp/t1-t12.sql:291: NOTICE:  PASS T8 draft link INSERT and DELETE
+psql:/tmp/t1-t12.sql:296: NOTICE:  PASS T10 Publication DELETE SQLSTATE=P0001
+ g3b_expect_error
+------------------
+
+(1 row)
+
+ g3b_expect_error
+------------------
+
+(1 row)
+
+psql:/tmp/t1-t12.sql:306: NOTICE:  PASS T11 Claim SUSPENDED without platform actor SQLSTATE=23514
+psql:/tmp/t1-t12.sql:314: NOTICE:  PASS T11 Membership REVOKED without actor SQLSTATE=23514
+ g3b_expect_error
+------------------
+
+(1 row)
+
+psql:/tmp/t1-t12.sql:324: NOTICE:  PASS T11 Membership REVOKED with two actors SQLSTATE=23514
+ g3b_expect_error
+------------------
+
+(1 row)
+
+ g3b_expect_error
+psql:/tmp/t1-t12.sql:332: NOTICE:  PASS T11 Grant REVOKED without actor SQLSTATE=23514
+------------------
+
+(1 row)
+
+psql:/tmp/t1-t12.sql:342: NOTICE:  PASS T11 Grant REVOKED with two actors SQLSTATE=23514
+ g3b_expect_error
+------------------
+
+(1 row)
+
+psql:/tmp/t1-t12.sql:384: NOTICE:  PASS T12 exact trigger allow-list (12/12)
+DO
+DROP FUNCTION
+COMMIT
+PASS t1-t12.sql
+PASS complete G3b reconstruction from origin/main migration history

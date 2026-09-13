@@ -1,0 +1,4 @@
+PASS from-migrations output matched schema-to-schema output byte-for-byte before LF canonicalization.
+RAW_MATCHING_SHA256=b36e92eca0a2843c594390a66e297ba0e8855f11c16d4cbe1852f51d56dfbfc4
+Both outputs were normalized to required LF for repository storage.
+COMMITTED_LF_SHA256=2a60090b32901d3a4b2bffd250d1c8560bdf389fed80fa371d64bbaf8d615ee6

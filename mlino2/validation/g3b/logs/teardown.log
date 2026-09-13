@@ -1,0 +1,6 @@
+mlino-g3b-postgres-20260913
+CONTAINER_REMAINS=0
+G3B_NAMED_VOLUME_REMAINS=0
+PASS disposable G3b container removed; no G3b named volume exists
+VERIFIED_CLEANUP_TARGET=C:\Users\galexy\mlino code\g3b-tooling
+TOOLING_REMAINS=False

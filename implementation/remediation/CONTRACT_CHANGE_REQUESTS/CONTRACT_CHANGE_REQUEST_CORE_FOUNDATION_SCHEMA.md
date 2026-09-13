@@ -47,7 +47,7 @@ D4 مالک «خیر» است. داده و migration موجود بدون تغی�
 
 FKهای مرکب و W1 در Database الزامی‌اند. فیلتر Query و Authorization همچنان لازم‌اند، اما جایگزین قید فیزیکی نیستند.
 
-## ۴. تصمیم‌های مالک D1 تا D5
+## ۴. تصمیم‌های مالک D1 تا D6
 
 | تصمیم | وضعیت | مقدار مصوب |
 |---|---|---|
@@ -56,6 +56,9 @@ FKهای مرکب و W1 در Database الزامی‌اند. فیلتر Query و
 | D3 — Prisma | DECIDED | `prisma` و `@prisma/client` دقیقاً `5.22.0` |
 | D4 — FK نگاشت بیرونی | DECIDED | در CCR نخست اضافه نشود |
 | D5 — قواعد migration | DECIDED | هر جدول ساخته‌شده در migration در `schema.prisma` مدل شود؛ نام قید دستی با Prisma یکی باشد یا با `map:` اعلام شود |
+| D6 — افزایش بازبینی محتوا | DECIDED | گزینه A: Database با تغییر هر فیلد عمومی BusinessProfile یا Capability، `content_revision` را دقیقاً یک واحد افزایش می‌دهد؛ تغییر مستقیم revision بدون تغییر فیلد عمومی رد می‌شود |
+
+سازوکار D1 اعتبارسنجی گذار را نیز شامل می‌شود: `WITHDRAWN` فقط از `PUBLISHED` پذیرفته است؛ `PUBLISHED` برای Profile و Capability از `UNPUBLISHED`، `WITHDRAWN` یا از `PUBLISHED` با revision بزرگ‌تر پذیرفته است؛ `PUBLISHED` برای OfferVersion فقط از `UNPUBLISHED` یا `WITHDRAWN` پذیرفته است. هر گذار دیگر با `P0001` رد می‌شود.
 
 ## ۵. مدل داده‌ی پیشنهادی
 
@@ -174,10 +177,10 @@ model Organization {
   archivedByPlatformIdentityRef String?               @map("archived_by_platform_identity_ref") @db.VarChar(255)
   archiveReason                 String?               @map("archive_reason") @db.Text
 
-  archivedByMembership OrganizationMembership? @relation("OrganizationArchivedByMembership", fields: [archivedByMembershipId, archivedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "organization_archived_by_membership_fk")
+  archivedByMembership Membership? @relation("OrganizationArchivedByMembership", fields: [archivedByMembershipId, archivedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "organization_archived_by_membership_fk")
   identityClaims       BusinessIdentityClaim[]   @relation("OrganizationIdentityClaims")
   identityVerifications IdentityVerification[]   @relation("OrganizationIdentityVerifications")
-  memberships          OrganizationMembership[]  @relation("OrganizationMemberships")
+  memberships          Membership[]  @relation("Memberships")
   permissionGrants     PermissionGrant[]         @relation("OrganizationPermissionGrants")
   businessProfiles     BusinessProfile[]         @relation("OrganizationBusinessProfiles")
   capabilities         Capability[]              @relation("OrganizationCapabilities")
@@ -208,7 +211,7 @@ model BusinessIdentityClaim {
   updatedAt                                   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   organization          Organization             @relation("OrganizationIdentityClaims", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "business_identity_claim_organization_fk")
-  submittedByMembership OrganizationMembership   @relation("ClaimSubmittedByMembership", fields: [submittedByMembershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "claim_submitted_by_membership_fk")
+  submittedByMembership Membership   @relation("ClaimSubmittedByMembership", fields: [submittedByMembershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "claim_submitted_by_membership_fk")
   verifications         IdentityVerification[]   @relation("ClaimVerifications")
   businessProfiles      BusinessProfile[]        @relation("BusinessProfileIdentityClaim")
 
@@ -241,7 +244,7 @@ model IdentityVerification {
   @@map("identity_verifications")
 }
 
-model OrganizationMembership {
+model Membership {
   id                                    String           @id @default(uuid()) @db.Text
   organizationId                        String           @map("organization_id") @db.Text
   identityProvider                      String           @map("identity_provider") @db.VarChar(100)
@@ -254,9 +257,9 @@ model OrganizationMembership {
   revokedByPlatformIdentityRef          String?          @map("revoked_by_platform_identity_ref") @db.VarChar(255)
   revocationReason                      String?          @map("revocation_reason") @db.Text
 
-  organization               Organization             @relation("OrganizationMemberships", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "membership_organization_fk")
-  revokedByMembership        OrganizationMembership?  @relation("MembershipRevokedByMembership", fields: [revokedByMembershipId, revokedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "membership_revoked_by_membership_fk")
-  revokedMemberships         OrganizationMembership[] @relation("MembershipRevokedByMembership")
+  organization               Organization             @relation("Memberships", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "membership_organization_fk")
+  revokedByMembership        Membership?  @relation("MembershipRevokedByMembership", fields: [revokedByMembershipId, revokedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "membership_revoked_by_membership_fk")
+  revokedMemberships         Membership[] @relation("MembershipRevokedByMembership")
   archivedOrganizations      Organization[]           @relation("OrganizationArchivedByMembership")
   submittedIdentityClaims    BusinessIdentityClaim[]  @relation("ClaimSubmittedByMembership")
   receivedPermissionGrants   PermissionGrant[]        @relation("PermissionGrantRecipient")
@@ -269,7 +272,7 @@ model OrganizationMembership {
   @@unique([id, organizationId], map: "membership_id_organization_unique")
   @@index([organizationId, membershipStatus], map: "membership_organization_status_idx")
   @@index([identityProvider, externalSubject], map: "membership_external_subject_idx")
-  @@map("organization_memberships")
+  @@map("memberships")
 }
 
 model PermissionGrant {
@@ -290,9 +293,9 @@ model PermissionGrant {
   revocationReason                      String?     @map("revocation_reason") @db.Text
 
   organization        Organization            @relation("OrganizationPermissionGrants", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_organization_fk")
-  membership          OrganizationMembership  @relation("PermissionGrantRecipient", fields: [membershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_membership_fk")
-  grantedByMembership OrganizationMembership? @relation("PermissionGrantGrantedBy", fields: [grantedByMembershipId, grantedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_granted_by_membership_fk")
-  revokedByMembership OrganizationMembership? @relation("PermissionGrantRevokedBy", fields: [revokedByMembershipId, revokedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_revoked_by_membership_fk")
+  membership          Membership  @relation("PermissionGrantRecipient", fields: [membershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_membership_fk")
+  grantedByMembership Membership? @relation("PermissionGrantGrantedBy", fields: [grantedByMembershipId, grantedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_granted_by_membership_fk")
+  revokedByMembership Membership? @relation("PermissionGrantRevokedBy", fields: [revokedByMembershipId, revokedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "permission_grant_revoked_by_membership_fk")
 
   @@unique([id, organizationId], map: "permission_grant_id_organization_unique")
   @@index([organizationId, membershipId, grantStatus], map: "permission_grant_member_status_idx")
@@ -352,7 +355,7 @@ model Capability {
   updatedAt                     DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   organization          Organization            @relation("OrganizationCapabilities", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "capability_organization_fk")
-  confirmedByMembership OrganizationMembership? @relation("CapabilityConfirmedByMembership", fields: [confirmedByMembershipId, confirmedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "capability_confirmed_by_membership_fk")
+  confirmedByMembership Membership? @relation("CapabilityConfirmedByMembership", fields: [confirmedByMembershipId, confirmedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "capability_confirmed_by_membership_fk")
   offerVersionLinks     OfferVersionCapability[] @relation("CapabilityOfferVersionLinks")
   evidenceItems         Evidence[]               @relation("EvidenceCapability")
   publicationEvents     Publication[]            @relation("PublicationCapability")
@@ -452,7 +455,7 @@ model Evidence {
   organization          Organization            @relation("OrganizationEvidence", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "evidence_organization_fk")
   capability            Capability?             @relation("EvidenceCapability", fields: [capabilityId, capabilityOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "evidence_capability_fk")
   offerVersion          OfferVersion?           @relation("EvidenceOfferVersion", fields: [offerVersionId, offerVersionOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "evidence_offer_version_fk")
-  confirmedByMembership OrganizationMembership? @relation("EvidenceConfirmedByMembership", fields: [confirmedByMembershipId, confirmedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "evidence_confirmed_by_membership_fk")
+  confirmedByMembership Membership? @relation("EvidenceConfirmedByMembership", fields: [confirmedByMembershipId, confirmedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "evidence_confirmed_by_membership_fk")
 
   @@unique([id, organizationId], map: "evidence_id_organization_unique")
   @@index([organizationId, capabilityId, evidenceStatus, freshUntil], map: "evidence_capability_status_fresh_idx")
@@ -482,7 +485,7 @@ model Publication {
   businessProfile     BusinessProfile?       @relation("PublicationBusinessProfile", fields: [businessProfileId, businessProfileOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_business_profile_fk")
   capability          Capability?            @relation("PublicationCapability", fields: [capabilityId, capabilityOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_capability_fk")
   offerVersion        OfferVersion?          @relation("PublicationOfferVersion", fields: [offerVersionId, offerVersionOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_offer_version_fk")
-  performedByMembership OrganizationMembership @relation("PublicationPerformedByMembership", fields: [performedByMembershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_performed_by_membership_fk")
+  performedByMembership Membership @relation("PublicationPerformedByMembership", fields: [performedByMembershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_performed_by_membership_fk")
 
   @@unique([id, organizationId], map: "publication_id_organization_unique")
   @@index([organizationId, businessProfileId, occurredAt], map: "publication_business_profile_time_idx")
@@ -506,7 +509,7 @@ CREATE UNIQUE INDEX business_identity_claim_active_identifier_unique
   WHERE claim_status IN ('VERIFIED', 'SUSPENDED');
 
 CREATE UNIQUE INDEX membership_active_subject_unique
-  ON organization_memberships (organization_id, identity_provider, external_subject)
+  ON memberships (organization_id, identity_provider, external_subject)
   WHERE membership_status = 'ACTIVE';
 
 CREATE UNIQUE INDEX permission_grant_active_unique
@@ -528,7 +531,7 @@ ALTER TABLE organizations ADD CONSTRAINT organization_archive_actor_pair_check C
       AND archived_by_organization_id = id)
 );
 
-ALTER TABLE organization_memberships ADD CONSTRAINT membership_revocation_actor_pair_check CHECK (
+ALTER TABLE memberships ADD CONSTRAINT membership_revocation_actor_pair_check CHECK (
   (revoked_by_membership_id IS NULL AND revoked_by_organization_id IS NULL)
   OR (revoked_by_membership_id IS NOT NULL AND revoked_by_organization_id IS NOT NULL
       AND revoked_by_organization_id = organization_id)
@@ -640,7 +643,7 @@ ALTER TABLE business_identity_claims ADD CONSTRAINT business_identity_claim_stat
     AND status_changed_at IS NOT NULL)
 );
 
-ALTER TABLE organization_memberships ADD CONSTRAINT membership_revocation_audit_check CHECK (
+ALTER TABLE memberships ADD CONSTRAINT membership_revocation_audit_check CHECK (
   (membership_status = 'ACTIVE'
     AND revoked_at IS NULL
     AND revoked_by_membership_id IS NULL
@@ -799,16 +802,42 @@ CREATE TRIGGER offer_version_immutable_before_change
 BEFORE UPDATE OR DELETE ON offer_versions
 FOR EACH ROW EXECUTE FUNCTION core_enforce_offer_version_immutability();
 
-CREATE FUNCTION core_reject_offer_version_capability_mutation() RETURNS trigger
+CREATE FUNCTION core_enforce_offer_version_capability_immutability() RETURNS trigger
 LANGUAGE plpgsql AS $$
+DECLARE
+  parent_published_at timestamptz;
 BEGIN
-  RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'offer version capability links are immutable';
+  IF TG_OP = 'UPDATE' THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'offer version capability links cannot be updated';
+  END IF;
+
+  IF TG_OP = 'INSERT' THEN
+    SELECT published_at INTO parent_published_at
+      FROM offer_versions
+     WHERE id = NEW.offer_version_id
+       AND organization_id = NEW.organization_id
+     FOR UPDATE;
+    IF parent_published_at IS NOT NULL THEN
+      RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'published offer version capability links are immutable';
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  SELECT published_at INTO parent_published_at
+    FROM offer_versions
+   WHERE id = OLD.offer_version_id
+     AND organization_id = OLD.organization_id
+   FOR UPDATE;
+  IF parent_published_at IS NOT NULL THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'published offer version capability links are immutable';
+  END IF;
+  RETURN OLD;
 END;
 $$;
 
 CREATE TRIGGER offer_version_capability_immutable_before_change
-BEFORE UPDATE OR DELETE ON offer_version_capabilities
-FOR EACH ROW EXECUTE FUNCTION core_reject_offer_version_capability_mutation();
+BEFORE INSERT OR UPDATE OR DELETE ON offer_version_capabilities
+FOR EACH ROW EXECUTE FUNCTION core_enforce_offer_version_capability_immutability();
 
 -- C14: decided verification history is read-only
 CREATE FUNCTION core_enforce_verification_immutability() RETURNS trigger
@@ -828,8 +857,54 @@ CREATE TRIGGER identity_verification_decided_immutable_before_change
 BEFORE UPDATE OR DELETE ON identity_verifications
 FOR EACH ROW EXECUTE FUNCTION core_enforce_verification_immutability();
 
+-- D6 = A: public-field changes increment content_revision in the database.
+CREATE FUNCTION core_bump_business_profile_content_revision() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF ROW(
+       NEW.name, NEW.description, NEW.latitude, NEW.longitude, NEW.address_text,
+       NEW.contact_information, NEW.links, NEW.business_hours,
+       NEW.business_identity_claim_id
+     ) IS DISTINCT FROM ROW(
+       OLD.name, OLD.description, OLD.latitude, OLD.longitude, OLD.address_text,
+       OLD.contact_information, OLD.links, OLD.business_hours,
+       OLD.business_identity_claim_id
+     ) THEN
+    NEW.content_revision := OLD.content_revision + 1;
+  ELSIF NEW.content_revision IS DISTINCT FROM OLD.content_revision THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'content revision requires a public field change';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER business_profile_content_revision_before_update
+BEFORE UPDATE OF name, description, latitude, longitude, address_text,
+  contact_information, links, business_hours, business_identity_claim_id,
+  content_revision ON business_profiles
+FOR EACH ROW EXECUTE FUNCTION core_bump_business_profile_content_revision();
+
+CREATE FUNCTION core_bump_capability_content_revision() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF ROW(NEW.name, NEW.short_description, NEW.category_key, NEW.audience)
+       IS DISTINCT FROM
+     ROW(OLD.name, OLD.short_description, OLD.category_key, OLD.audience) THEN
+    NEW.content_revision := OLD.content_revision + 1;
+  ELSIF NEW.content_revision IS DISTINCT FROM OLD.content_revision THEN
+    RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'content revision requires a public field change';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER capability_content_revision_before_update
+BEFORE UPDATE OF name, short_description, category_key, audience,
+  content_revision ON capabilities
+FOR EACH ROW EXECUTE FUNCTION core_bump_capability_content_revision();
+
 -- C15 / D1 = B1: direct projection writes are forbidden.
--- Closed trigger allow-list: publication_apply_projection_after_insert only.
+-- Closed projection-writer allow-list: publication_apply_projection_after_insert only.
 CREATE FUNCTION core_require_nested_publication_projection() RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN
@@ -850,21 +925,21 @@ CREATE TRIGGER business_profile_publication_initial_guard
 BEFORE INSERT ON business_profiles
 FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection();
 CREATE TRIGGER business_profile_publication_projection_guard
-BEFORE UPDATE OF publication_status ON business_profiles
+BEFORE UPDATE OF publication_status, published_content_revision ON business_profiles
 FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection();
 
 CREATE TRIGGER capability_publication_initial_guard
 BEFORE INSERT ON capabilities
 FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection();
 CREATE TRIGGER capability_publication_projection_guard
-BEFORE UPDATE OF publication_status ON capabilities
+BEFORE UPDATE OF publication_status, published_content_revision ON capabilities
 FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection();
 
 CREATE TRIGGER offer_version_publication_initial_guard
 BEFORE INSERT ON offer_versions
 FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection();
 CREATE TRIGGER offer_version_publication_projection_guard
-BEFORE UPDATE OF publication_status ON offer_versions
+BEFORE UPDATE OF publication_status, published_at ON offer_versions
 FOR EACH ROW EXECUTE FUNCTION core_require_nested_publication_projection();
 
 CREATE FUNCTION core_apply_publication_projection() RETURNS trigger
@@ -881,7 +956,11 @@ BEGIN
        WHERE id = NEW.business_profile_id
          AND organization_id = NEW.organization_id
          AND content_revision = NEW.content_revision
-         AND publication_status IN ('UNPUBLISHED', 'WITHDRAWN');
+         AND (
+           publication_status IN ('UNPUBLISHED', 'WITHDRAWN')
+           OR (publication_status = 'PUBLISHED'
+               AND NEW.content_revision > published_content_revision)
+         );
     ELSE
       UPDATE business_profiles
          SET publication_status = 'WITHDRAWN',
@@ -900,7 +979,11 @@ BEGIN
        WHERE id = NEW.capability_id
          AND organization_id = NEW.organization_id
          AND content_revision = NEW.content_revision
-         AND publication_status IN ('UNPUBLISHED', 'WITHDRAWN');
+         AND (
+           publication_status IN ('UNPUBLISHED', 'WITHDRAWN')
+           OR (publication_status = 'PUBLISHED'
+               AND NEW.content_revision > published_content_revision)
+         );
     ELSE
       UPDATE capabilities
          SET publication_status = 'WITHDRAWN',
@@ -941,9 +1024,17 @@ FOR EACH ROW EXECUTE FUNCTION core_apply_publication_projection();
 -- END CCR_CORE_MANUAL_SQL
 ```
 
-### ۶.۱. فهرست بسته Triggerهای مجاز برای D1/B1
+### ۶.۱. فهرست بسته Triggerهای مجاز برای D1/B1 و D6/A
 
-تنها Trigger مجاز به ایجاد update تو‌در‌تو روی `publication_status`، `publication_apply_projection_after_insert` است. افزودن هر Trigger دیگر که این ستون‌ها را بنویسد، تغییر قرارداد و نیازمند CCR است. آزمون inventory باید این allow-list را دقیق کنترل کند. `pg_trigger_depth() > 1` فقط nested بودن را اثبات می‌کند؛ allow-list با بازبینی اجباری migration و inventory خودکار تثبیت می‌شود.
+مجموعه‌ی دقیق Triggerهای غیرداخلی روی پنج جدول حساس به شرح زیر است:
+
+- `publications`: `publication_apply_projection_after_insert`، `publication_immutable_before_change`
+- `business_profiles`: `business_profile_content_revision_before_update`، `business_profile_publication_initial_guard`، `business_profile_publication_projection_guard`
+- `capabilities`: `capability_content_revision_before_update`، `capability_publication_initial_guard`، `capability_publication_projection_guard`
+- `offer_versions`: `offer_version_immutable_before_change`، `offer_version_publication_initial_guard`، `offer_version_publication_projection_guard`
+- `offer_version_capabilities`: `offer_version_capability_immutable_before_change`
+
+تنها Trigger مجاز به ایجاد update تو‌در‌تو روی projectionهای انتشار، `publication_apply_projection_after_insert` است. دو Trigger مربوط به D6 فقط `content_revision` را می‌نویسند و هرگز `publication_status`، `published_content_revision` یا `published_at` را تغییر نمی‌دهند. افزودن Trigger دیگری روی این پنج جدول، تغییر قرارداد و نیازمند CCR است. آزمون inventory باید مجموعه‌ی کامل بالا را با برابری دقیق کنترل کند. `pg_trigger_depth() > 1` فقط nested بودن را اثبات می‌کند؛ allow-list با بازبینی اجباری migration و inventory خودکار تثبیت می‌شود.
 
 ## ۷. مالکیت، کاردینالیتی و مرز Module
 
@@ -1017,6 +1108,7 @@ Rollback تخریبی ممنوع است. ابتدا writerها متوقف، snap
 | سند | Commit | SHA-256 canonical |
 |---|---|---|
 | بازبینی G2 Guardian | `89aef7ab70573283621f1396efade87d7e5d21db` | `4d65b222a0baa39461d5124c41f0d264dd0888f54ddd9eb0e47b82fff08b3f02` |
+| بازبینی G3 Guardian | `3e19b541d1db2f629ca758faaba4dbbf1b30fbda` | `753859b2087357baedf49e9a801c781fa6c98d750a5f82d95fbb083ab6098c57` |
 | CCR الگوی ExternalWorkspaceLink | `28438f22d8cfb04f114834e8b164af7c65dcea11` | `7d630b24bdc49b710a836ea1320bfb1e2b105c9f43f557abe3d8764872db5162` |
 | `MLINO_CORE_PRISMA_SCHEMA_DESIGN.md` v3 | `2cf6caa467a7d90a0fa4991ca5b6fad17ac07719` | `dff76aae5c7be67234998a73ee92a2716ff99b17e98f659bdf19abbf191823e6` |
 | بازبینی مستقل Prisma | `2cf6caa467a7d90a0fa4991ca5b6fad17ac07719` | `b0d229751a4c141b634afe4160c72674c42bef94145891e27ab935bac237d785` |
@@ -1057,10 +1149,22 @@ ADR-0001 تا ADR-0012 در `28438f22d8cfb04f114834e8b164af7c65dcea11` مرجع 
 
 جزئیات ۸۳ فایل شاهد G1b/G1c در `mlino2/validation/G1_EVIDENCE_MANIFEST.md` ثبت شده و در این CCR تکرار نمی‌شود.
 
-## ۱۵. وضعیت این CCR
+## ۱۵. تغییرات G3b
+
+| یافته | تغییر اعمال‌شده |
+|---|---|
+| R-1 | محافظ C15 اکنون همه‌ی ستون‌های projection را می‌پاید: `publication_status` همراه `published_content_revision` یا `published_at` |
+| R-2 | پیوند Capability برای OfferVersion منتشرشده در INSERT/DELETE قفل است؛ UPDATE همیشه رد می‌شود؛ پیش‌نویس INSERT/DELETE را می‌پذیرد |
+| R-3 | تصمیم مالک D6=A ثبت و Trigger افزایش خودکار `content_revision` برای فیلدهای عمومی Profile و Capability اضافه شد |
+| R-4 | بازنشر Profile و Capability منتشرشده فقط با `content_revision` بزرگ‌تر مجاز شد |
+| R-5 | بسته‌ی G3b آزمون‌های T1 تا T12 را روی متن نهایی اجرا می‌کند |
+| R-6 | نام مدل و جدول به طراحی مصوب `Membership` / `memberships` بازگردانده شد |
+| R-7 | قواعد کامل گذار Publication به‌عنوان بخش صریح D1 ثبت شد |
+
+## ۱۶. وضعیت این CCR
 
 **DRAFT — pending owner approval**
 
-این سند D1 تا D5 را به‌عنوان تصمیم‌های ثبت‌شده‌ی مالک منعکس می‌کند، اما هنوز APPROVED نیست. پس از اجرای validation دقیق §۵ و §۶، Architecture Guardian گزارش را بازبینی می‌کند و مالک تنها مرجع تصویب CCR است.
+این سند D1 تا D6 را به‌عنوان تصمیم‌های ثبت‌شده‌ی مالک منعکس می‌کند، اما هنوز APPROVED نیست. پس از اجرای validation دقیق §۵ و §۶ و بسته‌ی G3b، Architecture Guardian گزارش را بازبینی می‌کند و مالک تنها مرجع تصویب CCR است.
 
 من کدکس هستم.

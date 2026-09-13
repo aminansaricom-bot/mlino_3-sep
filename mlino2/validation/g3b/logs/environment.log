@@ -1,0 +1,3 @@
+16.15 (Debian 16.15-1.pgdg13+2)
+container=/mlino-g3b-postgres-20260913 tmpfs={"/var/lib/postgresql/data":""} mounts=[]
+status=Up 7 minutes
