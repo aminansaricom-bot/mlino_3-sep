@@ -1,0 +1,29 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand implementation/test/core
+
+PASS test/core/error-adapter.spec.ts
+FAIL test/core/core-authority.spec.ts
+  ● G10a2 Core authority slice › serializes concurrent platform revocations so only one can remove the last grant administrator
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 2
+    Received array:  [{"status": "fulfilled", "value": {"basisKey": "member_grant", "grantStatus": "REVOKED", "grantedAt": 2026-09-13T14:45:28.331Z, "grantedByMembershipId": "36eabec0-d7e4-4a7b-8163-81bd74241c4f", "grantedByOrganizationId": "g10a2-concurrency", "id": "7d409c42-bd43-45ab-8aa2-2f9a3c2fcbcd", "membershipId": "864172e0-d9fc-4be8-9957-6d0dd8e75a7d", "organizationId": "g10a2-concurrency", "permissionKey": "permission_grant.issue", "reason": "first admin", "revocationReason": "concurrent revoke 1", "revokedAt": 2026-09-13T14:45:28.362Z, "revokedByMembershipId": null, "revokedByOrganizationId": null, "revokedByPlatformIdentityRef": "platform:test"}}, {"status": "fulfilled", "value": {"basisKey": "member_grant", "grantStatus": "REVOKED", "grantedAt": 2026-09-13T14:45:28.349Z, "grantedByMembershipId": "36eabec0-d7e4-4a7b-8163-81bd74241c4f", "grantedByOrganizationId": "g10a2-concurrency", "id": "c0abbe61-fd51-43d6-a14d-e4bc5475a8c4", "membershipId": "5eed5490-ace3-4763-bbf7-4975d5f3d34d", "organizationId": "g10a2-concurrency", "permissionKey": "permission_grant.issue", "reason": "second admin", "revocationReason": "concurrent revoke 2", "revokedAt": 2026-09-13T14:45:28.393Z, "revokedByMembershipId": null, "revokedByOrganizationId": null, "revokedByPlatformIdentityRef": "platform:test"}}]
+
+      126 |       grants.revokeByPlatform('platform-token', a.organization.id, secondGrant.id, 'concurrent revoke 2'),
+      127 |     ]);
+    > 128 |     expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+          |                                                                       ^
+      129 |     expect(results.filter((result) => result.status === 'rejected')).toHaveLength(1);
+      130 |   });
+      131 | });
+
+      at Object.<anonymous> (test/core/core-authority.spec.ts:128:71)
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 18 passed, 19 total
+Snapshots:   0 total
+Time:        5.855 s
+Ran all test suites matching /implementation\\test\\core/i.
