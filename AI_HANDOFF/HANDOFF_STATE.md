@@ -1,38 +1,38 @@
-HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10B-REVIEW
+HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10B2-REVIEW
 AUTHOR: CLAUDE
-PHASE: G10B_REVIEWED_G10B2_RELEASED
-STATUS: APPROVED_WITH_FIXES
-REVIEW_VERDICT: G10b (codex d828d1e through b3dd604) is structurally sound:
-- closed S11 transition map; no direct →VERIFIED (the initial run's accepted SUSPENDED→VERIFIED was caught by tests and fixed)
-- decision and claim in one tx, with a proven rollback (C1)
-- attempt numbering under the org and claim locks, with a concurrency test
-- C1 → "identifier already claimed"; decided attempts immutable; platform paths fail-closed
-Environment clean: live DB untouched; tmpfs; NO_VOLUME_CHANGE; 23 suites and 296 tests; manifest 5/5.
-R1 (red): an S12-A loophole. decide() does not require the attempt to post-date the suspension, so a stale pre-suspension open attempt can reinstate a SUSPENDED claim. Open attempts are never closed on claim status changes.
-Yellow:
-- Y1: no runtime check of the decision value.
-- Y2: start() cross-org returns VALIDATION_FAILED instead of TENANT_MISMATCH.
-- Y3: no read() cross-org test.
-- Y4: no tests for markUnderReview on non-PENDING or decide on an already-decided attempt.
-- Y5: the S12-A test double-starts attempts.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G10B_CLAIM_VERIFICATION_SLICE.md
+PHASE: G10B_CLOSED_G11A_RELEASED
+STATUS: APPROVED_NEXT_STEP
+REVIEW_VERDICT: G10b2 (codex cfe376f, f4d1135, 139449c, 65168f1) closes R1:
+- open attempts are expired in the same tx on every claim status change
+- SUSPENDED requires attempt.startedAt > statusChangedAt
+- the exact A1/A2 scenario is tested
+Y1-Y5 are applied. Environment clean: GW2-P passed; live DB untouched; tmpfs; NO_VOLUME_CHANGE; 23 suites and 299 tests; manifest 4/4.
+The G10b claim/verification slice is CLOSED.
+Pre-merge items:
+- M1: remove the read() organizationId parameter (W1 shape).
+- M2: single clock for startedAt versus statusChangedAt.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G10B2_CLAIM_VERIFICATION_FIXES.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). The Codex core branch is at b3dd604. main is c7e9a88 before this commit. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-13T23:00:00+03:30
-NEXT_ACTION: Give Codex CODEX-20260913-G10B2-CLAIM-VERIFICATION-FIXES-001 (section 4 of the review), pinned. It stays within the G10b authorization; no new approval needed. After the G10b2 review, the merge gate for G10a+G10b into main goes to the owner.
+CODE_COMMIT_SHA: (none - review only). The Codex core branch is at 65168f1. main is b52f149 before this commit. Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-13T23:40:00+03:30
+NEXT_ACTION: Give Codex CODEX-20260913-G11A-CORE-SERVICE-MERGE-PREP-001 (section 5 of the review), pinned. No owner approval is needed for the preparation:
+- M1 and M2
+- the CCR draft CONTRACT_CHANGE_REQUEST_CORE_SERVICE_LAYER.md
+- a trial merge of origin/main + core in a temp worktree with the full V1 suite on a disposable DB, never pushed
+After the G11a review: the owner approves the CCR and the merge (G11b); the Guardian executes the merge into main.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260913-OWNER-APPROVAL-S12A-G10B
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260913-G10B-CORE-CLAIM-VERIFICATION-SLICE-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10B-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260913-G10B2-CLAIM-VERIFICATION-FIXES-001
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as MLINO Architecture Guardian.
 
 HANDOFF_PRECONDITION_CHECK:
-- Fetched; remote core is at b3dd604.
+- Fetched; remote core is at 65168f1.
 - Scope and secret scan.
-- Read both new services, the repository and adapter diffs, and the full spec line by line.
-- Read the initial failure log.
-- Checked volume before/after (identical, 19 lines), cleanup and migrate evidence.
-- Manifest 5/5; read-only counts on the live DB; checked anonymous volume CreatedAt; checked the report hash.
+- Read the full code/test diff since b3dd604.
+- Read the precondition GW2-P log, and the initial/final/full test logs.
+- Checked volume before-cleanup versus after (identical), the cleanup log, and the manifest (4/4).
+- Read-only counts on the live DB; checked anonymous volume CreatedAt; checked the report hash.
 
 SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main. No credential, Docker write, database write or Codex-branch action.
 
