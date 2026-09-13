@@ -1,0 +1,31 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/foundation/workspace-link.spec.ts
+
+FAIL test/foundation/workspace-link.spec.ts
+  ● Test suite failed to run
+
+    V1 test database guard: only disposable localhost PostgreSQL on port 5499 is allowed
+
+      25 |   throw new Error(`${GUARD_PREFIX} only disposable localhost PostgreSQL on port 5499 is allowed`);
+      26 | }
+    > 27 |
+         | ^
+      28 | export function assertSafeTestDatabase(env: NodeJS.ProcessEnv, envFilePath: string): void {
+      29 |   const effectiveUrl = Object.prototype.hasOwnProperty.call(env, 'DATABASE_URL')
+      30 |     ? env.DATABASE_URL
+
+      at reject (test/test-db-guard.ts:27:11)
+      at assertSafeTestDatabase (test/test-db-guard.ts:36:9)
+      at Object.<anonymous> (test/setup-env.ts:8:44)
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        2.489 s
+Ran all test suites matching /test\\foundation\\workspace-link.spec.ts/i.
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice
