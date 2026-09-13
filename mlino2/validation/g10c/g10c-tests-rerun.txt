@@ -1,0 +1,26 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/core/g10c-profile-capability.spec.ts
+
+PASS test/core/g10c-profile-capability.spec.ts
+  G10c Core profile, capability and publication slice
+    √ profile create starts unpublished and D6 bumps every public field without service projection writes (260 ms)
+    √ direct initial projection write is rejected and mapped (58 ms)
+    √ capability key is organization-unique, public updates bump D6, and confirmation is one-way (106 ms)
+    √ S13-A links only a verified same-organization claim and unlink clears both fields (121 ms)
+    √ publication uses current revisions, is idempotent, withdraws, and records the exact gate grant (144 ms)
+    √ publication rejects OfferVersion targets in this slice (52 ms)
+    √ W1 cross-organization and missing permission are denied (100 ms)
+    √ concurrent public edit and publish preserve revision consistency (96 ms)
+    √ error adapter maps the two new named constraints (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       9 passed, 9 total
+Snapshots:   0 total
+Time:        5.415 s
+Ran all test suites matching /test\\core\\g10c-profile-capability.spec.ts/i.
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice
