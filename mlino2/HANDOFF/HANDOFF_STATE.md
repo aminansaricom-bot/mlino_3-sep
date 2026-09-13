@@ -108,3 +108,23 @@ TEMP_WORKTREE_STATUS: REMOVED_AND_PRUNED
 DOCKER_DATABASE_STATUS: NOT_TOUCHED
 V2_BRANCH_STATUS: UNCHANGED
 NEXT_ACTION: Architecture Guardian independent review of G6. G7 remains forbidden without separate owner approval and instruction; do not run Docker, docker compose, Prisma migration, npm, or connect to any database.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: LOCAL_CORE_MIGRATION_G7_BACKUP_HARD_STOP
+STATUS: BLOCKED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G7-APPLY-CORE-MIGRATION-LOCAL-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G6_MERGE.md@53180d5028cdaa6589e02d60e69c6746c801b5ed
+OWNER_APPROVAL: G7 approved: back up and apply migration 20260913010000_add_core_foundation to mlino-v1-local-db
+BACKUP_DIR: C:\Users\galexy\mlino-backups\
+DELIVERY_COMMIT: bd0e62e8b8bdd98548724c57a2eb3a634bd1b9b0
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G7_APPLY_CORE_MIGRATION_REPORT.md
+REPORT_SHA256: 0b2d18d99f9e29667216302dfb9c98b05cc871f8bdef0e0bca7a2252e49081b8
+BRANCH: codex/core-prisma-foundation
+PRE_STATE: database running/healthy, restart count 0, exactly five expected completed migrations, ten public tables counted
+BACKUP_STATUS: FAILED_BEFORE_PG_DUMP — destination directory creation failed; no backup file exists
+DATABASE_CHANGE_STATUS: NONE — migration 20260913010000_add_core_foundation was not applied; post-stop check still shows exactly five migrations
+ROLLBACK_STATUS: NOT_REQUIRED
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian review and a separate corrective G7b instruction. Do not retry backup, apply migration, run Docker Compose, or begin any later step without that instruction.
