@@ -9,7 +9,6 @@ export interface AuthContext {
   readonly identityProvider: string;
   readonly externalSubject: string;
   readonly membershipId?: string;
-  readonly platformIdentityRef?: string;
 }
 
 export function validateAuthContext(context: AuthContext): void {
@@ -32,12 +31,6 @@ export async function requireMembershipPermission(db: Prisma.TransactionClient, 
   const grant = await db.permissionGrant.findFirst({ where: { organizationId: context.organizationId, membershipId: membership.id, permissionKey, grantStatus: 'ACTIVE' }, select: { id: true } });
   if (!grant) throw authorizationDenied('required permission grant missing');
   return membership;
-}
-
-export function requirePlatformIdentity(context: AuthContext): string {
-  validateAuthContext(context);
-  if (!context.platformIdentityRef) throw authorizationDenied('platform identity reference required');
-  return context.platformIdentityRef;
 }
 
 export function requireSameOrganization(context: AuthContext, organizationId: string): void {
