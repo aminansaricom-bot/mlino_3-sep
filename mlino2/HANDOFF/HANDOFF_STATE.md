@@ -51,3 +51,22 @@ VALIDATION: R1-R7 PASS; C1-C15 PASS; T1-T12 PASS; W1 Prisma P2003 PASS; origin/m
 MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 NEXT_ACTION: Architecture Guardian independent review of G3b. Do not approve the CCR, modify schema.prisma, create an application migration, or begin any later phase without a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_FOUNDATION_SCHEMA_MIGRATION_G4
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G4-CORE-SCHEMA-MIGRATION-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G3B_CCR_FIXES.md@94a70ce10cb95a0d5bade8624a93db076fb3d8c0
+OWNER_APPROVAL: CCR Core Foundation Schema at fcddfc2 is APPROVED
+BASE_COMMIT: 6b625093b2fd39fba9a26c2073a849e97411caa4
+DELIVERY_COMMIT: 3853f9755bf0c3ee7a40d97baf00ff236b127f63
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G4_CORE_SCHEMA_MIGRATION_REPORT.md
+REPORT_SHA256: e1313b833b8b67af345e798f068602dc8c6ec419c956a40ae8adbdaad2633f7f
+BRANCH: codex/core-prisma-foundation
+CCR_STATUS: APPROVED_BY_OWNER
+VALIDATION: Prisma 5.22.0 validate PASS; six-migration deploy PASS; post-deploy drift empty; C1-C15 PASS; T1-T12 PASS; W1 Prisma P2003 PASS; protected inventory recorded; fingerprint and teardown PASS
+V1_FULL_SUITE_STATUS: NOT_RUN — deferred by the approved G4 instruction to a later gate
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G4. Do not run the V1 full suite against the regenerated client, merge, or begin any later gate without a separate approved instruction.
