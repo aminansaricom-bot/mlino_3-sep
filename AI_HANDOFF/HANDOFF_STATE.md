@@ -1,50 +1,38 @@
-HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G10D-REVIEW
+HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G10D-MERGE-G10E
 AUTHOR: CLAUDE
-PHASE: G10D_CLOSED_OWNER_DECISIONS_PENDING
+PHASE: G10D_MERGED_G10E_RELEASED
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: G10d (codex/core-g10d-offer; b07f543 and f962e12; base main cf1da02; pushed after the Guardian's pre-push check) is accepted.
-- OfferService: allowlists; offer_key unique; version_number under an Offer FOR UPDATE lock; no update/delete for OfferVersion (R2); capability links only while UNPUBLISHED, blocked after publish and after withdraw.
-- OfferVersion publication:
-  - org lock, then the permission check, then Offer/version locks
-  - null content_revision
-  - outcomes PUBLISHED / ALREADY_PUBLISHED (no insert) / WITHDRAWN
-  - REPLACED: withdraw the old version, then publish the new one, in one tx
-  - the concurrent v2/v3 publish leaves exactly one PUBLISHED
-- S14-A resets only on an actual change and is tested both ways.
-- The G10c spec change reflects the approved scope; nothing is weakened.
-- All 10 claimed tests exist by name.
-- Environment clean: live DB untouched; volume lists identical; 26 suites and 337 tests; manifest 6/6; merge-tree 3e2d438 clean.
-Minor items carried to G10e:
-- Y1: unlinking a nonexistent link → P2025 → INTERNAL_ERROR.
-- Y2: OfferVersion tests do not assert the gate_snapshot grantId.
-The G10d slice is CLOSED.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G10D_OFFER_SLICE.md
+REVIEW_VERDICT: The owner approved directly in chat ("تصویبش ک[ن]"): the G10d merge, G10e, and S15-A.
+- G10d merge: the Guardian merged codex/core-g10d-offer f962e12 into main 0588c8f with --no-ff.
+  - Merge commit cebdb5f; tree 832bb38 equals the Guardian merge-tree; no deletions; guarded push.
+  - Runtime unchanged: read-api a07858b3; DB StartedAt unchanged, 0 restarts; 6 migrations; dspr=4.
+- S15-A DECIDED: evidence is append-only. Content is immutable after creation; only human confirmation and terminal status (EXPIRED or WITHDRAWN) change. A correction is new evidence plus withdrawing the old.
+- G10e released.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G10D_MERGE_G10E_RELEASE.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). The G10d branch is at f962e12. main is cf1da02 before this commit. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-14T06:30:00+03:30
-NEXT_ACTION: The owner decides, in one message:
-(a) "merge of G10d into main is authorized";
-(b) G10e authorized: the Evidence slice (the last Core slice).
-  - EvidenceService: record with exactly one owner (C7) in the same org; source_kind enum; confidence in [0,1]; allowlist.
-  - Human confirm via evidence.confirm (ADR-0006; AI_INFERRED is never auto-confirmed).
-  - ACTIVE → EXPIRED or WITHDRAWN, both terminal.
-  - Plus Y1 and Y2.
-(c) S15: the Guardian recommends S15-A, where evidence is append-only (content immutable after creation; only confirmation and terminal status change; a correction is new evidence plus withdrawing the old).
-Then the Guardian merges G10d (--no-ff, guarded), records the decisions, and issues G10e targeting the merge-record handoff.
+CODE_COMMIT_SHA: cebdb5f1e69f110ef4f405e1493ad30dbc8118b0 (merge commit on main). Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-14T07:00:00+03:30
+NEXT_ACTION: Relay CODEX-20260914-G10E-CORE-EVIDENCE-SLICE-001 (section 2 of the record), targeting THIS handoff ID and pinned. It goes on the new branch codex/core-g10e-evidence from main:
+- EvidenceService:
+  - record with exactly one same-org owner (C7 and the pair CHECKs); sourceKind validated; confidence in [0,1]; allowlist
+  - confirm via evidence.confirm only
+  - ACTIVE → EXPIRED or WITHDRAWN, terminal
+  - no content update (S15-A)
+- Y1: unlinking a missing link → VALIDATION_FAILED.
+- Y2: gate_snapshot grantId asserted for OfferVersion.
+After the Guardian review: a short owner confirmation to merge. With G10e the Core service layer is complete.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G10C-MERGE-G10D
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260914-G10D-CORE-OFFER-SLICE-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G10D-REVIEW
+EXECUTED_INSTRUCTION_ID: Owner direct approval in chat, 2026-09-14 (G10d merge; G10e; S15-A)
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
 HANDOFF_PRECONDITION_CHECK:
-- Pre-push inspection of the local commits.
-- After the push: fetched; remote f962e12 matches.
-- Read offer-service, the publication/capability/adapter diffs, both specs, and the report; matched the claimed test names against the logs.
-- Volume before/after; manifest 6/6; live DB and read-api; merge-tree.
-- Read the Evidence enum values from origin/main for the G10e proposal.
+- Fetched main and the G10d branch. main is 0588c8f and clean; the G10d branch is f962e12.
+- merge-tree gives 832bb38; the local merge tree matches; no deletions.
+- Runtime baseline recorded; the push is guarded on 0588c8f.
 
-SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main. No credential, Docker write, database write or Codex-branch action.
+SCOPE_CONSTRAINT_NOTE: main received the approved merge plus this record and the AI_HANDOFF files. No build, restart, migration, test or data action. No credential action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
