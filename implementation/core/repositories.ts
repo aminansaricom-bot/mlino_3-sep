@@ -8,6 +8,11 @@ export async function lockOrganization(db: Prisma.TransactionClient, organizatio
   if (rows.length !== 1) throw missingError;
 }
 
+export async function lockIdentityClaim(db: Prisma.TransactionClient, organizationId: string, claimId: string): Promise<void> {
+  const rows = await db.$queryRaw<{ id: string }[]>(Prisma.sql`SELECT id FROM business_identity_claims WHERE id = ${claimId} AND organization_id = ${organizationId} FOR UPDATE`);
+  if (rows.length !== 1) throw validationFailed('identity claim not found in organization');
+}
+
 export const memberOrganizationMissingError = () => authorizationDenied('active organization membership required');
 
 export class OrganizationRepository {

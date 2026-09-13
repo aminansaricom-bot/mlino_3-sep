@@ -38,7 +38,7 @@ export function mapCoreDatabaseError(error: unknown): CoreDomainError {
     if (message.includes(triggerMessage)) return domainError;
   }
   if (code === 'P2002' || code === '23505') {
-    if (diagnostic.includes('business_identity_claim_active_identifier_unique')) return conflict('identifier already claimed');
+    if (diagnostic.includes('business_identity_claim_active_identifier_unique') || (diagnostic.includes('identifier_type') && diagnostic.includes('identifier_value'))) return conflict('identifier already claimed');
     if (diagnostic.includes('membership_active_subject_unique')) return conflict('active membership already exists');
     if (diagnostic.includes('permission_grant_active_unique')) return conflict('active permission grant already exists');
     if (diagnostic.includes('offer_version_number_unique')) return conflict('offer version number already exists');
