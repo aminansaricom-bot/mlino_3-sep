@@ -33,3 +33,21 @@ VALIDATION: Prisma 5.22.0 PASS; PostgreSQL 16.15 migration replay PASS; C1-C15 P
 MAIN_STATUS: UNCHANGED
 V2_BRANCH_STATUS: UNCHANGED
 NEXT_ACTION: Architecture Guardian independent review of G3. Do not modify schema.prisma, create an application migration, approve the CCR, or begin any later phase without a new approved instruction.
+
+HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+AUTHOR: CODEX
+PHASE: CORE_FOUNDATION_SCHEMA_CCR_G3B_FIXES
+STATUS: DELIVERED_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260913-G3B-CCR-FIXES-001
+REVIEW_REFERENCE: origin/main:AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G3_CCR_DRAFT.md@3e19b541d1db2f629ca758faaba4dbbf1b30fbda
+OWNER_DECISION_D6: A — database auto-increments content_revision for public Profile/Capability field changes
+BASE_COMMIT: 48834d189c95cc7130913944d123102c380a174a
+DELIVERY_COMMIT: fcddfc2ef2faf76a2d6f8ded7eb4f68ec07a71cb
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G3B_CCR_FIXES_REPORT.md
+REPORT_SHA256: 45c2ec7ff1623113aa57c8199d7dc2496265c2607039519fbc0ab330fc08ffa4
+BRANCH: codex/core-prisma-foundation
+CCR_STATUS: DRAFT_PENDING_OWNER_APPROVAL
+VALIDATION: R1-R7 PASS; C1-C15 PASS; T1-T12 PASS; W1 Prisma P2003 PASS; origin/main migration replay PASS; protected inventory preserved; teardown PASS
+MAIN_STATUS: UNCHANGED
+V2_BRANCH_STATUS: UNCHANGED
+NEXT_ACTION: Architecture Guardian independent review of G3b. Do not approve the CCR, modify schema.prisma, create an application migration, or begin any later phase without a new approved instruction.
