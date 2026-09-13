@@ -1,0 +1,30 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand implementation/test/core
+
+PASS test/core/db-guard.spec.ts
+FAIL test/core/core-authority.spec.ts
+  ● G10a2 Core authority slice › rejects re-revoke and preserves the first revocation audit
+
+    CoreDomainError: self-grant is forbidden
+
+       9 |
+      10 | export const authenticationRequired = (message = 'authentication required') => new CoreDomainError('AUTHENTICATION_REQUIRED', message);
+    > 11 | export const authorizationDenied = (message = 'authorization denied') => new CoreDomainError('AUTHORIZATION_DENIED', message);
+         |                                                                          ^
+      12 | export const tenantMismatch = (message = 'tenant boundary rejected') => new CoreDomainError('TENANT_MISMATCH', message);
+      13 | export const validationFailed = (message: string) => new CoreDomainError('VALIDATION_FAILED', message);
+      14 | export const conflict = (message: string) => new CoreDomainError('CONFLICT', message);
+
+      at authorizationDenied (core/errors.ts:11:74)
+      at core/permission-grant-service.ts:21:69
+      at Proxy._transactionWithCallback (node_modules/@prisma/client/runtime/library.js:130:8000)
+      at Object.<anonymous> (test/core/core-authority.spec.ts:148:19)
+
+PASS test/core/error-adapter.spec.ts
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       1 failed, 27 passed, 28 total
+Snapshots:   0 total
+Time:        5.803 s
+Ran all test suites matching /implementation\\test\\core/i.

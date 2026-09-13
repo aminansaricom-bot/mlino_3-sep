@@ -42,8 +42,9 @@ export class BootstrapService {
       return { organization, foundingMembership };
     }).catch((error: unknown) => {
       if (error instanceof CoreDomainError) throw error;
-      if (error instanceof Error && error.message.includes('Unique constraint')) throw conflict('organization bootstrap already completed');
-      throw mapCoreDatabaseError(error);
+      const mapped = mapCoreDatabaseError(error);
+      if (mapped.code === 'CONFLICT') throw conflict('organization bootstrap already completed');
+      throw mapped;
     });
   }
 }

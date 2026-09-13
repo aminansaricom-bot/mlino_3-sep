@@ -1,0 +1,144 @@
+# بازبینی نگهبان معماری — G10a2: اصلاح برش هسته‌ی authority
+
+**تاریخ:** ۱۳ سپتامبر ۲۰۲۶
+**بازبین:** Claude Opus 5 — MLINO Architecture Guardian
+**گزارش بررسی‌شده:** `origin/codex/core-prisma-foundation:AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G10A2_CORE_AUTHORITY_FIXES_REPORT.md` (LF sha256 `2cc70009…423d`)
+**commitها:**
+
+| commit | محتوا |
+|---|---|
+| `edc8846` | کد |
+| `3fb8a0f` | شواهد |
+| `92a3dbf`، `6aa7ade`، `c877ce1` | گزارش و Handoff |
+
+## حکم: `APPROVED_WITH_FIXES` (دور کوچک و پایانی)
+
+**هر چهار شکاف امنیتی G10a در کد بسته شده‌اند:**
+
+| # | اصلاح در کد |
+|---|---|
+| A1 | port تأیید هویت پلتفرم که بدون تأیید رد می‌کند (fail-closed) |
+| A2 | bootstrap با actor تأییدشده و ثبت audit |
+| A3 | آخرین مدیر فقط grant فعال روی Membership فعال شمرده می‌شود، در هر دو مسیر revoke، با قفل ردیف سازمان |
+| A4 | adapter خطا در همه‌ی serviceها وصل شده است |
+| A5 | محافظ داخل spec و پاک‌سازی محدود به داده‌ی آزمون |
+
+محیط اجرا هم سالم است.
+
+**مانده‌ها** شکاف آزمونی و سخت‌سازی جزئی‌اند: آزمون رقابتی که قاعده‌ی S10-د را واقعاً ثابت کند هنوز نیست، آزمون‌های تکراری الزامی نیامده‌اند، و یک کانال نشت وجود سازمان هست. در همان دامنه اصلاح می‌شوند و تصویب تازه لازم نیست. **G10b و ادغام تا بسته شدن G10a3 متوقف می‌مانند.**
+
+---
+
+## ۱. راستی‌آزمایی
+
+| مورد | نتیجه |
+|---|---|
+| **دامنه** | ✅ `52689a4..c877ce1`: فقط `core/**`، `test/core/**`، `validation/g10a2/**`، گزارش و Handoff (بدون حذف). `tsconfig` و فایل‌های V1 تغییر نکرده‌اند · بدون الگوی secret |
+| **main و V2** | ✅ `21220d9` و `f4d326f`، بدون تغییر |
+| **پایگاه داده‌ی زنده‌ی V1** | ✅ شش migration · `dspr=4` · جدول‌های authority = ۰ · `StartedAt` بدون تغییر · `Restarts=0` · بدون volume بی‌نام تازه (جدیدترین `2026-09-12`) |
+| **پایگاه یک‌بارمصرف** | ✅ tmpfs ‏(`rw,size=512m`) · شش migration · حذف container · `NO_VOLUME_CHANGE`؛ فایل‌های before و after یکسان‌اند |
+| **آزمون** | ✅ ‏۲۱ suite و ۲۶۹ آزمون · Core: ‏۲ suite و ۲۰ آزمون · `tsc` پاک |
+| **hash گزارش** | ✅ `2cc70009…` = Handoff |
+| **GW2-P** | ✅ ثبت شده است؛ fetch همچنان `SEC_E_NO_CREDENTIALS` می‌دهد |
+| **manifest** | ❌ دستور manifest با LF خواسته بود. در `validation/g10a2/` هیچ manifestی نیست ← B5 |
+| **شکست اولیه‌ی آزمون رقابتی** | ✅ توضیح Codex درست است. طبق `core-tests.log`، دو grant revokeشده هر دو `member_grant` بودند که مؤسس اعطا کرده بود. مؤسس grant مدیریتی founding خودش را داشت، پس **سه مدیر** وجود داشت و موفقیت هر دو revoke درست بود. باگ کد نبود |
+
+## ۲. وضعیت اصلاح‌ها
+
+| # | وضعیت | شاهد |
+|---|---|---|
+| A1 | ✅ | `platformIdentityRef` از `AuthContext` حذف شده · `PlatformIdentityVerifier` بدون verifier یا credential رد می‌کند و خطای verifier را هم به رد تبدیل می‌کند (`platform-identity-verifier.ts:15-29`) · مسیرهای پلتفرم در متدهای جدای `revokeByPlatform` هستند · آزمون credential غایب و نامعتبر |
+| A2 | ✅ | actor تأییدشده پیش از هر کار · `reason: bootstrap:<ref>` (`bootstrap-service.ts:38`) · تکراری ← CONFLICT |
+| A3 | ✅ در کد، ⚠️ در آزمون | `countActiveForKey` با `membership: { membershipStatus: 'ACTIVE' }` (`repositories.ts:50`) · بررسی در هر دو revoke عضویت (`membership-service.ts:41-43`، `:61-63`) · `lockOrganization` پارامتری با `FOR UPDATE` در همه‌ی mutationها. **ولی آزمون نهایی رقابت، یک grant را دو بار revoke می‌کند** (`core-authority.spec.ts:136-139`). revoke دوم به‌خاطر «already revoked» شکست می‌خورد، نه به‌خاطر قاعده‌ی آخرین مدیر. پس S10-د زیر رقابت **ثابت نشده است** ← B1 |
+| A4 | ✅ با کمبود | adapter در همه‌ی serviceها وصل است · ۱۰ پیام trigger نگاشت شده‌اند · آزمون trigger واقعی هست. ولی (۱) **آزمون‌های الزامی issue تکراری grant و Membership فعال تکراری نیامده‌اند** ← B2. (۲) آزمون trigger فقط `VALIDATION_FAILED` را می‌سنجد، که مسیر پیش‌فرض P0001 هم همان را می‌دهد، پس نگاشت پیام را ثابت نمی‌کند ← B6 |
+| A5 | ✅ با کمبود | `db-guard.ts` در `beforeAll` · پاک‌سازی با پیشوند `g10a2-`. **ولی بررسی `.env` بی‌اثر است:** `existsSync('implementation/.env')` نسبت به cwd است و jest در `implementation/` اجرا می‌شود، پس مسیر `implementation/implementation/.env` بررسی می‌شود. بررسی URL سالم است ← B4 |
+| A6 | ✅ | rollback واقعی وسط تراکنش: subject ‏۳۰۰ کاراکتری ← organization پایدار نمی‌ماند · `createFounding` در prototype نیست · issue همیشه `member_grant` می‌دهد |
+| A7 | ✅ | revoke دوباره ← CONFLICT و audit نخست حفظ می‌شود · grant به Membership غیرفعال ← `VALIDATION_FAILED` |
+| A8 | ✅ | serviceها خط‌به‌خط شده‌اند |
+| A9 | ⚠️ | گزارش (بند ۵، A3) می‌گوید آزمون رقابت قاعده‌ی آخرین مدیر را «ثابت کرد». این درست نیست ← B7 |
+
+## ۳. یافته‌های تازه
+
+| # | یافته |
+|---|---|
+| **B3** | **نشت وجود سازمان و قفل پیش از احراز هویت.** `lockOrganization` پیش از `validateAuthContext` و بررسی Membership اجرا می‌شود. برای سازمان ناموجود یک `Error` ساده پرتاب می‌کند (`repositories.ts:7`) که به `INTERNAL_ERROR` نگاشت می‌شود، ولی سازمان موجود بدون عضویت `AUTHORIZATION_DENIED` می‌دهد. **این تفاوت وجود سازمان‌ها را فاش می‌کند** (خلاف بخش ۹ طراحی و S2 «رد یکنواخت»). هر caller احرازنشده هم می‌تواند ردیف هر سازمان را برای مدت تراکنش قفل کند. در revoke هم بررسی وضعیت (CONFLICT آخرین مدیر) پیش از بررسی مجوز است، پس عضو بی‌مجوز پاسخ متفاوت می‌گیرد |
+| **B6′** | bootstrap تکراری را با `error.message.includes('Unique constraint')` تشخیص می‌دهد (`bootstrap-service.ts:45`). این شکننده است؛ باید از خروجی adapter استفاده شود |
+
+---
+
+## ۴. گام بعدی — G10a3 (دور پایانی برش authority)
+
+```
+INSTRUCTION_ID: CODEX-20260913-G10A3-CORE-AUTHORITY-FINAL-FIXES-001
+TARGET_HANDOFF_ID: HANDOFF-20260912-CORE-PRISMA-FOUNDATION
+REVIEW_REFERENCE: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G10A2_CORE_AUTHORITY_FIXES.md (PINNED_COMMIT/SHA256 relayed)
+DECISION: APPROVED_WITH_FIXES — within the owner's G10a authorization; no new owner approval needed
+MODE: CODE — on codex/core-prisma-foundation from c877ce1, NEW commits only.
+
+PRECONDITION:
+- GW2 or GW2-P for REVIEW_REFERENCE; record the outputs; any failure → STOP.
+- Never touch credentials, token files, git config or credential helpers.
+
+FIXES (all mandatory):
+B1 Real S10-d race tests (replace the same-grant double revoke):
+   (a) Exactly two ACTIVE admins (the founder + one member admin, no third). Concurrently revoke
+       EACH OTHER'S DIFFERENT admin grants (Promise.allSettled).
+       Expect: exactly 1 fulfilled; 1 rejected with CONFLICT "last grant administrator";
+       final count of ACTIVE admin grants on ACTIVE memberships = 1.
+   (b) The same through MembershipService: concurrently revoke the two admin MEMBERSHIPS
+       → exactly one succeeds; at least one active admin remains.
+   Keep the same-grant double-revoke case only as an extra idempotency test.
+B2 Required duplicate tests:
+   - issuing a key the target already holds ACTIVE → CONFLICT (never a raw Prisma error)
+   - creating a Membership for an already-ACTIVE identity_provider+external_subject in the org → CONFLICT
+B3 Uniform authorization before locking:
+   - call validateAuthContext before any DB access
+   - lockOrganization throws a CoreDomainError, never a plain Error: AUTHORIZATION_DENIED on member
+     paths (identical to "no membership"), VALIDATION_FAILED on verified-platform paths
+   - in every member path, run requireMembershipPermission BEFORE the state checks (already revoked,
+     last admin), so unauthorized callers always get AUTHORIZATION_DENIED
+   - test: an unknown org id and a known org without membership return the same code and message
+B4 db-guard:
+   - resolve the .env check relative to the module (path.resolve(__dirname, '../../.env'))
+   - also call the guard at the start of clearCoreRows, so no delete runs unguarded even if hook
+     semantics change
+   - add guard unit tests (stubbed env): unset, ":5435", "@db:", another port, localhost:5499 → pass
+B5 LF evidence manifest in mlino2/validation/g10a3/ ("path  sha256" over git show bytes of the final
+   commit), covering every changed code and test file.
+B6 The real-trigger test asserts the specific mapped domain message ("initial publication state is
+   invalid"), proving message mapping, not the generic P0001 fallback. The bootstrap catch uses the
+   adapter result (CONFLICT → "organization bootstrap already completed") instead of string-sniffing
+   'Unique constraint'.
+B7 The report states exactly what each test proves. It corrects the G10a2 report's A3 concurrency
+   claim (the G10a2 report stays immutable).
+
+VALIDATION: identical DATABASE SAFETY to G10a/G10a2.
+- tmpfs 5499, external guard script, in-spec guard, no .env, volume before/after, rm -f
+- tsc passes; the Core specs pass; the FULL V1 suite passes
+- evidence in mlino2/validation/g10a3/
+
+REPORT: AI_HANDOFF/CODEX_REPORTS/20260913_CODEX_G10A3_CORE_AUTHORITY_FINAL_FIXES_REPORT.md
+Append only to mlino2/HANDOFF/HANDOFF_STATE.md.
+Push only to codex/core-prisma-foundation (if blocked, ask the owner; no workaround). Then STOP.
+
+ALLOWED FILES:
+  implementation/core/** · implementation/test/core/** · mlino2/validation/g10a3/**
+  the G10a3 report · mlino2/HANDOFF/HANDOFF_STATE.md (append only)
+
+FORBIDDEN: identical to G10a2
+- tsconfig, schema, migrations, types.ts, other V1 files, new dependencies
+- G10b scope; merging to main; V2, _PUSH_STAGING and the root AI_HANDOFF files
+- port 5435 or mlino-v1-local-db; any credential action
+```
+
+## ۵. وضعیت دروازه‌ها
+
+| دروازه | موضوع | وضعیت |
+|---|---|---|
+| G10a و G10a2 | هسته‌ی authority | ✅ شکاف‌های امنیتی در کد بسته شده‌اند · ⚠️ آزمون رقابت و سخت‌سازی مانده است |
+| **G10a3** | **B1 تا B7** | ▶️ صادر شد |
+| S12 | گذارهای SUSPENDED در claim | ⏳ پیش از G10b به مالک ارائه می‌شود |
+| G10b | claim و verification | ⛔ تا بسته شدن G10a3 |
+| ادغام در main | | ⛔ تا بسته شدن G10a3، به‌علاوه‌ی دروازه‌ی جدا |
+
+من کلاد هستم

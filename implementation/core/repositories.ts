@@ -1,11 +1,14 @@
 import { Prisma, PrismaClient } from '@prisma/client';
+import { CoreDomainError, authorizationDenied, validationFailed } from './errors';
 
 export type CoreDb = PrismaClient | Prisma.TransactionClient;
 
-export async function lockOrganization(db: Prisma.TransactionClient, organizationId: string): Promise<void> {
+export async function lockOrganization(db: Prisma.TransactionClient, organizationId: string, missingError: CoreDomainError = validationFailed('organization not found')): Promise<void> {
   const rows = await db.$queryRaw<{ id: string }[]>(Prisma.sql`SELECT id FROM organizations WHERE id = ${organizationId} FOR UPDATE`);
-  if (rows.length !== 1) throw new Error('organization not found');
+  if (rows.length !== 1) throw missingError;
 }
+
+export const memberOrganizationMissingError = () => authorizationDenied('active organization membership required');
 
 export class OrganizationRepository {
   constructor(private readonly db: CoreDb) {}
