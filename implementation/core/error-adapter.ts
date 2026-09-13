@@ -15,6 +15,11 @@ function constraintName(error: unknown): string {
     if (Array.isArray(constraint)) return constraint.join('_');
     if (typeof constraint === 'string') return constraint;
   }
+  if (typeof error === 'object' && error !== null && 'meta' in error) {
+    const target = (error as { meta?: { target?: unknown } }).meta?.target;
+    if (Array.isArray(target)) return target.join('_');
+    if (typeof target === 'string') return target;
+  }
   return 'unknown_constraint';
 }
 export function mapCoreDatabaseError(error: unknown): CoreDomainError {
@@ -41,6 +46,8 @@ export function mapCoreDatabaseError(error: unknown): CoreDomainError {
     if (diagnostic.includes('business_identity_claim_active_identifier_unique') || (diagnostic.includes('identifier_type') && diagnostic.includes('identifier_value'))) return conflict('identifier already claimed');
     if (diagnostic.includes('membership_active_subject_unique')) return conflict('active membership already exists');
     if (diagnostic.includes('permission_grant_active_unique')) return conflict('active permission grant already exists');
+    if (diagnostic.includes('business_profile_claim_unique')) return conflict('identity claim already linked to a profile');
+    if (diagnostic.includes('capability_organization_key_unique') || (diagnostic.includes('organization_id') && diagnostic.includes('capability_key'))) return conflict('capability key already exists');
     if (diagnostic.includes('offer_version_number_unique')) return conflict('offer version number already exists');
     if (diagnostic.includes('offer_version_published_unique')) return conflict('another offer version is already published');
     return conflict('unique constraint conflict');

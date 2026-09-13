@@ -1,0 +1,114 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/core/g10c-profile-capability.spec.ts
+
+FAIL test/core/g10c-profile-capability.spec.ts
+  G10c Core profile, capability and publication slice
+    √ profile create starts unpublished and D6 bumps every public field without service projection writes (272 ms)
+    √ direct initial projection write is rejected and mapped (51 ms)
+    √ capability key is organization-unique, public updates bump D6, and confirmation is one-way (119 ms)
+    × S13-A links only a verified same-organization claim and unlink clears both fields (83 ms)
+    × publication uses current revisions, is idempotent, withdraws, and records the exact gate grant (166 ms)
+    × publication rejects OfferVersion targets in this slice (63 ms)
+    √ W1 cross-organization and missing permission are denied (103 ms)
+    √ concurrent public edit and publish preserve revision consistency (100 ms)
+    × error adapter maps the two new named constraints (4 ms)
+
+  ● G10c Core profile, capability and publication slice › S13-A links only a verified same-organization claim and unlink clears both fields
+
+    PrismaClientUnknownRequestError: 
+    Invalid `prisma.businessIdentityClaim.update()` invocation in
+    C:\Users\galexy\mlino code\core-g10c-profile-capability\implementation\test\core\g10c-profile-capability.spec.ts:114:40
+
+      111 const p2 = await profiles.create(a.context, { organizationId: a.organizationId, name: 'Profile two' });
+      112 const claim = await prisma.businessIdentityClaim.create({ data: { organizationId: a.organizationId, identifierType: 'registration', identifierValue: `${TEST_PREFIX}claim`, submittedByMembershipId: a.membership.id } });
+      113 await expectCode(profiles.linkIdentityClaim(a.context, p1.id, claim.id), 'VALIDATION_FAILED');
+    → 114 await prisma.businessIdentityClaim.update(
+    Error occurred during query execution:
+    ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(PostgresError { code: "23514", message: "new row for relation \"business_identity_claims\" violates check constraint \"business_identity_claim_status_audit_check\"", severity: "ERROR", detail: Some("Failing row contains (7afb58f3-d837-4771-9762-393424219ba8, g10c-1789327615350-claims-7bqfs4, registration, g10c-1789327615350-claim, VERIFIED, f80fd5f7-481a-405a-b323-5eff6ae61cda, 2026-09-13 19:26:55.909+00, 2026-09-13 19:26:55.924+00, null, null, null, null, 2026-09-13 19:26:55.909+00, 2026-09-13 19:26:55.926+00)."), column: None, hint: None }), transient: false })
+
+      112 |     const claim = await prisma.businessIdentityClaim.create({ data: { organizationId: a.organizationId, identifierType: 'registration', identifierValue: `${TEST_PREFIX}claim`, submittedByMembershipId: a.membership.id } });
+      113 |     await expectCode(profiles.linkIdentityClaim(a.context, p1.id, claim.id), 'VALIDATION_FAILED');
+    > 114 |     await prisma.businessIdentityClaim.update({ where: { id_organizationId: { id: claim.id, organizationId: a.organizationId } }, data: { claimStatus: 'VERIFIED', verifiedAt: new Date() } });
+          |     ^
+      115 |     const linked = await profiles.linkIdentityClaim(a.context, p1.id, claim.id);
+      116 |     expect(linked.businessIdentityClaimId).toBe(claim.id);
+      117 |     await expectCode(profiles.linkIdentityClaim(a.context, p2.id, claim.id), 'CONFLICT');
+
+      at $n.handleRequestError (node_modules/@prisma/client/runtime/library.js:121:7505)
+      at $n.handleAndLogRequestError (node_modules/@prisma/client/runtime/library.js:121:6623)
+      at $n.request (node_modules/@prisma/client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/runtime/library.js:130:9633)
+      at Object.<anonymous> (test/core/g10c-profile-capability.spec.ts:114:5)
+
+  ● G10c Core profile, capability and publication slice › publication uses current revisions, is idempotent, withdraws, and records the exact gate grant
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"businessProfileId": "a891575d-a51a-4cfa-8233-889d5eafc804", "businessProfileOrganizationId": "g10c-1789327615350-publication-w6mquz", "capabilityId": null, "capabilityOrganizationId": null, "contentRevision": 2, "eventKind": "WITHDRAWN", "gateSnapshot": {"grantId": "f2619d28-f239-47c5-8e83-f5c2df76c475", "policyVersion": "core-publication-v1"}, "id": "3d4189a1-120d-41d4-839d-98a1c63a4bba", "occurredAt": 2026-09-13T19:26:56.092Z, "offerVersionId": null, "offerVersionOrganizationId": null, "organizationId": "g10c-1789327615350-publication-w6mquz", "performedByMembershipId": "2e788d8b-c937-480c-bc56-9f8151808ffc", "permissionKey": "publication.manage", "reason": "second withdraw"}
+
+      39 |
+      40 | function expectCode(action: Promise<unknown>, code: CoreDomainError['code']) {
+    > 41 |   return expect(action).rejects.toMatchObject({ name: 'CoreDomainError', code });
+         |          ^
+      42 | }
+      43 |
+      44 | describe('G10c Core profile, capability and publication slice', () => {
+
+      at expect (node_modules/expect/build/index.js:113:15)
+      at expectCode (test/core/g10c-profile-capability.spec.ts:41:10)
+      at Object.<anonymous> (test/core/g10c-profile-capability.spec.ts:142:11)
+
+  ● G10c Core profile, capability and publication slice › publication rejects OfferVersion targets in this slice
+
+    expect(received).rejects.toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "code": "VALIDATION_FAILED",
+    +   "code": "INTERNAL_ERROR",
+        "name": "CoreDomainError",
+      }
+
+      39 |
+      40 | function expectCode(action: Promise<unknown>, code: CoreDomainError['code']) {
+    > 41 |   return expect(action).rejects.toMatchObject({ name: 'CoreDomainError', code });
+         |                                 ^
+      42 | }
+      43 |
+      44 | describe('G10c Core profile, capability and publication slice', () => {
+
+      at Object.toMatchObject (node_modules/expect/build/index.js:218:22)
+      at expectCode (test/core/g10c-profile-capability.spec.ts:41:33)
+      at Object.<anonymous> (test/core/g10c-profile-capability.spec.ts:149:11)
+
+  ● G10c Core profile, capability and publication slice › error adapter maps the two new named constraints
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "identity claim already linked to a profile"
+    Received: "unique constraint conflict"
+
+      173 |
+      174 |   test('error adapter maps the two new named constraints', () => {
+    > 175 |     expect(mapCoreDatabaseError({ code: 'P2002', meta: { target: ['business_profile_claim_unique'] } }).message).toBe('identity claim already linked to a profile');
+          |                                                                                                                  ^
+      176 |     expect(mapCoreDatabaseError({ code: 'P2002', meta: { target: ['capability_organization_key_unique'] } }).message).toBe('capability key already exists');
+      177 |   });
+      178 | });
+
+      at Object.<anonymous> (test/core/g10c-profile-capability.spec.ts:175:114)
+
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 5 passed, 9 total
+Snapshots:   0 total
+Time:        5.038 s
+Ran all test suites matching /test\\core\\g10c-profile-capability.spec.ts/i.
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice
