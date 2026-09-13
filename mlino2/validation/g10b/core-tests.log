@@ -1,0 +1,83 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand implementation/test/core
+
+FAIL test/core/identity-claim-verification.spec.ts (6.888 s)
+  ● G10b identity claim and verification slice › rejects the forbidden claim transition PENDING -> VERIFIED
+
+    expect(received).rejects.toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "code": "CONFLICT",
+    +   "code": "INTERNAL_ERROR",
+        "name": "CoreDomainError",
+      }
+
+      24 | function expectDomainFailure(action: Promise<unknown>, code: CoreDomainError['code'], message?: string): Promise<void> {
+      25 |   const expected = message ? { name: 'CoreDomainError', code, message } : { name: 'CoreDomainError', code };
+    > 26 |   return expect(action).rejects.toMatchObject(expected);
+         |                                 ^
+      27 | }
+      28 |
+      29 | describe('G10b identity claim and verification slice', () => {
+
+      at Object.toMatchObject (node_modules/expect/build/index.js:218:22)
+      at expectDomainFailure (test/core/identity-claim-verification.spec.ts:26:33)
+      at test/core/identity-claim-verification.spec.ts:103:11
+
+  ● G10b identity claim and verification slice › rejects the forbidden claim transition SUSPENDED -> VERIFIED
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"claimStatus": "VERIFIED", "createdAt": 2026-09-13T16:40:23.932Z, "id": "44bfe950-9cf8-4427-b885-2692ff85ef61", "identifierType": "registration", "identifierValue": "g10b-forbidden-SUSPENDED-VERIFIED-11-identifier", "organizationId": "g10b-forbidden-SUSPENDED-VERIFIED-11", "statusChangeReason": "forbidden transition", "statusChangedAt": 2026-09-13T16:40:23.995Z, "statusChangedByPlatformIdentityRef": "platform:g10b", "submittedAt": 2026-09-13T16:40:23.932Z, "submittedByMembershipId": "5cb98207-9864-4aac-8eff-3aadf621fd51", "updatedAt": 2026-09-13T16:40:23.998Z, "validUntil": null, "verifiedAt": 2026-09-13T16:40:23.971Z}
+
+      24 | function expectDomainFailure(action: Promise<unknown>, code: CoreDomainError['code'], message?: string): Promise<void> {
+      25 |   const expected = message ? { name: 'CoreDomainError', code, message } : { name: 'CoreDomainError', code };
+    > 26 |   return expect(action).rejects.toMatchObject(expected);
+         |          ^
+      27 | }
+      28 |
+      29 | describe('G10b identity claim and verification slice', () => {
+
+      at expect (node_modules/expect/build/index.js:113:15)
+      at expectDomainFailure (test/core/identity-claim-verification.spec.ts:26:10)
+      at test/core/identity-claim-verification.spec.ts:103:11
+
+  ● G10b identity claim and verification slice › maps C1 across organizations and rolls the verification decision back with the claim update
+
+    expect(received).rejects.toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 0
+
+      Object {
+        "code": "CONFLICT",
+    -   "message": "identifier already claimed",
+        "name": "CoreDomainError",
+      }
+
+      24 | function expectDomainFailure(action: Promise<unknown>, code: CoreDomainError['code'], message?: string): Promise<void> {
+      25 |   const expected = message ? { name: 'CoreDomainError', code, message } : { name: 'CoreDomainError', code };
+    > 26 |   return expect(action).rejects.toMatchObject(expected);
+         |                                 ^
+      27 | }
+      28 |
+      29 | describe('G10b identity claim and verification slice', () => {
+
+      at Object.toMatchObject (node_modules/expect/build/index.js:218:22)
+      at expectDomainFailure (test/core/identity-claim-verification.spec.ts:26:33)
+      at Object.<anonymous> (test/core/identity-claim-verification.spec.ts:162:11)
+
+PASS test/core/core-authority.spec.ts
+PASS test/core/error-adapter.spec.ts
+PASS test/core/db-guard.spec.ts
+
+Test Suites: 1 failed, 3 passed, 4 total
+Tests:       3 failed, 44 passed, 47 total
+Snapshots:   0 total
+Time:        9.908 s
+Ran all test suites matching /implementation\\test\\core/i.
