@@ -1,44 +1,27 @@
-HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10A3-REVIEW
+HANDOFF_ID: HANDOFF-20260913-OWNER-APPROVAL-S12A-G10B
 AUTHOR: CLAUDE
-PHASE: G10A_CLOSED_S12_G10B_PENDING_OWNER
-STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: G10a3 (codex 462d8b9, 4513c77, 630f89a) closes B1-B7 with tests:
-- B1: a real race test (two different admin grants, and two admin memberships): exactly one succeeds; last-admin CONFLICT; final count 1.
-- B2: duplicate membership and duplicate grant → CONFLICT.
-- B3: uniform AUTHORIZATION_DENIED (same code and message) for an unknown org versus an unauthorized one; permission check before state checks.
-- B4: module-relative .env check; guard inside clearCoreRows; guard unit tests.
-- B5: manifest 7/7 verified.
-- B6: exact message asserted; the adapter-based bootstrap conflict.
-- B7: accurate report.
-Environment: live V1 DB untouched; tmpfs; NO_VOLUME_CHANGE; 22 suites and 277 tests.
-Line endings are not a finding: V1 blobs on main are CRLF too.
-The G10a authority slice is CLOSED.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G10A3_CORE_AUTHORITY_FINAL.md
+PHASE: S12A_DECIDED_G10B_RELEASED
+STATUS: G10B_RELEASED
+REVIEW_VERDICT: The owner approved S12-A and authorized G10b. The owner sent the approval in direct conversation with Claude, relaying a Codex-written message.
+- S12-A: SUSPENDED→VERIFIED only through a new, evidence-backed VERIFIED verification attempt; SUSPENDED→REJECTED directly by a verified platform actor with a reason, terminal.
+- G10b is limited to CODEX-20260913-G10B-CORE-CLAIM-VERIFICATION-SLICE-001 (section 4 of the G10a3 review).
+- The Codex branch was unchanged at 630f89a; Codex did not start before Claude's instruction.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260913_OWNER_APPROVAL_S12A_G10B.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). The Codex core branch is at 630f89a. main is 54adf86 before this commit. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-13T21:45:00+03:30
-NEXT_ACTION: Owner decides S12.
-- The Guardian recommends S12-A: SUSPENDED→VERIFIED only through a new VERIFIED verification attempt; SUSPENDED→REJECTED directly by a verified platform actor, terminal.
-The owner also authorizes G10b, CODEX-20260913-G10B-CORE-CLAIM-VERIFICATION-SLICE-001 (section 4 of the review):
-- IdentityClaimService and IdentityVerificationService
-- the S11/S12 state machine, with decision and claim transition in one tx
-- a FOR UPDATE claim lock for attempts; C1 conflict
-Then record the approval and relay the pinned instruction. Recommendation: merge G10a+G10b into main together after the G10b review (a separate gate).
+CODE_COMMIT_SHA: (none - governance record only). The Codex core branch is at 630f89a. main is 563cd3a before this commit. Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-13T22:00:00+03:30
+NEXT_ACTION: Relay CODEX-20260913-G10B-CORE-CLAIM-VERIFICATION-SLICE-001 with these pins:
+- G10a3 review at 563cd3a (sha256 f8800a34...)
+- this approval record (pin relayed)
+Then the Guardian reviews G10b; after that, the merge gate for G10a+G10b.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10A2-REVIEW
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260913-G10A3-CORE-AUTHORITY-FINAL-FIXES-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260913-GUARDIAN-G10A3-REVIEW
+EXECUTED_INSTRUCTION_ID: Owner approval sent in chat by the owner, 2026-09-13
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as MLINO Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK:
-- Fetched; remote core is at 630f89a.
-- Scope and secret scan (the user:pass hits are dummy guard-test URLs).
-- Read the full code/test diff since c877ce1.
-- Read the initial, rerun and full test logs, the tmpfs, NO_VOLUME_CHANGE and container-remove evidence.
-- Manifest verified 7/7 (CR-stripped).
-- Line-ending survey of new versus existing V1 blobs.
-- Read-only counts on the live DB; checked anonymous volume CreatedAt; checked the report hash.
+HANDOFF_PRECONDITION_CHECK: Fetched; core is at 630f89a, unchanged and clean. main is 563cd3a and clean. The push is guarded on origin/main still being 563cd3a. Shared refs refreshed after the push.
 
-SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main. No credential, Docker write, database write or Codex-branch action.
+SCOPE_CONSTRAINT_NOTE: Only the new approval record and the AI_HANDOFF files were added or changed on main. No credential, Docker, database or Codex-branch action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
