@@ -94,9 +94,11 @@ export class OfferService {
       await requireMembershipPermission(tx, context, 'offer.manage');
       const versionRows = await tx.$queryRaw<Array<{ id: string; publication_status: string }>>(Prisma.sql`SELECT id, publication_status FROM offer_versions WHERE id = ${input.offerVersionId} AND organization_id = ${context.organizationId} FOR UPDATE`);
       if (versionRows.length !== 1) throw validationFailed('offer version not found in organization');
-      if (versionRows[0].publication_status !== 'UNPUBLISHED') throw conflict('offer version capability links are immutable after publication');
       const capability = await tx.capability.findUnique({ where: { id_organizationId: { id: input.capabilityId, organizationId: context.organizationId } }, select: { id: true } });
       if (!capability) throw validationFailed('capability not found in organization');
+      const existing = await tx.offerVersionCapability.findUnique({ where: { offerVersionId_capabilityId: { offerVersionId: input.offerVersionId, capabilityId: input.capabilityId } }, select: { offerVersionId: true } });
+      if (operation === 'unlink' && !existing) throw validationFailed('capability link not found');
+      if (versionRows[0].publication_status !== 'UNPUBLISHED') throw conflict('offer version capability links are immutable after publication');
       if (operation === 'link') {
         return tx.offerVersionCapability.create({ data: { organizationId: context.organizationId, offerVersionId: input.offerVersionId, capabilityId: input.capabilityId } });
       }

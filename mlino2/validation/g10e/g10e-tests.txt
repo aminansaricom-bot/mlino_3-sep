@@ -1,0 +1,73 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/core/g10e-evidence.spec.ts
+
+FAIL test/core/g10e-evidence.spec.ts (7.568 s)
+  G10e Core evidence slice
+    √ records evidence for a capability and a published OfferVersion (281 ms)
+    √ requires exactly one same-organization owner (133 ms)
+    √ validates confidence boundaries and source kind (101 ms)
+    √ rejects forbidden fields and creates no row (81 ms)
+    √ confirm requires an active unconfirmed evidence and supports AI_INFERRED only through human confirmation (133 ms)
+    √ expire and withdraw are terminal ACTIVE-only transitions (199 ms)
+    √ S15-A exposes no content update method (1 ms)
+    × W1 cross-organization and missing permissions are denied (181 ms)
+    × Y1 missing capability link maps to VALIDATION_FAILED (143 ms)
+
+  ● G10e Core evidence slice › W1 cross-organization and missing permissions are denied
+
+    PrismaClientUnknownRequestError: 
+    Invalid `prisma.permissionGrant.update()` invocation in
+    C:\Users\galexy\mlino code\core-g10e-evidence\implementation\test\core\g10e-evidence.spec.ts:125:34
+
+      122 const b = await capabilityFixture('permissions-other');
+      123 await expectCode(evidence.record(a.context, { capabilityId: b.capability.id, sourceKind: EvidenceSourceKind.SYSTEM }), 'VALIDATION_FAILED');
+      124 const manage = await prisma.permissionGrant.findFirstOrThrow({ where: { organizationId: a.organizationId, membershipId: a.membership.id, permissionKey: 'evidence.manage', grantStatus: 'ACTIVE' } });
+    → 125 await prisma.permissionGrant.update(
+    Error occurred during query execution:
+    ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(PostgresError { code: "23514", message: "new row for relation \"permission_grants\" violates check constraint \"permission_grant_revocation_audit_check\"", severity: "ERROR", detail: Some("Failing row contains (84e1f109-1eb9-4102-88dc-7dfde315986d, g10e-1789333237582-permissions-4n1r5g, 62051882-7dec-408b-a474-3a5639a25806, evidence.manage, REVOKED, founding, null, null, bootstrap:platform:g10e, 2026-09-13 21:00:38.592+00, 2026-09-13 21:00:38.723+00, null, null, null, test)."), column: None, hint: None }), transient: false })
+
+      123 |     await expectCode(evidence.record(a.context, { capabilityId: b.capability.id, sourceKind: EvidenceSourceKind.SYSTEM }), 'VALIDATION_FAILED');
+      124 |     const manage = await prisma.permissionGrant.findFirstOrThrow({ where: { organizationId: a.organizationId, membershipId: a.membership.id, permissionKey: 'evidence.manage', grantStatus: 'ACTIVE' } });
+    > 125 |     await prisma.permissionGrant.update({ where: { id_organizationId: { id: manage.id, organizationId: a.organizationId } }, data: { grantStatus: 'REVOKED', revokedAt: new Date(), revocationReason: 'test' } });
+          |     ^
+      126 |     await expectCode(evidence.record(a.context, { capabilityId: a.capability.id, sourceKind: EvidenceSourceKind.SYSTEM }), 'AUTHORIZATION_DENIED');
+      127 |     const c = await capabilityFixture('confirm-permission');
+      128 |     const item = await evidence.record(c.context, { capabilityId: c.capability.id, sourceKind: EvidenceSourceKind.SYSTEM });
+
+      at $n.handleRequestError (node_modules/@prisma/client/runtime/library.js:121:7505)
+      at $n.handleAndLogRequestError (node_modules/@prisma/client/runtime/library.js:121:6623)
+      at $n.request (node_modules/@prisma/client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/runtime/library.js:130:9633)
+      at Object.<anonymous> (test/core/g10e-evidence.spec.ts:125:5)
+
+  ● G10e Core evidence slice › Y1 missing capability link maps to VALIDATION_FAILED
+
+    expect(received).rejects.toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "code": "VALIDATION_FAILED",
+    +   "code": "CONFLICT",
+        "name": "CoreDomainError",
+      }
+
+      38 |
+      39 | function expectCode(action: Promise<unknown>, code: CoreDomainError['code']) {
+    > 40 |   return expect(action).rejects.toMatchObject({ name: 'CoreDomainError', code });
+         |                                 ^
+      41 | }
+      42 |
+      43 | async function capabilityFixture(label: string) {
+
+      at Object.toMatchObject (node_modules/expect/build/index.js:218:22)
+      at expectCode (test/core/g10e-evidence.spec.ts:40:33)
+      at Object.<anonymous> (test/core/g10e-evidence.spec.ts:136:11)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 7 passed, 9 total
+Snapshots:   0 total
+Time:        9.577 s
+Ran all test suites matching /test\\core\\g10e-evidence.spec.ts/i.

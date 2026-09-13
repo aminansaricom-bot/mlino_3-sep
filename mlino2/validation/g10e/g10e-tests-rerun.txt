@@ -1,0 +1,26 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/core/g10e-evidence.spec.ts
+
+PASS test/core/g10e-evidence.spec.ts (5.506 s)
+  G10e Core evidence slice
+    √ records evidence for a capability and a published OfferVersion (265 ms)
+    √ requires exactly one same-organization owner (179 ms)
+    √ validates confidence boundaries and source kind (103 ms)
+    √ rejects forbidden fields and creates no row (82 ms)
+    √ confirm requires an active unconfirmed evidence and supports AI_INFERRED only through human confirmation (119 ms)
+    √ expire and withdraw are terminal ACTIVE-only transitions (190 ms)
+    √ S15-A exposes no content update method (1 ms)
+    √ W1 cross-organization and missing permissions are denied (300 ms)
+    √ Y1 missing capability link maps to VALIDATION_FAILED (138 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       9 passed, 9 total
+Snapshots:   0 total
+Time:        6.007 s, estimated 8 s
+Ran all test suites matching /test\\core\\g10e-evidence.spec.ts/i.
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice
