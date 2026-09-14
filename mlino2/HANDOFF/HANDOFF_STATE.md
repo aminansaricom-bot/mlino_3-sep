@@ -477,3 +477,14 @@ VALIDATION: PASS — build و Prisma generate؛ ۶ migration روی 5499؛ ۹ ت
 SCOPE: EvidenceService، اصلاح Y1 unlinkCapability و assertions مربوط به Y2 gate_snapshot؛ بدون schema، migration، HTTP یا V2.
 NEXT_ACTION: Guardian review؛ بدون G10f و بدون merge با main.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-V2-READ-CONTRACT
+AUTHOR: CODEX
+PHASE: G13A_V2_READ_CONTRACT_DESIGN
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G13A-V2-READ-CONTRACT-DESIGN-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G13A_V2_READ_CONTRACT_DESIGN_REPORT.md
+VALIDATION: DOCUMENT ONLY — no code, schema, migration, Prisma, Docker or database action.
+SCOPE: MLINO_V2_READ_CONTRACT_DESIGN.md with Core/V2 citations, fidelity gap, transport options, freshness, claim policy, DTOs, security, caching, tests and S16-S20 open decisions.
+NEXT_ACTION: Guardian review; no implementation and no main merge.
+CREATED_AT: 2026-09-14
