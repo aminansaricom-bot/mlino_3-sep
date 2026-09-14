@@ -35,31 +35,57 @@ Publication رویداد انتشار را با نوع رویداد، `contentRe
 
 در سمت V2 نیز DTO فعلی `products` و `offers` را لازم می‌داند (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:24-43,49-60`)، در حالی که Core schema فعلی Product ندارد و Offer/OfferVersion شکل دیگری دارد (`origin/main: implementation/prisma/schema.prisma:530-576`). این قرارداد نباید این شکاف را با حدس، دادهٔ ساختگی یا خواندن مستقیم ماژول‌ها پنهان کند.
 
-### گزینه‌ها
+### گزینه‌های fidelity
 
-**A — بازسازی در consumer:** V2 ردیف‌های جاری را بخواند و با status فیلتر کند.
+**A1 — `published_content` از نوع JSONB روی Publication:** در همان رویداد انتشار، snapshot فیلدهای عمومی در خود Publication ذخیره شود.
 
-- مزیت: کمترین تغییر اولیه.
-- ریسک: fidelity تضمین نمی‌شود؛ تغییر پس از انتشار ممکن است به V2 نشت کند؛ V2 به جزئیات storage Core وابسته می‌شود.
+- **CCR:** بله؛ تغییر schema و migration لازم است.
+- **D6:** revision عمومی باید در همان transaction و با trigger/سازوکار مصوب ثبت شود؛ JSONB باید به revision همان رخداد bind شود.
+- **S4، سرویس‌ها و triggerها:** PublicationService باید snapshot را بسازد؛ trigger C15 فقط projection status را حفظ می‌کند و باید از ناسازگاری snapshot جلوگیری شود.
+- **UX:** سریع و faithful برای همان رخداد؛ خواندن تاریخچه ساده است، ولی payload رویداد بزرگ و تغییر شکل آن دشوارتر می‌شود.
 
-**B — projection عمومی مالک‌شده توسط Core:** هنگام انتشار، Core یک projection versioned و فقط‌خواندنی از محتوای مجاز بسازد یا همان transaction آن را به‌روزرسانی کند. Read contract فقط projection را expose کند.
+**A2 — جدول projection عمومی Core:** یک projection versioned و فقط‌خواندنی برای Profile، Capability و OfferVersion نگه‌داری شود؛ Publication به revision projection اشاره کند.
 
-- مزیت: محتوای نمایش‌داده‌شده دقیقاً به revision و gate همان انتشار متصل است؛ V2 به جدول ماژول وابسته نمی‌شود.
-- هزینه: نیازمند تصمیم CCR و طراحی storage/read API جداگانه است.
+- **CCR:** بله؛ مدل، migration، trigger/transaction و read boundary جدید لازم است.
+- **D6:** انتشار projection باید با revision جاری و gate همان رخداد atomic باشد؛ trigger نباید راه دوم و متناقض برای نوشتن projection بسازد.
+- **S4، سرویس‌ها و triggerها:** PublicationService writer مجاز باقی می‌ماند؛ Core read service از projection می‌خواند؛ C15 باید source of truth و projection را در یک transaction نگه دارد.
+- **UX:** پاسخ کوچک‌تر، cache و rollback روشن‌تر، و مناسب‌تر برای V2؛ هزینهٔ storage و lifecycle بیشتر است.
 
-**C — Export adapter از سرویس Core:** Core در زمان درخواست یا ساخت snapshot، DTO را از دادهٔ منتشرشده تولید کند، بدون اینکه projection دائمی اضافه شود.
+**B — قفل‌کردن ویرایش پس از انتشار:** تا زمان withdraw یا ساخت نسخهٔ جدید، فیلدهای عمومی منتشرشده قابل‌ویرایش نباشند.
 
-- مزیت: storage جدید کمتر.
-- ریسک: تضمین consistency و snapshot تکرارپذیر سخت‌تر است؛ باید ترتیب خواندن و transaction روشن شود.
+- **CCR:** احتمالاً بله؛ محدودیت سرویس/trigger و خطای دامنه لازم است.
+- **D6:** شمارهٔ revision دیگر با ویرایش عادی بعد از انتشار جلو نمی‌رود؛ تغییر باید پس از withdraw یا در revision جدید انجام شود.
+- **S4، سرویس‌ها و triggerها:** Profile/Capability service باید mutation را رد کند؛ C15 ساده‌تر می‌شود، ولی عملیات انتشار/ویرایش به هم وابسته می‌شوند.
+- **UX:** fidelity بالا و رفتار قابل‌فهم، اما ویرایش کسب‌وکار کندتر و برای اصلاح فوری نامناسب‌تر است.
 
-**D — رویداد انتشار و cache در V2:** هر Publication یک پیام versioned برای V2 تولید کند.
+**C — gating با برابری revision:** ردیف جاری فقط وقتی expose شود که `content_revision = published_content_revision` و status منتشرشده باشد.
 
-- مزیت: مناسب مقیاس و همگام‌سازی غیرهم‌زمان.
-- ریسک: event delivery، replay، حذف، ordering و امنیت هنوز در این مرحله طراحی نشده‌اند.
+- **CCR:** برای اجرای کامل ممکن است لازم باشد؛ در schema فعلی بخشی از داده موجود است، اما این راه به‌تنهایی snapshot قدیمی را نگه نمی‌دارد.
+- **D6:** با هر ویرایش revision جاری جلو می‌رود و projection status باید از انتشار قبلی جدا بماند.
+- **S4، سرویس‌ها و triggerها:** read service باید برابری را enforce کند؛ trigger C15 همچنان status را محافظت می‌کند.
+- **UX:** ساده و fail-closed، اما بعد از یک ویرایش نامنتشر، داده برای کاربر ناپدید می‌شود و محتوای آخرین انتشار قابل بازسازی نیست.
 
-**توصیهٔ طراحی:** گزینهٔ **B** برای fidelity نهایی مناسب‌تر است. این توصیه تصمیم اجرایی نیست؛ قبل از implementation باید مالک دربارهٔ projection، شکل دقیق آن و CCR مربوط تصمیم بگیرد. تا آن زمان، export دوره‌ای Mock فعلی فقط برای توسعهٔ V2 معتبر است، نه ادعای اتصال واقعی به V1 (`origin/main: mlino2/02_V1_V2_INTEGRATION_CONTRACT_DRAFT.md:48-60`).
+**توصیهٔ واحد:** **A2** برای fidelity بلندمدت توصیه می‌شود؛ A1 گزینهٔ ساده‌تر برای اثبات اولیه است. B و C به‌تنهایی snapshot قابل‌بازگشت ایجاد نمی‌کنند. هیچ‌یک هنوز تصمیم مالک نیستند. «Adapter» گزینهٔ fidelity نیست، چون چیزی را که منتشر شده ذخیره نمی‌کند؛ «event» باید در بخش transport بررسی شود، نه به‌عنوان راه حفظ fidelity.
 
-## ۴. تازگی و اعتبار
+## ۴. نگاشت draft-1 V2 به Core
+
+| فیلد draft-1 در V2 | مقصد Core/قرارداد پیشنهادی | وضعیت و پیامد |
+|---|---|---|
+| `business_id` | `Organization.id` | نگاشت مستقیم؛ هویت canonical در Core است (`origin/main: implementation/prisma/schema.prisma:327-353`; `origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:49-54`). |
+| `organization_id` | `Organization.id` | همان مقدار برای tenant؛ V2 فقط مصرف‌کننده است (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:49-60`). |
+| `category` | `Capability.categoryKey` یا vocabulary ماژول | Core نباید category کلینیکی بسازد؛ mapping vocabulary باید versioned باشد. Capability category در Core هست (`origin/main: implementation/prisma/schema.prisma:496-527`). |
+| `location.floor_level` | مقصد فعلی ندارد | BusinessProfile فقط latitude/longitude/address دارد (`origin/main: implementation/prisma/schema.prisma:465-477`)، پس floor/building نیازمند تصمیم و CCR جداست؛ دادهٔ Mock فعلی واقعی تلقی نشود (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:13-22`). |
+| `location.building_id` | مقصد فعلی ندارد | همان شکاف بالا؛ گزینه‌ها: فیلد typed در Profile یا extension جدا، فقط پس از تصمیم. |
+| `products` | مقصد Core ندارد | Core Offer/OfferVersion دارد، Product ندارد (`origin/main: implementation/prisma/schema.prisma:530-576`). حذف از DTO واقعی، یا ساخت مدل جدید، تصمیم جداست؛ بازسازی Product از Capability مجاز نیست. |
+| `offers.title` | `OfferVersion.name` | mapping معنایی ممکن است، اما contract باید نام‌گذاری را صریح کند (`origin/main: implementation/prisma/schema.prisma:547-560`; `origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:34-43`). |
+| `offers.discount_percent` | مقصد مستقیم ندارد | Core price/terms دارد، اما discount_percent ندارد (`origin/main: implementation/prisma/schema.prisma:552-560`). تبدیل از terms فقط با قرارداد typed مجاز است؛ حدس در V2 ممنوع. |
+| `last_synced_at` | metadata انتقال، نه business truth | از `generated_at`/sync receipt ساخته می‌شود؛ V2 فعلی آن را در cache نگه می‌دارد (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:59-60`). |
+
+### برنامهٔ نسخه
+
+`draft-1` فقط قرارداد آزمایشی/Mock باقی بماند. قرارداد واقعی پیشنهادی `mlino.v2.public-business.v1` است و باید با DTO typed، policy انتشار و transport مصوب نهایی شود. V2 باید تا زمان migration، `draft-1` را با label آزمایشی جدا نگه دارد؛ پس از انتشار `public-business.v1`، draft-1 deprecated می‌شود و حذف آن فقط بعد از دورهٔ سازگاری و مالکیت migration مجاز است. پیامدهای schema بالا فقط گزینه‌اند و در این مرحله اعمال نمی‌شوند.
+
+## ۵. تازگی و اعتبار
 
 هر رکورد خواندنی باید این metadata را داشته باشد:
 
@@ -76,7 +102,13 @@ Capability در Core `freshUntil` دارد (`origin/main: implementation/prisma/
 
 پیشنهاد: V2 فقط آیتمی را نمایش دهد که Publication معتبر دارد، revision آن با محتوای projection برابر است، و در زمان خواندن از بازهٔ اعتبار خارج نشده است. تاریخ نامعتبر یا دادهٔ بدون `fresh_until` معتبر باید طبق policy صریح تعیین شود، نه با حدس در client.
 
-## ۵. نمایش پس از تعلیق یا انقضای claim
+**Y1 — Capability:** انتشار Capability در Core طبق S14-A می‌تواند با وضعیت `UNCONFIRMED` مجاز باشد؛ بنابراین قرارداد read باید یک تصمیم مستقل دربارهٔ exposure داشته باشد. پیشنهاد ایمن این است که V2 فقط `HUMAN_CONFIRMED` را expose کند و قابلیت منتشرشده اما تأییدنشده را داخلی نگه دارد. این قاعده در S18 به‌صورت تصمیم باز ثبت می‌شود و با permission انتشار یکی نیست.
+
+**Y2 — Evidence با منبع `AI_INFERRED`:** طبق ADR-0006، provenance با confirmation جداست. Evidence با source `AI_INFERRED` یا status `UNCONFIRMED` نباید به‌تنهایی public eligibility را ثابت کند. V2 نباید Evidence خام را نمایش دهد؛ Core read layer باید policy evidence لازم را اعمال کند (`origin/main: implementation/prisma/schema.prisma:593-623`).
+
+**Y3 — پیوند Capability به Offer:** OfferVersionCapability رابطهٔ Core بین نسخهٔ Offer و Capability است (`origin/main: implementation/prisma/schema.prisma:579-590`). DTO می‌تواند برای هر OfferVersion فهرست `capability_ids` یا خلاصهٔ Capabilityهای public را برگرداند، اما فقط پیوندهای همان organization و فقط Capabilityهای واجد شرط exposure؛ نام‌گذاری category یا capability از متن آزاد V2 حدس زده نشود.
+
+## ۶. نمایش پس از تعلیق یا انقضای claim
 
 Core Claim را از Organization جدا نگه می‌دارد؛ وضعیت claim و زمان اعتبار در خود claim است (`origin/main: implementation/prisma/schema.prisma:356-380`). BusinessProfile نیز به claim اختیاری همان سازمان وصل می‌شود (`origin/main: implementation/prisma/schema.prisma:465-486`).
 
@@ -87,7 +119,7 @@ Core Claim را از Organization جدا نگه می‌دارد؛ وضعیت cla
 
 **توصیه:** S16-A، مگر اینکه مالک برای continuity کسب‌وکار سیاست دیگری تصویب کند. اینجا تصمیمی گرفته نشده است.
 
-## ۶. DTOهای نسخه‌دار
+## ۷. DTOهای نسخه‌دار
 
 قرارداد پیشنهادی باید namespace و version مستقل داشته باشد، مثلاً `mlino.v2.public-business.v1`، و هر پاسخ شامل `contract_version` باشد. DTO پیشنهادی:
 
@@ -132,7 +164,7 @@ type PublicBusinessReadV1 = {
 
 این DTO پیشنهادی عمداً `Membership`، `PermissionGrant`، claim status، Evidence خام و دادهٔ خصوصی را برنمی‌گرداند. `products` فعلی V2 تا زمان وجود منبع Core معتبر باید یا deprecated شود یا فقط در قرارداد Mock جدا باقی بماند؛ نباید به‌عنوان دادهٔ واقعی V1 معرفی شود.
 
-## ۷. گزینه‌های انتقال
+## ۸. گزینه‌های انتقال
 
 **S17-A — Read API versioned:** مسیر فقط‌خواندنی با DTO نسخه‌دار، tenant filter و cursor/etag.
 
@@ -140,9 +172,9 @@ type PublicBusinessReadV1 = {
 
 **S17-C — Event feed:** رخدادهای انتشار برای ساخت cache V2.
 
-**توصیه:** برای اولین اتصال واقعی، S17-A یا S17-B باید با یک CCR مشترک انتخاب شود؛ S17-C به زمانی موکول شود که نیاز مقیاس و replay روشن باشد. انتخاب نهایی باز است.
+**توصیهٔ واحد:** با توجه به سند یکپارچگی که export دوره‌ای را برای شروع توصیه می‌کند، **S17-B — snapshot export versioned و فقط‌خواندنی** برای اولین اتصال واقعی مناسب‌تر است. API می‌تواند بعداً همان DTO را ارائه کند و event feed بعد از نیاز واقعی مقیاس اضافه شود. انتخاب نهایی باز است.
 
-## ۸. امنیت و tenancy
+## ۹. امنیت و tenancy
 
 V2 نباید `organization_id` را از ورودی کاربر به‌عنوان مجوز اعتماد کند. V1 باید داده را با tenant صحیح تولید کند و V2 باید در import/read مسیر tenant و شناسهٔ پایدار را فقط به‌صورت دادهٔ read-only نگه دارد.
 
@@ -157,7 +189,9 @@ read contract باید:
 - cache key را حداقل بر `organization_id` و نسخهٔ contract متکی کند؛
 - V2 را از write، claim، publication و تغییر business truth منع کند.
 
-## ۹. consistency و caching
+مصرف‌کنندهٔ V2 باید با credential سرویس‌به‌سرویس یا artifact امضاشده احراز شود؛ endpoint عمومی بدون auth برای دادهٔ Core مجاز نیست. transport باید rate limit و سقف payload داشته باشد. `contact_information` می‌تواند PII یا دادهٔ حساس باشد؛ قبل از exposure باید allowlist فیلد، مبنای privacy، حذف شماره/ایمیل خصوصی و policy opt-out مشخص شود. این policy هنوز تصمیم نشده است.
+
+## ۱۰. consistency و caching
 
 منبع اصلی V2 فعلاً snapshot در حافظه است و با `loadSnapshot` جایگزین می‌شود (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/BusinessDirectoryService.ts:31-43`). بنابراین قرارداد واقعی باید این موارد را مشخص کند:
 
@@ -170,7 +204,9 @@ read contract باید:
 
 Matching فعلی فقط از Directory استفاده می‌کند و دادهٔ جدید تولید نمی‌کند (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/matching/MatchingService.ts:1-13,56-72`). هر نتیجهٔ match باید به رکوردی از snapshot معتبر اشاره کند؛ اگر snapshot با context یا intent تغییرکند، نتیجه باید دوباره ارزیابی شود و cache قدیمی نباید به‌عنوان نتیجهٔ تازه عرضه شود.
 
-## ۱۰. راهبرد آزمون
+ترتیب رکوردها در export باید بر اساس `Publication.occurred_at` یا cursor معادل آن deterministic باشد (`origin/main: implementation/prisma/schema.prisma:635-653`). هدف پیشنهادی برای propagation withdrawal، حداکثر ۵ دقیقه از ثبت رخداد تا حذف/نامرئی شدن در read cache است؛ این مقدار S19 و نیاز عملیاتی است، نه تصمیم قطعی. در بازهٔ تأخیر، پاسخ باید stale marker داشته باشد و freshness را ادعا نکند.
+
+## ۱۱. راهبرد آزمون
 
 پیش از implementation قرارداد:
 
@@ -187,17 +223,21 @@ Matching فعلی فقط از Directory استفاده می‌کند و داده
 
 برای V2 فعلی، ورودی snapshot در `validateExportSnapshot` قبل از cache اعتبارسنجی می‌شود (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/BusinessDirectoryService.ts:35-43`; `origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/validate.ts:117-123`). این مسیر می‌تواند harness اولیه باشد، اما جایگزین آزمون contract واقعی V1 نمی‌شود.
 
-## ۱۱. تصمیم‌های باز مالک و ماتریس ADR
+## ۱۲. تصمیم‌های باز مالک و ماتریس ADR
 
 ### تصمیم‌های باز
 
 | شناسه | موضوع | گزینه‌ها | توصیهٔ طراحی | وضعیت |
 |---|---|---|---|---|
 | S16 | claim تعلیق/انقضا یافته | A حذف فوری، B حفظ تا TTL | A | OPEN — مالک باید تصمیم بگیرد |
-| S17 | transport | A API، B snapshot export، C event feed | A یا B برای فاز اول | OPEN |
-| S18 | fidelity | A بازسازی V2، B projection Core، C adapter، D event | B | OPEN |
-| S19 | freshness Evidence/Capability | A فیلتر در read، B snapshot freeze، C حذف با stale شدن هر evidence | A با policy صریح | OPEN |
-| S20 | شکل location/contact/links | JSON فعلی یا DTOهای typed نسخه‌دار | DTO typed با سازگاری تدریجی | OPEN |
+| S17 | transport اولیه | A API، B snapshot export، C event feed | B، مطابق export-first فعلی | OPEN |
+| S18 | exposure Capability تأییدنشده | A فقط HUMAN_CONFIRMED، B انتشار طبق S14-A | A | OPEN |
+| S19 | fidelity محتوای منتشرشده | A1 JSONB روی Publication، A2 projection table، B قفل ویرایش، C revision gating | A2 | OPEN |
+| S20 | freshness Evidence/Capability | A فیلتر در read، B snapshot freeze، C حذف با stale شدن هر evidence | A با policy صریح | OPEN |
+| S21 | شکل location/contact/links | A نگه‌داشتن JSON، B DTO typed و versioned، C افزودن فیلدهای Profile | B؛ C فقط با CCR | OPEN |
+| S22 | PII در contact_information | A allowlist عمومی، B حذف contact، C policy جدا برای هر کشور | A همراه policy privacy | OPEN |
+| S23 | withdrawal propagation | A فوری، B هدف ۵ دقیقه، C batch روزانه | B با stale marker | OPEN |
+| S24 | Offer capability exposure | A فقط capability_id، B خلاصهٔ public، C عدم نمایش پیوند | B با شرط exposure | OPEN |
 
 این جدول پیشنهاد می‌دهد و هیچ S item را به‌صورت قطعی تصویب نمی‌کند.
 

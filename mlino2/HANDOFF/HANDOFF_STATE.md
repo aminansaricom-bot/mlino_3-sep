@@ -488,3 +488,14 @@ VALIDATION: DOCUMENT ONLY — no code, schema, migration, Prisma, Docker or data
 SCOPE: MLINO_V2_READ_CONTRACT_DESIGN.md with Core/V2 citations, fidelity gap, transport options, freshness, claim policy, DTOs, security, caching, tests and S16-S20 open decisions.
 NEXT_ACTION: Guardian review; no implementation and no main merge.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-V2-READ-CONTRACT
+AUTHOR: CODEX
+PHASE: G13B_V2_READ_CONTRACT_DESIGN_FIXES
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G13B-V2-READ-CONTRACT-DESIGN-FIXES-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G13B_V2_READ_CONTRACT_DESIGN_FIXES_REPORT.md
+VALIDATION: DOCUMENT ONLY — GW2-P passed; diff check passed; no code/schema/migration/Prisma/Docker/database action.
+SCOPE: Fidelity A1/A2/B/C، draft-1 mapping، version/deprecation، Y1-Y3، export-first S17، security/PII، consistency/latency، S16-S24 open decisions.
+NEXT_ACTION: Guardian review; no implementation and no main merge.
+CREATED_AT: 2026-09-14
