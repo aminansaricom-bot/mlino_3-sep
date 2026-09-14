@@ -535,3 +535,15 @@ VALIDATION: DOCUMENT ONLY — GW2-P passed; final design hash 90c5753efe11c1b2b2
 SCOPE: F9 completion only; no code/schema/migration/Prisma/Docker/database action; no G14.
 NEXT_ACTION: Guardian review; Push only when automated check permits.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A1_CCR_DRAFT
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G14A1-PUBLISHED-CONTENT-CCR-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A1_PUBLISHED_CONTENT_CCR_REPORT.md
+COMMITS: 31f3c22bc74d860ddbb2e491449bccff276b1a66
+VALIDATION: DOCUMENT ONLY — GW2-P passed; CCR LF hash 44539a3e2136803dcae7c166ab1f173066db45b881d22a3ccbdd14a119c714b4; no schema/migration/code/test/config/Prisma/Docker/database action.
+SCOPE: DRAFT CCR for publications.published_content under S19-A1; C1-C9 complete; OQ-1 through OQ-5 remain owner decisions.
+NEXT_ACTION: Guardian review and owner decision; no G14a-2, G14a-3, G14b or G14c.
+CREATED_AT: 2026-09-14
