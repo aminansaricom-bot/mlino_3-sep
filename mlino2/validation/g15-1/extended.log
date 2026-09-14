@@ -1,0 +1,1489 @@
+BEGIN setting=extended head=d20ad7cfeff48ca8b3f28bb0bdc284b4588139b3 mode=extended
+HOST_CONTEXT label=before-extended running_container_count=7 cpu_load_percent=28
+MIGRATE_EXIT=0
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "127.0.0.1:5499"
+
+7 migrations found in prisma/migrations
+
+Applying migration `20260814065924_init`
+Applying migration `20260815033018_add_situation_key`
+Applying migration `20260815113714_rename_actor_core_entity_id_to_actor_id`
+Applying migration `20260906001500_add_ownership_type`
+Applying migration `20260910020000_add_external_workspace_link`
+Applying migration `20260913010000_add_core_foundation`
+Applying migration `20260914010000_add_publication_published_content`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260814065924_init/
+    └─ migration.sql
+  └─ 20260815033018_add_situation_key/
+    └─ migration.sql
+  └─ 20260815113714_rename_actor_core_entity_id_to_actor_id/
+    └─ migration.sql
+  └─ 20260906001500_add_ownership_type/
+    └─ migration.sql
+  └─ 20260910020000_add_external_workspace_link/
+    └─ migration.sql
+  └─ 20260913010000_add_core_foundation/
+    └─ migration.sql
+  └─ 20260914010000_add_publication_published_content/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+
+JEST_EXIT=0
+jest.cmd : PASS test/foundation/opportunity-read/opportunity-read.spec.ts (6.908 s)
+At C:\Users\galexy\mlino code\core-g15-transaction-robustness\mlino2\validation\g15-1\run-g15-diagnostics.ps1:34 
+char:15
++     $output = & $file @arguments 2>&1 | Out-String
++               ~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PASS test/found...ec.ts (6.908 s):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=5
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=7
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=6
+PASS test/core/g10c-profile-capability.spec.ts
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=4
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=4
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+PASS test/core/g14a2-published-content.spec.ts
+PASS test/value-engines/cancellation/cancellation-detector.spec.ts
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=4
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=7
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+PASS test/core/identity-claim-verification.spec.ts
+PASS test/foundation/business-context.spec.ts
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=6
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_END organization_lock elapsed_ms=18
+PASS test/core/g10d-offer.spec.ts
+PASS test/value-engines/capacity/capacity-detector.spec.ts
+PASS test/foundation/opportunity-projection/rebuild-projection.spec.ts
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=8
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_END organization_lock elapsed_ms=17
+PASS test/core/core-authority.spec.ts
+PASS test/foundation/recommendation/recommendation-contract.spec.ts
+PASS test/foundation/workspace-link.spec.ts
+PASS test/foundation/event-admission-validation.spec.ts
+PASS test/http/read-api.spec.ts
+PASS test/feed/opportunity-feed.spec.ts
+PASS test/value-engines/followup/followup-detector.spec.ts
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+PASS test/core/g10e-evidence.spec.ts
+PASS test/foundation/opportunity-projection/situation-lookup.spec.ts
+PASS test/foundation/access-decision/org-membership-ac2-port.spec.ts
+PASS test/foundation/event-admission.spec.ts
+PASS test/foundation/event-admission-concurrency.spec.ts
+PASS test/foundation/ownership-type.spec.ts
+PASS test/foundation/auth-adapter.spec.ts
+PASS test/test-db-guard.spec.ts
+PASS test/briefing/proactive-briefing.spec.ts
+PASS test/foundation/situation-key.spec.ts
+PASS test/core/error-adapter.spec.ts
+PASS test/core/db-guard.spec.ts
+
+Test Suites: 28 passed, 28 total
+Tests:       360 passed, 360 total
+Snapshots:   0 total
+Time:        37.267 s
+Ran all test suites.
+
+RAW_AND_LOCK_LINES
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=5
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=7
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=6
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=4
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=4
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=4
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=7
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=6
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_END organization_lock elapsed_ms=18
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=8
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_END organization_lock elapsed_ms=17
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=3
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=1
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+G15_1_LOCK_START organization_lock
+G15_1_LOCK_END organization_lock elapsed_ms=2
+SUMMARY_LINES
+Test Suites: 28 passed, 28 total
+Tests:       360 passed, 360 total
+REMOVED_CONTAINER name=mlino-g15-1-extended exit=0
+HOST_CONTEXT label=after-extended running_container_count=7 cpu_load_percent=8
