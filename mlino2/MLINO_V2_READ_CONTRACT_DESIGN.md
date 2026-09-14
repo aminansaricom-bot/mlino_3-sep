@@ -22,7 +22,7 @@
 | BusinessProfile | نام، توضیح، مکان، راه تماس، لینک‌ها، ساعات کاری | پروفایل قابل‌نمایش و claim مربوطه طبق تصمیم مالک |
 | Capability | شناسهٔ عمومی، کلید، نام، توضیح کوتاه، دسته، audience | انتشار شده، `CUSTOMER_FACING`، تأیید انسانی و تازه بودن |
 | Offer / OfferVersion | شناسه، عنوان/توضیح نسخه، شکل، شرایط، قیمت، ارز، بازهٔ اعتبار | فقط نسخهٔ منتشرشده و معتبر؛ Offer والد به‌تنهایی محتوای customer-facing نیست |
-| Evidence | خود Evidence خام منتشر نشود | فقط برای اثبات داخلی freshness/eligibility؛ در صورت نیاز، خلاصهٔ غیرحساس و تصمیم‌گیری‌شده در projection |
+| Evidence | خود Evidence خام منتشر نشود | فقط برای اثبات داخلی freshness/eligibility؛ در صورت نیاز، خلاصهٔ غیرحساس و تصمیم‌گیری‌شده در snapshot منتشرشده |
 | Publication | رویداد انتشار و نسخهٔ منتشرشده | به‌عنوان provenance و revision در قرارداد؛ تاریخچهٔ داخلی کامل به V2 داده نشود |
 | Membership / PermissionGrant | هرگز expose نشود | اطلاعات داخلی authorization |
 | BusinessIdentityClaim / IdentityVerification | وضعیت داخلی claim expose نشود | فقط نتیجهٔ policy نمایش عمومی را تعیین کند |
@@ -35,7 +35,7 @@ BusinessProfile در Core فیلدهای عمومی اصلی را دارد، ا�
 
 Publication رویداد انتشار را با نوع رویداد، `contentRevision`، actor، permission و `gateSnapshot` ثبت می‌کند (`origin/main: implementation/prisma/schema.prisma:626-654`). اما رکورد Publication یک snapshot کامل از فیلدهای BusinessProfile، Capability یا OfferVersion ندارد. محتوای Profile و Capability در ردیف‌های جاری آن‌هاست (`origin/main: implementation/prisma/schema.prisma:465-481,496-512`) و OfferVersion نیز به‌صورت ردیف immutable نگه‌داری می‌شود (`origin/main: implementation/prisma/schema.prisma:547-563`). بنابراین صرفاً خواندن جدول جاری و نام‌گذاری آن به‌عنوان «محتوای منتشرشده» می‌تواند محتوای بعد از آخرین انتشار را هم وارد V2 کند؛ این با قاعدهٔ جدا بودن `contentRevision` از `publishedContentRevision` ناسازگار است (`origin/main: implementation/prisma/schema.prisma:478-481,509-512`).
 
-در سمت V2 نیز DTO فعلی `products` و `offers` را لازم می‌داند (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:24-43,49-60`)، در حالی که Core schema فعلی Product ندارد و Offer/OfferVersion شکل دیگری دارد (`origin/main: implementation/prisma/schema.prisma:530-576`). این قرارداد نباید این شکاف را با حدس، دادهٔ ساختگی یا خواندن مستقیم ماژول‌ها پنهان کند.
+در سمت V2 نیز export فعلی `contract_version`، `generated_at` و `records` را تعریف می‌کند (`origin/codex/v2-intent-flow-foundation:mlino2/app/src/directory/contract.ts:62-72`) و هر record در draft-1 شامل `products` و `offers` است (`origin/codex/v2-intent-flow-foundation:mlino2/app/src/directory/contract.ts:24-43,49-60`). Core schema فعلی Product ندارد و Offer/OfferVersion شکل دیگری دارد (`origin/main: implementation/prisma/schema.prisma:530-576`). این قرارداد نباید این شکاف را با حدس، دادهٔ ساختگی یا خواندن مستقیم ماژول‌ها پنهان کند.
 
 ### گزینه‌های fidelity
 
@@ -91,22 +91,22 @@ Publication رویداد انتشار را با نوع رویداد، `contentRe
 
 ## ۵. تازگی و اعتبار
 
-هر رکورد خواندنی باید این metadata را داشته باشد:
+برای policy freshness این metadata باید در منبع/وضعیت cache قابل ردیابی باشد؛ در DTO نهایی فقط آن‌هایی که در بلوک نوع آمده‌اند serialize می‌شوند:
 
 - `contract_version`
 - `organization_id`
 - `source_revision` یا مجموعهٔ revisionهای Profile/Capability/OfferVersion
 - `published_at`
 - `generated_at`
-- `last_synced_at`
+- `last_synced_at` در draft-1 legacy است و در v1 با `generated_at`، `snapshot_id` و receipt انتقال پوشش داده می‌شود؛ به‌صورت content field وارد DTO نمی‌شود.
 - `fresh_until` برای Capability و Evidence در صورت اعمال policy
-- `visibility` یا وضعیت عمومی نهایی، بدون expose کردن وضعیت‌های داخلی
+- `visibility` به‌صورت شرط exposure اعمال می‌شود و وضعیت داخلی claim/permission را expose نمی‌کند.
 
 Capability در Core `freshUntil` دارد (`origin/main: implementation/prisma/schema.prisma:503-512`) و Evidence نیز `freshUntil` و status دارد (`origin/main: implementation/prisma/schema.prisma:593-612`). در V2 فعلی فقط `last_synced_at` در DTO وجود دارد و Offer با `valid_until` بررسی می‌شود (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:34-43,49-60`; `origin/codex/v2-intent-flow-foundation: mlino2/app/src/matching/MatchingService.ts:91-94`). این دو مفهوم باید جدا بمانند: sync freshness با business validity یکی نیست.
 
-پیشنهاد: V2 فقط آیتمی را نمایش دهد که Publication معتبر دارد، revision آن با محتوای projection برابر است، و در زمان خواندن از بازهٔ اعتبار خارج نشده است. تاریخ نامعتبر یا دادهٔ بدون `fresh_until` معتبر باید طبق policy صریح تعیین شود، نه با حدس در client.
+پیشنهاد: V2 فقط آیتمی را نمایش دهد که Publication معتبر دارد، revision آن با snapshot منتشرشده برابر است، و در زمان خواندن از بازهٔ اعتبار خارج نشده است. تاریخ نامعتبر یا دادهٔ بدون `fresh_until` معتبر باید طبق policy صریح تعیین شود، نه با حدس در client.
 
-**Y1 — Capability:** انتشار Capability در Core طبق S14-A می‌تواند با وضعیت `UNCONFIRMED` مجاز باشد؛ بنابراین قرارداد read باید یک تصمیم مستقل دربارهٔ exposure داشته باشد. پیشنهاد ایمن این است که V2 فقط `HUMAN_CONFIRMED` را expose کند و قابلیت منتشرشده اما تأییدنشده را داخلی نگه دارد. این قاعده در S18 به‌صورت تصمیم باز ثبت می‌شود و با permission انتشار یکی نیست.
+**Y1 — Capability:** انتشار Capability در Core طبق S14-A می‌تواند با وضعیت `UNCONFIRMED` مجاز باشد؛ S18-A اکنون تصمیم نهایی exposure است: V2 فقط `HUMAN_CONFIRMED` را expose می‌کند و قابلیت منتشرشده اما تأییدنشده را داخلی نگه می‌دارد. این قاعده با permission انتشار یکی نیست.
 
 **Y2 — Evidence با منبع `AI_INFERRED`:** طبق ADR-0006، provenance با confirmation جداست. Evidence با source `AI_INFERRED` یا status `UNCONFIRMED` نباید به‌تنهایی public eligibility را ثابت کند. V2 نباید Evidence خام را نمایش دهد؛ Core read layer باید policy evidence لازم را اعمال کند (`origin/main: implementation/prisma/schema.prisma:593-623`).
 
@@ -125,24 +125,29 @@ Core Claim را از Organization جدا نگه می‌دارد؛ وضعیت cla
 
 ## ۷. DTOهای نسخه‌دار
 
-قرارداد نهایی `mlino.v2.public-business.v1` است. Export طبق S17-B باید امضا یا metadata صحت‌سنجی داشته باشد و هر پاسخ شامل `contract_version` و `generated_at` باشد. DTO نهایی پیشنهادی:
+قرارداد نهایی `mlino.v2.public-business.v1` است. Export طبق S17-B باید امضا داشته باشد؛ artifact بدون امضا فقط برای Mock `draft-1` مجاز است. شکل فعلی export در V2 از `contract_version`، `generated_at` و `records` استفاده می‌کند (`origin/codex/v2-intent-flow-foundation:mlino2/app/src/directory/contract.ts:62-72`). DTO نهایی:
 
 ```ts
-type PublicBusinessReadV1 = {
+type PublicBusinessExportV1 = {
   contract_version: 'mlino.v2.public-business.v1';
   generated_at: string; // metadata
-  signature: { algorithm: string; key_id: string; value: string } | null; // metadata
+  snapshot_id: string; // metadata
+  signature: { algorithm: string; key_id: string; value: string }; // required; algorithm/key management deferred to G14b
+  records: PublicBusinessRecordV1[];
+};
+
+type PublicBusinessRecordV1 = {
   business: {
     organization_id: string; // Organization.id
-    display_name: string; // Organization.displayName
     name: string;
     description: string | null;
-    location: { latitude: number; longitude: number; address_text: string | null } | null; // S21-B
+    location: { latitude: number | null; longitude: number | null; address_text: string | null } | null; // S21-B
     contact_information: { public_phone?: string; public_email?: string; public_address?: string } | null; // S22-A
     links: { website?: string; public_social?: string[] } | null; // S21-B
-    business_hours: unknown | null;
+    business_hours: unknown | null; // versioned JSON schema in G14b
     published_at: string;
     publication_id: string;
+    source_revision: number;
   };
   capabilities: Array<{
     capability_id: string;
@@ -151,7 +156,6 @@ type PublicBusinessReadV1 = {
     short_description: string | null;
     fresh_until: string | null;
     source_revision: number;
-    capability_links: Array<{ offer_version_id: string; offer_id: string }>;
   }>;
   offers: Array<{
     offer_id: string;
@@ -160,9 +164,10 @@ type PublicBusinessReadV1 = {
     name: string;
     short_description: string | null;
     offer_shape: string;
-    terms: unknown | null;
+    terms: unknown | null; // versioned JSON schema in G14b
     price_amount: string | null;
     price_currency: string | null;
+    on_request: boolean;
     valid_from: string;
     valid_until: string | null;
     capability_links: Array<{ capability_id: string; capability_key: string; name: string }>;
@@ -182,7 +187,9 @@ type PublicBusinessReadV1 = {
 - S25: در `public-business.v1` هیچ `category`، `floor_level` یا `building_id` وجود ندارد. category آینده فقط از vocabulary نسخه‌دار اولین module می‌آید؛ floor/building در V2 فعلاً mock/null می‌ماند.
 - S26: `products` از قرارداد واقعی حذف شده است؛ Offer/OfferVersion جای آن را می‌گیرد. `draft-1` با products فقط Mock و deprecated است.
 - `Membership`، `PermissionGrant`، claim status، Evidence خام و PII غیر allowlist‌شده هرگز برنمی‌گردند.
-- منبع فیلدهای DTO: `organization_id` و `display_name` از Organization، `name`، `description`، location پایه، contact، links و hours از BusinessProfile، شناسه/کلید/نام/توضیح/تأیید/freshness از Capability، و فیلدهای Offer از OfferVersion می‌آیند. `published_at`، `publication_id`، ordering و revision از Publication و snapshot مصوب می‌آیند. منابع: Organization/BusinessProfile (`origin/main: implementation/prisma/schema.prisma:327-353,465-493`)، Capability (`origin/main: implementation/prisma/schema.prisma:496-527`)، Offer/OfferVersion (`origin/main: implementation/prisma/schema.prisma:530-576`)، Publication (`origin/main: implementation/prisma/schema.prisma:626-654`). `signature`، `generated_at`، `stale` و `ordering` metadata هستند؛ `category`، `floor_level`، `building_id` و `products` عمداً در DTO نهایی نیستند.
+- اگر یکی از latitude یا longitude تهی باشد، هر دو مختصات در DTO تهی می‌شوند؛ `address_text` مستقل باقی می‌ماند. مقدار Decimal مختصات به number با حداکثر ۶ رقم اعشار تبدیل می‌شود (`origin/main: implementation/prisma/schema.prisma:472-477`).
+- `business_hours` و `terms` باید JSON مطابق schema نسخه‌داری باشند که در G14b تعریف می‌شود؛ `unknown` در بلوک TypeScript فقط نشان‌دهندهٔ قرارداد schema جداگانه است، نه مجوز عبور JSON دلخواه.
+- هر content field از `publications.published_content` در S19-A1 می‌آید؛ read layer هیچ live-row را برای محتوای DTO نمی‌خواند. `Organization.id` فقط شناسهٔ tenant است و `Organization.displayName` مستقیماً وارد DTO نمی‌شود؛ اگر نام نمایشی لازم شود فقط از allowlist snapshot BusinessProfile در G14a افزوده می‌شود. منابع schema: Organization/BusinessProfile (`origin/main: implementation/prisma/schema.prisma:327-353,465-493`)، Capability (`origin/main: implementation/prisma/schema.prisma:496-527`)، Offer/OfferVersion (`origin/main: implementation/prisma/schema.prisma:530-576`)، Publication (`origin/main: implementation/prisma/schema.prisma:626-654`). `signature`، `generated_at`، `snapshot_id`، `stale` و `ordering` metadata هستند؛ `category`، `floor_level`، `building_id` و `products` عمداً در DTO نهایی نیستند.
 
 ## ۸. گزینه‌های انتقال
 
@@ -243,7 +250,7 @@ Matching فعلی فقط از Directory استفاده می‌کند و داده
 
 برای V2 فعلی، ورودی snapshot در `validateExportSnapshot` قبل از cache اعتبارسنجی می‌شود (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/BusinessDirectoryService.ts:35-43`; `origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/validate.ts:117-123`). این مسیر می‌تواند harness اولیه باشد، اما جایگزین آزمون contract واقعی V1 نمی‌شود.
 
-## ۱۲. تصمیم‌های باز مالک و ماتریس ADR
+## ۱۲. تصمیم‌های مالک (DECIDED) و ماتریس ADR
 
 ### تصمیم‌های باز
 
@@ -261,7 +268,7 @@ Matching فعلی فقط از Directory استفاده می‌کند و داده
 | S25 | category/floor/building در public DTO | A افزودن به v1 (not chosen)، B حذف از v1 و mapping آیندهٔ module، C mock/null در V2 (not chosen as public fields) | B؛ floor/building فعلاً mock/null | DECIDED |
 | S26 | products در public DTO | A نگه‌داشتن products (not chosen)، B حذف و جایگزینی با Offer/OfferVersion، C تبدیل حدسی (not chosen) | B؛ draft-1 فقط Mock | DECIDED |
 
-S16 تا S26 در جدول زیر تصمیم‌های مالک هستند؛ گزینه‌های ردشده فقط برای traceability با برچسب «not chosen» نگه داشته شده‌اند.
+S16 تا S26 در جدول بالا تصمیم‌های مالک هستند؛ گزینه‌های ردشده فقط برای traceability با برچسب «not chosen» نگه داشته شده‌اند.
 
 ### ماتریس سازگاری ADR
 
@@ -286,7 +293,7 @@ S16 تا S26 در جدول زیر تصمیم‌های مالک هستند؛ گز
 
 ### G14a — CCR برای `published_content`
 
-- **Scope:** افزودن JSONB به Publication، CHECK برای PUBLISHED/WITHDRAWN، allowlist snapshot، قفل `FOR UPDATE` و نوشتن snapshot در همان transaction.
+- **Scope:** افزودن JSONB به Publication، CHECK برای PUBLISHED/WITHDRAWN، allowlist snapshot، قفل `FOR UPDATE` و نوشتن snapshot در همان transaction. `Organization.displayName` فقط در صورت نیاز و فقط از allowlist Profile snapshot وارد می‌شود؛ live-row هرگز خوانده نمی‌شود.
 - **فایل‌ها:** schema/migration و PublicationService فقط پس از CCR مستقل؛ آزمون‌های constraint و rollback در validation جدا.
 - **ممنوع:** تغییر V2، ساخت HTTP، تغییر Offer lifecycle یا backfill بدون تصمیم.
 - **آزمون:** fidelity هر target، snapshot OfferVersion، immutable trigger، ALREADY_PUBLISHED، withdraw و migration stability.
