@@ -1,12 +1,12 @@
 # گزارش اجرای Codex — G14a-2: پیاده‌سازی محتوای منتشرشده
 
-**وضعیت:** DELIVERED_AWAITING_GUARDIAN_REVIEW  
-**تاریخ:** ۲۰۲۶-۰۹-۱۴  
-**INSTRUCTION_ID:** `CODEX-20260914-G14A2-PUBLISHED-CONTENT-IMPLEMENTATION-001`  
-**TARGET_HANDOFF_ID:** `HANDOFF-20260914-OWNER-APPROVAL-G14A2`  
-**WORKSTREAM_HANDOFF_ID:** `HANDOFF-20260914-CORE-G14A`  
-**شاخه:** `codex/core-g14a-published-content`  
-**مبنای اجرا:** `ee25ead`  
+**وضعیت:** DELIVERED_AWAITING_GUARDIAN_REVIEW
+**تاریخ:** ۲۰۲۶-۰۹-۱۴
+**INSTRUCTION_ID:** `CODEX-20260914-G14A2-PUBLISHED-CONTENT-IMPLEMENTATION-001`
+**TARGET_HANDOFF_ID:** `HANDOFF-20260914-OWNER-APPROVAL-G14A2`
+**WORKSTREAM_HANDOFF_ID:** `HANDOFF-20260914-CORE-G14A`
+**شاخه:** `codex/core-g14a-published-content`
+**مبنای اجرا:** `ee25ead`
 **Commit پیاده‌سازی:** `39d91841587911d6caf28810251ea8944d7deac5`
 
 ## ۱. Task اجراشده
