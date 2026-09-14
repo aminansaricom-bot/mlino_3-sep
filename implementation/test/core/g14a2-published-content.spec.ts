@@ -71,9 +71,11 @@ describe('G14a2 published content snapshot', () => {
     const accepted = await newProfile('c7-01-accepted');
     await expect(publications.publish(accepted.context, 'BUSINESS_PROFILE', accepted.profile.id, 'publish object')).resolves.toMatchObject({ outcome: 'PUBLISHED' });
     const sqlNull = await newProfile('c7-01-null');
-    await expect(prisma.publication.create({ data: await directPublicationData(sqlNull, 'PUBLISHED', Prisma.DbNull) })).rejects.toBeTruthy();
+    await expect(prisma.publication.create({ data: await directPublicationData(sqlNull, 'PUBLISHED', Prisma.DbNull) })).rejects.toThrow(/publication_published_content_event_kind_check/);
+    await expect(prisma.publication.create({ data: await directPublicationData(sqlNull, 'PUBLISHED', { snapshot_version: 'core-publication-snapshot-v1', content: { name: 'valid' } }) })).resolves.toBeTruthy();
     const scalar = await newProfile('c7-01-scalar');
-    await expect(prisma.publication.create({ data: await directPublicationData(scalar, 'PUBLISHED', 'not-an-object') })).rejects.toBeTruthy();
+    await expect(prisma.publication.create({ data: await directPublicationData(scalar, 'PUBLISHED', 'not-an-object') })).rejects.toThrow(/publication_published_content_event_kind_check/);
+    await expect(prisma.publication.create({ data: await directPublicationData(scalar, 'PUBLISHED', { snapshot_version: 'core-publication-snapshot-v1', content: { name: 'valid' } }) })).resolves.toBeTruthy();
   });
 
   test('g14a2-c7-02 WITHDRAWN accepts SQL NULL and rejects an object', async () => {
@@ -84,7 +86,8 @@ describe('G14a2 published content snapshot', () => {
     expect(withdrawal.publication.publishedContent).toBeNull();
     const rejected = await newProfile('c7-02-rejected');
     await publications.publish(rejected.context, 'BUSINESS_PROFILE', rejected.profile.id, 'publish');
-    await expect(prisma.publication.create({ data: await directPublicationData(rejected, 'WITHDRAWN', { snapshot_version: 'core-publication-snapshot-v1', content: {} }) })).rejects.toBeTruthy();
+    await expect(prisma.publication.create({ data: await directPublicationData(rejected, 'WITHDRAWN', { snapshot_version: 'core-publication-snapshot-v1', content: {} }) })).rejects.toThrow(/publication_published_content_event_kind_check/);
+    await expect(prisma.publication.create({ data: await directPublicationData(rejected, 'WITHDRAWN', Prisma.DbNull) })).resolves.toBeTruthy();
   });
 
   test('g14a2-c7-03 snapshots for all targets equal the publish-time allowlists', async () => {
@@ -146,7 +149,7 @@ describe('G14a2 published content snapshot', () => {
     const fixture = await newProfile('c7-07');
     const result = await publications.publish(fixture.context, 'BUSINESS_PROFILE', fixture.profile.id, 'publish');
     if (result.outcome !== 'PUBLISHED') throw new Error('expected publication');
-    await expect(prisma.publication.update({ where: { id: result.publication.id }, data: { publishedContent: { snapshot_version: 'core-publication-snapshot-v1', content: { name: 'tampered' } } } })).rejects.toBeTruthy();
+    await expect(prisma.publication.update({ where: { id: result.publication.id }, data: { publishedContent: { snapshot_version: 'core-publication-snapshot-v1', content: { name: 'tampered' } } } })).rejects.toThrow(/publications are append-only/);
   });
 
   test('g14a2-c7-08 allowlists exclude internal and whole-row fields', async () => {
@@ -166,7 +169,7 @@ describe('G14a2 published content snapshot', () => {
     expect(constraint).toEqual([{ convalidated: true }]);
   });
 
-  test('g14a2-c7-10 preflight rejects existing publications before any DDL continuation', async () => {
+  test('g14a2-c7-10 preflight SQL rejects a non-empty publications table before DDL continuation', async () => {
     const fixture = await newProfile('c7-10');
     await publications.publish(fixture.context, 'BUSINESS_PROFILE', fixture.profile.id, 'seed');
     await expect(prisma.$executeRawUnsafe(`DO $$ BEGIN IF EXISTS (SELECT 1 FROM publications LIMIT 1) THEN RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'published_content migration requires an empty publications table'; END IF; END; $$;`)).rejects.toBeTruthy();
@@ -194,10 +197,12 @@ describe('G14a2 published content snapshot', () => {
 
   test('g14a2-c7-12 JSON null is rejected for both PUBLISHED and WITHDRAWN', async () => {
     const pending = await newProfile('c7-12-published');
-    await expect(prisma.publication.create({ data: await directPublicationData(pending, 'PUBLISHED', Prisma.JsonNull) })).rejects.toBeTruthy();
+    await expect(prisma.publication.create({ data: await directPublicationData(pending, 'PUBLISHED', Prisma.JsonNull) })).rejects.toThrow(/publication_published_content_event_kind_check/);
+    await expect(prisma.publication.create({ data: await directPublicationData(pending, 'PUBLISHED', { snapshot_version: 'core-publication-snapshot-v1', content: { name: 'valid' } }) })).resolves.toBeTruthy();
     const active = await newProfile('c7-12-withdrawn');
     await publications.publish(active.context, 'BUSINESS_PROFILE', active.profile.id, 'publish');
-    await expect(prisma.publication.create({ data: await directPublicationData(active, 'WITHDRAWN', Prisma.JsonNull) })).rejects.toBeTruthy();
+    await expect(prisma.publication.create({ data: await directPublicationData(active, 'WITHDRAWN', Prisma.JsonNull) })).rejects.toThrow(/publication_published_content_event_kind_check/);
+    await expect(prisma.publication.create({ data: await directPublicationData(active, 'WITHDRAWN', Prisma.DbNull) })).resolves.toBeTruthy();
   });
 
   test('g14a2-c7-13 snapshot envelope has no redundant target id or revision keys', async () => {
