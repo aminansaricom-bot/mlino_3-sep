@@ -106,6 +106,69 @@ Architecture Guardian این Commit، migration، شواهد و گزارش را 
 
 من کدکس هستم.
 
+## ۱۳. اصلاحیهٔ G14a-2c — تشخیص هم‌زمانی
+
+این بخش طبق `CODEX-20260914-G14A2C-CONCURRENCY-DIAGNOSIS-001` افزوده شد. تشخیص فقط در دو کپی موقت خارج از مخزن انجام شد: `head` از `a4d9a75108197da62cf4c9ed6a9713268e1b2e40` و `baseline` بر پایهٔ `ee25ead` با حذف migration و spec مربوط به G14a2. instrumentation فقط در همان کپی‌های موقت بود و هیچ فایل محصولی در worktree تغییر نکرد.
+
+### پیش‌شرط و محیط
+
+- `git fetch origin` با کد ۱۲۸ شکست خورد؛ خطای اتصال شبکه به GitHub ثبت شد.
+- GW2-P برای commit بازبینی موفق بود: `cat-file` کد صفر، `merge-base --is-ancestor` کد صفر و SHA-256 برابر مقدار pinned بود.
+- هر ۱۶ اجرا از PostgreSQL 16 روی کانتینر tmpfs تازه با پورت `127.0.0.1:5499` استفاده کرد؛ هر کانتینر پس از اجرا با موفقیت حذف شد.
+- فهرست کانتینرها و volumeها قبل و بعد در `execution.log` ثبت شده است؛ کانتینر یا volume تازه‌ای باقی نماند.
+- لاگ‌ها با بررسی ساختاری فاقد URL اتصال و رمز عبور هستند.
+
+### D3 — سه اجرای کامل برای هر کپی
+
+| کپی × اجرا | suite/test نتیجه | آزمون‌های شکست‌خورده | خطای خام |
+|---|---|---|---|
+| head × full-1 | ۴ شکست از ۲۸ suite؛ ۶ شکست از ۳۶۰ test | همان شش نام جدول D4 | P2028 |
+| head × full-2 | ۴ شکست از ۲۸ suite؛ ۶ شکست از ۳۶۰ test | همان شش نام جدول D4 | P2028 |
+| head × full-3 | ۴ شکست از ۲۸ suite؛ ۶ شکست از ۳۶۰ test | همان شش نام جدول D4 | P2028 |
+| baseline × full-1 | ۴ شکست از ۲۷ suite؛ ۶ شکست از ۳۴۶ test | همان شش نام جدول D4 | P2028 |
+| baseline × full-2 | ۴ شکست از ۲۷ suite؛ ۶ شکست از ۳۴۶ test | همان شش نام جدول D4 | P2028 |
+| baseline × full-3 | ۴ شکست از ۲۷ suite؛ ۶ شکست از ۳۴۶ test | همان شش نام جدول D4 | P2028 |
+
+در هر خط خام، شکل مشاهده‌شده `PrismaClientKnownRequestError` با `code=P2028` و پیام `Unable to start a transaction in the given time.` بود.
+
+### D4 — پنج تکرار متمرکز برای هر کپی
+
+| آزمون | head | baseline |
+|---|---:|---:|
+| `G10b ... assigns distinct attempt numbers under concurrent starts` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+| `G10c ... concurrent public edit and publish preserve revision consistency` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+| `G10d ... createVersion numbers versions 1, 2, 3 and concurrent creates get distinct numbers` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+| `G10d ... concurrent publication of two versions leaves exactly one published without a raw error` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+| `G10a2 ... serializes concurrent revocation of two different admin grants` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+| `G10a2 ... serializes concurrent revocation of the two admin memberships` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+
+هر اجرای متمرکز شامل ۴ suite و ۵۸ test بود و در هر دو کپی ۴ suite شکست خوردند؛ جمع هر کپی ۳۰ شکست آزمون در D4 است.
+
+### نتیجهٔ factual تشخیص
+
+baseline نیز همان چهار suite و همان شش آزمون هم‌زمانی را با خطای خام P2028 شکست داد؛ head نیز همان رفتار را نشان داد. بنابراین شواهد این اجراها نشان می‌دهد شکست‌های مشاهده‌شده فقط در head ظاهر نشده‌اند و در مقایسهٔ head با baseline به‌عنوان regression اختصاصی G14a2 شناخته نمی‌شوند.
+
+### شواهد و hashها
+
+```text
+7b6a435f83e7a5b38d3b0385a63316f3402378088b1bd1be046c3fb84bd5cf68  mlino2/validation/g14a2c/prepare-copies.ps1
+aa609e3d0561c35f883ace002fbf415680807fc414d766c49bb9eacbb3187a68  mlino2/validation/g14a2c/run-prepared-diagnosis.ps1
+972b01a5ef7a34cee3a1bf8117a017a199fd2eaf0cbbb909d8d65a90c28dfc94  mlino2/validation/g14a2c/g14a2c-precondition.log
+f572a42ec1c8c22d837832e8a48270d8e6423d899f7082a417ce8737c9b6cf7a  mlino2/validation/g14a2c/prep-validation.log
+6cc4e21fba77915a3fcf6f1b7529e18be24f173b316fefd4220530b352a1524d  mlino2/validation/g14a2c/head-manifest.txt
+371a7b4ca6ada7aa7eb82e123a52432cdaa7fe74f08a313bbda1b072403ff256  mlino2/validation/g14a2c/baseline-manifest.txt
+01a960097e224a733e85533677987e573e32b00d002f30bf6c6da59f83f93f5d  mlino2/validation/g14a2c/execution.log
+d152e05eb29a26ddef2aaaf4df54b5d50641a11039e74155eb86a08a8299d0db  mlino2/validation/g14a2c/run-cleanup.log
+```
+
+جزئیات کامل خروجی خام، suite totals، نام آزمون‌ها، شمار containerهای قبل و بعد، فهرست volumeها و ثبت حذف کپی‌ها در `mlino2/validation/g14a2c/execution.log` و `run-cleanup.log` قرار دارد. هیچ fix یا proposal محصولی در این مرحله اعمال نشد.
+
+### وضعیت تحویل G14a-2c
+
+این تشخیص تکمیل شد و برای بازبینی Guardian متوقف می‌شود. هیچ Push، merge، تغییر محصول، تغییر schema/migration یا اتصال به پورت ۵۴۳۵ انجام نشد.
+
+من کدکس هستم.
+
 ## ۱۱. اصلاحیهٔ G14a-2b
 
 این بخش طبق دستور `CODEX-20260914-G14A2B-PUBLISHED-CONTENT-TEST-HARDENING-001` افزوده شد. هیچ‌یک از `publication-service.ts`، `schema.prisma`، migration یا CCR در این مرحله تغییر نکردند.

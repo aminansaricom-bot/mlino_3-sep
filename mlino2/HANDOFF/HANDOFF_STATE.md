@@ -584,3 +584,15 @@ VALIDATION: T1-T3 PASS; focused G14a2 14/14 PASS; migration refusal PASS with fa
 SCOPE: Test assertions, reproducible refusal/suite scripts and logs only; no product code, schema, migration or CCR changes.
 NEXT_ACTION: Guardian review; no push, merge, G14a-3, G14b or G14c.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A2C_CONCURRENCY_DIAGNOSIS
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G14A2C-CONCURRENCY-DIAGNOSIS-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A2_PUBLISHED_CONTENT_IMPLEMENTATION_REPORT.md
+COMMITS: abcd1763a7f2576b56da9b368f69640a8cff7963, 460d4e286fa867cd1f6d630a800049ed3475940d
+VALIDATION: 6 full runs and 10 focused runs completed on disposable PostgreSQL 16 tmpfs containers at 127.0.0.1:5499; head and baseline both failed the same six concurrency tests with raw P2028; no live DB/5435 access; all diagnostic containers and throwaway copies removed.
+SCOPE: Diagnosis evidence only; no worktree product, test, schema, migration or CCR changes; instrumentation existed only in throwaway copies.
+NEXT_ACTION: Guardian review; no fix, G14a3, G14b or G14c.
+CREATED_AT: 2026-09-14
