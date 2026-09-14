@@ -538,6 +538,17 @@ CREATED_AT: 2026-09-14
 ---
 HANDOFF_ID: HANDOFF-20260914-CORE-G14A
 AUTHOR: CODEX
+PHASE: G14A3_LOCAL_MIGRATION
+STATUS: BLOCKED_BEFORE_MIGRATION
+INSTRUCTION_ID: CODEX-20260914-G14A3-LOCAL-MIGRATION-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A3_LOCAL_MIGRATION_REPORT.md
+VALIDATION: HARD_STOP_BEFORE_MIGRATION — source check and GW2-P passed; the existing database connection value was unavailable in the process and allowed worktree env files; no Docker/database/backup/migration action occurred.
+SCOPE: G14a3 preflight evidence only; no product, schema, migration, test, Docker or database change.
+NEXT_ACTION: Owner must provide an approved execution environment with the existing connection value available without exposing it; then Guardian review is required before retry. No retry was performed automatically.
+CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
 PHASE: G14A1_CCR_DRAFT
 STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
 INSTRUCTION_ID: CODEX-20260914-G14A1-PUBLISHED-CONTENT-CCR-001

@@ -1,0 +1,8 @@
+SOURCE CHECK
+git rev-parse 97b37f8664f27e254e3d8b2064adc9d557708da9:implementation/prisma = d5a7fc88f18ea55c79a67f2f10957858c8e2ad27
+git rev-parse a68c599516a87468e66d9b5411bbc7b8ed5782b0:implementation/prisma = d5a7fc88f18ea55c79a67f2f10957858c8e2ad27
+SOURCE_MATCH=True
+git status --short implementation/: empty at precheck
+required migration directory: present
+Publication.publishedContent schema field: present
+Prisma CLI: 5.22.0

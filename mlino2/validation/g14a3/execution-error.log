@@ -1,0 +1,3 @@
+HARD_STOP: existing DB connection value is unavailable in the process or allowed worktree env files
+STATUS=HARD_STOP_BEFORE_MIGRATION
+RESOLVED_ROLLED_BACK=False
