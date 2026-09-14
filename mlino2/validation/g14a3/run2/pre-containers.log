@@ -1,0 +1,15 @@
+
+Container    : mlino-v1-local-db
+Image        : postgres:16-alpine
+ImageId      : sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb
+StartedAt    : 2026-09-12T21:34:05.613278779Z
+RestartCount : 0
+Health       : healthy
+
+
+Container    : mlino-v1-read-api
+Image        : implementation-v1-read-api
+ImageId      : sha256:a07858b3da15e63ac0c925c44eaee51903adfdcb6b715cd99dfc1667de10cda8
+StartedAt    : 2026-09-13T12:54:39.843291769Z
+RestartCount : 0
+Health       : none

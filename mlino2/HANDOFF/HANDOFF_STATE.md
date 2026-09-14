@@ -538,6 +538,40 @@ CREATED_AT: 2026-09-14
 ---
 HANDOFF_ID: HANDOFF-20260914-CORE-G14A
 AUTHOR: CODEX
+PHASE: G14A3_LOCAL_MIGRATION_RUN2
+STATUS: BLOCKED_PREFLIGHT
+INSTRUCTION_ID: CODEX-20260914-G14A3-LOCAL-MIGRATION-002
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A3_LOCAL_MIGRATION_RUN2_REPORT.md
+VALIDATION: C0 PASS; source check PASS; preflight HARD STOP — recorded output did not satisfy the owner gate; no backup or migration was executed.
+SCOPE: Run2 pre-state evidence only; no product, schema, migration, test, Docker restart or database write.
+NEXT_ACTION: Guardian review of the preflight discrepancy; no automatic retry and no local migration continuation.
+CREATED_AT: 2026-09-15
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A3_LOCAL_MIGRATION_RUN3
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260915-G14A3-LOCAL-MIGRATION-003
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260915_CODEX_G14A3_LOCAL_MIGRATION_RUN3_REPORT.md
+VALIDATION: PASS — C0, F2 preflight, backup B1-B6 and the single deploy succeeded; post-state a-g passed by independent read-only verification. Initial script count comparison was corrected without a second deploy.
+SCOPE: Apply only 20260914010000_add_publication_published_content to mlino-v1-local-db after verified backup; no product-file, test, schema or other migration changes.
+BACKUP: mlino_v1_pre_g14a_20260914T214243Z.dump; container and host SHA-256 matched; backup remains outside repository.
+NEXT_ACTION: Guardian review; no push and no subsequent task automatically.
+CREATED_AT: 2026-09-15
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A3_LOCAL_MIGRATION
+STATUS: BLOCKED_BEFORE_MIGRATION
+INSTRUCTION_ID: CODEX-20260914-G14A3-LOCAL-MIGRATION-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A3_LOCAL_MIGRATION_REPORT.md
+VALIDATION: HARD_STOP_BEFORE_MIGRATION — source check and GW2-P passed; the existing database connection value was unavailable in the process and allowed worktree env files; no Docker/database/backup/migration action occurred.
+SCOPE: G14a3 preflight evidence only; no product, schema, migration, test, Docker or database change.
+NEXT_ACTION: Owner must provide an approved execution environment with the existing connection value available without exposing it; then Guardian review is required before retry. No retry was performed automatically.
+CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
 PHASE: G14A1_CCR_DRAFT
 STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
 INSTRUCTION_ID: CODEX-20260914-G14A1-PUBLISHED-CONTENT-CCR-001

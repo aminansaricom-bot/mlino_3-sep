@@ -1,0 +1,10 @@
+EXIT_CODE=1
+Prisma schema loaded from implementation\prisma\schema.prisma
+Datasource "db": PostgreSQL database "mlino_v1", schema "public" at "[REDACTED_LIVE_ENDPOINT]"
+
+7 migrations found in prisma/migrations
+Following migration have not yet been applied:
+20260914010000_add_publication_published_content
+
+To apply migrations in development run prisma migrate dev.
+To apply migrations in production run prisma migrate deploy.

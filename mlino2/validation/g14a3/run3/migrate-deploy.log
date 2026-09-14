@@ -1,0 +1,15 @@
+EXIT_CODE=0
+Prisma schema loaded from implementation\prisma\schema.prisma
+Datasource "db": PostgreSQL database "mlino_v1", schema "public" at "[REDACTED_LIVE_ENDPOINT]"
+
+7 migrations found in prisma/migrations
+
+Applying migration `20260914010000_add_publication_published_content`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260914010000_add_publication_published_content/
+    └─ migration.sql
+
+All migrations have been successfully applied.

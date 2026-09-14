@@ -1,0 +1,6 @@
+STATUS=HARD_STOP_BEFORE_MIGRATION
+The existing database connection value was unavailable in the process environment and in both allowed worktree env locations.
+DATABASE_URL was not printed or recorded.
+No Docker metadata query, backup, migrate status, migrate deploy, resolve, test, or production file change was performed after this hard stop.
+MIGRATION_ATTEMPTED=False
+BACKUP_CREATED=False

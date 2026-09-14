@@ -1,0 +1,8 @@
+GW2/GW2-P
+git fetch origin: FAILED, exit 128, network connection to the remote was unavailable.
+git cat-file -e f59ffebc171d6609e9e9bc6dd01a1d25f228b208^{commit}: PASS, exit 0
+git merge-base --is-ancestor f59ffebc171d6609e9e9bc6dd01a1d25f228b208 origin/main: PASS, exit 0
+git show pinned review: PASS, exit 0
+pinned review bytes: 7678
+pinned review sha256: fb99b8b238bd86e207dee1c12822a6cc0a0776b0f2e5dd8a23f5208369414f44
+No credentials, git config, or credential helper was accessed.
