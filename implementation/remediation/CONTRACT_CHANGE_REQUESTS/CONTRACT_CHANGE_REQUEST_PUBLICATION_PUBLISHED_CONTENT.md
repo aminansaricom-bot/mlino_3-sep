@@ -29,6 +29,10 @@
 Migration مصوب Core Foundation و triggerهای آن در `20260913010000_add_core_foundation` دست‌نخورده می‌مانند (`origin/main: implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:1-15,759-769,931-1008`). متن دقیق SQL پیشنهادی برای migration تازه:
 
 ```sql
+BEGIN;
+
+LOCK TABLE publications IN ACCESS EXCLUSIVE MODE;
+
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM publications LIMIT 1) THEN
@@ -49,6 +53,8 @@ ALTER TABLE publications
       event_kind = 'PUBLISHED'
       AND published_content IS NOT NULL
       AND jsonb_typeof(published_content) = 'object'
+      AND published_content ? 'snapshot_version'
+      AND published_content ? 'content'
     )
     OR
     (
@@ -56,11 +62,13 @@ ALTER TABLE publications
       AND published_content IS NULL
     )
   );
+
+COMMIT;
 ```
 
 پیشنهاد این پیش‌نویس استفاده از CHECK مستقیم است، نه `NOT VALID` سپس `VALIDATE`: سیاست پیش‌فرض این CCR وجود هر ردیف قبلی را پیش از DDL رد می‌کند، و شواهد G7b می‌گوید ۱۲ جدول Core هنگام اعمال migration اولیه خالی بوده‌اند (`origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260913_CLAUDE_REVIEW_G7B_LOCAL_MIGRATION.md:31-38`). خالی‌بودن واقعی محیط محلی باید در G14a-3 دوباره بررسی شود و این سند هیچ queryای روی آن محیط اجرا نکرده است (`origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_G14A1_PUBLISHED_CONTENT_CCR.md:96-101`).
 
-ستون در سطح فیزیکی nullable است، زیرا رویداد `WITHDRAWN` باید مقدار NULL داشته باشد؛ CHECK رابطهٔ مقدار با `event_kind` را enforce می‌کند. enum موجود فقط `PUBLISHED` و `WITHDRAWN` را تعریف می‌کند و Publication همان `eventKind` را ذخیره می‌کند (`origin/main: implementation/prisma/schema.prisma:318-321,626-641`).
+قفل `ACCESS EXCLUSIVE` پیش از preflight انتخاب شده است تا بین شمارش و افزودن ستون، Publication تازه‌ای درج نشود. قفل تا پایان تراکنش migration نگه داشته می‌شود و در صورت شکست همراه تراکنش آزاد می‌شود. ستون در سطح فیزیکی nullable است، زیرا رویداد `WITHDRAWN` باید مقدار SQL NULL داشته باشد؛ CHECK رابطهٔ مقدار با `event_kind` و حضور دو کلید envelope را enforce می‌کند. enum موجود فقط `PUBLISHED` و `WITHDRAWN` را تعریف می‌کند و Publication همان `eventKind` را ذخیره می‌کند (`origin/main: implementation/prisma/schema.prisma:322-325,626-641`).
 
 ### ۲.۲. تغییر پیشنهادی Prisma
 
@@ -78,32 +86,19 @@ publishedContent Json? @map("published_content") @db.JsonB
 
 ## ۳. C3 — شکل نسخه‌دار snapshot و allowlist
 
-هر snapshot یک object JSON با envelope زیر است. این envelope از target همان Publication و revision همان رخداد ساخته می‌شود؛ OfferVersion طبق مدل فعلی `content_revision` ندارد، پس مقدار آن برای این target تهی است (`origin/main: implementation/prisma/schema.prisma:547-576,626-654`).
+هر snapshot یک object JSON با envelope زیر است. `target`، `target_id` و `content_revision` در JSON تکرار نمی‌شوند؛ ستون‌های target و `content_revision` خود Publication منبع حقیقت‌اند. حذف این سه مقدار از JSON امکان ناسازگاری تغییرناپذیر بین envelope و ستون‌های ردیف را از بین می‌برد (`origin/main: implementation/prisma/schema.prisma:626-654`; `origin/main: implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:759-769`).
 
 ```ts
-type PublicationSnapshotV1 =
-  | {
-      snapshot_version: 'core-publication-snapshot-v1';
-      target: 'BUSINESS_PROFILE';
-      target_id: string;
-      content_revision: number;
-      content: BusinessProfileSnapshotV1;
-    }
-  | {
-      snapshot_version: 'core-publication-snapshot-v1';
-      target: 'CAPABILITY';
-      target_id: string;
-      content_revision: number;
-      content: CapabilitySnapshotV1;
-    }
-  | {
-      snapshot_version: 'core-publication-snapshot-v1';
-      target: 'OFFER_VERSION';
-      target_id: string;
-      content_revision: null;
-      content: OfferVersionSnapshotV1;
-    };
+type PublicationSnapshotV1 = {
+  snapshot_version: 'core-publication-snapshot-v1';
+  content:
+    | BusinessProfileSnapshotV1
+    | CapabilitySnapshotV1
+    | OfferVersionSnapshotV1;
+};
 ```
+
+نوع `content` با ستون target غیرتهی همان Publication انتخاب می‌شود؛ قید موجود دقیقاً یک target را برای هر رویداد الزام می‌کند (`origin/main: implementation/prisma/schema.prisma:629-646`; `origin/main: implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:440-451`).
 
 ### ۳.۱. BusinessProfile
 
@@ -189,6 +184,9 @@ Snapshot هرگز کل ردیف، Membership، PermissionGrant، actor، جزئ�
 | وضعیت claim متصل به Profile | claim زنده | SUSPENDED یا EXPIRED فوراً Profile را از خروجی حذف کند؛ claim data expose نشود | `origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_V2_READ_CONTRACT_DECISIONS.md:19-20`; `origin/main: mlino2/MLINO_V2_READ_CONTRACT_DESIGN.md:119-124` |
 | audience و status Capability | ردیف زنده + مقدار snapshot پیشنهادی برای audience | fail-closed به `CUSTOMER_FACING` و `ACTIVE`؛ جزئیات تصمیم در OQ-2 | `origin/main: implementation/prisma/schema.prisma:503-512,524-526`; `origin/main: mlino2/MLINO_V2_READ_CONTRACT_DESIGN.md:21-24` |
 | اعتبار OfferVersion | snapshot زمان انتشار + clock زمان read | فقط در بازهٔ `[valid_from, valid_until]`؛ پایان تهی نامحدود است | `origin/main: implementation/prisma/schema.prisma:559-575`; `origin/main: mlino2/MLINO_V2_READ_CONTRACT_DESIGN.md:171-172,230,244` |
+| چرخهٔ عمر Organization | ردیف زنده Organization | فقط `ACTIVE`؛ `ARCHIVED` کل رکورد کسب‌وکار را پنهان می‌کند و content اضافه نمی‌کند | `origin/main: implementation/prisma/schema.prisma:239-242,327-330` |
+| چرخهٔ عمر BusinessProfile | ردیف زنده BusinessProfile | فقط `ACTIVE`؛ `DRAFT` یا `ARCHIVED` پروفایل را پنهان می‌کند و content اضافه نمی‌کند | `origin/main: implementation/prisma/schema.prisma:270-274,465-478` |
+| چرخهٔ عمر Offer | ردیف زنده Offer والد | فقط `ACTIVE`؛ `RETIRED` نسخهٔ Offer را پنهان می‌کند و content اضافه نمی‌کند | `origin/main: implementation/prisma/schema.prisma:298-301,530-539` |
 
 بدیل باز این است که eligibility نیز در snapshot منجمد شود. این بدیل رد نشده اما توصیه نمی‌شود، زیرا تغییر بعدی confirmation، freshness یا claim تا انتشار تازه در خروجی عمومی دیده نمی‌شود؛ OQ-3 تصمیم مالک را می‌خواهد (`origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_G14A1_PUBLISHED_CONTENT_CCR.md:29-37`).
 
@@ -197,7 +195,7 @@ Snapshot هرگز کل ردیف، Membership، PermissionGrant، actor، جزئ�
 این بخش فقط طراحی است و هیچ کدی در G14a-1 تغییر نمی‌کند (`origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_G14A1_PUBLISHED_CONTENT_CCR.md:7-16`).
 
 1. `lockTarget` باید برای BusinessProfile و Capability علاوه بر status و revision، فقط ستون‌های محتوایی allowlist‌شدهٔ C3 را در همان `SELECT ... FOR UPDATE` برگرداند؛ خواندن جداگانه پس از قفل مجاز نیست. پیاده‌سازی فعلی فقط چهار ستون کنترلی را می‌خواند (`origin/main: implementation/core/publication-service.ts:86-90`).
-2. `publicationData` پارامتر `publishedContent` می‌گیرد و در PUBLISHED مقدار snapshot و در WITHDRAWN مقدار NULL را به `tx.publication.create` می‌دهد (`origin/main: implementation/core/publication-service.ts:92-108`; `origin/main: implementation/prisma/schema.prisma:626-654`).
+2. `publicationData` پارامتر `publishedContent` می‌گیرد و در PUBLISHED فقط `{ snapshot_version, content }` را می‌نویسد. در WITHDRAWN باید SQL NULL را صریحاً با `Prisma.DbNull` بنویسد؛ `Prisma.JsonNull` ممنوع است، زیرا JSON `null` مقدار SQL NULL نیست و CHECK را نقض می‌کند (`origin/main: implementation/core/publication-service.ts:92-108`; `origin/main: implementation/prisma/schema.prisma:626-654`).
 3. مسیر BusinessProfile/Capability snapshot را از همان row قفل‌شده می‌سازد. `ALREADY_PUBLISHED` پیش از INSERT بازمی‌گردد، پس Publication و snapshot تازه ندارد (`origin/main: implementation/core/publication-service.ts:38-53`).
 4. مسیر OfferVersion با ترتیب قفل کنونی Organization → Offer → OfferVersion، ستون‌های allowlist‌شدهٔ نسخه و سپس شناسه‌های پیوند را در همان تراکنش می‌خواند. PUBLISHED و ردیف PUBLISHED از REPLACED snapshot دارند؛ WITHDRAWN و ردیف WITHDRAWN از REPLACED مقدار NULL دارند؛ `ALREADY_PUBLISHED` چیزی درج نمی‌کند (`origin/main: implementation/core/publication-service.ts:59-80`).
 5. D6 بدون تغییر است: PublicationService هیچ `content_revision` یا projection field هدف را نمی‌نویسد؛ trigger projection پس از INSERT آن‌ها را تغییر می‌دهد (`origin/main: implementation/core/publication-service.ts:28-53,92-108`; `origin/main: implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:931-1008`).
@@ -223,6 +221,8 @@ G14a-2 باید دست‌کم موارد زیر را روی PostgreSQL یک‌ب
 9. migration روی DB خالی موفق است و CHECK پس از آن valid است.
 10. migration روی DB دارای حتی یک Publication با پیام preflight تعریف‌شده شکست می‌خورد و هیچ ستون یا constraint نیمه‌اعمال‌شده باقی نمی‌گذارد؛ سیاست این CCR «refuse، بدون backfill حدسی» است.
 11. serialization مختصات، قیمت، timestamps، JSON schema markers و ترتیب capability link IDs قطعی است (`origin/main: mlino2/MLINO_V2_READ_CONTRACT_DESIGN.md:160-191`).
+12. JSON literal ‏`null` برای هر دو event kind یعنی PUBLISHED و WITHDRAWN رد می‌شود؛ فقط object دارای `snapshot_version` و `content` برای PUBLISHED و SQL NULL برای WITHDRAWN معتبر است.
+13. snapshot هیچ `target`، `target_id` یا `content_revision` تکراری ندارد و decoder نوع content را از ستون target همان Publication انتخاب می‌کند (`origin/main: implementation/prisma/schema.prisma:629-646`).
 
 ## ۸. C8 — داده، rollout و rollback
 
@@ -230,7 +230,9 @@ G14a-2 باید دست‌کم موارد زیر را روی PostgreSQL یک‌ب
 
 اگر هر Publication موجود باشد، migration به‌صورت fail-closed متوقف می‌شود. هیچ snapshot از live row، revision یا projection بازسازی نمی‌شود، زیرا تاریخ دقیق محتوای رخداد قبلی قابل اثبات نیست (`origin/main: implementation/prisma/schema.prisma:465-481,496-512,626-654`; `origin/main: mlino2/MLINO_V2_READ_CONTRACT_DESIGN.md:34-49`). هر سیاست backfill بعدی به CCR و شواهد مستقل نیاز دارد.
 
-Rollback فیزیکی پیشنهادی، پس از rollback کردن writer/read consumer وابسته، چنین است:
+Runbook ‏G14a-3 باید بداند شکست preflight، یک ردیف failed برای migration در `_prisma_migrations` ثبت می‌کند و deployهای بعدی را مسدود می‌سازد. پس از رفع علت، اپراتور باید همان migration را طبق رویهٔ مستند با `prisma migrate resolve --rolled-back <migration-name>` resolve کند یا rollback عملیاتی مصوب را اجرا کند؛ سپس deploy از ابتدا تکرار می‌شود. `LOCK TABLE publications IN ACCESS EXCLUSIVE MODE` پیش از preflight انتخاب شده تا پنجرهٔ race میان بررسی و DDL بسته شود (`origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G14A1_PUBLISHED_CONTENT_CCR.md:55`).
+
+Prisma down migration ندارد. Rollback فیزیکی پیشنهادی باید به‌صورت یک **migration رو‌به‌جلوی تازه**، پس از rollback کردن writer/read consumer وابسته، با SQL زیر ثبت و deploy شود (`origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G14A1_PUBLISHED_CONTENT_CCR.md:56`):
 
 ```sql
 ALTER TABLE publications
@@ -240,7 +242,7 @@ ALTER TABLE publications
   DROP COLUMN published_content;
 ```
 
-این rollback تمام snapshotهای ذخیره‌شده را از بین می‌برد و فقط قبل از وجود دادهٔ لازم، یا پس از export/تصمیم صریح نگه‌داری داده مجاز است. تاریخچهٔ پایهٔ Publication بدون این ستون باقی می‌ماند، زیرا سایر ستون‌ها و روابط آن جدا هستند (`origin/main: implementation/prisma/schema.prisma:626-654`).
+Migration رو‌به‌جلوی rollback یک ردیف موفق تازه در `_prisma_migrations` می‌سازد؛ ردیف migration افزودن ستون حذف یا بازنویسی نمی‌شود و تاریخچهٔ اعمال/بازگشت قابل ردیابی می‌ماند. این rollback تمام snapshotهای ذخیره‌شده را از بین می‌برد و فقط قبل از وجود دادهٔ لازم، یا پس از export/تصمیم صریح نگه‌داری داده مجاز است. تاریخچهٔ پایهٔ Publication بدون این ستون باقی می‌ماند، زیرا سایر ستون‌ها و روابط آن جدا هستند (`origin/main: implementation/prisma/schema.prisma:626-654`).
 
 اثر runtime بر read-api فعلی انتظار نمی‌رود: Dockerfile پوشهٔ `core` را در build image کپی نمی‌کند، هرچند tsconfig آن را در build محلی include می‌کند؛ HTTP فعلی نیز در این CCR تغییر نمی‌کند (`origin/main: implementation/Dockerfile:22-38,49-64`; `origin/main: implementation/tsconfig.json:17-18`). هر زمان Core وارد runtime image شود، Dockerfile باید در CCR همان مرحله صریحاً `COPY core ./core` را اضافه کند (`origin/main: implementation/Dockerfile:30-38`).
 
@@ -263,7 +265,7 @@ ALTER TABLE publications
 
 ### OQ-3 — مرز live eligibility
 
-- **A:** confirmation، freshness، claim status، audience و capability status هنگام read به‌صورت fail-closed ارزیابی شوند و فقط قابلیت حذف رکورد داشته باشند.
+- **A:** confirmation، freshness، claim status، audience، capability status، `Organization.lifecycleStatus=ACTIVE`، `BusinessProfile.lifecycleStatus=ACTIVE` و `Offer.lifecycleStatus=ACTIVE` هنگام read به‌صورت fail-closed ارزیابی شوند و فقط قابلیت حذف رکورد داشته باشند.
 - **B:** eligibility در snapshot منجمد شود و تا رخداد انتشار بعدی تغییر نکند.
 - **توصیهٔ واحد:** **A**؛ این گزینه تصمیم‌های S16-A، S18-A و S20-A را بدون خواندن محتوای live اجرا می‌کند (`origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_V2_READ_CONTRACT_DECISIONS.md:19-24`; `origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_G14A1_PUBLISHED_CONTENT_CCR.md:29-37`).
 

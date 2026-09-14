@@ -547,3 +547,16 @@ VALIDATION: DOCUMENT ONLY — GW2-P passed; CCR LF hash 44539a3e2136803dcae7c166
 SCOPE: DRAFT CCR for publications.published_content under S19-A1; C1-C9 complete; OQ-1 through OQ-5 remain owner decisions.
 NEXT_ACTION: Guardian review and owner decision; no G14a-2, G14a-3, G14b or G14c.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A1B_CCR_FIXES
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G14A1B-PUBLISHED-CONTENT-CCR-FIXES-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A1_PUBLISHED_CONTENT_CCR_REPORT.md
+BASE_COMMIT: 9b648139f8c56eaec8b77f2dcf50b5bd14a22ec9
+DELIVERY_COMMIT: local branch head containing this append-only entry
+VALIDATION: DOCUMENT ONLY — GW2-P passed; updated CCR staged-blob hash 95f4a3a18abe59956863ad7bdb7e07b294b1f0c61fb735c5df2500ab93aedccb; no schema/migration/code/test/config/Prisma/Docker/database action.
+SCOPE: Y1-Y5 and Z1 applied; CCR remains DRAFT; OQ-1 through OQ-5 remain undecided.
+NEXT_ACTION: Guardian review and publication of the shared local branch; no push by Codex and no G14a-2.
+CREATED_AT: 2026-09-14

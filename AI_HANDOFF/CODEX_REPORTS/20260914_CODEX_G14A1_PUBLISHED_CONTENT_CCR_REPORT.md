@@ -110,3 +110,50 @@ SHA-256 سند CCR روی بایت‌های commit‌شدهٔ Git:
 Guardian این CCR را مستقل بازبینی کند. سپس مالک OQ-1 تا OQ-5 و متن CCR را تصویب یا برای اصلاح برگرداند. فقط پس از تصویب جداگانه، G14a-2 می‌تواند schema، migration، PublicationService و تست‌های disposable را پیاده کند. G14a-3، G14b و G14c همچنان مجوز جدا می‌خواهند.
 
 من کدکس هستم.
+
+---
+
+## G14a-1b — اصلاحات بازبینی Guardian
+
+**INSTRUCTION_ID:** `CODEX-20260914-G14A1B-PUBLISHED-CONTENT-CCR-FIXES-001`
+**REVIEW_REFERENCE:** `AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G14A1_PUBLISHED_CONTENT_CCR.md@488e78a65de4f9b0d785bd6610fb473b8fb1f428`
+
+| شناسه | بخش تغییرکرده | وضعیت | نتیجه |
+|---|---|---|---|
+| Y1 | C2، C3، C5 و C7 | اعمال شد | `target`، `target_id` و `content_revision` از JSON حذف شدند؛ ستون‌های Publication منبع حقیقت ماندند و CHECK حضور `snapshot_version` و `content` را الزام می‌کند |
+| Y2 | C4 و OQ-3 | اعمال شد | lifecycle سازمان، پروفایل و Offer به gateهای زندهٔ fail-closed افزوده شدند؛ هیچ contentی از live row اضافه نمی‌شود |
+| Y3 | C5 و C7 | اعمال شد | WITHDRAWN فقط SQL NULL با `Prisma.DbNull` می‌نویسد؛ `Prisma.JsonNull` ممنوع شد و آزمون رد JSON literal ‏`null` برای هر دو event kind اضافه شد |
+| Y4 | C2 و C8 | اعمال شد | `BEGIN` و `LOCK TABLE ... ACCESS EXCLUSIVE` پیش از preflight انتخاب شد؛ runbook برای failed migration و `migrate resolve --rolled-back` ثبت شد |
+| Y5 | C8 | اعمال شد | rollback به‌صورت migration رو‌به‌جلوی تازه تعریف شد و اثر آن بر `_prisma_migrations` ثبت شد |
+| Z1 | C2 | اعمال شد | ارجاع `PublicationEventKind` از `schema.prisma:318-321` به `:322-325` اصلاح شد |
+
+**انتخاب Y1:** فیلدهای تکراری حذف شدند. نگه‌داشتن آن‌ها به CHECKهای پیچیده برای تطبیق سه target و revision نیاز داشت و یک منبع حقیقت دوم می‌ساخت؛ ردیف Publication از قبل target و revision canonical را دارد. envelope نهایی فقط `{ snapshot_version, content }` است. این انتخاب هیچ OQ را تصمیم نکرد.
+
+### شواهد GW2-P
+
+`git fetch origin` با exit code 1 و خطای اتصال به `github.com:443` شکست خورد. مسیر GW2-P اجرا شد:
+
+```text
+git cat-file -e 488e78a65de4f9b0d785bd6610fb473b8fb1f428^{commit}
+CAT_FILE_EXIT=0
+
+git merge-base --is-ancestor 488e78a65de4f9b0d785bd6610fb473b8fb1f428 origin/main
+ANCESTOR_EXIT=0
+
+git show 488e78a65de4f9b0d785bd6610fb473b8fb1f428:AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G14A1_PUBLISHED_CONTENT_CCR.md | SHA-256
+edb3087781b813035ba036c30e2bcf4155cf13f25441e32cabb8565710c7955e
+```
+
+هر سه شرط موفق‌اند و hash با مقدار قفل‌شده برابر است. هیچ credential، token، git config یا credential helper لمس نشد.
+
+### SHA-256 تازهٔ CCR
+
+SHA-256 از بایت‌های staged Git با `git show :implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_PUBLICATION_PUBLISHED_CONTENT.md` محاسبه شد؛ همین blob در commit واحد G14a-1b ثبت می‌شود:
+
+```text
+95f4a3a18abe59956863ad7bdb7e07b294b1f0c61fb735c5df2500ab93aedccb  implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_PUBLICATION_PUBLISHED_CONTENT.md
+```
+
+این اصلاح فقط مستندات است. schema، migration، کد، تست، config، Prisma، npm، Jest، Docker و دیتابیس اجرا یا تغییر نکردند. طبق دستور، Push انجام نمی‌شود و commit محلی برای Guardian در object store مشترک باقی می‌ماند.
+
+من کدکس هستم.
