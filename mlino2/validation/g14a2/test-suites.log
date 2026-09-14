@@ -1,0 +1,393 @@
+G14A2_TEST_SUITES=START
+[CONTAINERS_BEFORE]
+mlino-v1-read-api
+mlino-v1-migrate
+app-mlino2-web-1
+mlino-v1-local-db
+kolokate-web-freellmapi-1
+kolokate-web-web-1
+contentstudio-db-1
+microservice
+n8n
+affectionate_panini
+ngrok-agent
+ngrok
+kolokate-web-db-1
+crazy_davinci
+zealous_swanson
+objective_curie
+peaceful_curran
+epic_rosalind
+malino-local-db
+[VOLUMES_BEFORE]
+1a470c762a77097aac35f031c76384a1f66e12abdaf3e3b31c7859337592cb56
+7ca2e3419b0305abde5a20bcffa48fea2f752b7b344dd7c8d657d1ee2ab5d884
+8bae211f898a8c1f9c44888aecad43534bcbe99049e14ddfe1031cac5e9c8b02
+274a5807fcc21ea788dfed9ad73679ffbcbd0bb952729839b775b0c61f6f1947
+731210c358d689e8a1ddf595d02169aab1982526950d0ecb1c207ba7d84ce908
+app_mlino2-certs
+automation_n8n_data
+automation_shared_data
+automation_v5_with_guide_n8n_data
+automation_v5_with_guide_shared_data
+automation_v5_with_guide_whisper_cache
+automation_whisper_cache
+bbe591cc8f4c41883fccc7a8183dfe4e7c066f61ea35f8a08317c570aa64b9e0
+c31d95b8caa3101dbf12644d09fd7c621ea9122a0595d1c49520986423c2c6ee
+contentstudio_content_studio_db
+implementation_mlino_v1_local_db_data
+kolokate-web_kolokate_db_data
+malino-backend_malino_local_db_data
+paddlex_cache
+[MIGRATE_DEPLOY]
+
+> mlino-v1-core@0.1.0 prisma:migrate:deploy
+> prisma migrate deploy
+
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "localhost:5499"
+
+7 migrations found in prisma/migrations
+
+Applying migration `20260814065924_init`
+Applying migration `20260815033018_add_situation_key`
+Applying migration `20260815113714_rename_actor_core_entity_id_to_actor_id`
+Applying migration `20260906001500_add_ownership_type`
+Applying migration `20260910020000_add_external_workspace_link`
+Applying migration `20260913010000_add_core_foundation`
+Applying migration `20260914010000_add_publication_published_content`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260814065924_init/
+    └─ migration.sql
+  └─ 20260815033018_add_situation_key/
+    └─ migration.sql
+  └─ 20260815113714_rename_actor_core_entity_id_to_actor_id/
+    └─ migration.sql
+  └─ 20260906001500_add_ownership_type/
+    └─ migration.sql
+  └─ 20260910020000_add_external_workspace_link/
+    └─ migration.sql
+  └─ 20260913010000_add_core_foundation/
+    └─ migration.sql
+  └─ 20260914010000_add_publication_published_content/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+MIGRATE_EXIT=0
+[FULL_V1_AND_CORE]
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand
+
+FAIL test/core/g10d-offer.spec.ts (10.503 s)
+  ● G10d Core offer and OfferVersion slice › createVersion numbers versions 1, 2, 3 and concurrent creates get distinct numbers
+System.Management.Automation.RemoteException
+    CoreDomainError: Core operation failed
+System.Management.Automation.RemoteException
+      60 |   if (code === 'P2000') return validationFailed('Core value exceeds its database limit');
+      61 |   if (code === 'P0001') return validationFailed('Core invariant rejected the operation');
+    > 62 |   return new CoreDomainError('INTERNAL_ERROR', 'Core operation failed');
+         |          ^
+      63 | }
+      64 |
+System.Management.Automation.RemoteException
+      at mapCoreDatabaseError (core/error-adapter.ts:62:10)
+      at core/offer-service.ts:75:76
+          at async Promise.all (index 0)
+      at Object.<anonymous> (test/core/g10d-offer.spec.ts:77:24)
+System.Management.Automation.RemoteException
+  ● G10d Core offer and OfferVersion slice › concurrent publication of two versions leaves exactly one published without a raw error
+System.Management.Automation.RemoteException
+    expect(received).toBe(expected) // Object.is equality
+System.Management.Automation.RemoteException
+    Expected: true
+    Received: false
+System.Management.Automation.RemoteException
+      186 |       publications.publish(a.context, 'OFFER_VERSION', third.id, 'race third'),
+      187 |     ]);
+    > 188 |     expect(results.every((result) => result.status === 'fulfilled')).toBe(true);
+          |                                                                      ^
+      189 |     expect(await prisma.offerVersion.count({ where: { organizationId: a.organizationId, publicationStatus: 'PUBLISHED' } })).toBe(1);
+      190 |   });
+      191 | });
+System.Management.Automation.RemoteException
+      at Object.<anonymous> (test/core/g10d-offer.spec.ts:188:70)
+System.Management.Automation.RemoteException
+FAIL test/core/core-authority.spec.ts (7.563 s)
+  ● G10a2 Core authority slice › serializes concurrent revocation of two different admin grants
+System.Management.Automation.RemoteException
+    expect(received).toContain(expected) // indexOf
+System.Management.Automation.RemoteException
+    Expected value: "revoking the last grant administrator is forbidden"
+    Received array: ["Core operation failed"]
+System.Management.Automation.RemoteException
+      163 |     ]);
+      164 |     expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    > 165 |     expect(results.filter((result) => result.status === 'rejected').map((result) => result.status === 'rejected' ? result.reason.message : '')).toContain('revoking the last grant administrator is forbidden');
+          |                                                                                                                                                 ^
+      166 |     expect(await new PermissionGrantRepository(prisma).countActiveForKey(a.organization.id, 'permission_grant.issue')).toBe(1);
+      167 |   });
+      168 |
+System.Management.Automation.RemoteException
+      at Object.<anonymous> (test/core/core-authority.spec.ts:165:145)
+System.Management.Automation.RemoteException
+  ● G10a2 Core authority slice › serializes concurrent revocation of the two admin memberships
+System.Management.Automation.RemoteException
+    expect(received).toContain(expected) // indexOf
+System.Management.Automation.RemoteException
+    Expected value: "revoking the last grant administrator is forbidden"
+    Received array: ["Core operation failed"]
+System.Management.Automation.RemoteException
+      177 |     ]);
+      178 |     expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    > 179 |     expect(results.filter((result) => result.status === 'rejected').map((result) => result.status === 'rejected' ? result.reason.message : '')).toContain('revoking the last grant administrator is forbidden');
+          |                                                                                                                                                 ^
+      180 |     expect(await prisma.membership.count({ where: { organizationId: a.organization.id, membershipStatus: 'ACTIVE' } })).toBe(1);
+      181 |   });
+      182 | });
+System.Management.Automation.RemoteException
+      at Object.<anonymous> (test/core/core-authority.spec.ts:179:145)
+System.Management.Automation.RemoteException
+FAIL test/core/identity-claim-verification.spec.ts (7.399 s)
+  ● G10b identity claim and verification slice › assigns distinct attempt numbers under concurrent starts
+System.Management.Automation.RemoteException
+    CoreDomainError: Core operation failed
+System.Management.Automation.RemoteException
+      60 |   if (code === 'P2000') return validationFailed('Core value exceeds its database limit');
+      61 |   if (code === 'P0001') return validationFailed('Core invariant rejected the operation');
+    > 62 |   return new CoreDomainError('INTERNAL_ERROR', 'Core operation failed');
+         |          ^
+      63 | }
+      64 |
+System.Management.Automation.RemoteException
+      at mapCoreDatabaseError (core/error-adapter.ts:62:10)
+      at core/identity-verification-service.ts:53:76
+          at async Promise.all (index 1)
+      at Object.<anonymous> (test/core/identity-claim-verification.spec.ts:190:22)
+System.Management.Automation.RemoteException
+FAIL test/core/g10c-profile-capability.spec.ts (6.339 s)
+  ● G10c Core profile, capability and publication slice › concurrent public edit and publish preserve revision consistency
+System.Management.Automation.RemoteException
+    CoreDomainError: Core operation failed
+System.Management.Automation.RemoteException
+      60 |   if (code === 'P2000') return validationFailed('Core value exceeds its database limit');
+      61 |   if (code === 'P0001') return validationFailed('Core invariant rejected the operation');
+    > 62 |   return new CoreDomainError('INTERNAL_ERROR', 'Core operation failed');
+         |          ^
+      63 | }
+      64 |
+System.Management.Automation.RemoteException
+      at mapCoreDatabaseError (core/error-adapter.ts:62:10)
+      at core/publication-service.ts:55:76
+          at async Promise.all (index 1)
+      at Object.<anonymous> (test/core/g10c-profile-capability.spec.ts:277:5)
+System.Management.Automation.RemoteException
+PASS test/core/g14a2-published-content.spec.ts
+PASS test/http/read-api.spec.ts (5.542 s)
+PASS test/foundation/event-admission-concurrency.spec.ts
+PASS test/foundation/opportunity-read/opportunity-read.spec.ts
+PASS test/core/g10e-evidence.spec.ts
+PASS test/foundation/opportunity-projection/rebuild-projection.spec.ts
+PASS test/value-engines/cancellation/cancellation-detector.spec.ts
+PASS test/foundation/opportunity-projection/situation-lookup.spec.ts
+PASS test/value-engines/capacity/capacity-detector.spec.ts
+PASS test/value-engines/followup/followup-detector.spec.ts
+PASS test/foundation/workspace-link.spec.ts
+PASS test/feed/opportunity-feed.spec.ts
+PASS test/foundation/event-admission-validation.spec.ts
+PASS test/foundation/access-decision/org-membership-ac2-port.spec.ts
+PASS test/foundation/event-admission.spec.ts
+PASS test/foundation/ownership-type.spec.ts
+PASS test/test-db-guard.spec.ts
+PASS test/foundation/auth-adapter.spec.ts
+PASS test/foundation/recommendation/recommendation-contract.spec.ts
+PASS test/foundation/business-context.spec.ts
+PASS test/core/error-adapter.spec.ts
+PASS test/foundation/situation-key.spec.ts
+PASS test/briefing/proactive-briefing.spec.ts
+PASS test/core/db-guard.spec.ts
+System.Management.Automation.RemoteException
+Summary of all failing tests
+FAIL test/core/g10d-offer.spec.ts (10.503 s)
+  ● G10d Core offer and OfferVersion slice › createVersion numbers versions 1, 2, 3 and concurrent creates get distinct numbers
+System.Management.Automation.RemoteException
+    CoreDomainError: Core operation failed
+System.Management.Automation.RemoteException
+      60 |   if (code === 'P2000') return validationFailed('Core value exceeds its database limit');
+      61 |   if (code === 'P0001') return validationFailed('Core invariant rejected the operation');
+    > 62 |   return new CoreDomainError('INTERNAL_ERROR', 'Core operation failed');
+         |          ^
+      63 | }
+      64 |
+System.Management.Automation.RemoteException
+      at mapCoreDatabaseError (core/error-adapter.ts:62:10)
+      at core/offer-service.ts:75:76
+          at async Promise.all (index 0)
+      at Object.<anonymous> (test/core/g10d-offer.spec.ts:77:24)
+System.Management.Automation.RemoteException
+  ● G10d Core offer and OfferVersion slice › concurrent publication of two versions leaves exactly one published without a raw error
+System.Management.Automation.RemoteException
+    expect(received).toBe(expected) // Object.is equality
+System.Management.Automation.RemoteException
+    Expected: true
+    Received: false
+System.Management.Automation.RemoteException
+      186 |       publications.publish(a.context, 'OFFER_VERSION', third.id, 'race third'),
+      187 |     ]);
+    > 188 |     expect(results.every((result) => result.status === 'fulfilled')).toBe(true);
+          |                                                                      ^
+      189 |     expect(await prisma.offerVersion.count({ where: { organizationId: a.organizationId, publicationStatus: 'PUBLISHED' } })).toBe(1);
+      190 |   });
+      191 | });
+System.Management.Automation.RemoteException
+      at Object.<anonymous> (test/core/g10d-offer.spec.ts:188:70)
+System.Management.Automation.RemoteException
+FAIL test/core/core-authority.spec.ts (7.563 s)
+  ● G10a2 Core authority slice › serializes concurrent revocation of two different admin grants
+System.Management.Automation.RemoteException
+    expect(received).toContain(expected) // indexOf
+System.Management.Automation.RemoteException
+    Expected value: "revoking the last grant administrator is forbidden"
+    Received array: ["Core operation failed"]
+System.Management.Automation.RemoteException
+      163 |     ]);
+      164 |     expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    > 165 |     expect(results.filter((result) => result.status === 'rejected').map((result) => result.status === 'rejected' ? result.reason.message : '')).toContain('revoking the last grant administrator is forbidden');
+          |                                                                                                                                                 ^
+      166 |     expect(await new PermissionGrantRepository(prisma).countActiveForKey(a.organization.id, 'permission_grant.issue')).toBe(1);
+      167 |   });
+      168 |
+System.Management.Automation.RemoteException
+      at Object.<anonymous> (test/core/core-authority.spec.ts:165:145)
+System.Management.Automation.RemoteException
+  ● G10a2 Core authority slice › serializes concurrent revocation of the two admin memberships
+System.Management.Automation.RemoteException
+    expect(received).toContain(expected) // indexOf
+System.Management.Automation.RemoteException
+    Expected value: "revoking the last grant administrator is forbidden"
+    Received array: ["Core operation failed"]
+System.Management.Automation.RemoteException
+      177 |     ]);
+      178 |     expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    > 179 |     expect(results.filter((result) => result.status === 'rejected').map((result) => result.status === 'rejected' ? result.reason.message : '')).toContain('revoking the last grant administrator is forbidden');
+          |                                                                                                                                                 ^
+      180 |     expect(await prisma.membership.count({ where: { organizationId: a.organization.id, membershipStatus: 'ACTIVE' } })).toBe(1);
+      181 |   });
+      182 | });
+System.Management.Automation.RemoteException
+      at Object.<anonymous> (test/core/core-authority.spec.ts:179:145)
+System.Management.Automation.RemoteException
+FAIL test/core/identity-claim-verification.spec.ts (7.399 s)
+  ● G10b identity claim and verification slice › assigns distinct attempt numbers under concurrent starts
+System.Management.Automation.RemoteException
+    CoreDomainError: Core operation failed
+System.Management.Automation.RemoteException
+      60 |   if (code === 'P2000') return validationFailed('Core value exceeds its database limit');
+      61 |   if (code === 'P0001') return validationFailed('Core invariant rejected the operation');
+    > 62 |   return new CoreDomainError('INTERNAL_ERROR', 'Core operation failed');
+         |          ^
+      63 | }
+      64 |
+System.Management.Automation.RemoteException
+      at mapCoreDatabaseError (core/error-adapter.ts:62:10)
+      at core/identity-verification-service.ts:53:76
+          at async Promise.all (index 1)
+      at Object.<anonymous> (test/core/identity-claim-verification.spec.ts:190:22)
+System.Management.Automation.RemoteException
+FAIL test/core/g10c-profile-capability.spec.ts (6.339 s)
+  ● G10c Core profile, capability and publication slice › concurrent public edit and publish preserve revision consistency
+System.Management.Automation.RemoteException
+    CoreDomainError: Core operation failed
+System.Management.Automation.RemoteException
+      60 |   if (code === 'P2000') return validationFailed('Core value exceeds its database limit');
+      61 |   if (code === 'P0001') return validationFailed('Core invariant rejected the operation');
+    > 62 |   return new CoreDomainError('INTERNAL_ERROR', 'Core operation failed');
+         |          ^
+      63 | }
+      64 |
+System.Management.Automation.RemoteException
+      at mapCoreDatabaseError (core/error-adapter.ts:62:10)
+      at core/publication-service.ts:55:76
+          at async Promise.all (index 1)
+      at Object.<anonymous> (test/core/g10c-profile-capability.spec.ts:277:5)
+System.Management.Automation.RemoteException
+System.Management.Automation.RemoteException
+Test Suites: 4 failed, 24 passed, 28 total
+Tests:       6 failed, 354 passed, 360 total
+Snapshots:   0 total
+Time:        83.268 s, estimated 84 s
+Ran all test suites.
+FULL_EXIT=1
+[FOCUSED_G14A2]
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/core/g14a2-published-content.spec.ts
+
+PASS test/core/g14a2-published-content.spec.ts (6.546 s)
+  G14a2 published content snapshot
+    √ g14a2-c7-01 PUBLISHED accepts an object and rejects SQL NULL or a non-object (2364 ms)
+    √ g14a2-c7-02 WITHDRAWN accepts SQL NULL and rejects an object (167 ms)
+    √ g14a2-c7-03 snapshots for all targets equal the publish-time allowlists (224 ms)
+    √ g14a2-c7-04 post-publish edits do not change stored profile or capability snapshots (149 ms)
+    √ g14a2-c7-05 REPLACED writes a NULL withdrawal before the new version snapshot (160 ms)
+    √ g14a2-c7-06 ALREADY_PUBLISHED inserts no publication or snapshot (131 ms)
+    √ g14a2-c7-07 publication immutability rejects published_content UPDATE (98 ms)
+    √ g14a2-c7-08 allowlists exclude internal and whole-row fields (79 ms)
+    √ g14a2-c7-09 empty-database migration is recorded and the CHECK is validated (9 ms)
+    √ g14a2-c7-10 preflight SQL rejects a non-empty publications table before DDL continuation (114 ms)
+    √ g14a2-c7-11 serialization is deterministic for decimals timestamps JSON and link ids (237 ms)
+    √ g14a2-c7-12 JSON null is rejected for both PUBLISHED and WITHDRAWN (154 ms)
+    √ g14a2-c7-13 snapshot envelope has no redundant target id or revision keys (73 ms)
+    √ g14a2-oq4-a-prime sanitizes contact and links but preserves business_hours and terms as-is (128 ms)
+System.Management.Automation.RemoteException
+Test Suites: 1 passed, 1 total
+Tests:       14 passed, 14 total
+Snapshots:   0 total
+Time:        6.969 s
+Ran all test suites matching /test\\core\\g14a2-published-content.spec.ts/i.
+FOCUSED_EXIT=0
+RESULT=FAIL: one or more test suites failed
+CONTAINER_REMOVED=True
+[CONTAINERS_AFTER]
+mlino-v1-read-api
+mlino-v1-migrate
+app-mlino2-web-1
+mlino-v1-local-db
+kolokate-web-freellmapi-1
+kolokate-web-web-1
+contentstudio-db-1
+microservice
+n8n
+affectionate_panini
+ngrok-agent
+ngrok
+kolokate-web-db-1
+crazy_davinci
+zealous_swanson
+objective_curie
+peaceful_curran
+epic_rosalind
+malino-local-db
+[VOLUMES_AFTER]
+1a470c762a77097aac35f031c76384a1f66e12abdaf3e3b31c7859337592cb56
+7ca2e3419b0305abde5a20bcffa48fea2f752b7b344dd7c8d657d1ee2ab5d884
+8bae211f898a8c1f9c44888aecad43534bcbe99049e14ddfe1031cac5e9c8b02
+274a5807fcc21ea788dfed9ad73679ffbcbd0bb952729839b775b0c61f6f1947
+731210c358d689e8a1ddf595d02169aab1982526950d0ecb1c207ba7d84ce908
+app_mlino2-certs
+automation_n8n_data
+automation_shared_data
+automation_v5_with_guide_n8n_data
+automation_v5_with_guide_shared_data
+automation_v5_with_guide_whisper_cache
+automation_whisper_cache
+bbe591cc8f4c41883fccc7a8183dfe4e7c066f61ea35f8a08317c570aa64b9e0
+c31d95b8caa3101dbf12644d09fd7c621ea9122a0595d1c49520986423c2c6ee
+contentstudio_content_studio_db
+implementation_mlino_v1_local_db_data
+kolokate-web_kolokate_db_data
+malino-backend_malino_local_db_data
+paddlex_cache

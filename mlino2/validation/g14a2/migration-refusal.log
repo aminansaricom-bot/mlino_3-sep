@@ -1,0 +1,143 @@
+G14A2_REFUSAL_VALIDATION=START
+[CONTAINERS_BEFORE]
+mlino-v1-read-api
+mlino-v1-migrate
+app-mlino2-web-1
+mlino-v1-local-db
+kolokate-web-freellmapi-1
+kolokate-web-web-1
+contentstudio-db-1
+microservice
+n8n
+affectionate_panini
+ngrok-agent
+ngrok
+kolokate-web-db-1
+crazy_davinci
+zealous_swanson
+objective_curie
+peaceful_curran
+epic_rosalind
+malino-local-db
+[VOLUMES_BEFORE]
+1a470c762a77097aac35f031c76384a1f66e12abdaf3e3b31c7859337592cb56
+7ca2e3419b0305abde5a20bcffa48fea2f752b7b344dd7c8d657d1ee2ab5d884
+8bae211f898a8c1f9c44888aecad43534bcbe99049e14ddfe1031cac5e9c8b02
+274a5807fcc21ea788dfed9ad73679ffbcbd0bb952729839b775b0c61f6f1947
+731210c358d689e8a1ddf595d02169aab1982526950d0ecb1c207ba7d84ce908
+app_mlino2-certs
+automation_n8n_data
+automation_shared_data
+automation_v5_with_guide_n8n_data
+automation_v5_with_guide_shared_data
+automation_v5_with_guide_whisper_cache
+automation_whisper_cache
+bbe591cc8f4c41883fccc7a8183dfe4e7c066f61ea35f8a08317c570aa64b9e0
+c31d95b8caa3101dbf12644d09fd7c621ea9122a0595d1c49520986423c2c6ee
+contentstudio_content_studio_db
+implementation_mlino_v1_local_db_data
+kolokate-web_kolokate_db_data
+malino-backend_malino_local_db_data
+paddlex_cache
+[PRE_CORE_MIGRATIONS]
+20260814065924_init
+20260815033018_add_situation_key
+20260815113714_rename_actor_core_entity_id_to_actor_id
+20260906001500_add_ownership_type
+20260910020000_add_external_workspace_link
+20260913010000_add_core_foundation
+[DEPLOY_UP_TO_CORE_FOUNDATION_OUTPUT]
+Prisma schema loaded from ..\AppData\Local\Temp\mlino-g14a2-refusal-1931395e781f438aacd174964b973aee\prisma\schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "localhost:5499"
+
+6 migrations found in prisma/migrations
+
+Applying migration `20260814065924_init`
+Applying migration `20260815033018_add_situation_key`
+Applying migration `20260815113714_rename_actor_core_entity_id_to_actor_id`
+Applying migration `20260906001500_add_ownership_type`
+Applying migration `20260910020000_add_external_workspace_link`
+Applying migration `20260913010000_add_core_foundation`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260814065924_init/
+    └─ migration.sql
+  └─ 20260815033018_add_situation_key/
+    └─ migration.sql
+  └─ 20260815113714_rename_actor_core_entity_id_to_actor_id/
+    └─ migration.sql
+  └─ 20260906001500_add_ownership_type/
+    └─ migration.sql
+  └─ 20260910020000_add_external_workspace_link/
+    └─ migration.sql
+  └─ 20260913010000_add_core_foundation/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+DEPLOY_UP_TO_CORE_FOUNDATION_EXIT=0
+[SEED_OUTPUT]
+SEED_EXIT=0
+[TARGET_DEPLOY_FULL_ERROR]
+Prisma schema loaded from core-g14a-published-content\implementation\prisma\schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "localhost:5499"
+
+7 migrations found in prisma/migrations
+
+Applying migration `20260914010000_add_publication_published_content`
+Error: ERROR: current transaction is aborted, commands ignored until end of transaction block
+System.Management.Automation.RemoteException
+System.Management.Automation.RemoteException
+TARGET_DEPLOY_EXIT=1
+[FAILED_MIGRATION_ROW]
+20260914010000_add_publication_published_content|finished_at=NULL|rolled_back_at=NULL
+[PUBLISHED_CONTENT_COLUMN_COUNT]
+0
+[PRISMA_MIGRATION_LOGS_AND_P0001_IF_VISIBLE]
+
+FAILED_MIGRATION_ROW_EXIT=0
+COLUMN_COUNT_EXIT=0
+P0001_VISIBLE_IN_CAPTURED_LOG=False
+RESULT=PASS
+CONTAINER_REMOVED=True
+[CONTAINERS_AFTER]
+mlino-v1-read-api
+mlino-v1-migrate
+app-mlino2-web-1
+mlino-v1-local-db
+kolokate-web-freellmapi-1
+kolokate-web-web-1
+contentstudio-db-1
+microservice
+n8n
+affectionate_panini
+ngrok-agent
+ngrok
+kolokate-web-db-1
+crazy_davinci
+zealous_swanson
+objective_curie
+peaceful_curran
+epic_rosalind
+malino-local-db
+[VOLUMES_AFTER]
+1a470c762a77097aac35f031c76384a1f66e12abdaf3e3b31c7859337592cb56
+7ca2e3419b0305abde5a20bcffa48fea2f752b7b344dd7c8d657d1ee2ab5d884
+8bae211f898a8c1f9c44888aecad43534bcbe99049e14ddfe1031cac5e9c8b02
+274a5807fcc21ea788dfed9ad73679ffbcbd0bb952729839b775b0c61f6f1947
+731210c358d689e8a1ddf595d02169aab1982526950d0ecb1c207ba7d84ce908
+app_mlino2-certs
+automation_n8n_data
+automation_shared_data
+automation_v5_with_guide_n8n_data
+automation_v5_with_guide_shared_data
+automation_v5_with_guide_whisper_cache
+automation_whisper_cache
+bbe591cc8f4c41883fccc7a8183dfe4e7c066f61ea35f8a08317c570aa64b9e0
+c31d95b8caa3101dbf12644d09fd7c621ea9122a0595d1c49520986423c2c6ee
+contentstudio_content_studio_db
+implementation_mlino_v1_local_db_data
+kolokate-web_kolokate_db_data
+malino-backend_malino_local_db_data
+paddlex_cache
