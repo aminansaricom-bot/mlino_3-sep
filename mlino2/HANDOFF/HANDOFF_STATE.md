@@ -630,3 +630,15 @@ VALIDATION: 6 full runs and 10 focused runs completed on disposable PostgreSQL 1
 SCOPE: Diagnosis evidence only; no worktree product, test, schema, migration or CCR changes; instrumentation existed only in throwaway copies.
 NEXT_ACTION: Guardian review; no fix, G14a3, G14b or G14c.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260915-CORE-G15
+AUTHOR: CODEX
+PHASE: G15_1_CORE_TRANSACTION_ROBUSTNESS_CCR
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260915-G15-1-CORE-TRANSACTION-ROBUSTNESS-CCR-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260915_CODEX_G15_1_TRANSACTION_ROBUSTNESS_CCR_REPORT.md
+BASE_COMMIT: d20ad7cfeff48ca8b3f28bb0bdc284b4588139b3
+VALIDATION: DOCUMENT_AND_THROWAWAY_DIAGNOSTICS — GW2-P passed; three disposable PostgreSQL 16 tmpfs runs on 127.0.0.1:5499 each passed 28 suites and 360 tests; no raw P2028/P2034 in these runs; historical baseline P2028 evidence retained; no product/schema/migration change.
+SCOPE: CCR draft, redacted diagnostic scripts/logs and evidence only; no implementation, retry, error-code, schema, migration, Docker compose, live DB or credential action.
+NEXT_ACTION: Guardian review; owner decision required for CCR options; no G15-2 or implementation automatically.
+CREATED_AT: 2026-09-15
