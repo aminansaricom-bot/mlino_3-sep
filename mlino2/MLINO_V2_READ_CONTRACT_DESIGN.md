@@ -77,12 +77,12 @@ Publication رویداد انتشار را با نوع رویداد، `contentRe
 |---|---|---|
 | `business_id` | `Organization.id` | نگاشت مستقیم؛ هویت canonical در Core است (`origin/main: implementation/prisma/schema.prisma:327-353`; `origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:49-54`). |
 | `organization_id` | `Organization.id` | همان مقدار برای tenant؛ V2 فقط مصرف‌کننده است (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:49-60`). |
-| `category` | `Capability.categoryKey` یا vocabulary ماژول | Core نباید category کلینیکی بسازد؛ mapping vocabulary باید versioned باشد. Capability category در Core هست (`origin/main: implementation/prisma/schema.prisma:496-527`). |
-| `location.floor_level` | مقصد فعلی ندارد | BusinessProfile فقط latitude/longitude/address دارد (`origin/main: implementation/prisma/schema.prisma:465-477`)، پس floor/building نیازمند تصمیم و CCR جداست؛ دادهٔ Mock فعلی واقعی تلقی نشود (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:13-22`). |
-| `location.building_id` | مقصد فعلی ندارد | همان شکاف بالا؛ گزینه‌ها: فیلد typed در Profile یا extension جدا، فقط پس از تصمیم. |
-| `products` | مقصد Core ندارد | Core Offer/OfferVersion دارد، Product ندارد (`origin/main: implementation/prisma/schema.prisma:530-576`). حذف از DTO واقعی، یا ساخت مدل جدید، تصمیم جداست؛ بازسازی Product از Capability مجاز نیست. |
+| `category` | در v1 وجود ندارد (S25) | category آینده فقط از vocabulary نسخه‌دار اولین vertical module طبق ADR-0011 می‌آید، نه از `Capability.categoryKey` (`origin/main: implementation/prisma/schema.prisma:496-527`). |
+| `location.floor_level` | در v1 وجود ندارد (S25) | فقط با CCR جداگانه ممکن است؛ V2 فعلاً mock/null نگه می‌دارد. BusinessProfile فقط latitude/longitude/address دارد (`origin/main: implementation/prisma/schema.prisma:465-477`) و فیلد Mock فعلی منبع واقعی نیست (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:13-22`). |
+| `location.building_id` | در v1 وجود ندارد (S25) | فقط با CCR جداگانه ممکن است؛ V2 فعلاً mock/null نگه می‌دارد (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:13-22`). |
+| `products` | از `public-business.v1` حذف شده (S26) | Offer/OfferVersion جایگزین است؛ `draft-1` فقط Mock می‌ماند. Core Offer/OfferVersion دارد و Product ندارد (`origin/main: implementation/prisma/schema.prisma:530-576`; `origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:24-32`). |
 | `offers.title` | `OfferVersion.name` | mapping معنایی ممکن است، اما contract باید نام‌گذاری را صریح کند (`origin/main: implementation/prisma/schema.prisma:547-560`; `origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:34-43`). |
-| `offers.discount_percent` | مقصد مستقیم ندارد | Core price/terms دارد، اما discount_percent ندارد (`origin/main: implementation/prisma/schema.prisma:552-560`). تبدیل از terms فقط با قرارداد typed مجاز است؛ حدس در V2 ممنوع. |
+| `offers.discount_percent` | در v1 وجود ندارد | هیچ Core source ندارد؛ در v1 از `terms` مشتق نمی‌شود (`origin/main: implementation/prisma/schema.prisma:552-560`; `origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:34-43`). |
 | `last_synced_at` | metadata انتقال، نه business truth | از `generated_at`/sync receipt ساخته می‌شود؛ V2 فعلی آن را در cache نگه می‌دارد (`origin/codex/v2-intent-flow-foundation: mlino2/app/src/directory/contract.ts:59-60`). |
 
 ### برنامهٔ نسخه
@@ -252,7 +252,7 @@ Matching فعلی فقط از Directory استفاده می‌کند و داده
 
 ## ۱۲. تصمیم‌های مالک (DECIDED) و ماتریس ADR
 
-### تصمیم‌های باز
+### تصمیم‌های مالک (DECIDED)
 
 | شناسه | موضوع | گزینه‌ها | توصیهٔ طراحی | وضعیت |
 |---|---|---|---|---|
