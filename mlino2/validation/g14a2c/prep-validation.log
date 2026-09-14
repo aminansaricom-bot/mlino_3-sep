@@ -1,0 +1,9 @@
+PREPARATION=PASS
+HEAD_SOURCE_COMMIT=a4d9a75108197da62cf4c9ed6a9713268e1b2e40
+BASELINE_SOURCE_COMMIT=ee25ead
+HEAD_MANIFEST=head-manifest.txt; all recorded entries MATCH
+BASELINE_MANIFEST=baseline-manifest.txt; all recorded entries MATCH
+BASELINE_REMOVED=20260914010000_add_publication_published_content migration and test/core/g14a2-published-content.spec.ts
+BASELINE_PRISMA_GENERATE=PASS
+INSTRUMENTATION=temporary copies only; not committed to product tree
+TEMP_COPY_CLEANUP=PASS; removed after diagnosis
