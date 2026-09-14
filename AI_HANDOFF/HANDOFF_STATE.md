@@ -1,40 +1,40 @@
-HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G14A2C-REVIEW
+HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G14A-MERGE-G14A3
 AUTHOR: CLAUDE
-PHASE: G14A_COMPLETE_OWNER_MERGE_DECISION_PENDING
+PHASE: G14A_MERGED_G14A3_RELEASED
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: G14a-2c diagnosis (abcd176, 460d4e2 and a68c599; published by the Guardian) is conclusive:
-- Baseline (ee25ead product code, manifest verified against the git blobs) and head (a4d9a75) BOTH fail the same 6 concurrency tests deterministically:
-  - 3 of 3 full runs (baseline 6/346, head 6/360) and 5 of 5 focused runs
-  - raw PrismaClientKnownRequestError P2028 "Unable to start a transaction in the given time"
-- The failures are PRE-EXISTING in main's code in this environment, not a G14a regression.
-- The G14a-2 "360/360" claim is unverifiable (no log). From now on a full-suite pass is accepted only with a committed log.
-- Scope: evidence only, 0 implementation files. Throwaway copies and 16 containers removed. Runtime unchanged (6 migrations, publications=0, no column on the local DB).
-- Minor: one uncommitted cleanup-log line in Codex's worktree.
-Trial merge into main 3ffa327: base f578499, tree d80488f, clean; 20 files, +5960/-26.
-Owner package:
-1. Merge G14a into main; the Guardian executes it.
-2. G14a-3 immediately after the merge: apply the migration to mlino-v1-local-db with the G7b B1-B6 backup, run by Codex. Until then there must be NO compose build, because v1-migrate would apply the migration without a backup.
-3. G15-1: a Core transaction-robustness CCR, document only (P2028 root cause, P2028/P2034 mapping, tx options, deterministic race tests).
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G14A2C_CONCURRENCY_DIAGNOSIS.md
+REVIEW_VERDICT: The owner authorized in chat: «ادغام G14a در main، G14a-3 (اعمال migration روی DB محلی با backup) و G15-1 (سند CCR مقاوم‌سازی تراکنش) مجاز است».
+The Guardian MERGED G14a into main:
+- Merge commit 97b37f8664f27e254e3d8b2064adc9d557708da9, tree 56bd4cb, parents d251599 and a68c599.
+- The trial tree is equal; it differs from the earlier trial d80488f only by 3 AI_HANDOFF files. 20 files, +5960/-26.
+- The key hashes are equal to the reviewed ones: migration 7b424e9c, schema 9a4dd47c, service 03250e13.
+- Runtime unchanged: the local DB still has 6 migrations and no column; no build or compose.
+Released CODEX-20260914-G14A3-LOCAL-MIGRATION-001 (the G7b method):
+- a source tree check
+- a pre-state with a publications=0 preflight
+- backup B1-B6 to C:\Users\galexy\mlino-backups\
+- migrate status (exactly one pending)
+- a single deploy
+- verification a)-g)
+- a failure path of resolve --rolled-back
+Until G14a-3 is done: NO docker compose build and no v1-migrate. G15-1 is authorized and is released after G14a-3.
+Pre-existing: 6 P2028 race-test failures (G14a-2c), addressed by G15-1.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G14A_MERGE_G14A3_RELEASE.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). The G14a branch is at a68c599 on origin. main is 3ffa327 before this commit. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-14T16:30:00+03:30
-NEXT_ACTION: The owner decides (suggested: "merge of G14a into main, G14a-3 and G15-1 authorized"). Then the Guardian:
-1. Merges (--no-ff, tree must equal d80488f) and records it.
-2. Releases G14a-3 at once.
-3. Releases G15-1 after G14a-3.
+CODE_COMMIT_SHA: 97b37f8664f27e254e3d8b2064adc9d557708da9 (merge). Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-14T17:00:00+03:30
+NEXT_ACTION: Codex executes G14a-3 with TARGET_HANDOFF_ID=HANDOFF-20260914-GUARDIAN-G14A-MERGE-G14A3. Then:
+1. Guardian review, including a read-only DB check.
+2. The Guardian publishes the branch.
+3. The Guardian releases G15-1.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G14A2B-REVIEW
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260914-G14A2C-CONCURRENCY-DIAGNOSIS-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G14A2C-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), executing the owner-authorized G14a merge and releasing G14a-3
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK:
-- Read the commits from the shared object store; no git config was written.
-- Verified the baseline and head manifests against the ee25ead and a4d9a75 blob hashes myself. Read the execution log totals and raw lines, the cleanup log and the report.
-- Trial merge-tree against origin/main 3ffa327. Docker and runtime checked read-only.
+HANDOFF_PRECONDITION_CHECK: origin/main was d251599, and origin/codex/core-g14a-published-content was a68c599 (published by the Guardian). The trial merge-tree gave 56bd4cb; the merge tree equals it. The runtime was checked read-only.
 
-SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main, plus the Codex branch ref published unchanged (a fast-forward from a4d9a75 to a68c599). No merge was executed. No credential, Docker write, database write or code action.
+SCOPE_CONSTRAINT_NOTE: The --no-ff merge plus the AI_HANDOFF record files. No credential, Docker write, database write, compose or build action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
