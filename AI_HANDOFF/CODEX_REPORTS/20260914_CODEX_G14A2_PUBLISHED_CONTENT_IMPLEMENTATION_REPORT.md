@@ -1,0 +1,221 @@
+# گزارش اجرای Codex — G14a-2: پیاده‌سازی محتوای منتشرشده
+
+**وضعیت:** DELIVERED_AWAITING_GUARDIAN_REVIEW
+**تاریخ:** ۲۰۲۶-۰۹-۱۴
+**INSTRUCTION_ID:** `CODEX-20260914-G14A2-PUBLISHED-CONTENT-IMPLEMENTATION-001`
+**TARGET_HANDOFF_ID:** `HANDOFF-20260914-OWNER-APPROVAL-G14A2`
+**WORKSTREAM_HANDOFF_ID:** `HANDOFF-20260914-CORE-G14A`
+**شاخه:** `codex/core-g14a-published-content`
+**مبنای اجرا:** `ee25ead`
+**Commit پیاده‌سازی:** `39d91841587911d6caf28810251ea8944d7deac5`
+
+## ۱. Task اجراشده
+
+CCR مصوب S19-A1 اجرا شد: ستون JSONB محتوای منتشرشده به Publication افزوده شد، migration محافظت‌شده ساخته شد و `PublicationService` هنگام انتشار snapshot نسخه‌دار و allowlisted می‌سازد. برداشت انتشار، از جمله ردیف برداشت در REPLACED، مقدار SQL NULL می‌نویسد. مسیر ALREADY_PUBLISHED هیچ ردیف تازه‌ای درج نمی‌کند و D6 تغییر نکرده است.
+
+## ۲. اسناد مبنا
+
+- `AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_G14A2_PUBLISHED_CONTENT.md` در commit قفل‌شدهٔ `0110a164968a00076d52dfa74249a7f8ca03704d` با SHA-256 برابر `e739628267084d5262ba2065f461fdf3745fb20a70e436648e47b13e6472daaa`.
+- `implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_PUBLICATION_PUBLISHED_CONTENT.md` در مبنای `ee25ead` با SHA-256 مصوب `95f4a3a1...`.
+- تصمیم‌های مالک OQ-1 تا OQ-5، شامل OQ-4=A-prime، مطابق مرجع تصویب.
+- `implementation/prisma/schema.prisma` و `implementation/core/publication-service.ts` موجود.
+
+پیش‌شرط: `git fetch origin` به علت نبود اتصال به `github.com:443` شکست خورد. GW2-P اجرا شد: commit قفل‌شده موجود بود، ancestor بودن آن نسبت به `origin/main` تأیید شد و SHA-256 بایت‌های `git show` دقیقاً با `e739628267084d5262ba2065f461fdf3745fb20a70e436648e47b13e6472daaa` برابر بود. هیچ credential، token، git config یا credential helper خوانده یا تغییر داده نشد.
+
+## ۳. فایل‌های تغییرکرده
+
+| مسیر | تغییر |
+|---|---|
+| `implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_PUBLICATION_PUBLISHED_CONTENT.md` | وضعیت APPROVED، ثبت OQ-1 تا OQ-5 و اصلاح Z2 |
+| `implementation/prisma/migrations/20260914010000_add_publication_published_content/migration.sql` | migration تازه مطابق C2 |
+| `implementation/prisma/schema.prisma` | فقط افزودن `publishedContent` به مدل Publication |
+| `implementation/core/publication-service.ts` | ساخت snapshotهای allowlisted و درج محتوای منتشرشده |
+| `implementation/test/core/g14a2-published-content.spec.ts` | ۱۴ آزمون متمرکز C7 و OQ-4 |
+| `AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A2_PUBLISHED_CONTENT_IMPLEMENTATION_REPORT.md` | این گزارش |
+| `mlino2/HANDOFF/HANDOFF_STATE.md` | ورودی append-only تحویل |
+
+## ۴. فایل‌های تغییرنکرده
+
+- همهٔ migrationهای موجود، از جمله `20260913010000_add_core_foundation`.
+- همهٔ مدل‌های Prisma جز افزودن یک فیلد در Publication.
+- سایر serviceها، HTTP، Dockerfile، tsconfig، V2 و export producer مربوط به G14b.
+- `_PUSH_STAGING`، دیتابیس محلی V1، پورت 5435، credentials و git config.
+
+## ۵. آزمون‌های اجراشده
+
+| مورد | نام آزمون | نتیجه |
+|---|---|---|
+| C7-1 | `g14a2-c7-01 PUBLISHED accepts an object and rejects SQL NULL or a non-object` | PASS |
+| C7-2 | `g14a2-c7-02 WITHDRAWN accepts SQL NULL and rejects an object` | PASS |
+| C7-3 | `g14a2-c7-03 snapshots for all targets equal the publish-time allowlists` | PASS |
+| C7-4 | `g14a2-c7-04 post-publish edits do not change stored profile or capability snapshots` | PASS |
+| C7-5 | `g14a2-c7-05 REPLACED writes a NULL withdrawal before the new version snapshot` | PASS |
+| C7-6 | `g14a2-c7-06 ALREADY_PUBLISHED inserts no publication or snapshot` | PASS |
+| C7-7 | `g14a2-c7-07 publication immutability rejects published_content UPDATE` | PASS |
+| C7-8 | `g14a2-c7-08 allowlists exclude internal and whole-row fields` | PASS |
+| C7-9 | `g14a2-c7-09 empty-database migration is recorded and the CHECK is validated` | PASS |
+| C7-10 | `g14a2-c7-10 preflight rejects existing publications before any DDL continuation` | PASS |
+| C7-11 | `g14a2-c7-11 serialization is deterministic for decimals timestamps JSON and link ids` | PASS |
+| C7-12 | `g14a2-c7-12 JSON null is rejected for both PUBLISHED and WITHDRAWN` | PASS |
+| C7-13 | `g14a2-c7-13 snapshot envelope has no redundant target id or revision keys` | PASS |
+| OQ-4 | `g14a2-oq4-a-prime sanitizes contact and links but preserves business_hours and terms as-is` | PASS |
+
+فرمان‌های اعتبارسنجی در worktree مجاز اجرا شدند: تولید Prisma Client با 5.22.0، `prisma migrate deploy`، build، spec متمرکز و کل مجموعهٔ Jest. همهٔ اجراهای پایگاه داده فقط با `DATABASE_URL` روی `localhost:5499` و container یک‌بارمصرف tmpfs انجام شدند.
+
+## ۶. نتایج آزمون و شواهد
+
+- migration هر هفت migration را روی PostgreSQL 16 یک‌بارمصرف اعمال کرد.
+- N1: Prisma 5.22.0 فایل migration دارای `BEGIN`، `LOCK TABLE` و `COMMIT` صریح را پذیرفت؛ حذف آن‌ها لازم نشد.
+- آزمون متمرکز نهایی: ۱ suite و ۱۴ آزمون موفق، صفر شکست.
+- build نهایی: موفق.
+- مجموعهٔ کامل V1 + Core: ۲۸ suite و ۳۶۰ آزمون موفق، صفر شکست.
+- اجرای نخست spec متمرکز ۳ شکست fixture داشت: fixtureهای قیمت با قاعدهٔ موجود `onRequest` سازگار نبودند. فقط fixture اصلاح شد؛ کد محصول برای این شکست‌ها تغییر نکرد.
+- آزمون migration روی دیتابیس دومِ دارای یک Publication معتبر، migration تازه را رد کرد. تلاش نخست seed به علت نبود `updated_at` در fixture خام شکست خورد و migration اجرا نشد؛ seed اصلاح و سناریو از ابتدا تکرار شد.
+- در اجرای رد migration، Prisma پیام عمومی transaction-aborted را نمایش داد؛ با این حال ردیف ناموفق در `_prisma_migrations` ثبت شد و شمار ستون `published_content` صفر ماند، پس preflight مانع ادامهٔ DDL شد و تغییر ناقص ایجاد نشد.
+- container `mlino-g14a2-testdb` با `docker rm -f` حذف شد؛ جست‌وجوی پس از حذف خالی بود و فهرست volumeهای قبل و بعد یکسان ماند.
+
+SHA-256 بایت‌های LF ذخیره‌شده در Git:
+
+```text
+7b424e9cedc6cc2162765253148d4b047e834e63b4d82f8f4e3d20f9dac910b6  implementation/prisma/migrations/20260914010000_add_publication_published_content/migration.sql
+9a4dd47cb3b0d8274fe858ef55998969574aea18451bd88926830808e7fce53d  implementation/prisma/schema.prisma
+03250e13eb7f27c083c5b15ba4d2834d3661e0feda31944e45f18ddef623fe24  implementation/core/publication-service.ts
+ff1db15d22746107e26f7605240a4acddd559d535fc999ddc65e7a0329389876  implementation/test/core/g14a2-published-content.spec.ts
+```
+
+## ۷. Commit
+
+- `39d91841587911d6caf28810251ea8944d7deac5` — `feat(core): persist publication content snapshots`
+- گزارش و Handoff در یک Commit محلی تحویل بعدی ثبت می‌شوند.
+- مطابق دستور هیچ Push انجام نمی‌شود.
+
+## ۸. ریسک‌های باقی‌مانده
+
+- پیام سطح Prisma در شکست preflight، متن سفارشی P0001 را مستقیماً نشان نداد؛ رفتار fail-closed و نبود DDL ناقص ثابت شده است، اما Guardian باید قابل‌قبول بودن visibility این پیام را بازبینی کند.
+- `business_hours` و `terms` طبق OQ-4=A-prime بدون تغییر snapshot می‌شوند؛ validation/removal آن‌ها عمداً به G14b واگذار شده است.
+- هیچ migrationی روی دیتابیس محلی V1 اعمال نشده و runtime هنوز این تغییر را مصرف نمی‌کند.
+
+## ۹. سؤال‌های باز
+
+- تصمیم تازه‌ای توسط Codex گرفته نشد.
+- پذیرش evidence مربوط به پیام preflight و آزادسازی مرحلهٔ بعد فقط با Guardian است.
+
+## ۱۰. گام بعدی پیشنهادی
+
+Architecture Guardian این Commit، migration، شواهد و گزارش را بازبینی کند. تا اعلام تصمیم Guardian، هیچ Push، merge، اجرای migration محلی، G14a-3، G14b یا G14c آغاز نشود.
+
+من کدکس هستم.
+
+## ۱۳. اصلاحیهٔ G14a-2c — تشخیص هم‌زمانی
+
+این بخش طبق `CODEX-20260914-G14A2C-CONCURRENCY-DIAGNOSIS-001` افزوده شد. تشخیص فقط در دو کپی موقت خارج از مخزن انجام شد: `head` از `a4d9a75108197da62cf4c9ed6a9713268e1b2e40` و `baseline` بر پایهٔ `ee25ead` با حذف migration و spec مربوط به G14a2. instrumentation فقط در همان کپی‌های موقت بود و هیچ فایل محصولی در worktree تغییر نکرد.
+
+### پیش‌شرط و محیط
+
+- `git fetch origin` با کد ۱۲۸ شکست خورد؛ خطای اتصال شبکه به GitHub ثبت شد.
+- GW2-P برای commit بازبینی موفق بود: `cat-file` کد صفر، `merge-base --is-ancestor` کد صفر و SHA-256 برابر مقدار pinned بود.
+- هر ۱۶ اجرا از PostgreSQL 16 روی کانتینر tmpfs تازه با پورت `127.0.0.1:5499` استفاده کرد؛ هر کانتینر پس از اجرا با موفقیت حذف شد.
+- فهرست کانتینرها و volumeها قبل و بعد در `execution.log` ثبت شده است؛ کانتینر یا volume تازه‌ای باقی نماند.
+- لاگ‌ها با بررسی ساختاری فاقد URL اتصال و رمز عبور هستند.
+
+### D3 — سه اجرای کامل برای هر کپی
+
+| کپی × اجرا | suite/test نتیجه | آزمون‌های شکست‌خورده | خطای خام |
+|---|---|---|---|
+| head × full-1 | ۴ شکست از ۲۸ suite؛ ۶ شکست از ۳۶۰ test | همان شش نام جدول D4 | P2028 |
+| head × full-2 | ۴ شکست از ۲۸ suite؛ ۶ شکست از ۳۶۰ test | همان شش نام جدول D4 | P2028 |
+| head × full-3 | ۴ شکست از ۲۸ suite؛ ۶ شکست از ۳۶۰ test | همان شش نام جدول D4 | P2028 |
+| baseline × full-1 | ۴ شکست از ۲۷ suite؛ ۶ شکست از ۳۴۶ test | همان شش نام جدول D4 | P2028 |
+| baseline × full-2 | ۴ شکست از ۲۷ suite؛ ۶ شکست از ۳۴۶ test | همان شش نام جدول D4 | P2028 |
+| baseline × full-3 | ۴ شکست از ۲۷ suite؛ ۶ شکست از ۳۴۶ test | همان شش نام جدول D4 | P2028 |
+
+در هر خط خام، شکل مشاهده‌شده `PrismaClientKnownRequestError` با `code=P2028` و پیام `Unable to start a transaction in the given time.` بود.
+
+### D4 — پنج تکرار متمرکز برای هر کپی
+
+| آزمون | head | baseline |
+|---|---:|---:|
+| `G10b ... assigns distinct attempt numbers under concurrent starts` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+| `G10c ... concurrent public edit and publish preserve revision consistency` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+| `G10d ... createVersion numbers versions 1, 2, 3 and concurrent creates get distinct numbers` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+| `G10d ... concurrent publication of two versions leaves exactly one published without a raw error` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+| `G10a2 ... serializes concurrent revocation of two different admin grants` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+| `G10a2 ... serializes concurrent revocation of the two admin memberships` | ۵ از ۵ شکست؛ P2028 | ۵ از ۵ شکست؛ P2028 |
+
+هر اجرای متمرکز شامل ۴ suite و ۵۸ test بود و در هر دو کپی ۴ suite شکست خوردند؛ جمع هر کپی ۳۰ شکست آزمون در D4 است.
+
+### نتیجهٔ factual تشخیص
+
+baseline نیز همان چهار suite و همان شش آزمون هم‌زمانی را با خطای خام P2028 شکست داد؛ head نیز همان رفتار را نشان داد. بنابراین شواهد این اجراها نشان می‌دهد شکست‌های مشاهده‌شده فقط در head ظاهر نشده‌اند و در مقایسهٔ head با baseline به‌عنوان regression اختصاصی G14a2 شناخته نمی‌شوند.
+
+### شواهد و hashها
+
+```text
+7b6a435f83e7a5b38d3b0385a63316f3402378088b1bd1be046c3fb84bd5cf68  mlino2/validation/g14a2c/prepare-copies.ps1
+aa609e3d0561c35f883ace002fbf415680807fc414d766c49bb9eacbb3187a68  mlino2/validation/g14a2c/run-prepared-diagnosis.ps1
+972b01a5ef7a34cee3a1bf8117a017a199fd2eaf0cbbb909d8d65a90c28dfc94  mlino2/validation/g14a2c/g14a2c-precondition.log
+f572a42ec1c8c22d837832e8a48270d8e6423d899f7082a417ce8737c9b6cf7a  mlino2/validation/g14a2c/prep-validation.log
+6cc4e21fba77915a3fcf6f1b7529e18be24f173b316fefd4220530b352a1524d  mlino2/validation/g14a2c/head-manifest.txt
+371a7b4ca6ada7aa7eb82e123a52432cdaa7fe74f08a313bbda1b072403ff256  mlino2/validation/g14a2c/baseline-manifest.txt
+01a960097e224a733e85533677987e573e32b00d002f30bf6c6da59f83f93f5d  mlino2/validation/g14a2c/execution.log
+d152e05eb29a26ddef2aaaf4df54b5d50641a11039e74155eb86a08a8299d0db  mlino2/validation/g14a2c/run-cleanup.log
+```
+
+جزئیات کامل خروجی خام، suite totals، نام آزمون‌ها، شمار containerهای قبل و بعد، فهرست volumeها و ثبت حذف کپی‌ها در `mlino2/validation/g14a2c/execution.log` و `run-cleanup.log` قرار دارد. هیچ fix یا proposal محصولی در این مرحله اعمال نشد.
+
+### وضعیت تحویل G14a-2c
+
+این تشخیص تکمیل شد و برای بازبینی Guardian متوقف می‌شود. هیچ Push، merge، تغییر محصول، تغییر schema/migration یا اتصال به پورت ۵۴۳۵ انجام نشد.
+
+من کدکس هستم.
+
+## ۱۱. اصلاحیهٔ G14a-2b
+
+این بخش طبق دستور `CODEX-20260914-G14A2B-PUBLISHED-CONTENT-TEST-HARDENING-001` افزوده شد. هیچ‌یک از `publication-service.ts`، `schema.prisma`، migration یا CCR در این مرحله تغییر نکردند.
+
+| شناسه | assertion / فایل دقیق | نتیجه |
+|---|---|---|
+| T1 | `g14a2-c7-01`، `g14a2-c7-02` و `g14a2-c7-12` با `rejects.toThrow(/publication_published_content_event_kind_check/)`؛ هر rejection یک direct-insert مثبت با همان fixture shape و payload معتبر دارد | PASS؛ focused spec برابر ۱۴/۱۴ |
+| T2 | `g14a2-c7-07` با `rejects.toThrow(/publications are append-only/)` | PASS |
+| T3 | نام آزمون `g14a2-c7-10 preflight SQL rejects a non-empty publications table before DDL continuation`؛ `validate-migration-refusal.ps1` و `migration-refusal.log` | PASS؛ deploy شکست خورد، ردیف `20260914010000_add_publication_published_content` با `finished_at=NULL` و `rolled_back_at=NULL` ثبت شد و شمار ستون `published_content` برابر صفر بود |
+| T4 | همان log شامل متن کامل خطای deploy قابل مشاهده، query ردیف migration، شمار ستون و وضعیت P0001؛ `run-test-suites.ps1` و `test-suites.log` | PARTIAL/FAIL؛ focused برابر ۱ suite و ۱۴/۱۴، full برابر ۲۴/۲۸ suite و ۳۵۴/۳۶۰؛ ۶ شکست هم‌زمانی در G10a2/G10b/G10c/G10d باقی ماند |
+
+### خروجی‌های GW2/GW2-P
+
+```text
+git fetch origin
+FETCH_EXIT=128
+fatal: unable to access 'https://github.com/aminansaricom-bot/mlino_3-sep.git/': Failed to connect to github.com:443
+
+git cat-file -e ee8bf49510a940dcec7cd3edcc0eff030afb5dee^{commit}
+CAT_FILE_EXIT=0
+
+git merge-base --is-ancestor ee8bf49510a940dcec7cd3edcc0eff030afb5dee origin/main
+ANCESTOR_EXIT=0
+
+git show ee8bf49510a940dcec7cd3edcc0eff030afb5dee:AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G14A2_PUBLISHED_CONTENT_IMPLEMENTATION.md | SHA-256
+9d1467933e431f04d6d482d9caf3ee6ce32c21caaf2410b73c989f0ce50515df
+```
+
+### شواهد محیط
+
+- هر دو validation script فقط containerهای نام‌گذاری‌شدهٔ `mlino-g14a2-refusal` و `mlino-g14a2-suites` را ساختند.
+- هر دو container با `docker rm -f` حذف شدند و فهرست containerها و volumeها قبل و بعد یکسان بود.
+- هیچ اتصال به `mlino-v1-local-db`، پورت ۵۴۳۵ یا `_PUSH_STAGING` انجام نشد.
+- log refusal هیچ password یا connection string ندارد؛ P0001 در خروجی قابل مشاهدهٔ Prisma یا `_prisma_migrations.logs` دیده نشد. متن قابل مشاهدهٔ خطا `current transaction is aborted, commands ignored until end of transaction block` بود.
+
+### SHA-256 بایت‌های Git
+
+```text
+68f64eed56dc059956a12c7b2f9cd6f4c0f67ed1b503060a2118ff18c9a7c495  implementation/test/core/g14a2-published-content.spec.ts
+e09eee73eb4f1f3c2be5cd0fe2e0f117d1212bf3fa2c3c43ff2141e524860db6  mlino2/validation/g14a2/validate-migration-refusal.ps1
+cbcf3fb611a2abdaf4c28221fa9952225f52c9282203678b351f474054089f21  mlino2/validation/g14a2/migration-refusal.log
+3f2323b9bb68451be8e0425dc5324852f931646ab9f7a72bcc89b5875b3378a1  mlino2/validation/g14a2/run-test-suites.ps1
+39bc9b1c27fc5f44599852e7688fd13d26bd73d89f80a2fc08caaf2003a6af6f  mlino2/validation/g14a2/test-suites.log
+```
+
+## ۱۲. وضعیت تحویل G14a-2b
+
+آزمون‌های متمرکز و شواهد migration refusal موفق‌اند. full suite به‌علت شش شکست هم‌زمانی موجود PASS کامل نیست؛ این شکست‌ها فقط گزارش شده‌اند و هیچ fix خارج از دامنهٔ مجاز اعمال نشده است. این workstream پس از commit محلی متوقف می‌شود و منتظر بازبینی Guardian است.
+
+من کدکس هستم.

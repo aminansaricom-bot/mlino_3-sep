@@ -535,3 +535,64 @@ VALIDATION: DOCUMENT ONLY — GW2-P passed; final design hash 90c5753efe11c1b2b2
 SCOPE: F9 completion only; no code/schema/migration/Prisma/Docker/database action; no G14.
 NEXT_ACTION: Guardian review; Push only when automated check permits.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A1_CCR_DRAFT
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G14A1-PUBLISHED-CONTENT-CCR-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A1_PUBLISHED_CONTENT_CCR_REPORT.md
+COMMITS: 31f3c22bc74d860ddbb2e491449bccff276b1a66
+VALIDATION: DOCUMENT ONLY — GW2-P passed; CCR LF hash 44539a3e2136803dcae7c166ab1f173066db45b881d22a3ccbdd14a119c714b4; no schema/migration/code/test/config/Prisma/Docker/database action.
+SCOPE: DRAFT CCR for publications.published_content under S19-A1; C1-C9 complete; OQ-1 through OQ-5 remain owner decisions.
+NEXT_ACTION: Guardian review and owner decision; no G14a-2, G14a-3, G14b or G14c.
+CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A1B_CCR_FIXES
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G14A1B-PUBLISHED-CONTENT-CCR-FIXES-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A1_PUBLISHED_CONTENT_CCR_REPORT.md
+BASE_COMMIT: 9b648139f8c56eaec8b77f2dcf50b5bd14a22ec9
+DELIVERY_COMMIT: local branch head containing this append-only entry
+VALIDATION: DOCUMENT ONLY — GW2-P passed; updated CCR staged-blob hash 95f4a3a18abe59956863ad7bdb7e07b294b1f0c61fb735c5df2500ab93aedccb; no schema/migration/code/test/config/Prisma/Docker/database action.
+SCOPE: Y1-Y5 and Z1 applied; CCR remains DRAFT; OQ-1 through OQ-5 remain undecided.
+NEXT_ACTION: Guardian review and publication of the shared local branch; no push by Codex and no G14a-2.
+CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A2_PUBLISHED_CONTENT_IMPLEMENTATION
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G14A2-PUBLISHED-CONTENT-IMPLEMENTATION-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A2_PUBLISHED_CONTENT_IMPLEMENTATION_REPORT.md
+IMPLEMENTATION_COMMIT: 39d91841587911d6caf28810251ea8944d7deac5
+VALIDATION: PASS — Prisma 5.22.0 accepted explicit BEGIN/COMMIT; 7 migrations applied on disposable PostgreSQL 16; focused 14/14; full V1+Core 28 suites and 360/360 tests; preflight existing-row refusal proved with zero partial DDL; container removed; no new volume.
+SCOPE: Approved S19-A1 published_content migration, Publication Prisma field, PublicationService snapshots, C7/OQ-4 tests and CCR approval only; no local V1 migration, HTTP, V2 or export producer.
+NEXT_ACTION: Guardian review; no push, merge, local migration, G14a-3, G14b or G14c.
+CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A2B_PUBLISHED_CONTENT_TEST_HARDENING
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G14A2B-PUBLISHED-CONTENT-TEST-HARDENING-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A2_PUBLISHED_CONTENT_IMPLEMENTATION_REPORT.md
+COMMITS: bcdcdeb713c0799decbd7c4a55174fa86bbdbcdd, 8572d83c7fbb9a76321068a700b6b0a59e3870c8
+VALIDATION: T1-T3 PASS; focused G14a2 14/14 PASS; migration refusal PASS with failed migration row and zero published_content column; T4 full suite FAIL — 24/28 suites and 354/360 tests, six existing concurrency failures in G10a2/G10b/G10c/G10d; both disposable containers removed; no new volume.
+SCOPE: Test assertions, reproducible refusal/suite scripts and logs only; no product code, schema, migration or CCR changes.
+NEXT_ACTION: Guardian review; no push, merge, G14a-3, G14b or G14c.
+CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A2C_CONCURRENCY_DIAGNOSIS
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G14A2C-CONCURRENCY-DIAGNOSIS-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A2_PUBLISHED_CONTENT_IMPLEMENTATION_REPORT.md
+COMMITS: abcd1763a7f2576b56da9b368f69640a8cff7963, 460d4e286fa867cd1f6d630a800049ed3475940d
+VALIDATION: 6 full runs and 10 focused runs completed on disposable PostgreSQL 16 tmpfs containers at 127.0.0.1:5499; head and baseline both failed the same six concurrency tests with raw P2028; no live DB/5435 access; all diagnostic containers and throwaway copies removed.
+SCOPE: Diagnosis evidence only; no worktree product, test, schema, migration or CCR changes; instrumentation existed only in throwaway copies.
+NEXT_ACTION: Guardian review; no fix, G14a3, G14b or G14c.
+CREATED_AT: 2026-09-14

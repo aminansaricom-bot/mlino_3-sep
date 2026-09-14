@@ -634,6 +634,7 @@ model Publication {
   offerVersionOrganizationId            String?              @map("offer_version_organization_id") @db.Text
   eventKind                              PublicationEventKind @map("event_kind")
   contentRevision                        Int?                 @map("content_revision")
+  publishedContent                       Json?                @map("published_content") @db.JsonB
   performedByMembershipId                String               @map("performed_by_membership_id") @db.Text
   permissionKey                          String               @map("permission_key") @db.VarChar(160)
   gateSnapshot                           Json                 @map("gate_snapshot") @db.JsonB

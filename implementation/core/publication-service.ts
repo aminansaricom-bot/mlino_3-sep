@@ -1,16 +1,17 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { AuthContext, requireActiveMembership, requireMembershipPermission, requireNonEmpty, validateAuthContext } from './auth-context';
+import { AuthContext, requireActiveMembership, requireNonEmpty, validateAuthContext } from './auth-context';
 import { mapCoreDatabaseError } from './error-adapter';
 import { CoreDomainError, conflict, validationFailed } from './errors';
 import { lockOrganization } from './repositories';
 
 export type PublicationTarget = 'BUSINESS_PROFILE' | 'CAPABILITY' | 'OFFER_VERSION';
 
-const targetTables: Record<PublicationTarget, string> = {
-  BUSINESS_PROFILE: 'business_profiles',
-  CAPABILITY: 'capabilities',
-  OFFER_VERSION: 'offer_versions',
-};
+type PublicationEvent = 'PUBLISHED' | 'WITHDRAWN';
+type LockedProfile = { kind: 'BUSINESS_PROFILE'; id: string; publication_status: string; content_revision: number; published_content_revision: number | null; name: string; description: string | null; latitude: Prisma.Decimal | null; longitude: Prisma.Decimal | null; address_text: string | null; contact_information: Prisma.JsonValue | null; links: Prisma.JsonValue | null; business_hours: Prisma.JsonValue | null };
+type LockedCapability = { kind: 'CAPABILITY'; id: string; publication_status: string; content_revision: number; published_content_revision: number | null; capability_key: string; name: string; short_description: string | null; audience: string };
+type LockedTarget = LockedProfile | LockedCapability;
+type LockedOfferVersion = { id: string; offer_id: string; version_number: number; name: string; short_description: string | null; offer_shape: string; terms: Prisma.JsonValue | null; price_amount: Prisma.Decimal | null; price_currency: string | null; on_request: boolean; valid_from: Date; valid_until: Date | null; publication_status: string };
+type PublishedContent = Prisma.InputJsonObject;
 
 export class PublicationService {
   constructor(private readonly db: PrismaClient) {}
@@ -25,7 +26,7 @@ export class PublicationService {
     return this.change(context, target, targetId, reason, 'WITHDRAWN');
   }
 
-  private async change(context: AuthContext, target: PublicationTarget, targetId: string, reason: string, eventKind: 'PUBLISHED' | 'WITHDRAWN') {
+  private async change(context: AuthContext, target: PublicationTarget, targetId: string, reason: string, eventKind: PublicationEvent) {
     validateAuthContext(context);
     requireNonEmpty(targetId, 'targetId');
     requireNonEmpty(reason, 'reason');
@@ -37,18 +38,17 @@ export class PublicationService {
       if (target === 'OFFER_VERSION') return this.changeOfferVersion(tx, context.organizationId, targetId, reason, eventKind, membership.id, grant.id);
       const row = await this.lockTarget(tx, target, targetId, context.organizationId);
       if (!row) throw validationFailed('publication target not found in organization');
-
-      const status = row.publication_status as string;
-      const revision = row.content_revision as number;
-      const publishedRevision = row.published_content_revision as number | null;
+      const status = row.publication_status;
+      const revision = row.content_revision;
+      const publishedRevision = row.published_content_revision;
       if (eventKind === 'PUBLISHED') {
         if (status === 'PUBLISHED' && publishedRevision === revision) return { outcome: 'ALREADY_PUBLISHED' as const, revision };
         if (!['UNPUBLISHED', 'WITHDRAWN', 'PUBLISHED'].includes(status) || (status === 'PUBLISHED' && revision <= (publishedRevision ?? 0))) throw conflict('invalid publication transition');
-      } else {
-        if (status !== 'PUBLISHED') throw conflict('target is not published');
+      } else if (status !== 'PUBLISHED') {
+        throw conflict('target is not published');
       }
-
-      const data = this.publicationData(target, targetId, context.organizationId, eventKind, eventKind === 'PUBLISHED' ? revision : publishedRevision!, membership.id, grant.id, reason);
+      const publishedContent = eventKind === 'PUBLISHED' ? this.snapshotForTarget(row) : null;
+      const data = this.publicationData(target, targetId, context.organizationId, eventKind, eventKind === 'PUBLISHED' ? revision : publishedRevision!, membership.id, grant.id, reason, publishedContent);
       const publication = await tx.publication.create({ data });
       return eventKind === 'PUBLISHED' ? { outcome: 'PUBLISHED' as const, publication } : { outcome: 'WITHDRAWN' as const, publication };
     }).catch((error: unknown) => {
@@ -56,26 +56,28 @@ export class PublicationService {
     });
   }
 
-  private async changeOfferVersion(tx: Prisma.TransactionClient, organizationId: string, versionId: string, reason: string, eventKind: 'PUBLISHED' | 'WITHDRAWN', membershipId: string, grantId: string) {
+  private async changeOfferVersion(tx: Prisma.TransactionClient, organizationId: string, versionId: string, reason: string, eventKind: PublicationEvent, membershipId: string, grantId: string) {
     const offerRows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`SELECT o.id FROM offers o JOIN offer_versions v ON v.offer_id = o.id AND v.organization_id = o.organization_id WHERE v.id = ${versionId} AND v.organization_id = ${organizationId} FOR UPDATE`);
     if (offerRows.length !== 1) throw validationFailed('offer version not found in organization');
-    const versionRows = await tx.$queryRaw<Array<{ id: string; offer_id: string; publication_status: string; published_at: Date | null }>>(Prisma.sql`SELECT id, offer_id, publication_status, published_at FROM offer_versions WHERE id = ${versionId} AND organization_id = ${organizationId} FOR UPDATE`);
+    const versionRows = await tx.$queryRaw<LockedOfferVersion[]>(Prisma.sql`SELECT id, offer_id, version_number, name, short_description, offer_shape, terms, price_amount, price_currency, on_request, valid_from, valid_until, publication_status FROM offer_versions WHERE id = ${versionId} AND organization_id = ${organizationId} FOR UPDATE`);
     if (versionRows.length !== 1) throw validationFailed('offer version not found in organization');
     const version = versionRows[0];
     if (eventKind === 'WITHDRAWN') {
       if (version.publication_status !== 'PUBLISHED') throw conflict('target is not published');
-      const publication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', versionId, organizationId, 'WITHDRAWN', null, membershipId, grantId, reason) });
+      const publication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', versionId, organizationId, 'WITHDRAWN', null, membershipId, grantId, reason, null) });
       return { outcome: 'WITHDRAWN' as const, publication };
     }
     if (version.publication_status === 'PUBLISHED') return { outcome: 'ALREADY_PUBLISHED' as const, revision: null };
     const oldRows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`SELECT id FROM offer_versions WHERE offer_id = ${version.offer_id} AND organization_id = ${organizationId} AND id <> ${versionId} AND publication_status = 'PUBLISHED' FOR UPDATE`);
     if (oldRows.length > 1) throw conflict('multiple published offer versions found');
+    const capabilityRows = await tx.offerVersionCapability.findMany({ where: { organizationId, offerVersionId: versionId }, select: { capabilityId: true }, orderBy: { capabilityId: 'asc' } });
+    const publishedContent = this.snapshotForOfferVersion(version, capabilityRows.map((row) => row.capabilityId));
     if (oldRows.length === 1) {
-      const withdrawnPublication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', oldRows[0].id, organizationId, 'WITHDRAWN', null, membershipId, grantId, `replaced by ${versionId}`) });
-      const publication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', versionId, organizationId, 'PUBLISHED', null, membershipId, grantId, reason) });
+      const withdrawnPublication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', oldRows[0].id, organizationId, 'WITHDRAWN', null, membershipId, grantId, `replaced by ${versionId}`, null) });
+      const publication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', versionId, organizationId, 'PUBLISHED', null, membershipId, grantId, reason, publishedContent) });
       return { outcome: 'REPLACED' as const, withdrawnPublication, publication };
     }
-    const publication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', versionId, organizationId, 'PUBLISHED', null, membershipId, grantId, reason) });
+    const publication = await tx.publication.create({ data: this.publicationData('OFFER_VERSION', versionId, organizationId, 'PUBLISHED', null, membershipId, grantId, reason, publishedContent) });
     return { outcome: 'PUBLISHED' as const, publication };
   }
 
@@ -83,13 +85,59 @@ export class PublicationService {
     if (target !== 'BUSINESS_PROFILE' && target !== 'CAPABILITY' && target !== 'OFFER_VERSION') throw validationFailed('unsupported publication target');
   }
 
-  private async lockTarget(tx: Prisma.TransactionClient, target: PublicationTarget, id: string, organizationId: string) {
-    const table = targetTables[target];
-    const rows = await tx.$queryRaw<Array<{ id: string; publication_status: string; content_revision: number; published_content_revision: number | null }>>(Prisma.sql`SELECT id, publication_status, content_revision, published_content_revision FROM ${Prisma.raw(table)} WHERE id = ${id} AND organization_id = ${organizationId} FOR UPDATE`);
-    return rows[0];
+  private async lockTarget(tx: Prisma.TransactionClient, target: Exclude<PublicationTarget, 'OFFER_VERSION'>, id: string, organizationId: string): Promise<LockedTarget | undefined> {
+    if (target === 'BUSINESS_PROFILE') {
+      const rows = await tx.$queryRaw<Omit<LockedProfile, 'kind'>[]>(Prisma.sql`SELECT id, publication_status, content_revision, published_content_revision, name, description, latitude, longitude, address_text, contact_information, links, business_hours FROM business_profiles WHERE id = ${id} AND organization_id = ${organizationId} FOR UPDATE`);
+      return rows[0] ? { kind: 'BUSINESS_PROFILE', ...rows[0] } : undefined;
+    }
+    const rows = await tx.$queryRaw<Omit<LockedCapability, 'kind'>[]>(Prisma.sql`SELECT id, publication_status, content_revision, published_content_revision, capability_key, name, short_description, audience FROM capabilities WHERE id = ${id} AND organization_id = ${organizationId} FOR UPDATE`);
+    return rows[0] ? { kind: 'CAPABILITY', ...rows[0] } : undefined;
   }
 
-  private publicationData(target: PublicationTarget, id: string, organizationId: string, eventKind: 'PUBLISHED' | 'WITHDRAWN', contentRevision: number | null, membershipId: string, grantId: string, reason: string) {
+  private snapshotForTarget(row: LockedTarget): PublishedContent {
+    if (row.kind === 'BUSINESS_PROFILE') {
+      const hasCoordinates = row.latitude !== null && row.longitude !== null;
+      return {
+        snapshot_version: 'core-publication-snapshot-v1',
+        content: {
+          name: row.name,
+          description: row.description,
+          latitude: hasCoordinates ? Number(row.latitude!.toFixed(6)) : null,
+          longitude: hasCoordinates ? Number(row.longitude!.toFixed(6)) : null,
+          address_text: row.address_text,
+          contact_information: sanitizeObject(row.contact_information, ['public_phone', 'public_email', 'public_address']),
+          links: sanitizeObject(row.links, ['website', 'public_social']),
+          business_hours: row.business_hours,
+        },
+      } as Prisma.InputJsonObject;
+    }
+    return {
+      snapshot_version: 'core-publication-snapshot-v1',
+      content: { capability_key: row.capability_key, name: row.name, short_description: row.short_description, audience: row.audience },
+    } as Prisma.InputJsonObject;
+  }
+
+  private snapshotForOfferVersion(version: LockedOfferVersion, capabilityIds: string[]): PublishedContent {
+    return {
+      snapshot_version: 'core-publication-snapshot-v1',
+      content: {
+        offer_id: version.offer_id,
+        version_number: version.version_number,
+        name: version.name,
+        short_description: version.short_description,
+        offer_shape: version.offer_shape,
+        terms: version.terms,
+        price_amount: version.price_amount?.toString() ?? null,
+        price_currency: version.price_currency,
+        on_request: version.on_request,
+        valid_from: version.valid_from.toISOString(),
+        valid_until: version.valid_until?.toISOString() ?? null,
+        capability_link_ids: [...new Set(capabilityIds)].sort(),
+      },
+    } as Prisma.InputJsonObject;
+  }
+
+  private publicationData(target: PublicationTarget, id: string, organizationId: string, eventKind: PublicationEvent, contentRevision: number | null, membershipId: string, grantId: string, reason: string, publishedContent: PublishedContent | null) {
     const targetFields = target === 'BUSINESS_PROFILE'
       ? { businessProfileId: id, businessProfileOrganizationId: organizationId }
       : target === 'CAPABILITY'
@@ -100,10 +148,23 @@ export class PublicationService {
       ...targetFields,
       eventKind,
       contentRevision,
+      publishedContent: eventKind === 'PUBLISHED' ? publishedContent! : Prisma.DbNull,
       performedByMembershipId: membershipId,
       permissionKey: 'publication.manage',
       gateSnapshot: { grantId, policyVersion: 'core-publication-v1' },
       reason,
     };
   }
+}
+
+function sanitizeObject(value: Prisma.JsonValue | null, allowedKeys: readonly string[]): Prisma.InputJsonObject | null {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return null;
+  const source = value as Record<string, Prisma.JsonValue>;
+  const sanitized: Record<string, Prisma.InputJsonValue | null> = {};
+  for (const key of allowedKeys) {
+    const item = source[key];
+    if (typeof item === 'string') sanitized[key] = item;
+    if (key === 'public_social' && Array.isArray(item) && item.every((entry) => typeof entry === 'string')) sanitized[key] = item;
+  }
+  return sanitized as Prisma.InputJsonObject;
 }
