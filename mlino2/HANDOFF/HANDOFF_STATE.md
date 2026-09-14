@@ -499,3 +499,15 @@ VALIDATION: DOCUMENT ONLY — GW2-P passed; diff check passed; no code/schema/mi
 SCOPE: Fidelity A1/A2/B/C، draft-1 mapping، version/deprecation، Y1-Y3، export-first S17، security/PII، consistency/latency، S16-S24 open decisions.
 NEXT_ACTION: Guardian review; no implementation and no main merge.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-V2-READ-CONTRACT
+AUTHOR: CODEX
+PHASE: G13C_V2_READ_CONTRACT_FINAL
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G13C-V2-READ-CONTRACT-FINAL-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G13C_V2_READ_CONTRACT_FINAL_REPORT.md
+COMMITS: bb0452f0aa723b1dff842824acfd3bd63c17bbbe
+VALIDATION: DOCUMENT ONLY — both GW2-P references passed; final design hash 4fff41d4247d1c6d1b7b6a90cb2c0b527d5d7604a8f0ce0aefcab04660e4071a; no code/schema/migration/Prisma/Docker/database action.
+SCOPE: Final public-business.v1 contract; S16-S26 decided; S19-A1 published_content; G14 proposal-only plan.
+NEXT_ACTION: Guardian review; no G14 implementation and no main merge.
+CREATED_AT: 2026-09-14
