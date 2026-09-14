@@ -549,6 +549,18 @@ CREATED_AT: 2026-09-15
 ---
 HANDOFF_ID: HANDOFF-20260914-CORE-G14A
 AUTHOR: CODEX
+PHASE: G14A3_LOCAL_MIGRATION_RUN3
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260915-G14A3-LOCAL-MIGRATION-003
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260915_CODEX_G14A3_LOCAL_MIGRATION_RUN3_REPORT.md
+VALIDATION: PASS — C0, F2 preflight, backup B1-B6 and the single deploy succeeded; post-state a-g passed by independent read-only verification. Initial script count comparison was corrected without a second deploy.
+SCOPE: Apply only 20260914010000_add_publication_published_content to mlino-v1-local-db after verified backup; no product-file, test, schema or other migration changes.
+BACKUP: mlino_v1_pre_g14a_20260914T214243Z.dump; container and host SHA-256 matched; backup remains outside repository.
+NEXT_ACTION: Guardian review; no push and no subsequent task automatically.
+CREATED_AT: 2026-09-15
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
 PHASE: G14A3_LOCAL_MIGRATION
 STATUS: BLOCKED_BEFORE_MIGRATION
 INSTRUCTION_ID: CODEX-20260914-G14A3-LOCAL-MIGRATION-001

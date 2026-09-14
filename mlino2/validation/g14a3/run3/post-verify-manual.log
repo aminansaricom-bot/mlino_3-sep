@@ -1,0 +1,9 @@
+POST_VERIFY_MANUAL
+A_MIGRATIONS=PASS 7 FINISHED NOT_ROLLED_BACK
+B_PUBLISHED_CONTENT=PASS jsonb
+C_CHECK=PASS publication_published_content_event_kind_check validated=true
+D_TABLE_COUNTS=PASS all_non_migration_public_table_counts_equal; _prisma_migrations 6_to_7; publications 0
+E_CONSTRAINTS=PASS triggers 13 unchanged; CHECK constraints 29_to_30
+F_CONTAINERS=PASS image StartedAt RestartCount unchanged
+G_READ_API=PASS HTTP_STATUS=401
+INITIAL_SCRIPT_COUNT_COMPARISON=FALSE_FAILURE because _prisma_migrations intentionally changed 6_to_7
