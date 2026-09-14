@@ -105,3 +105,54 @@ ff1db15d22746107e26f7605240a4acddd559d535fc999ddc65e7a0329389876  implementation
 Architecture Guardian این Commit، migration، شواهد و گزارش را بازبینی کند. تا اعلام تصمیم Guardian، هیچ Push، merge، اجرای migration محلی، G14a-3، G14b یا G14c آغاز نشود.
 
 من کدکس هستم.
+
+## ۱۱. اصلاحیهٔ G14a-2b
+
+این بخش طبق دستور `CODEX-20260914-G14A2B-PUBLISHED-CONTENT-TEST-HARDENING-001` افزوده شد. هیچ‌یک از `publication-service.ts`، `schema.prisma`، migration یا CCR در این مرحله تغییر نکردند.
+
+| شناسه | assertion / فایل دقیق | نتیجه |
+|---|---|---|
+| T1 | `g14a2-c7-01`، `g14a2-c7-02` و `g14a2-c7-12` با `rejects.toThrow(/publication_published_content_event_kind_check/)`؛ هر rejection یک direct-insert مثبت با همان fixture shape و payload معتبر دارد | PASS؛ focused spec برابر ۱۴/۱۴ |
+| T2 | `g14a2-c7-07` با `rejects.toThrow(/publications are append-only/)` | PASS |
+| T3 | نام آزمون `g14a2-c7-10 preflight SQL rejects a non-empty publications table before DDL continuation`؛ `validate-migration-refusal.ps1` و `migration-refusal.log` | PASS؛ deploy شکست خورد، ردیف `20260914010000_add_publication_published_content` با `finished_at=NULL` و `rolled_back_at=NULL` ثبت شد و شمار ستون `published_content` برابر صفر بود |
+| T4 | همان log شامل متن کامل خطای deploy قابل مشاهده، query ردیف migration، شمار ستون و وضعیت P0001؛ `run-test-suites.ps1` و `test-suites.log` | PARTIAL/FAIL؛ focused برابر ۱ suite و ۱۴/۱۴، full برابر ۲۴/۲۸ suite و ۳۵۴/۳۶۰؛ ۶ شکست هم‌زمانی در G10a2/G10b/G10c/G10d باقی ماند |
+
+### خروجی‌های GW2/GW2-P
+
+```text
+git fetch origin
+FETCH_EXIT=128
+fatal: unable to access 'https://github.com/aminansaricom-bot/mlino_3-sep.git/': Failed to connect to github.com:443
+
+git cat-file -e ee8bf49510a940dcec7cd3edcc0eff030afb5dee^{commit}
+CAT_FILE_EXIT=0
+
+git merge-base --is-ancestor ee8bf49510a940dcec7cd3edcc0eff030afb5dee origin/main
+ANCESTOR_EXIT=0
+
+git show ee8bf49510a940dcec7cd3edcc0eff030afb5dee:AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G14A2_PUBLISHED_CONTENT_IMPLEMENTATION.md | SHA-256
+9d1467933e431f04d6d482d9caf3ee6ce32c21caaf2410b73c989f0ce50515df
+```
+
+### شواهد محیط
+
+- هر دو validation script فقط containerهای نام‌گذاری‌شدهٔ `mlino-g14a2-refusal` و `mlino-g14a2-suites` را ساختند.
+- هر دو container با `docker rm -f` حذف شدند و فهرست containerها و volumeها قبل و بعد یکسان بود.
+- هیچ اتصال به `mlino-v1-local-db`، پورت ۵۴۳۵ یا `_PUSH_STAGING` انجام نشد.
+- log refusal هیچ password یا connection string ندارد؛ P0001 در خروجی قابل مشاهدهٔ Prisma یا `_prisma_migrations.logs` دیده نشد. متن قابل مشاهدهٔ خطا `current transaction is aborted, commands ignored until end of transaction block` بود.
+
+### SHA-256 بایت‌های Git
+
+```text
+68f64eed56dc059956a12c7b2f9cd6f4c0f67ed1b503060a2118ff18c9a7c495  implementation/test/core/g14a2-published-content.spec.ts
+e09eee73eb4f1f3c2be5cd0fe2e0f117d1212bf3fa2c3c43ff2141e524860db6  mlino2/validation/g14a2/validate-migration-refusal.ps1
+cbcf3fb611a2abdaf4c28221fa9952225f52c9282203678b351f474054089f21  mlino2/validation/g14a2/migration-refusal.log
+3f2323b9bb68451be8e0425dc5324852f931646ab9f7a72bcc89b5875b3378a1  mlino2/validation/g14a2/run-test-suites.ps1
+39bc9b1c27fc5f44599852e7688fd13d26bd73d89f80a2fc08caaf2003a6af6f  mlino2/validation/g14a2/test-suites.log
+```
+
+## ۱۲. وضعیت تحویل G14a-2b
+
+آزمون‌های متمرکز و شواهد migration refusal موفق‌اند. full suite به‌علت شش شکست هم‌زمانی موجود PASS کامل نیست؛ این شکست‌ها فقط گزارش شده‌اند و هیچ fix خارج از دامنهٔ مجاز اعمال نشده است. این workstream پس از commit محلی متوقف می‌شود و منتظر بازبینی Guardian است.
+
+من کدکس هستم.

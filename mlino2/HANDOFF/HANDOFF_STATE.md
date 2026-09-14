@@ -572,3 +572,15 @@ VALIDATION: PASS — Prisma 5.22.0 accepted explicit BEGIN/COMMIT; 7 migrations 
 SCOPE: Approved S19-A1 published_content migration, Publication Prisma field, PublicationService snapshots, C7/OQ-4 tests and CCR approval only; no local V1 migration, HTTP, V2 or export producer.
 NEXT_ACTION: Guardian review; no push, merge, local migration, G14a-3, G14b or G14c.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A2B_PUBLISHED_CONTENT_TEST_HARDENING
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G14A2B-PUBLISHED-CONTENT-TEST-HARDENING-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A2_PUBLISHED_CONTENT_IMPLEMENTATION_REPORT.md
+COMMITS: bcdcdeb713c0799decbd7c4a55174fa86bbdbcdd, 8572d83c7fbb9a76321068a700b6b0a59e3870c8
+VALIDATION: T1-T3 PASS; focused G14a2 14/14 PASS; migration refusal PASS with failed migration row and zero published_content column; T4 full suite FAIL — 24/28 suites and 354/360 tests, six existing concurrency failures in G10a2/G10b/G10c/G10d; both disposable containers removed; no new volume.
+SCOPE: Test assertions, reproducible refusal/suite scripts and logs only; no product code, schema, migration or CCR changes.
+NEXT_ACTION: Guardian review; no push, merge, G14a-3, G14b or G14c.
+CREATED_AT: 2026-09-14
