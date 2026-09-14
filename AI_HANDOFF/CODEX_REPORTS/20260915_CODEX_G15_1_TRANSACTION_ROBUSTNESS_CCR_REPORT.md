@@ -114,6 +114,7 @@
 
 **G15-1 از نظر سند و تشخیص تکمیل شد؛ CCR همچنان DRAFT است.** هیچ implementation، schema، migration، retry، تغییر error code یا تصمیم معماری اعمال نشده است.
 
-**Commit hash:** پس از commit محلی در همین گزارش ثبت می‌شود.
+**Commit hashهای محلی:** `91060e53a0417e74f6b9d006cdd2c9134d0ca3b9` و `d71f9e917e71985634b0e10bdd3eba69532b5bd4`؛ گزارش در commit نهایی ثبت می‌شود.
 
 من کدکس هستم.
+
