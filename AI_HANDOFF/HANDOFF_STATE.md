@@ -1,38 +1,35 @@
-HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G14A1-REVIEW
+HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G14A1B-REVIEW
 AUTHOR: CLAUDE
-PHASE: G14A1_REVIEWED_G14A1B_RELEASED
-STATUS: APPROVED_WITH_FIXES
-REVIEW_VERDICT: G14a-1 is local and unpushed; Codex's push was refused with "dubious ownership": 31f3c22 and 9b64813, CCR 44539a3e. The CCR design is sound:
-- a new migration with a fail-closed preflight
-- a CHECK compatible with OfferVersion and REPLACED
-- a versioned, typed per-target allowlist
-- the snapshot read under the same FOR UPDATE
-- content kept separate from live eligibility
-- OQ-1..OQ-5, all with recommendation A, which the Guardian agrees with
-Fixes needed:
-- Y1: target/target_id/content_revision duplicated in the JSON with no equality constraint. Remove them, or add CHECKs.
-- Y2: missing live gates: Organization, BusinessProfile and Offer lifecycleStatus must be ACTIVE.
-- Y3: Prisma.DbNull vs JsonNull for WITHDRAWN.
-- Y4: the failed-migration runbook (migrate resolve) and an optional LOCK.
-- Y5: rollback as a forward migration.
-- Z1: the enum citation.
-Released CODEX-20260914-G14A1B-PUBLISHED-CONTENT-CCR-FIXES-001: one LOCAL commit on 9b64813 with no push attempt; the Guardian publishes the branch.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G14A1_PUBLISHED_CONTENT_CCR.md
+PHASE: G14A1B_ACCEPTED_OWNER_CCR_DECISION_PENDING
+STATUS: APPROVED_NEXT_STEP
+REVIEW_VERDICT: G14a-1b (ee25ead; CCR 95f4a3a1) is APPROVED. Y1-Y5 and Z1 are applied.
+- Y1: removal chosen; the envelope is {snapshot_version, content} with key CHECKs.
+- Y2: lifecycle live gates added.
+- Y3: DbNull.
+- Y4: LOCK and a resolve runbook.
+- Y5: a forward-migration rollback.
+Notes carried to G14a-2:
+- Z2: the XOR citation is :591-593, not :440-451.
+- N1: test Prisma's handling of an explicit BEGIN/COMMIT.
+The Guardian published codex/core-g14a-published-content at ee25ead to origin (new branch, leased); Codex cannot push because of repository ownership.
+Owner package: CCR approval; OQ-1..OQ-5 = A (OQ-4 = A-prime: contact and links sanitized now; business_hours and terms stored as-is until the G14b schemas exist); G14a-2 authorization (disposable DB on 5499 only; no local-DB apply).
+The G14a-2 instruction is drafted in the review; it is released only after owner approval, with TARGET=HANDOFF-20260914-OWNER-APPROVAL-G14A2.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260914_CLAUDE_REVIEW_G14A1B_PUBLISHED_CONTENT_CCR_FIXES.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). main is f578499 before this commit. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-14T12:30:00+03:30
-NEXT_ACTION: Codex executes G14a-1b with TARGET_HANDOFF_ID=HANDOFF-20260914-GUARDIAN-G14A1-REVIEW. Then:
-1. A short Guardian check, and the Guardian publishes codex/core-g14a-published-content.
-2. The owner package: CCR approval, OQ-1..OQ-5, and G14a-2 authorization.
+CODE_COMMIT_SHA: (none - review only). The G14a branch is at ee25ead on origin. main is 488e78a before this commit. Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-14T13:00:00+03:30
+NEXT_ACTION: The owner decides (suggested: "CCR approved; OQ-1..OQ-5 per Guardian (OQ-4 A-prime); G14a-2 authorized"). Then the Guardian:
+1. Records the approval as HANDOFF-20260914-OWNER-APPROVAL-G14A2.
+2. Releases G14a-2.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260914-OWNER-APPROVAL-G14A1
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260914-G14A1-PUBLISHED-CONTENT-CCR-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260914-GUARDIAN-G14A1-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260914-G14A1B-PUBLISHED-CONTENT-CCR-FIXES-001
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: Read the commits from the shared object store, read-only; no git config was written. The scope is 3 files, +410/-0, and the tree is clean. Read the full CCR and report. Spot-checked the citations: G7b, the Dockerfile, tsconfig, publication-service, and the schema enums and lifecycle fields.
+HANDOFF_PRECONDITION_CHECK: Read ee25ead from the shared object store; no git config was written. The scope is 3 files, the report and handoff are append-only, and the tree is clean. Read the full CCR diff and the report addendum. Checked the new citations: migration.sql:440-451 is wrong (the XOR is at :591-593); review :55-56 is correct.
 
-SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main. No credential, Docker, database or Codex-branch action.
+SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main, plus the Codex branch ref published unchanged. No credential, Docker, database or code action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
