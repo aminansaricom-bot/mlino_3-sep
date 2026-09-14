@@ -560,3 +560,15 @@ VALIDATION: DOCUMENT ONLY — GW2-P passed; updated CCR staged-blob hash 95f4a3a
 SCOPE: Y1-Y5 and Z1 applied; CCR remains DRAFT; OQ-1 through OQ-5 remain undecided.
 NEXT_ACTION: Guardian review and publication of the shared local branch; no push by Codex and no G14a-2.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
+PHASE: G14A2_PUBLISHED_CONTENT_IMPLEMENTATION
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G14A2-PUBLISHED-CONTENT-IMPLEMENTATION-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A2_PUBLISHED_CONTENT_IMPLEMENTATION_REPORT.md
+IMPLEMENTATION_COMMIT: 39d91841587911d6caf28810251ea8944d7deac5
+VALIDATION: PASS — Prisma 5.22.0 accepted explicit BEGIN/COMMIT; 7 migrations applied on disposable PostgreSQL 16; focused 14/14; full V1+Core 28 suites and 360/360 tests; preflight existing-row refusal proved with zero partial DDL; container removed; no new volume.
+SCOPE: Approved S19-A1 published_content migration, Publication Prisma field, PublicationService snapshots, C7/OQ-4 tests and CCR approval only; no local V1 migration, HTTP, V2 or export producer.
+NEXT_ACTION: Guardian review; no push, merge, local migration, G14a-3, G14b or G14c.
+CREATED_AT: 2026-09-14
