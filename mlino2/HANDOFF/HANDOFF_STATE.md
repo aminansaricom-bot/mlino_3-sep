@@ -538,6 +538,17 @@ CREATED_AT: 2026-09-14
 ---
 HANDOFF_ID: HANDOFF-20260914-CORE-G14A
 AUTHOR: CODEX
+PHASE: G14A3_LOCAL_MIGRATION_RUN2
+STATUS: BLOCKED_PREFLIGHT
+INSTRUCTION_ID: CODEX-20260914-G14A3-LOCAL-MIGRATION-002
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G14A3_LOCAL_MIGRATION_RUN2_REPORT.md
+VALIDATION: C0 PASS; source check PASS; preflight HARD STOP — recorded output did not satisfy the owner gate; no backup or migration was executed.
+SCOPE: Run2 pre-state evidence only; no product, schema, migration, test, Docker restart or database write.
+NEXT_ACTION: Guardian review of the preflight discrepancy; no automatic retry and no local migration continuation.
+CREATED_AT: 2026-09-15
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G14A
+AUTHOR: CODEX
 PHASE: G14A3_LOCAL_MIGRATION
 STATUS: BLOCKED_BEFORE_MIGRATION
 INSTRUCTION_ID: CODEX-20260914-G14A3-LOCAL-MIGRATION-001

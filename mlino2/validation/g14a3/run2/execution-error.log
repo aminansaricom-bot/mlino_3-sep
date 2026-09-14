@@ -1,0 +1,3 @@
+HARD_STOP: publication preflight or trigger count failed
+STATUS=HARD_STOP_BEFORE_MIGRATION
+ROLLED_BACK_RESOLUTION=False
