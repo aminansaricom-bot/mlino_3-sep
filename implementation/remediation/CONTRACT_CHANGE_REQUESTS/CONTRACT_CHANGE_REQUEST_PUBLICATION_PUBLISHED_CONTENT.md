@@ -1,6 +1,6 @@
 # CONTRACT_CHANGE_REQUEST — snapshot محتوای منتشرشده در Publication
 
-**وضعیت:** DRAFT — منتظر بازبینی Guardian و تصویب مالک  
+**وضعیت:** APPROVED — مصوب مالک در `AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_G14A2_PUBLISHED_CONTENT.md@0110a164968a00076d52dfa74249a7f8ca03704d`
 **تاریخ:** ۲۰۲۶-۰۹-۱۴  
 **INSTRUCTION_ID:** `CODEX-20260914-G14A1-PUBLISHED-CONTENT-CCR-001`  
 **TARGET_HANDOFF_ID:** `HANDOFF-20260914-OWNER-APPROVAL-G14A1`  
@@ -98,7 +98,7 @@ type PublicationSnapshotV1 = {
 };
 ```
 
-نوع `content` با ستون target غیرتهی همان Publication انتخاب می‌شود؛ قید موجود دقیقاً یک target را برای هر رویداد الزام می‌کند (`origin/main: implementation/prisma/schema.prisma:629-646`; `origin/main: implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:440-451`).
+نوع `content` با ستون target غیرتهی همان Publication انتخاب می‌شود؛ قید موجود دقیقاً یک target را برای هر رویداد الزام می‌کند (`origin/main: implementation/prisma/schema.prisma:629-646`; `origin/main: implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:591-593`).
 
 ### ۳.۱. BusinessProfile
 
@@ -246,17 +246,21 @@ Migration رو‌به‌جلوی rollback یک ردیف موفق تازه در `
 
 اثر runtime بر read-api فعلی انتظار نمی‌رود: Dockerfile پوشهٔ `core` را در build image کپی نمی‌کند، هرچند tsconfig آن را در build محلی include می‌کند؛ HTTP فعلی نیز در این CCR تغییر نمی‌کند (`origin/main: implementation/Dockerfile:22-38,49-64`; `origin/main: implementation/tsconfig.json:17-18`). هر زمان Core وارد runtime image شود، Dockerfile باید در CCR همان مرحله صریحاً `COPY core ./core` را اضافه کند (`origin/main: implementation/Dockerfile:30-38`).
 
-## ۹. C9 — سؤال‌های باز برای مالک
+## ۹. C9 — تصمیم‌های مالک
 
-هیچ گزینه‌ای در این بخش با وضعیت DRAFT این CCR تصمیم‌شده محسوب نمی‌شود.
+مالک OQ-1 تا OQ-5 را در `AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_G14A2_PUBLISHED_CONTENT.md:15-28` تصویب کرده است.
 
 ### OQ-1 — روش برخورد migration با Publicationهای موجود
+
+**تصمیم مالک: A.** اگر ردیفی در Publication باشد، migration پیش از DDL رد می‌شود و backfill فقط با CCR جدا مجاز است.
 
 - **A:** اگر حتی یک ردیف وجود داشت، migration پیش از DDL متوقف شود؛ backfill فقط با CCR جدا.
 - **B:** migration ستون را اضافه کند، backfill کنترل‌شده بسازد، سپس CHECK را validate کند.
 - **توصیهٔ واحد:** **A**؛ محتوای دقیق یک انتشار تاریخی از live row قابل اثبات نیست و بازسازی آن می‌تواند ادعای نادرست بسازد (`origin/main: implementation/prisma/schema.prisma:465-481,496-512,626-654`; `origin/main: mlino2/MLINO_V2_READ_CONTRACT_DESIGN.md:34-49`).
 
 ### OQ-2 — audience و capability_status
+
+**تصمیم مالک: A.** `audience` در snapshot و gate زندهٔ `CUSTOMER_FACING` است؛ `capability_status` فقط gate زندهٔ `ACTIVE` است.
 
 - **A:** `audience` در snapshot ذخیره شود و read همزمان snapshot و live row را `CUSTOMER_FACING` بخواهد؛ `capability_status` فقط gate زندهٔ `ACTIVE` باشد.
 - **B:** هر دو فقط gate زنده باشند و داخل snapshot نیایند.
@@ -265,17 +269,23 @@ Migration رو‌به‌جلوی rollback یک ردیف موفق تازه در `
 
 ### OQ-3 — مرز live eligibility
 
+**تصمیم مالک: A.** همهٔ gateهای فهرست‌شده در گزینه A هنگام خواندن fail-closed هستند و فقط رکورد را پنهان می‌کنند.
+
 - **A:** confirmation، freshness، claim status، audience، capability status، `Organization.lifecycleStatus=ACTIVE`، `BusinessProfile.lifecycleStatus=ACTIVE` و `Offer.lifecycleStatus=ACTIVE` هنگام read به‌صورت fail-closed ارزیابی شوند و فقط قابلیت حذف رکورد داشته باشند.
 - **B:** eligibility در snapshot منجمد شود و تا رخداد انتشار بعدی تغییر نکند.
 - **توصیهٔ واحد:** **A**؛ این گزینه تصمیم‌های S16-A، S18-A و S20-A را بدون خواندن محتوای live اجرا می‌کند (`origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_V2_READ_CONTRACT_DECISIONS.md:19-24`; `origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_G14A1_PUBLISHED_CONTENT_CCR.md:29-37`).
 
 ### OQ-4 — سخت‌گیری JSONهای عمومی در زمان snapshot
 
+**تصمیم مالک: A′.** `contact_information` و `links` هنگام snapshot sanitize می‌شوند؛ `business_hours` و `terms` در این مرحله همان‌طور که هستند ذخیره می‌شوند و producer در G14b آن‌ها را اعتبارسنجی یا حذف می‌کند.
+
 - **A:** `contact_information` و `links` همین حالا با allowlist S21-B/S22-A sanitize شوند؛ `business_hours` و `terms` فقط با schema marker/version مورد توافق G14b پذیرفته شوند.
 - **B:** JSONهای خام Core در snapshot ذخیره شوند و فقط producer خروجی G14b آن‌ها را filter کند.
 - **توصیهٔ واحد:** **A**؛ ذخیرهٔ حداقلی در مرز انتشار احتمال نشت PII و عبور JSON بدون قرارداد را کاهش می‌دهد (`origin/main: mlino2/MLINO_V2_READ_CONTRACT_DESIGN.md:139-147,182-192`; `origin/main: AI_HANDOFF/CLAUDE_REVIEWS/20260914_OWNER_APPROVAL_V2_READ_CONTRACT_DECISIONS.md:24-26`).
 
 ### OQ-5 — نام و نسخهٔ snapshot
+
+**تصمیم مالک: A.** envelope واحد `{ snapshot_version: 'core-publication-snapshot-v1', content }` است.
 
 - **A:** همین envelope با `snapshot_version='core-publication-snapshot-v1'` و union مبتنی بر target تصویب شود.
 - **B:** هر target نسخهٔ مستقل داشته باشد، مانند `core-business-profile-snapshot-v1`.
