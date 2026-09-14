@@ -114,22 +114,26 @@ describe('G10d Core offer and OfferVersion slice', () => {
 
   test('OfferVersion publication is idempotent, withdrawable and republishable', async () => {
     const a = await createVersionFixture('publish');
+    const grant = await prisma.permissionGrant.findFirstOrThrow({ where: { organizationId: a.organizationId, membershipId: a.membership.id, permissionKey: 'publication.manage', grantStatus: 'ACTIVE' } });
     const first = await publications.publish(a.context, 'OFFER_VERSION', a.version.id, 'publish version');
     expect(first.outcome).toBe('PUBLISHED');
     if (first.outcome !== 'PUBLISHED') throw new Error('expected publication');
     expect(first.publication.contentRevision).toBeNull();
     expect(first.publication.offerVersionId).toBe(a.version.id);
-    expect(first.publication.gateSnapshot).toHaveProperty('policyVersion', 'core-publication-v1');
+    expect(first.publication.gateSnapshot).toMatchObject({ grantId: grant.id, policyVersion: 'core-publication-v1' });
     await expect(publications.publish(a.context, 'OFFER_VERSION', a.version.id, 'same version')).resolves.toMatchObject({ outcome: 'ALREADY_PUBLISHED' });
     expect(await prisma.publication.count({ where: { organizationId: a.organizationId, offerVersionId: a.version.id } })).toBe(1);
     const withdrawn = await publications.withdraw(a.context, 'OFFER_VERSION', a.version.id, 'withdraw version');
     expect(withdrawn.outcome).toBe('WITHDRAWN');
+    if (withdrawn.outcome !== 'WITHDRAWN') throw new Error('expected withdrawal');
+    expect(withdrawn.publication.gateSnapshot).toMatchObject({ grantId: grant.id, policyVersion: 'core-publication-v1' });
     await expectCode(publications.withdraw(a.context, 'OFFER_VERSION', a.version.id, 'withdraw again'), 'CONFLICT');
     expect((await publications.publish(a.context, 'OFFER_VERSION', a.version.id, 'publish again')).outcome).toBe('PUBLISHED');
   });
 
   test('publishing a second version replaces the first in withdrawal-then-publication order', async () => {
     const a = await createVersionFixture('replace');
+    const grant = await prisma.permissionGrant.findFirstOrThrow({ where: { organizationId: a.organizationId, membershipId: a.membership.id, permissionKey: 'publication.manage', grantStatus: 'ACTIVE' } });
     const second = await offers.createVersion(a.context, { offerId: a.offer.id, name: 'Version two', offerShape: OfferShape.ITEM, onRequest: true, validFrom: new Date('2026-02-01T00:00:00.000Z') });
     await publications.publish(a.context, 'OFFER_VERSION', a.version.id, 'publish first version');
     const replacement = await publications.publish(a.context, 'OFFER_VERSION', second.id, 'replace first version');
@@ -137,6 +141,8 @@ describe('G10d Core offer and OfferVersion slice', () => {
     if (replacement.outcome !== 'REPLACED') throw new Error('expected replacement');
     expect(replacement.withdrawnPublication.offerVersionId).toBe(a.version.id);
     expect(replacement.publication.offerVersionId).toBe(second.id);
+    expect(replacement.withdrawnPublication.gateSnapshot).toMatchObject({ grantId: grant.id, policyVersion: 'core-publication-v1' });
+    expect(replacement.publication.gateSnapshot).toMatchObject({ grantId: grant.id, policyVersion: 'core-publication-v1' });
     expect((await prisma.offerVersion.count({ where: { organizationId: a.organizationId, publicationStatus: 'PUBLISHED' } }))).toBe(1);
     expect((await prisma.offerVersion.findUniqueOrThrow({ where: { id_organizationId: { id: a.version.id, organizationId: a.organizationId } } })).publicationStatus).toBe('WITHDRAWN');
   });

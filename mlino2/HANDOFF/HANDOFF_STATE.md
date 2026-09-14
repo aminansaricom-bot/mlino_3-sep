@@ -465,3 +465,15 @@ COMMITS: 4cbdaa94bac50ceb9e8d59ea6d51b5bda4408d00
 VALIDATION: PASS — build موفق؛ migration روی PostgreSQL موقت 5499 موفق؛ ۱۳ تست G10c2 و ۲۵ suite / ۳۲۶ تست کامل V1 موفق؛ volume قبل/بعد یکسان و کانتینر حذف شد.
 NEXT_ACTION: Guardian review. هیچ G10d، Offer، Evidence، HTTP یا merge با main شروع نشده است.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-CORE-G10E
+AUTHOR: CODEX
+PHASE: G10E_CORE_EVIDENCE_SLICE
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G10E-CORE-EVIDENCE-SLICE-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G10E_CORE_EVIDENCE_SLICE_REPORT.md
+COMMITS: 1b2a2b64570dc53499ecc426fa0a2bfac65ff6aa
+VALIDATION: PASS — build و Prisma generate؛ ۶ migration روی 5499؛ ۹ تست G10E؛ ۲۷ suite و ۳۴۶ تست کامل V1؛ volume ثابت و container حذف شد.
+SCOPE: EvidenceService، اصلاح Y1 unlinkCapability و assertions مربوط به Y2 gate_snapshot؛ بدون schema، migration، HTTP یا V2.
+NEXT_ACTION: Guardian review؛ بدون G10f و بدون merge با main.
+CREATED_AT: 2026-09-14
