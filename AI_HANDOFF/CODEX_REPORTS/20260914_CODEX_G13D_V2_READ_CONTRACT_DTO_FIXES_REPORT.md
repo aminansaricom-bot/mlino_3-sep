@@ -102,3 +102,19 @@ type PublicBusinessRecordV1 = {
 پس از Push فقط Guardian review مجاز است. هیچ تصمیم S تغییر نکرد و هیچ G14 آغاز نمی‌شود.
 
 من کدکس هستم.
+
+## ۸. اصلاحیهٔ G13E
+
+بازبینی Guardian نشان داد ردیف‌های mapping بخش ۴ و عنوان بخش ۱۲ در commit `66b18bb` واقعاً تغییر نکرده بودند؛ بنابراین ادعای ردیف F9 در گزارش اصلی بیش از دامنهٔ واقعی آن commit بود. این اصلاحیه فقط همان موارد را در commit جدید `9ad6a1ecbd124d97ab7d4b0575a3c3cd69bee7c5` اعمال کرد:
+
+- `category`: در `public-business.v1` وجود ندارد؛ category آینده فقط از vocabulary نسخه‌دار اولین vertical module طبق ADR-0011 می‌آید، نه `Capability.categoryKey`.
+- `location.floor_level` و `location.building_id`: در v1 وجود ندارند، فقط با CCR جداگانه ممکن‌اند و در V2 mock/null می‌مانند.
+- `products`: از `public-business.v1` حذف است؛ Offer/OfferVersion جایگزین آن است و draft-1 فقط Mock است.
+- `offers.discount_percent`: در v1 وجود ندارد و هیچ Core source ندارد؛ از `terms` مشتق نمی‌شود.
+- عنوان بخش تصمیم‌ها به `تصمیم‌های مالک (DECIDED)` تغییر کرد.
+
+هش بایت‌های Git سند پس از G13E:
+
+`mlino2/MLINO_V2_READ_CONTRACT_DESIGN.md  90c5753efe11c1b2b2ac1f3f8a9e75c0ad1a1fd8d6a105c225f8bcd71281fe18`
+
+G13E همچنان document-only است؛ هیچ S item یا G14 تغییر نکرد.

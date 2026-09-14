@@ -523,3 +523,15 @@ VALIDATION: DOCUMENT ONLY — GW2-P passed; final design hash 855aa828e7a29fc799
 SCOPE: F1-F9 DTO corrections; two final DTO types; S16-S26 unchanged; no G14.
 NEXT_ACTION: Guardian review; no G14 implementation and no main merge.
 CREATED_AT: 2026-09-14
+---
+HANDOFF_ID: HANDOFF-20260914-V2-READ-CONTRACT
+AUTHOR: CODEX
+PHASE: G13E_V2_READ_CONTRACT_F9_COMPLETION
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260914-G13E-V2-READ-CONTRACT-F9-COMPLETION-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260914_CODEX_G13D_V2_READ_CONTRACT_DTO_FIXES_REPORT.md
+COMMITS: 9ad6a1ecbd124d97ab7d4b0575a3c3cd69bee7c5
+VALIDATION: DOCUMENT ONLY — GW2-P passed; final design hash 90c5753efe11c1b2b2ac1f3f8a9e75c0ad1a1fd8d6a105c225f8bcd71281fe18; mapping rows and DECIDED heading corrected.
+SCOPE: F9 completion only; no code/schema/migration/Prisma/Docker/database action; no G14.
+NEXT_ACTION: Guardian review; Push only when automated check permits.
+CREATED_AT: 2026-09-14
