@@ -83,7 +83,7 @@ fetch به‌علت در دسترس نبودن ارتباط/اعتبار احر�
 
 ## ۱۰. commit و وضعیت
 
-این گزارش قبل از commit نهایی نوشته شد و hash commit پس از commit در همین بخش ثبت می‌شود.
+commit محلی این تحویل: `538342b` (`feat(core): harden transaction execution`). Push انجام نشد.
 
 ## ۱۱. ریسک‌های باقی‌مانده
 
