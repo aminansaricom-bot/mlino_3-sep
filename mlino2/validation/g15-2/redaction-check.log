@@ -1,0 +1,4 @@
+SCAN_SCOPE=precondition.log,environment.txt,cleanup.log,ten-run-summary.json,run-1.log..run-10.log
+FORBIDDEN_PATTERNS=connection-scheme,DB-environment-key,password-key
+URL_OR_SECRET_VALUES_FOUND=0
+RESULT=PASS

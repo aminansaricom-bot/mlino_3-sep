@@ -1,3 +1,4 @@
+import { runCoreTransaction } from './transaction';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { AuthContext, requireMembershipPermission, requireNonEmpty, requireSameOrganization, validateAuthContext } from './auth-context';
 import { mapCoreDatabaseError } from './error-adapter';
@@ -30,7 +31,7 @@ export class IdentityVerificationService {
     requireNonEmpty(input.claimId, 'claimId');
     requireNonEmpty(input.methodKey, 'methodKey');
     const applicationNow = new Date(); // single-clock rule: application time is authoritative for lifecycle timestamps
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId, memberOrganizationMissingError());
       await requireMembershipPermission(tx, context, 'identity_verification.start');
       await lockIdentityClaim(tx, context.organizationId, input.claimId);
@@ -58,7 +59,7 @@ export class IdentityVerificationService {
     await requireVerifiedPlatformActor(this.verifier, platformCredential);
     requireNonEmpty(organizationId, 'organizationId');
     requireNonEmpty(verificationId, 'verificationId');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, organizationId);
       const attempt = await tx.identityVerification.findUnique({ where: { id_organizationId: { id: verificationId, organizationId } } });
       if (!attempt) throw validationFailed('verification attempt not found in organization');
@@ -76,7 +77,7 @@ export class IdentityVerificationService {
     requireNonEmpty(input.verificationId, 'verificationId');
     requireNonEmpty(input.decisionReason, 'decisionReason');
     if (input.decision !== 'VERIFIED' && input.decision !== 'REJECTED') throw validationFailed('decision must be VERIFIED or REJECTED');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, input.organizationId);
       const attempt = await tx.identityVerification.findUnique({ where: { id_organizationId: { id: input.verificationId, organizationId: input.organizationId } } });
       if (!attempt) throw validationFailed('verification attempt not found in organization');

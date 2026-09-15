@@ -1,0 +1,4 @@
+COMMAND=rg -n -F <dollar>transaction( implementation/core
+EXIT=0
+implementation/core\transaction.ts:22:  return db.$transaction(fn, coreTransactionOptions());
+

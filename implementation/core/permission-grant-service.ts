@@ -1,3 +1,4 @@
+import { runCoreTransaction } from './transaction';
 import { PrismaClient } from '@prisma/client';
 import { AuthContext, requireMembershipPermission, requireNonEmpty, validateAuthContext } from './auth-context';
 import { CoreDomainError, authorizationDenied, conflict, validationFailed } from './errors';
@@ -13,7 +14,7 @@ export class PermissionGrantService {
     requireNonEmpty(targetMembershipId, 'targetMembershipId');
     requireNonEmpty(permissionKey, 'permissionKey');
     if (!isCorePermissionKey(permissionKey)) throw validationFailed('permission key is not in the Core registry');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId, memberOrganizationMissingError());
       const actor = await requireMembershipPermission(tx, context, GRANT_ADMIN_PERMISSION);
       const target = await new MembershipRepository(tx).findById(context.organizationId, targetMembershipId);
@@ -33,7 +34,7 @@ export class PermissionGrantService {
   }
 
   private async revokeMember(context: AuthContext, grantId: string, reason: string) {
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId, memberOrganizationMissingError());
       const grants = new PermissionGrantRepository(tx);
       const actor = await requireMembershipPermission(tx, context, 'permission_grant.revoke');
@@ -50,7 +51,7 @@ export class PermissionGrantService {
     const actor = await requireVerifiedPlatformActor(this.verifier, platformCredential);
     requireNonEmpty(grantId, 'grantId');
     requireNonEmpty(reason, 'reason');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, organizationId);
       const grants = new PermissionGrantRepository(tx);
       const grant = await grants.findById(organizationId, grantId);

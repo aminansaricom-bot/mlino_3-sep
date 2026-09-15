@@ -44,6 +44,7 @@ export function mapCoreDatabaseError(error: unknown): CoreDomainError {
   }
   if (diagnostic.includes('offer_version_price_check')) return validationFailed('offer version price is invalid');
   if (diagnostic.includes('offer_version_validity_check')) return validationFailed('offer version validity range is invalid');
+  if (code === 'P2028' || code === 'P2034' || code === '40001' || code === '40P01') return new CoreDomainError('TRANSACTION_RETRYABLE', 'transaction could not complete; retry');
   if (code === 'P2002' || code === '23505') {
     if (diagnostic.includes('business_identity_claim_active_identifier_unique') || (diagnostic.includes('identifier_type') && diagnostic.includes('identifier_value'))) return conflict('identifier already claimed');
     if (diagnostic.includes('membership_active_subject_unique')) return conflict('active membership already exists');

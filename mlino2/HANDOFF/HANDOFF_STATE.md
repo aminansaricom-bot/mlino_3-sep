@@ -642,3 +642,15 @@ VALIDATION: DOCUMENT_AND_THROWAWAY_DIAGNOSTICS — GW2-P passed; three disposabl
 SCOPE: CCR draft, redacted diagnostic scripts/logs and evidence only; no implementation, retry, error-code, schema, migration, Docker compose, live DB or credential action.
 NEXT_ACTION: Guardian review; owner decision required for CCR options; no G15-2 or implementation automatically.
 CREATED_AT: 2026-09-15
+---
+HANDOFF_ID: HANDOFF-20260915-CORE-G15
+AUTHOR: CODEX
+PHASE: G15_2_CORE_TRANSACTION_ROBUSTNESS_IMPLEMENTATION
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260915-G15-2-TRANSACTION-ROBUSTNESS-IMPLEMENTATION-001
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260915_CODEX_G15_2_TRANSACTION_ROBUSTNESS_IMPLEMENTATION_REPORT.md
+BASE_COMMIT: 1dc6818482fca53607a96be0a63b4b45b18126e0
+VALIDATION: TSC PASS; ten fresh disposable tmpfs PostgreSQL 16 runs on 127.0.0.1:5499; all 29 suites / 368 tests green each; deterministic T2 passed; containers removed; no schema/migration/live DB change.
+SCOPE: Shared Core transaction helper, retryable transaction error mapping, ten service call-site routes, focused Core spec and evidence only.
+NEXT_ACTION: Guardian review; no push and no next task automatically.
+CREATED_AT: 2026-09-15

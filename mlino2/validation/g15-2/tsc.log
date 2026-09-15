@@ -1,0 +1,3 @@
+COMMAND=tsc -p implementation/tsconfig.json --noEmit
+EXIT=0
+
