@@ -1,45 +1,36 @@
-HANDOFF_ID: HANDOFF-20260915-GUARDIAN-G15-1-REVIEW
+HANDOFF_ID: HANDOFF-20260915-OWNER-APPROVAL-G15-2
 AUTHOR: CLAUDE
-PHASE: G15_1_ACCEPTED_OWNER_DECISIONS_PENDING
+PHASE: G15_CCR_APPROVED_G15_2_RELEASED
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: G15-1 (commits 91060e5..1dc6818; published by the Guardian as the new branch codex/core-g15-transaction-robustness) is accepted. The CCR (838947a8, DRAFT) is an adequate decision basis.
-Verified:
-- scope: only the CCR in implementation/; evidence, report and handoff are append-only
-- no leak; the worktree is clean
-- three diagnostic settings (default; maxWait 10s/timeout 15s; connection_limit=1) ALL green: 28/28 suites and 360/360 tests, no P2028/P2034
-- host CPU 11-28%; longest org-lock hold 19 ms; the recorded HEAD is correct
-- runtime unchanged (7 migrations)
-Reading of the evidence:
-- P2028 is load-dependent. It did not reproduce at low load, whereas G14a-2c saw 6/6 at 30-58% CPU.
-- Pool size alone is not the cause (pool=1 was green).
-- The likely mechanism is transaction start (connection acquire plus BEGIN) exceeding the default maxWait of 2s under host load.
-- Gap: acquire time was not measured. G15-2 must reproduce P2028 deterministically by construction.
-Guardian owner package:
-- approve the CCR direction (option A: a shared tx helper)
-- S-G15-1-1 = A: a new TRANSACTION_RETRYABLE code
-- S-G15-1-2 = maxWait 5000 ms / timeout 10000 ms, env-overridable, the same for tests and runtime (differs from the CCR's "C, open")
-- S-G15-1-3 = A: no retry in Core (differs from the CCR's B; Core tx are mutations)
-- S-G15-1-4 = A: explicit connection_limit in tests only
-- authorize G15-2 on disposable DBs only
-G15-2 acceptance:
-1. Every $transaction goes through the helper.
-2. P2028/P2034 map to TRANSACTION_RETRYABLE, with a deterministic P2028 test.
-3. 10 consecutive green full runs with committed logs.
-4. No schema or migration.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260915_CLAUDE_REVIEW_G15_1_TRANSACTION_ROBUSTNESS_CCR.md
+REVIEW_VERDICT: The owner approved in chat: «CCR مقاوم‌سازی تراکنش با توصیه‌های نگهبان تصویب شد (S1=A، S2=۵/۱۰ ثانیه، S3=A، S4=A)؛ G15-2 مجاز است.»
+The CCR 838947a8 is APPROVED.
+- S1=A: TRANSACTION_RETRYABLE, mapped from P2028/P2034.
+- S2: maxWait 5000 ms / timeout 10000 ms, env-overridable (CORE_TX_MAX_WAIT_MS / CORE_TX_TIMEOUT_MS), the same for tests and runtime.
+- S3=A: no retry in Core.
+- S4=A: an explicit connection_limit in the test URL only.
+Released CODEX-20260915-G15-2-TRANSACTION-ROBUSTNESS-IMPLEMENTATION-001:
+- on codex/core-g15-transaction-robustness from 1dc6818; local commits only
+- a new core/transaction.ts helper; every Core $transaction routed through it (grep acceptance)
+- the errors.ts code and the error-adapter mapping
+- a new spec: T1 options, T2 a deterministic P2028 by construction (pool=1 plus a held tx plus a small maxWait), T3 the adapter unit
+- 10 consecutive green full runs, each on a fresh disposable 5499 DB, with committed logs in mlino2/validation/g15-2
+- no schema, migration, prisma-client runtime settings, HTTP or retry
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260915_OWNER_APPROVAL_G15_2_TRANSACTION_ROBUSTNESS.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). main is d20ad7c before this commit; the G15 branch is at 1dc6818 on origin. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-15T11:00:00+03:30
-NEXT_ACTION: The owner decides (suggested: "CCR approved with Guardian recommendations (S1=A, S2=5/10s, S3=A, S4=A); G15-2 authorized"). Then the Guardian records the decisions and releases G15-2.
+CODE_COMMIT_SHA: (none - approval record only). main is 1b11dd9 before this commit; the G15 branch is at 1dc6818 on origin. Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-15T11:30:00+03:30
+NEXT_ACTION: Codex executes G15-2 with TARGET_HANDOFF_ID=HANDOFF-20260915-OWNER-APPROVAL-G15-2. Then:
+1. Guardian review: code, grep, the deterministic test, the 10 logs.
+2. The owner decides the merge.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260915-GUARDIAN-G14A3-COMPLETE-G15-1
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260915-G15-1-CORE-TRANSACTION-ROBUSTNESS-CCR-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260915-GUARDIAN-G15-1-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), recording the owner's G15 decisions and releasing G15-2
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: Read 1dc6818 from the shared object store (scope, the leak grep, the full CCR, the report). Verified the per-setting totals in the evidence. Docker and runtime checked read-only.
+HANDOFF_PRECONDITION_CHECK: origin/main is 1b11dd9, and origin/codex/core-g15-transaction-robustness is 1dc6818 (published by the Guardian).
 
-SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main, plus the new Codex branch published unchanged (an empty lease). No credential, Docker write, database write or code action.
+SCOPE_CONSTRAINT_NOTE: Only the new approval record and the AI_HANDOFF files were added or changed on main. No credential, Docker, database or code action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
