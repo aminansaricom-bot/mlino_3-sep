@@ -682,3 +682,18 @@ VALIDATION: GW2-P PASS; TypeScript PASS; focused 16/16; three fresh tmpfs Postgr
 SCOPE: V1 public-export module, test, design decision record, allowed config entries, evidence and report only; no schema/migration/V2 change, no push or real key.
 NEXT_ACTION: Architecture Guardian review; no merge, G14c or operational schedule automatically.
 CREATED_AT: 2026-09-17
+
+---
+HANDOFF_ID: HANDOFF-20260917-CORE-PROFILE-UNIQUE
+AUTHOR: CODEX
+PHASE: Q8_PROFILE_PUBLISHED_UNIQUE_CCR
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260917-Q8-PROFILE-UNIQUE-INDEX-CCR-001
+TARGET_HANDOFF_ID: HANDOFF-20260917-OWNER-APPROVAL-Q8-AND-G14C1
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260917_CODEX_Q8_PROFILE_UNIQUE_INDEX_CCR_REPORT.md
+CCR_PATH: implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_PROFILE_PUBLISHED_UNIQUE.md
+CCR_COMMIT: 70b73d6
+VALIDATION: GW2-P PASS; documentation-only git diff --check PASS; no npm, Prisma, Docker or database access.
+SCOPE: Draft Q8 CCR, report and append-only handoff; no schema, migration, code or test change; no push.
+NEXT_ACTION: Architecture Guardian review and owner decision before implementation; no G14c work started.
+CREATED_AT: 2026-09-17
