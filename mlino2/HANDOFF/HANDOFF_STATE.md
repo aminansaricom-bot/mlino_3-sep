@@ -725,3 +725,18 @@ VALIDATION: GW2-P PASS; backup SHA-256 matched inside container and host; one pe
 SCOPE: Local Q8-3 migration only, with owner-approved in-memory DATABASE_URL read; no product files changed and no push.
 NEXT_ACTION: Architecture Guardian review; no automatic G14c work, push, or further database action.
 CREATED_AT: 2026-09-17
+
+---
+HANDOFF_ID: HANDOFF-20260918-V2-PUBLIC-CONSUMER-DESIGN
+AUTHOR: CODEX
+PHASE: G14C1_V2_PUBLIC_CONSUMER_DESIGN
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260918-G14C1-V2-CONSUMER-DESIGN-006
+TARGET_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-Q8-3-MERGE
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260917_CODEX_G14C1_V2_CONSUMER_DESIGN_REPORT.md
+DESIGN_PATH: mlino2/MLINO_V2_PUBLIC_CONSUMER_DESIGN.md
+DESIGN_COMMIT: 5a3cc98
+VALIDATION: GW2-P PASS; C1-C8 documented with V1/V2 source citations; documentation diff check PASS; no code tests required.
+SCOPE: Draft V2 public export consumer design, report and append-only handoff; no code, database, Docker, V2 branch change or push.
+NEXT_ACTION: Architecture Guardian review and separate G14c-2 authorization; no automatic implementation.
+CREATED_AT: 2026-09-18
