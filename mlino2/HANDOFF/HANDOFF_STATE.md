@@ -654,3 +654,17 @@ VALIDATION: TSC PASS; ten fresh disposable tmpfs PostgreSQL 16 runs on 127.0.0.1
 SCOPE: Shared Core transaction helper, retryable transaction error mapping, ten service call-site routes, focused Core spec and evidence only.
 NEXT_ACTION: Guardian review; no push and no next task automatically.
 CREATED_AT: 2026-09-15
+---
+HANDOFF_ID: HANDOFF-20260917-V1-PUBLIC-EXPORT
+AUTHOR: CODEX
+PHASE: G14B1_SIGNED_PUBLIC_EXPORT_DESIGN
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260917-G14B1-PUBLIC-EXPORT-DESIGN-001
+TARGET_HANDOFF_ID: HANDOFF-20260917-OWNER-APPROVAL-G14B1
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260917_CODEX_G14B1_PUBLIC_EXPORT_DESIGN_REPORT.md
+DESIGN_PATH: mlino2/MLINO_V1_PUBLIC_EXPORT_DESIGN.md
+DESIGN_COMMIT: 477075c3a0e02a3f328aa741cfc65f117d2b4f6e
+VALIDATION: GW2-P PASS; FINAL DTO block LF-verbatim; E1-E9 present; documentation diff check PASS. No code tests, database, Docker, npm or real key access.
+SCOPE: Design document only, report and append-only Handoff; E9 questions remain OPEN, no S decision changed.
+NEXT_ACTION: Architecture Guardian review; no push or G14b-2/G14c automatically.
+CREATED_AT: 2026-09-17
