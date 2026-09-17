@@ -1,33 +1,31 @@
-HANDOFF_ID: HANDOFF-20260917-GUARDIAN-G15-2-REVIEW
+HANDOFF_ID: HANDOFF-20260917-GUARDIAN-G15-MERGE
 AUTHOR: CLAUDE
-PHASE: G15_2_ACCEPTED_OWNER_MERGE_PENDING
+PHASE: G15_MERGED_G14B1_DECISION_PENDING
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: G15-2 (538342b and def9039; published by the Guardian) is ACCEPTED.
-Verified:
-- scope exactly as allowed: the CCR (status and decisions only), a new core/transaction.ts, errors.ts, error-adapter.ts, ten services, a new spec, evidence, report, append-only handoff. No schema, migration, Dockerfile, tsconfig, package or HTTP change. The worktree is clean.
-- grep acceptance: $transaction( appears only at transaction.ts:22.
-- Each service diff is only an import plus the call swap; lock order, the mapCoreDatabaseError catch and business logic are unchanged.
-- The helper: defaults maxWait 5000 / timeout 10000, env-overridable, an invalid value throws (fail-closed), and there is no retry.
-- Error contract: TRANSACTION_RETRYABLE added; P2028, P2034, 40001, 40P01 map to it; other mappings unchanged; unknown stays INTERNAL_ERROR.
-- Tests: T1 options; T2 a deterministic pool-exhaustion test (connection_limit=1, a held connection, maxWait 200) expecting TRANSACTION_RETRYABLE; T3 the mapping table plus preserved mappings. All four claimed test names exist.
-- Acceptance: 10 consecutive runs on fresh disposable DBs, all 29/29 suites and 368/368 tests, including runs at 52% and 66% CPU, the load range that failed in G14a-2c. tsc exit 0. All containers removed; volumes unchanged; no secret committed.
-- Honest reporting: an earlier acceptance attempt exited 1 because of a cleanup bug; it was recorded, fixed and rerun.
-Environment note: Docker Desktop is not running at review time, so the live DB was not re-checked. G15 never touched it; the Guardian will re-verify after the merge when Docker is up.
-Trial merge into main 919329d: tree 7f23b013, clean, 49 files, +6542/-28.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260917_CLAUDE_REVIEW_G15_2_TRANSACTION_ROBUSTNESS.md
+REVIEW_VERDICT: The owner authorized in chat: «ادغام G15 در main مجاز است.»
+The Guardian MERGED G15 into main:
+- Merge commit 9ae0d79b096590b61df2756e75ac2ddae11f959f, tree f595e645, parents a7f7be9 and def9039.
+- The tree equals the trial; it differs from the earlier trial 7f23b013 only by 3 AI_HANDOFF files. 49 files, +6542/-28.
+- Post-merge acceptance on main: $transaction( appears only in implementation/core/transaction.ts; the migrations folder is unchanged (7 migrations plus the lock file).
+- Key hashes on main: transaction.ts a94e91b2, errors.ts 76b0ee84, error-adapter.ts e4f549d3, spec 9599cfcf.
+- No schema, migration, Dockerfile, tsconfig, package or HTTP change; the read-api image excludes core.
+Docker Desktop was OFF at merge time, so the live DB was not checked. G15 never touched it. PENDING: once Docker runs, verify 7 migrations, publications=0, the column and CHECK, and read-api 401.
+G15 is COMPLETE: diagnosis, CCR, implementation, 10 green runs, merge.
+Next proposal to the owner: G14b-1, a short design document (document only) for the signed V1 export producer, covering the signing and key policy, the execution shape and output location, the cycle versus invalidation for S23-B, the snapshot-only data source plus live gates, the business_hours and terms schemas (OQ-4 A-prime), and the test plan on disposable DBs.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260917_CLAUDE_REVIEW_G15_MERGE.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only; no merge executed). main is 919329d before this commit; the G15 branch is at def9039 on origin. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-17T09:30:00+03:30
-NEXT_ACTION: The owner decides (suggested: "merge of G15 into main authorized"). Then the Guardian merges --no-ff (the tree must equal 7f23b013 if main has not moved), records it, and re-verifies the runtime when Docker is running. G14b and G14c remain separately approved steps.
+CODE_COMMIT_SHA: 9ae0d79b096590b61df2756e75ac2ddae11f959f (merge). Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-17T10:00:00+03:30
+NEXT_ACTION: The owner decides on G14b-1 (suggested: "G14b-1 authorized"). Then the Guardian records it and releases the instruction. The Guardian also re-verifies the runtime once Docker is running.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260915-OWNER-APPROVAL-G15-2
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260915-G15-2-TRANSACTION-ROBUSTNESS-IMPLEMENTATION-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260917-GUARDIAN-G15-2-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), executing the owner-authorized G15 merge
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: Read def9039 from the shared object store: scope, the grep acceptance, the full helper, the service diffs, the spec, the report, the ten run logs and the manifest. Trial merge-tree against origin/main.
+HANDOFF_PRECONDITION_CHECK: origin/main was a7f7be9 and clean; origin/codex/core-g15-transaction-robustness was def9039 (published by the Guardian). The trial merge-tree gave f595e645 and the merge tree equals it.
 
-SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main, plus the Codex branch ref published unchanged (a fast-forward from 1dc6818 to def9039). No merge, credential, Docker, database or code action.
+SCOPE_CONSTRAINT_NOTE: The --no-ff merge plus the AI_HANDOFF record files. No credential, Docker, database, compose or build action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
