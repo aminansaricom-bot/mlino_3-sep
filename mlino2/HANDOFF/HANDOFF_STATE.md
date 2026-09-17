@@ -740,3 +740,19 @@ VALIDATION: GW2-P PASS; C1-C8 documented with V1/V2 source citations; documentat
 SCOPE: Draft V2 public export consumer design, report and append-only handoff; no code, database, Docker, V2 branch change or push.
 NEXT_ACTION: Architecture Guardian review and separate G14c-2 authorization; no automatic implementation.
 CREATED_AT: 2026-09-18
+
+---
+HANDOFF_ID: HANDOFF-20260917-V2-PUBLIC-CONSUMER
+AUTHOR: CODEX
+PHASE: G14C1_V2_CONSUMER_DESIGN
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260918-G14C1-V2-CONSUMER-DESIGN-006
+TARGET_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-Q8-3-MERGE
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260918_CODEX_G14C1_V2_CONSUMER_DESIGN_REPORT.md
+DESIGN_PATH: mlino2/MLINO_V2_PUBLIC_CONSUMER_DESIGN.md
+DESIGN_COMMIT: 18f5364
+VALIDATION: GW2-P PASS; C1-C8 checked against the full -006 instruction; LF SHA-256 of design checked from git show; documentation diff check PASS; no code tests allowed.
+SCOPE: Documentation only: design, correctly named report, append-only handoff; no code, test, database, Docker, V2 branch change or push.
+CORRECTION: This entry supersedes the immediately preceding Codex G14c-1 handoff entry, which was written before the full attached instruction arrived and pointed to the superseded 20260917 report name. The earlier entry remains intact under the append-only rule.
+NEXT_ACTION: Architecture Guardian review; G14c-2 requires separate authorization.
+CREATED_AT: 2026-09-18
