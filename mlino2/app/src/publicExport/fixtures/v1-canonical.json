@@ -1,0 +1,79 @@
+[
+  {
+    "name": "nfc_non_latin",
+    "input": {
+      "label": "کافه é"
+    },
+    "expected_hex": "7b226c6162656c223a22daa9d8a7d981d98720c3a9227d",
+    "expected_sha256": "898ddc3fec3f6c4373ea10bb17c87ccadf77e0fdbc3f5a720db330d255c22121"
+  },
+  {
+    "name": "six_decimal",
+    "input": {
+      "latitude": 35.123456
+    },
+    "expected_hex": "7b226c61746974756465223a33352e3132333435367d",
+    "expected_sha256": "68677b3e2bcc9ecdb86fe72c0c8518a454c3fadaa53f44354cf342dc765f953a"
+  },
+  {
+    "name": "negative_zero",
+    "input": {
+      "zero": 0
+    },
+    "expected_hex": "7b227a65726f223a307d",
+    "expected_sha256": "33b50e61094f0d59aabcdd47c698ea5d9d120c188b8a49f6451ebc736e28ba45"
+  },
+  {
+    "name": "explicit_null",
+    "input": {
+      "value": null
+    },
+    "expected_hex": "7b2276616c7565223a6e756c6c7d",
+    "expected_sha256": "1c197daef20de3f47eec5e2f735ec6669869d3180cc29f35be4788511e0af0f8"
+  },
+  {
+    "name": "absent_key",
+    "input": {},
+    "expected_hex": "7b7d",
+    "expected_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  {
+    "name": "empty_string",
+    "input": {
+      "text": ""
+    },
+    "expected_hex": "7b2274657874223a22227d",
+    "expected_sha256": "63be7e41e020bc00ee1c7926929730c6f0a0b9c0c3d83427c76eb5acfba8dc67"
+  },
+  {
+    "name": "nested_order",
+    "input": {
+      "items": [
+        [
+          "دوم",
+          "اول"
+        ],
+        {
+          "b": [
+            3,
+            2,
+            1
+          ],
+          "a": []
+        }
+      ]
+    },
+    "expected_hex": "7b226974656d73223a5b5b22d8afd988d985222c22d8a7d988d984225d2c7b2261223a5b5d2c2262223a5b332c322c315d7d5d7d",
+    "expected_sha256": "ea930946aa008f562e1a6970c04a8ac29d62423893d9609362d2d95689992ed4"
+  },
+  {
+    "name": "scalar_key_order",
+    "input": {
+      "😀": 1,
+      "آ": 2,
+      "a": 3
+    },
+    "expected_hex": "7b2261223a332c22d8a2223a322c22f09f9880223a317d",
+    "expected_sha256": "67456e7108f1ad13182f6a32e839ff79cc8e31adbe4d97bdf1c2db524bc86ff9"
+  }
+]

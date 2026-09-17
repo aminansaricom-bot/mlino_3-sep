@@ -22,6 +22,7 @@ import { isOfferActiveAt, offerStatus } from './offers';
 import { pickSuggestion, type SuggestionResult } from './experience/pickSuggestion';
 import ShareBusinessAction from './experience/ShareBusinessAction';
 import AssistantFoundation from './discovery/AssistantFoundation';
+import RealPublicApp from './publicExport/RealPublicApp';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
 
@@ -76,7 +77,7 @@ interface ChatMessage {
 
 type Overlay = 'foundation' | 'none' | 'assistant' | 'vitrine' | 'settings' | 'detail' | 'experience';
 
-export default function App() {
+function DemoApp() {
   const [loaded, setLoaded] = useState(false);
   const [records, setRecords] = useState<V2BusinessDirectoryRecord[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -176,6 +177,7 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
+    console.info('[directory] demo mode: draft-1 mock data only');
     loadMockSnapshotRaw().then((raw) => {
       if (cancelled) return;
       directoryService.loadSnapshot(raw);
@@ -394,6 +396,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <div className="app-banner" role="status">حالت نمایشی — داده‌های آزمایشی، نه اطلاعات واقعی کسب‌وکارها</div>
       <MapView
         records={visibleRecords}
         matchIds={lastMatchIds}
@@ -859,4 +862,8 @@ export default function App() {
       )}
     </div>
   );
+}
+
+export default function App() {
+  return import.meta.env.VITE_PUBLIC_EXPORT_MODE === 'demo' ? <DemoApp /> : <RealPublicApp />;
 }
