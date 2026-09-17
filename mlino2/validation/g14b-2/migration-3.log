@@ -28,6 +28,6 @@ migrations/
     └─ migration.sql
   └─ 20260914010000_add_publication_published_content/
     └─ migration.sql
-      
+
 All migrations have been successfully applied.
 EXIT_CODE=0
