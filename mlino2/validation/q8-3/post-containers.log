@@ -1,0 +1,2 @@
+/mlino-v1-local-db|postgres:16-alpine|sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb|2026-09-17T14:17:07.785908831Z|0|healthy
+/mlino-v1-read-api|implementation-v1-read-api|sha256:a07858b3da15e63ac0c925c44eaee51903adfdcb6b715cd99dfc1667de10cda8|2026-09-17T14:17:07.794732436Z|0|none

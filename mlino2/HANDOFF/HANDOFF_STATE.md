@@ -711,3 +711,17 @@ VALIDATION: TypeScript PASS; Prisma 5.22.0; 3 fresh PostgreSQL 16 tmpfs runs on 
 SCOPE: Q8-2 migration, error mapping, focused spec, evidence and report; no schema.prisma change, no existing migration change, no live DB, no push.
 NEXT_ACTION: Architecture Guardian review; Q8-3 local migration and G14c-1 remain blocked until separate approval.
 CREATED_AT: 2026-09-17
+
+---
+HANDOFF_ID: HANDOFF-20260917-CORE-PROFILE-UNIQUE-Q8-3
+AUTHOR: CODEX
+PHASE: Q8_3_LOCAL_INDEX_MIGRATION
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260917-Q8-3-LOCAL-INDEX-MIGRATION-001
+TARGET_HANDOFF_ID: HANDOFF-20260917-GUARDIAN-Q8-MERGE-Q8-3
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260917_CODEX_Q8_3_LOCAL_INDEX_MIGRATION_REPORT.md
+EVIDENCE_PATH: mlino2/validation/q8-3/
+VALIDATION: GW2-P PASS; backup SHA-256 matched inside container and host; one pending migration applied once; 8 finished migrations; unique valid partial index; all public table counts unchanged; 13 triggers and 30 CHECKs unchanged; unauthenticated read-api 401.
+SCOPE: Local Q8-3 migration only, with owner-approved in-memory DATABASE_URL read; no product files changed and no push.
+NEXT_ACTION: Architecture Guardian review; no automatic G14c work, push, or further database action.
+CREATED_AT: 2026-09-17
