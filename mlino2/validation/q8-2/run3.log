@@ -1,0 +1,75 @@
+Q8-2 RUN 3 FINAL (fresh container)
+17657ab114d22306334bada57137d4f1d6304fc54efd17b0d4dc3583bfc6b3da
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "127.0.0.1:5499"
+
+8 migrations found in prisma/migrations
+
+Applying migration `20260814065924_init`
+Applying migration `20260815033018_add_situation_key`
+Applying migration `20260815113714_rename_actor_core_entity_id_to_actor_id`
+Applying migration `20260906001500_add_ownership_type`
+Applying migration `20260910020000_add_external_workspace_link`
+Applying migration `20260913010000_add_core_foundation`
+Applying migration `20260914010000_add_publication_published_content`
+Applying migration `20260917010000_add_business_profile_published_unique`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260814065924_init/
+    └─ migration.sql
+  └─ 20260815033018_add_situation_key/
+    └─ migration.sql
+  └─ 20260815113714_rename_actor_core_entity_id_to_actor_id/
+    └─ migration.sql
+  └─ 20260906001500_add_ownership_type/
+    └─ migration.sql
+  └─ 20260910020000_add_external_workspace_link/
+    └─ migration.sql
+  └─ 20260913010000_add_core_foundation/
+    └─ migration.sql
+  └─ 20260914010000_add_publication_published_content/
+    └─ migration.sql
+  └─ 20260917010000_add_business_profile_published_unique/
+    └─ migration.sql
+
+All migrations have been successfully applied.
+PASS test/core/identity-claim-verification.spec.ts (5.175 s)
+PASS test/core/g10c-profile-capability.spec.ts
+PASS test/core/g14a2-published-content.spec.ts
+PASS test/core/g10d-offer.spec.ts
+PASS test/foundation/opportunity-read/opportunity-read.spec.ts
+PASS test/core/core-authority.spec.ts
+PASS test/core/g10e-evidence.spec.ts
+PASS test/http/read-api.spec.ts
+PASS test/core/q8-2-profile-unique.spec.ts
+PASS test/foundation/opportunity-projection/rebuild-projection.spec.ts
+PASS test/value-engines/cancellation/cancellation-detector.spec.ts
+PASS test/value-engines/capacity/capacity-detector.spec.ts
+PASS test/foundation/opportunity-projection/situation-lookup.spec.ts
+PASS test/public-export/public-export.spec.ts
+PASS test/value-engines/followup/followup-detector.spec.ts
+PASS test/foundation/workspace-link.spec.ts
+PASS test/foundation/access-decision/org-membership-ac2-port.spec.ts
+PASS test/core/g15-transaction-robustness.spec.ts
+PASS test/foundation/event-admission-concurrency.spec.ts
+PASS test/foundation/event-admission-validation.spec.ts
+PASS test/feed/opportunity-feed.spec.ts
+PASS test/foundation/event-admission.spec.ts
+PASS test/foundation/ownership-type.spec.ts
+PASS test/foundation/auth-adapter.spec.ts
+PASS test/test-db-guard.spec.ts
+PASS test/foundation/recommendation/recommendation-contract.spec.ts
+PASS test/foundation/business-context.spec.ts
+PASS test/core/error-adapter.spec.ts
+PASS test/core/db-guard.spec.ts
+PASS test/briefing/proactive-briefing.spec.ts
+PASS test/foundation/situation-key.spec.ts
+
+Test Suites: 31 passed, 31 total
+Tests:       390 passed, 390 total
+Snapshots:   0 total
+Time:        25.678 s, estimated 26 s
+Ran all test suites.
+mlino-q8-2-testdb

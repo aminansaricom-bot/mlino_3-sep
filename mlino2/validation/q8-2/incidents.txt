@@ -1,0 +1,1 @@
+Incident: initial run3 container command used host:container port mapping 5499:5499; no database connection, migration, or test occurred. Container removed immediately; corrected run3 used 127.0.0.1:5499:5432.

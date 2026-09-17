@@ -682,3 +682,32 @@ VALIDATION: GW2-P PASS; TypeScript PASS; focused 16/16; three fresh tmpfs Postgr
 SCOPE: V1 public-export module, test, design decision record, allowed config entries, evidence and report only; no schema/migration/V2 change, no push or real key.
 NEXT_ACTION: Architecture Guardian review; no merge, G14c or operational schedule automatically.
 CREATED_AT: 2026-09-17
+
+---
+HANDOFF_ID: HANDOFF-20260917-CORE-PROFILE-UNIQUE
+AUTHOR: CODEX
+PHASE: Q8_PROFILE_PUBLISHED_UNIQUE_CCR
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260917-Q8-PROFILE-UNIQUE-INDEX-CCR-001
+TARGET_HANDOFF_ID: HANDOFF-20260917-OWNER-APPROVAL-Q8-AND-G14C1
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260917_CODEX_Q8_PROFILE_UNIQUE_INDEX_CCR_REPORT.md
+CCR_PATH: implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_PROFILE_PUBLISHED_UNIQUE.md
+CCR_COMMIT: 70b73d6
+VALIDATION: GW2-P PASS; documentation-only git diff --check PASS; no npm, Prisma, Docker or database access.
+SCOPE: Draft Q8 CCR, report and append-only handoff; no schema, migration, code or test change; no push.
+NEXT_ACTION: Architecture Guardian review and owner decision before implementation; no G14c work started.
+CREATED_AT: 2026-09-17
+
+---
+HANDOFF_ID: HANDOFF-20260917-CORE-PROFILE-UNIQUE-Q8-2
+AUTHOR: CODEX
+PHASE: Q8_2_PROFILE_UNIQUE_IMPLEMENTATION
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260917-Q8-2-PROFILE-UNIQUE-IMPLEMENTATION-001
+TARGET_HANDOFF_ID: HANDOFF-20260917-OWNER-APPROVAL-Q8-2
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260917_CODEX_Q8_2_PROFILE_UNIQUE_IMPLEMENTATION_REPORT.md
+IMPLEMENTATION_COMMITS: 8f7c07e, 6b035b1, b9d5028
+VALIDATION: TypeScript PASS; Prisma 5.22.0; 3 fresh PostgreSQL 16 tmpfs runs on 127.0.0.1:5499; each 31 suites and 390 tests PASS; migrate status/diff clean; containers removed.
+SCOPE: Q8-2 migration, error mapping, focused spec, evidence and report; no schema.prisma change, no existing migration change, no live DB, no push.
+NEXT_ACTION: Architecture Guardian review; Q8-3 local migration and G14c-1 remain blocked until separate approval.
+CREATED_AT: 2026-09-17
