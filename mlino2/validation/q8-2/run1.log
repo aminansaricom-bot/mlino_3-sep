@@ -33,7 +33,7 @@ migrations/
     └─ migration.sql
   └─ 20260917010000_add_business_profile_published_unique/
     └─ migration.sql
-      
+
 All migrations have been successfully applied.
 PASS test/foundation/opportunity-read/opportunity-read.spec.ts
 PASS test/core/identity-claim-verification.spec.ts
