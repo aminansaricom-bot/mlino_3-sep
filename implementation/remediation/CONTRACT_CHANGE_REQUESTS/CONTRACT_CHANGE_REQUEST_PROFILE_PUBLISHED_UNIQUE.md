@@ -1,6 +1,6 @@
 # CONTRACT_CHANGE_REQUEST — یکتایی Profile منتشرشده در هر سازمان (Q8)
 
-**وضعیت:** DRAFT — سند تصمیم و بازبینی؛ مجوز تغییر schema یا اجرای migration نیست.
+**وضعیت:** APPROVED — تصویب مالک Q8-2 ثبت‌شده در `AI_HANDOFF/CLAUDE_REVIEWS/20260917_OWNER_APPROVAL_Q8_2_IMPLEMENTATION.md`.
 **Instruction:** `CODEX-20260917-Q8-PROFILE-UNIQUE-INDEX-CCR-001`
 **Handoff:** `HANDOFF-20260917-OWNER-APPROVAL-Q8-AND-G14C1`
 **مبنای مستندات:** `origin/main` در `6514b846788ea061e7a92383521ced7a0d383e48`.
@@ -89,7 +89,9 @@ Prisma migration رو‌به‌عقب خودکار ندارد. بازگشتِ ق
 5. تولیدکننده از وضعیت معتبرِ یک Profile خروجی بدهد. شاخهٔ دفاعی `MULTIPLE_PUBLISHED_PROFILES` در unit test با دادهٔ ساختگی نامعتبر همچنان بماند (`origin/main:implementation/test/public-export/public-export.spec.ts:127-135`)، اما پایگاه مهاجرت‌داده‌شده دیگر نتواند آن وضعیت را ایجاد کند.
 6. suite کامل V1 و Core روی دیتابیس یک‌بارمصرف پاس شود؛ اجرای آزمون روی دیتابیس محلی زنده ممنوع است.
 
-## P7 — گزینه‌های باز برای مالک؛ هیچ‌کدام در این سند تصویب نمی‌شوند
+## P7 — گزینه‌ها و تصمیم‌های مالک
+
+**تصمیم‌های مالک Q8-2:** OQ-Q8-1=A، OQ-Q8-2=A، OQ-Q8-3=A. این تصمیم‌ها فقط همین CCR و اجرای Q8-2 را پوشش می‌دهند؛ Q8-3 همچنان مرحله‌ای جداست.
 
 | پرسش | گزینه‌ها و پیامد | یک توصیه |
 |---|---|---|

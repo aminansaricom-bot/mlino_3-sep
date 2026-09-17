@@ -1,0 +1,10 @@
+Q8-2 migrate status
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "127.0.0.1:5499"
+
+8 migrations found in prisma/migrations
+
+Database schema is up to date!
+Q8-2 migrate diff
+No difference detected.
+

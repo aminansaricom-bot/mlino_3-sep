@@ -26,7 +26,8 @@ export function mapCoreDatabaseError(error: unknown): CoreDomainError {
   const code = databaseCode(error);
   const constraint = constraintName(error);
   const message = error instanceof Error ? error.message : '';
-  const diagnostic = `${message} ${constraint}`;
+  const metadata = typeof error === 'object' && error !== null && 'meta' in error ? JSON.stringify((error as { meta?: unknown }).meta) : '';
+  const diagnostic = `${message} ${constraint} ${metadata}`;
   const triggerMessages: Record<string, CoreDomainError> = {
     'publications are append-only': conflict('publication is immutable'),
     'offer versions cannot be deleted': conflict('offer version is immutable'),
@@ -45,7 +46,9 @@ export function mapCoreDatabaseError(error: unknown): CoreDomainError {
   if (diagnostic.includes('offer_version_price_check')) return validationFailed('offer version price is invalid');
   if (diagnostic.includes('offer_version_validity_check')) return validationFailed('offer version validity range is invalid');
   if (code === 'P2028' || code === 'P2034' || code === '40001' || code === '40P01') return new CoreDomainError('TRANSACTION_RETRYABLE', 'transaction could not complete; retry');
-  if (code === 'P2002' || code === '23505') {
+  if (code === 'P2002' || code === '23505' || (code === 'P2010' && diagnostic.includes('23505'))) {
+    if (diagnostic.includes('business_profile_one_published_per_organization_unique')) return conflict('another business profile is already published for this organization');
+    if ((diagnostic.includes('"modelName":"Publication"') && diagnostic.includes('"target":["organization_id"]')) || (code === 'P2010' && diagnostic.includes('Key (organization_id)'))) return conflict('another business profile is already published for this organization');
     if (diagnostic.includes('business_identity_claim_active_identifier_unique') || (diagnostic.includes('identifier_type') && diagnostic.includes('identifier_value'))) return conflict('identifier already claimed');
     if (diagnostic.includes('membership_active_subject_unique')) return conflict('active membership already exists');
     if (diagnostic.includes('permission_grant_active_unique')) return conflict('active permission grant already exists');
