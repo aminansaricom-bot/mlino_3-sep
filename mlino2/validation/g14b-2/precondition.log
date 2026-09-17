@@ -1,0 +1,12 @@
+INSTRUCTION_ID=CODEX-20260917-G14B2-PUBLIC-EXPORT-IMPLEMENTATION-001
+TARGET_HANDOFF_ID=HANDOFF-20260917-OWNER-APPROVAL-G14B2
+WORKTREE_HEAD_BEFORE=9430c226f605d1854d78c0c9a98a9f55a8f3158a
+ORIGIN_MAIN=9e7eef64ceee2554caa8295a97b78d716c7e0548
+git fetch origin (sandbox): EXIT_CODE=1; network connection to github.com:443 unavailable.
+git fetch origin (elevated retry): EXIT_CODE=1; Git rejected worktree ownership. No git config was changed.
+git cat-file -e 9e7eef64ceee2554caa8295a97b78d716c7e0548^{commit}: EXIT_CODE=0; stdout empty.
+git merge-base --is-ancestor 9e7eef64ceee2554caa8295a97b78d716c7e0548 origin/main: EXIT_CODE=0; stdout empty.
+git show 9e7eef64ceee2554caa8295a97b78d716c7e0548:AI_HANDOFF/CLAUDE_REVIEWS/20260917_OWNER_APPROVAL_G14B2_EXPORT_IMPLEMENTATION.md | SHA-256 raw bytes:
+ace54c4a91dab4f389eff7845498cb7ce9a62db16b94e35f85286a39844a43c9
+EXPECTED_SHA256=ace54c4a91dab4f389eff7845498cb7ce9a62db16b94e35f85286a39844a43c9
+GW2-P=PASS

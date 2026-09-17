@@ -1,0 +1,2 @@
+HEAD=9430c226f605d1854d78c0c9a98a9f55a8f3158a
+Verified with GW2-P in the sandboxed Git context; elevated Docker context cannot read Git ownership.

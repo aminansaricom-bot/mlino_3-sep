@@ -1,0 +1,33 @@
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "mlino_export_test", schema "public" at "localhost:5499"
+
+7 migrations found in prisma/migrations
+
+Applying migration `20260814065924_init`
+Applying migration `20260815033018_add_situation_key`
+Applying migration `20260815113714_rename_actor_core_entity_id_to_actor_id`
+Applying migration `20260906001500_add_ownership_type`
+Applying migration `20260910020000_add_external_workspace_link`
+Applying migration `20260913010000_add_core_foundation`
+Applying migration `20260914010000_add_publication_published_content`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260814065924_init/
+    └─ migration.sql
+  └─ 20260815033018_add_situation_key/
+    └─ migration.sql
+  └─ 20260815113714_rename_actor_core_entity_id_to_actor_id/
+    └─ migration.sql
+  └─ 20260906001500_add_ownership_type/
+    └─ migration.sql
+  └─ 20260910020000_add_external_workspace_link/
+    └─ migration.sql
+  └─ 20260913010000_add_core_foundation/
+    └─ migration.sql
+  └─ 20260914010000_add_publication_published_content/
+    └─ migration.sql
+
+All migrations have been successfully applied.
+EXIT_CODE=0
