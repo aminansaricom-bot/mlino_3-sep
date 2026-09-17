@@ -1,32 +1,29 @@
-HANDOFF_ID: HANDOFF-20260918-GUARDIAN-G14C1-REVIEW
+HANDOFF_ID: HANDOFF-20260918-OWNER-APPROVAL-G14C2
 AUTHOR: CLAUDE
-PHASE: G14C1_ACCEPTED_OWNER_DECISIONS_PENDING
+PHASE: G14C1_DECIDED_G14C2_RELEASED
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: G14c-1 (5a3cc98..0bd14bb; published by the Guardian as codex/v2-public-consumer-design) is ACCEPTED. The design document (9222ebd1, DRAFT) is a sound decision basis.
-Verified:
-- exactly three allowed files; the handoff is append-only; 0 files under implementation/, in the FINAL contract or on the V2 branch; the worktree is clean
-- the hash I computed matches the report; GW2-P recorded
-- citations verified independently: loader.ts is the only Mock entry point in V2; validate.ts accepts only draft-1; BusinessDirectoryService.loadSnapshot assigns snapshot and byId separately, which is exactly the atomicity gap the design closes; the producer always writes stale: false
-Strengths: the acceptance order ends with the cache swap so no rejection touches the cache; fail-closed for missing, corrupt, unsigned, unknown or revoked key, expired, future-dated and older-than-cache artifacts, with no Mock fallback; the signed stale field is correctly separated from real freshness; legacy filters are dropped rather than filled with invented data; validity dates are re-checked at read time; the cache swaps through one immutable reference.
-Guardian notes for G14c-2:
-- N1: the browser clock is user-controlled, so TTL is a correctness and UX guard, not a security control; real freshness comes from the short producer cycle. State this explicitly.
-- N2: write the threat model down - the signature protects the artifact in transit and at rest, not a compromised V2 origin, since the public key ships with the app.
-- N3: byte parity between V1 and V2 canonicalization must be proven by shared test vectors (non-Latin text with NFC, six-decimal numbers, -0, null versus absent key, empty string), as an acceptance condition.
-Guardian owner package, agreeing with all five document recommendations: C8-1=C (a read-only path on the deployment host, since V2 is a browser app) BUT the code must keep a pluggable transport so the choice does not block G14c-2; C8-2=A (fetch at most every minute, TTL five minutes); C8-3=A (public keys ship with the V2 build, never the private key, with a revocation path confirmed before real use); C8-4=A (drop legacy filters for real records); C8-5=A (cycle only for now, with the delay acknowledged). Authorize G14c-2 with N1-N3 and ephemeral test keys.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260918_CLAUDE_REVIEW_G14C1_V2_CONSUMER_DESIGN.md
+REVIEW_VERDICT: The owner approved in chat: «توصیه‌های نگهبان برای C8-1 تا C8-5 تصویب شد؛ G14c-2 مجاز است.»
+Decisions: C8-1 a read-only path on the deployment host, with a PLUGGABLE transport in code; C8-2 fetch at most every 60s, TTL 300s from generated_at, clock skew 30s; C8-3 public keys ship with the V2 build, never a private key, with a revocation path confirmed before real use; C8-4 category, floor_level, building_id, products and discount_percent filters are dropped for real records with nothing invented; C8-5 removal after a claim suspension happens only through the normal cycle, with the one-cycle delay accepted.
+Released CODEX-20260918-G14C2-V2-CONSUMER-IMPLEMENTATION-001 on a NEW branch codex/v2-public-consumer from origin/codex/v2-intent-flow-foundation at f4d326f, local commits only:
+- a new mlino2/app/src/publicExport module: canonical (mirroring V1 byte rules), verify (Ed25519 via WebCrypto), trustBundle (public-key allowlist plus revocation, never modifiable by an artifact), transport (a pluggable port with fetch and file implementations), consumer (verify then TTL then atomic single-reference swap), mapping (C4, with absent fields never invented and validity re-checked at read time)
+- mock isolation behind an explicit demo mode, with no fallback or conversion
+- Guardian conditions: N1 the device clock makes TTL a correctness guard, not security; N2 a written threat model; N3 byte parity PROVEN with fixtures generated once from the V1 implementation and committed
+- vitest tests covering the design C7 list plus the parity fixtures; build and test three consecutive times with committed logs; no network, Docker or database
+Out of scope, separately approved later: merging into the V2 branch, and the operational key, publishing path and schedule.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260918_OWNER_APPROVAL_G14C2_IMPLEMENTATION.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). main is 25d44e2 before this commit; the G14c branch is at 0bd14bb on origin. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-18T10:00:00+03:30
-NEXT_ACTION: The owner decides (suggested: "Guardian recommendations for C8-1..C8-5 approved; G14c-2 authorized"). Then the Guardian records the decisions and releases G14c-2. The real key, the schedule and the publishing path stay a separate operational decision.
+CODE_COMMIT_SHA: (none - approval record only). main is b56329e before this commit; the design branch is at 0bd14bb on origin; the V2 base is f4d326f. Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-18T10:40:00+03:30
+NEXT_ACTION: Codex executes G14c-2 with TARGET_HANDOFF_ID=HANDOFF-20260918-OWNER-APPROVAL-G14C2. Then Guardian review, then the owner decides the V2-branch merge.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-Q8-3-MERGE
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260918-G14C1-V2-CONSUMER-DESIGN-006
+PREVIOUS_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-G14C1-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), recording the owner's C8 decisions and releasing G14c-2
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: Read 0bd14bb from the shared object store: scope, the full design document, the report, and independent verification of cited lines on both origin/main and origin/codex/v2-intent-flow-foundation.
+HANDOFF_PRECONDITION_CHECK: origin/main is b56329e; origin/codex/v2-public-consumer-design is 0bd14bb; origin/codex/v2-intent-flow-foundation is f4d326f. The V2 app already uses vitest with 13 existing test files, so the required tests need no new dependency.
 
-SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main, plus the new Codex branch published unchanged. No credential, Docker, database or code action.
+SCOPE_CONSTRAINT_NOTE: Only the new approval record and the AI_HANDOFF files were added or changed on main. No credential, Docker, database or code action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
