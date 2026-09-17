@@ -1,34 +1,31 @@
-HANDOFF_ID: HANDOFF-20260917-GUARDIAN-Q8-2-REVIEW
+HANDOFF_ID: HANDOFF-20260917-GUARDIAN-Q8-MERGE-Q8-3
 AUTHOR: CLAUDE
-PHASE: Q8_2_ACCEPTED_OWNER_MERGE_AND_APPLY_PENDING
+PHASE: Q8_MERGED_Q8_3_RELEASED
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: Q8-2 (8f7c07e, 6b035b1, 252301f, b9d5028, e0348a1; published by the Guardian) is ACCEPTED.
-Verified:
-- 0 forbidden files; schema.prisma, earlier migrations, Dockerfile, package, tsconfig and public-export untouched; the worktree is clean
-- the migration SQL is byte-for-byte the approved CCR block (compared by the Guardian)
-- no drift: migrate status reports up to date and migrate diff reports no difference, with schema.prisma left unchanged
-- all six claimed test names exist; three full runs at 31/31 suites and 390/390 tests; the build passes
-- the disposable container was removed; the owner's live DB is untouched (7 migrations, no such index)
-- an early failed attempt caused by a wrong port mapping was recorded in the evidence instead of being hidden; no live or wrong database was involved
-Test quality: the index existence, validity and predicate; a second publish mapped to CONFLICT with no orphan Publication and the profile left UNPUBLISHED; concurrent publishes yielding exactly one success and one CONFLICT rather than INTERNAL_ERROR; withdraw freeing the slot; other unique messages unchanged; the export still producing one record. The real Prisma error shape was captured in the test rather than guessed.
-Note N1: the mapping has two conditions - the exact index name, which is safe, and a fallback on the Prisma error shape (modelName Publication with target organization_id), which is slightly broad. It is needed because that path does not surface the index name. No other constraint matches that shape today; tighten it when Prisma exposes the constraint there.
-Trial merge into main 786f18e: tree 50448943, clean, 12 files, 0 forbidden paths.
-Guardian owner package: approve BOTH together, to keep the risky window short - (1) merge Q8 into main, (2) Q8-3 applying the migration to mlino-v1-local-db with the G14a-3 backup method. No compose build until Q8-3 completes.
-G14c-1 still has not started and this record changes the handoff ID again, so it is re-issued as CODEX-20260917-G14C1-V2-CONSUMER-DESIGN-004 with identical content.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260917_CLAUDE_REVIEW_Q8_2_IMPLEMENTATION.md
+REVIEW_VERDICT: The owner authorized in chat: «ادغام Q8 در main و Q8-3 مجاز است».
+The Guardian MERGED Q8 into main:
+- Merge commit 736bf2d73221368d20e7afe125ab1970d8dfa510, tree 47b97890, parents 68fb692 and e0348a1.
+- The tree equals the trial; 12 files, +695/-2; 0 forbidden files; schema.prisma, Dockerfile and package untouched.
+- The new migration folder is in main and its file hash 3874e179 equals the reviewed one.
+- The local database still has 7 migrations; the index is NOT applied yet. That is Q8-3.
+WARNING: between this merge and the end of Q8-3, no docker compose up --build and no v1-migrate, or the migration lands without a backup.
+Released CODEX-20260917-Q8-3-LOCAL-INDEX-MIGRATION-001 (method = G14a-3 run 3): a source check, a pre-state with the CCR P4 duplicate query returning zero rows and the index absent, backup B1-B6 to C:\Users\galexy\mlino-backups\ as mlino_v1_pre_q8_<TS>.dump, migrate status showing exactly one pending, a single deploy, verification a)-f) including 8 migrations and index validity, and a resolve --rolled-back failure path.
+IMPORTANT: the in-memory DATABASE_URL exception was granted for G14a-3 ONLY and has expired. The Q8-3 instruction performs C0 only if the owner sends a sentence extending it to Q8-3; otherwise Codex stops before touching anything. The Guardian asked the owner for that one line.
+G14c-1 is re-issued as CODEX-20260917-G14C1-V2-CONSUMER-DESIGN-005 targeting this handoff; only the id, target and pin change.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260917_CLAUDE_REVIEW_Q8_MERGE_Q8_3_RELEASE.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only; no merge executed). main is 786f18e before this commit; the Q8 branch is at e0348a1 on origin. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-17T20:10:00+03:30
-NEXT_ACTION: The owner decides (suggested: "merge of Q8 into main and Q8-3 authorized"). Then the Guardian merges --no-ff, records it, releases Q8-3 at once, and re-verifies the runtime afterwards.
+CODE_COMMIT_SHA: 736bf2d73221368d20e7afe125ab1970d8dfa510 (merge). Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-17T20:40:00+03:30
+NEXT_ACTION: Codex executes Q8-3 with TARGET_HANDOFF_ID=HANDOFF-20260917-GUARDIAN-Q8-MERGE-Q8-3, once the owner extends the connection exception. Then Guardian review and a read-only runtime verification. G14c1-005 may run in parallel.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260917-OWNER-APPROVAL-Q8-2
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260917-Q8-2-PROFILE-UNIQUE-IMPLEMENTATION-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260917-GUARDIAN-Q8-2-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), executing the owner-authorized Q8 merge and releasing Q8-3
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: Read e0348a1 from the shared object store: scope, the migration compared with the CCR, the error-adapter diff, the spec, the report and the evidence. Trial merge-tree against origin/main. The live DB was checked read-only.
+HANDOFF_PRECONDITION_CHECK: origin/main was 68fb692 and clean; origin/codex/core-profile-unique-ccr was e0348a1 (published by the Guardian). The trial merge-tree gave 47b97890 and the merge tree equals it. The local DB was checked read-only and still has 7 migrations.
 
-SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main, plus the Codex branch ref published unchanged (a fast-forward from e74191f to e0348a1). No merge, credential, Docker write, database write or code action.
+SCOPE_CONSTRAINT_NOTE: The --no-ff merge plus the AI_HANDOFF record files. No credential, Docker write, database write, compose or build action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
