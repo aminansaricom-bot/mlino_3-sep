@@ -668,3 +668,17 @@ VALIDATION: GW2-P PASS; FINAL DTO block LF-verbatim; E1-E9 present; documentatio
 SCOPE: Design document only, report and append-only Handoff; E9 questions remain OPEN, no S decision changed.
 NEXT_ACTION: Architecture Guardian review; no push or G14b-2/G14c automatically.
 CREATED_AT: 2026-09-17
+
+---
+HANDOFF_ID: HANDOFF-20260917-V1-PUBLIC-EXPORT
+AUTHOR: CODEX
+PHASE: G14B2_PUBLIC_EXPORT_IMPLEMENTATION
+STATUS: DELIVERED_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260917-G14B2-PUBLIC-EXPORT-IMPLEMENTATION-001
+TARGET_HANDOFF_ID: HANDOFF-20260917-OWNER-APPROVAL-G14B2
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260917_CODEX_G14B2_PUBLIC_EXPORT_IMPLEMENTATION_REPORT.md
+IMPLEMENTATION_COMMITS: 607da60, b5e1987
+VALIDATION: GW2-P PASS; TypeScript PASS; focused 16/16; three fresh tmpfs PostgreSQL runs each 30 suites and 384 tests PASS; container/volume counts unchanged.
+SCOPE: V1 public-export module, test, design decision record, allowed config entries, evidence and report only; no schema/migration/V2 change, no push or real key.
+NEXT_ACTION: Architecture Guardian review; no merge, G14c or operational schedule automatically.
+CREATED_AT: 2026-09-17
