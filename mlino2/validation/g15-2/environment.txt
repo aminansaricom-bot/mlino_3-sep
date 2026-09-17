@@ -1,0 +1,13 @@
+WORKTREE=C:\Users\galexy\mlino code\core-g15-transaction-robustness
+BRANCH=codex/core-g15-transaction-robustness
+HEAD_AT_ACCEPTANCE=1dc6818482fca53607a96be0a63b4b45b18126e0
+POSTGRES_IMAGE=postgres:16-alpine
+POSTGRES_MAJOR=16
+TEST_HOST=127.0.0.1
+TEST_PORT=5499
+TEST_STORAGE=tmpfs:/var/lib/postgresql/data
+PRISMA_CLI=5.22.0
+TEST_CONNECTION_LIMIT=10
+LIVE_DATABASE_CONTACTED=false
+PUSH_STAGING_USED=false
+OPTIONAL_CPU_STRESS_RUN=NOT_RUN

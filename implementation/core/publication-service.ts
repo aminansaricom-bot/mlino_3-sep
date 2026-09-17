@@ -1,3 +1,4 @@
+import { runCoreTransaction } from './transaction';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { AuthContext, requireActiveMembership, requireNonEmpty, validateAuthContext } from './auth-context';
 import { mapCoreDatabaseError } from './error-adapter';
@@ -30,7 +31,7 @@ export class PublicationService {
     validateAuthContext(context);
     requireNonEmpty(targetId, 'targetId');
     requireNonEmpty(reason, 'reason');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       const membership = await requireActiveMembership(tx, context);
       const grant = await tx.permissionGrant.findFirst({ where: { organizationId: context.organizationId, membershipId: membership.id, permissionKey: 'publication.manage', grantStatus: 'ACTIVE' }, select: { id: true } });

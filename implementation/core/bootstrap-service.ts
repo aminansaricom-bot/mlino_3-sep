@@ -1,3 +1,4 @@
+import { runCoreTransaction } from './transaction';
 import { PrismaClient } from '@prisma/client';
 import { requireNonEmpty } from './auth-context';
 import { CoreDomainError, conflict } from './errors';
@@ -21,7 +22,7 @@ export class BootstrapService {
     requireNonEmpty(input.displayName, 'displayName');
     requireNonEmpty(input.foundingIdentityProvider, 'foundingIdentityProvider');
     requireNonEmpty(input.foundingExternalSubject, 'foundingExternalSubject');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       const organizations = new OrganizationRepository(tx);
       const memberships = new MembershipRepository(tx);
       if (await organizations.findById(input.organizationId)) throw conflict('organization bootstrap already completed');

@@ -1,3 +1,4 @@
+import { runCoreTransaction } from './transaction';
 import { OfferShape, Prisma, PrismaClient } from '@prisma/client';
 import { AuthContext, requireMembershipPermission, requireNonEmpty, requireSameOrganization, validateAuthContext } from './auth-context';
 import { mapCoreDatabaseError } from './error-adapter';
@@ -35,7 +36,7 @@ export class OfferService {
     requireSameOrganization(context, input.organizationId);
     requireNonEmpty(input.offerKey, 'offerKey');
     this.assertAllowedKeys(input, ['organizationId', 'offerKey']);
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'offer.manage');
       return tx.offer.create({ data: { organizationId: context.organizationId, offerKey: input.offerKey } });
@@ -49,7 +50,7 @@ export class OfferService {
     requireNonEmpty(input.offerId, 'offerId');
     requireNonEmpty(input.name, 'name');
     this.assertAllowedKeys(input, ['offerId', 'name', 'shortDescription', 'offerShape', 'terms', 'priceAmount', 'priceCurrency', 'onRequest', 'validFrom', 'validUntil']);
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'offer.manage');
       const offerRows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`SELECT id FROM offers WHERE id = ${input.offerId} AND organization_id = ${context.organizationId} AND lifecycle_status = 'ACTIVE' FOR UPDATE`);
@@ -89,7 +90,7 @@ export class OfferService {
     this.assertAllowedKeys(input, ['offerVersionId', 'capabilityId']);
     requireNonEmpty(input.offerVersionId, 'offerVersionId');
     requireNonEmpty(input.capabilityId, 'capabilityId');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'offer.manage');
       const versionRows = await tx.$queryRaw<Array<{ id: string; publication_status: string }>>(Prisma.sql`SELECT id, publication_status FROM offer_versions WHERE id = ${input.offerVersionId} AND organization_id = ${context.organizationId} FOR UPDATE`);

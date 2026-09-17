@@ -1,0 +1,82 @@
+BEGIN run=2 head=1dc6818482fca53607a96be0a63b4b45b18126e0
+HOST_CONTEXT label=before-run-2 running_container_count=7 cpu_load_percent=29
+MIGRATE_EXIT=0
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "127.0.0.1:5499"
+
+7 migrations found in prisma/migrations
+
+Applying migration `20260814065924_init`
+Applying migration `20260815033018_add_situation_key`
+Applying migration `20260815113714_rename_actor_core_entity_id_to_actor_id`
+Applying migration `20260906001500_add_ownership_type`
+Applying migration `20260910020000_add_external_workspace_link`
+Applying migration `20260913010000_add_core_foundation`
+Applying migration `20260914010000_add_publication_published_content`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260814065924_init/
+    └─ migration.sql
+  └─ 20260815033018_add_situation_key/
+    └─ migration.sql
+  └─ 20260815113714_rename_actor_core_entity_id_to_actor_id/
+    └─ migration.sql
+  └─ 20260906001500_add_ownership_type/
+    └─ migration.sql
+  └─ 20260910020000_add_external_workspace_link/
+    └─ migration.sql
+  └─ 20260913010000_add_core_foundation/
+    └─ migration.sql
+  └─ 20260914010000_add_publication_published_content/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+
+JEST_EXIT=0
+jest.cmd : PASS test/core/identity-claim-verification.spec.ts (6.277 s)
+At C:\Users\galexy\mlino code\core-g15-transaction-robustness\mlino2\validation\g15-2\run-g15-2-acceptance.ps1:30 
+char:15
++     $output = & $file @arguments 2>&1 | Out-String
++               ~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PASS test/core/...ec.ts (6.277 s):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+PASS test/core/g10c-profile-capability.spec.ts
+PASS test/core/g14a2-published-content.spec.ts
+PASS test/core/g10d-offer.spec.ts
+PASS test/core/core-authority.spec.ts
+PASS test/foundation/opportunity-read/opportunity-read.spec.ts
+PASS test/core/g10e-evidence.spec.ts
+PASS test/http/read-api.spec.ts
+PASS test/foundation/opportunity-projection/rebuild-projection.spec.ts
+PASS test/value-engines/cancellation/cancellation-detector.spec.ts
+PASS test/value-engines/followup/followup-detector.spec.ts
+PASS test/value-engines/capacity/capacity-detector.spec.ts
+PASS test/foundation/opportunity-projection/situation-lookup.spec.ts
+PASS test/foundation/access-decision/org-membership-ac2-port.spec.ts
+PASS test/foundation/event-admission-validation.spec.ts
+PASS test/foundation/workspace-link.spec.ts
+PASS test/feed/opportunity-feed.spec.ts
+PASS test/foundation/event-admission-concurrency.spec.ts
+PASS test/foundation/event-admission.spec.ts
+PASS test/core/g15-transaction-robustness.spec.ts
+PASS test/foundation/ownership-type.spec.ts
+PASS test/test-db-guard.spec.ts
+PASS test/foundation/auth-adapter.spec.ts
+PASS test/foundation/business-context.spec.ts
+PASS test/foundation/recommendation/recommendation-contract.spec.ts
+PASS test/core/error-adapter.spec.ts
+PASS test/core/db-guard.spec.ts
+PASS test/briefing/proactive-briefing.spec.ts
+PASS test/foundation/situation-key.spec.ts
+
+Test Suites: 29 passed, 29 total
+Tests:       368 passed, 368 total
+Snapshots:   0 total
+Time:        28.843 s, estimated 30 s
+Ran all test suites.
+
+TOTALS suite=[Test Suites: 29 passed, 29 total] tests=[Tests:       368 passed, 368 total]
+REMOVED_CONTAINER name=mlino-g15-2-run-2 exit=0

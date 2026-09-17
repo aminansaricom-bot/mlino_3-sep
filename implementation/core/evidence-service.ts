@@ -1,3 +1,4 @@
+import { runCoreTransaction } from './transaction';
 import { EvidenceSourceKind, Prisma, PrismaClient } from '@prisma/client';
 import { AuthContext, requireMembershipPermission, requireNonEmpty, validateAuthContext } from './auth-context';
 import { mapCoreDatabaseError } from './error-adapter';
@@ -31,7 +32,7 @@ export class EvidenceService {
     if (input.confidence !== undefined && input.confidence !== null && (typeof input.confidence !== 'number' || input.confidence < 0 || input.confidence > 1)) throw validationFailed('evidence confidence must be between 0 and 1');
     if (hasCapability) requireNonEmpty(input.capabilityId!, 'capabilityId');
     if (hasOfferVersion) requireNonEmpty(input.offerVersionId!, 'offerVersionId');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'evidence.manage');
       const capability = input.capabilityId === undefined ? null : await tx.capability.findUnique({ where: { id_organizationId: { id: input.capabilityId, organizationId: context.organizationId } }, select: { id: true } });
@@ -73,7 +74,7 @@ export class EvidenceService {
   private async changeConfirmation(context: AuthContext, evidenceId: string) {
     validateAuthContext(context);
     requireNonEmpty(evidenceId, 'evidenceId');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       const actor = await requireMembershipPermission(tx, context, 'evidence.confirm');
       const evidence = await tx.evidence.findUnique({ where: { id_organizationId: { id: evidenceId, organizationId: context.organizationId } } });
@@ -89,7 +90,7 @@ export class EvidenceService {
   private async changeStatus(context: AuthContext, evidenceId: string, status: 'EXPIRED' | 'WITHDRAWN') {
     validateAuthContext(context);
     requireNonEmpty(evidenceId, 'evidenceId');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'evidence.manage');
       const evidence = await tx.evidence.findUnique({ where: { id_organizationId: { id: evidenceId, organizationId: context.organizationId } } });

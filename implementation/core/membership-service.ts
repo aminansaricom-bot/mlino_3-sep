@@ -1,3 +1,4 @@
+import { runCoreTransaction } from './transaction';
 import { PrismaClient } from '@prisma/client';
 import { AuthContext, requireMembershipPermission, requireNonEmpty, requireSameOrganization, validateAuthContext } from './auth-context';
 import { CoreDomainError, conflict, validationFailed } from './errors';
@@ -17,7 +18,7 @@ export class MembershipService {
     requireSameOrganization(context, input.organizationId);
     requireNonEmpty(input.identityProvider, 'identityProvider');
     requireNonEmpty(input.externalSubject, 'externalSubject');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId, memberOrganizationMissingError());
       await requireMembershipPermission(tx, context, 'membership.create');
       return new MembershipRepository(tx).create(context.organizationId, { identityProvider: input.identityProvider, externalSubject: input.externalSubject });
@@ -33,7 +34,7 @@ export class MembershipService {
   }
 
   private async revokeMember(context: AuthContext, targetMembershipId: string, reason: string) {
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId, memberOrganizationMissingError());
       const actor = await requireMembershipPermission(tx, context, 'membership.revoke');
       const memberships = new MembershipRepository(tx);
@@ -53,7 +54,7 @@ export class MembershipService {
     const actor = await requireVerifiedPlatformActor(this.verifier, platformCredential);
     requireNonEmpty(targetMembershipId, 'targetMembershipId');
     requireNonEmpty(reason, 'reason');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, organizationId);
       const target = await new MembershipRepository(tx).findById(organizationId, targetMembershipId);
       if (!target) throw validationFailed('membership not found in organization');

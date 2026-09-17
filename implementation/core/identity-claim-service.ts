@@ -1,3 +1,4 @@
+import { runCoreTransaction } from './transaction';
 import { PrismaClient } from '@prisma/client';
 import { AuthContext, requireActiveMembership, requireMembershipPermission, requireNonEmpty, requireSameOrganization, validateAuthContext } from './auth-context';
 import { mapCoreDatabaseError } from './error-adapter';
@@ -21,7 +22,7 @@ export class IdentityClaimService {
     requireSameOrganization(context, input.organizationId);
     requireNonEmpty(input.identifierType, 'identifierType');
     requireNonEmpty(input.identifierValue, 'identifierValue');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId, memberOrganizationMissingError());
       const actor = await requireMembershipPermission(tx, context, 'identity_claim.submit');
       return tx.businessIdentityClaim.create({
@@ -41,7 +42,7 @@ export class IdentityClaimService {
   async read(context: AuthContext, claimId: string) {
     validateAuthContext(context);
     requireNonEmpty(claimId, 'claimId');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await requireActiveMembership(tx, context);
       return tx.businessIdentityClaim.findUnique({ where: { id_organizationId: { id: claimId, organizationId: context.organizationId } } });
     }).catch((error: unknown) => {
@@ -54,7 +55,7 @@ export class IdentityClaimService {
     requireNonEmpty(organizationId, 'organizationId');
     requireNonEmpty(claimId, 'claimId');
     requireNonEmpty(reason, 'reason');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, organizationId);
       const claim = await tx.businessIdentityClaim.findUnique({ where: { id_organizationId: { id: claimId, organizationId } } });
       if (!claim) throw validationFailed('identity claim not found in organization');

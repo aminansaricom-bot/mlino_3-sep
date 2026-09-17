@@ -1,3 +1,4 @@
+import { runCoreTransaction } from './transaction';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { AuthContext, requireMembershipPermission, requireNonEmpty, requireSameOrganization, validateAuthContext } from './auth-context';
 import { mapCoreDatabaseError } from './error-adapter';
@@ -28,7 +29,7 @@ export class BusinessProfileService {
     requireSameOrganization(context, input.organizationId);
     requireNonEmpty(input.name, 'name');
     this.assertAllowedKeys(input, ['organizationId', 'name', 'description', 'latitude', 'longitude', 'addressText', 'contactInformation', 'links', 'businessHours']);
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'business_profile.manage');
       return tx.businessProfile.create({ data: { organizationId: context.organizationId, ...this.publicData(input) } as Prisma.BusinessProfileUncheckedCreateInput });
@@ -44,7 +45,7 @@ export class BusinessProfileService {
     if (input.name !== undefined) requireNonEmpty(input.name, 'name');
     const data = this.publicData(input);
     if (Object.keys(data).length === 0) throw validationFailed('at least one public field is required');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'business_profile.manage');
       const profile = await tx.businessProfile.findUnique({ where: { id_organizationId: { id: profileId, organizationId: context.organizationId } } });
@@ -62,7 +63,7 @@ export class BusinessProfileService {
   async unlinkIdentityClaim(context: AuthContext, profileId: string) {
     validateAuthContext(context);
     requireNonEmpty(profileId, 'profileId');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'business_profile.manage');
       const profile = await tx.businessProfile.findUnique({ where: { id_organizationId: { id: profileId, organizationId: context.organizationId } } });
@@ -80,7 +81,7 @@ export class BusinessProfileService {
     validateAuthContext(context);
     requireNonEmpty(profileId, 'profileId');
     requireNonEmpty(claimId, 'claimId');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'business_profile.manage');
       const profile = await tx.businessProfile.findUnique({ where: { id_organizationId: { id: profileId, organizationId: context.organizationId } } });

@@ -1,3 +1,4 @@
+import { runCoreTransaction } from './transaction';
 import { CapabilityAudience, PrismaClient } from '@prisma/client';
 import { AuthContext, requireMembershipPermission, requireNonEmpty, requireSameOrganization, validateAuthContext } from './auth-context';
 import { mapCoreDatabaseError } from './error-adapter';
@@ -30,7 +31,7 @@ export class CapabilityService {
     requireNonEmpty(input.name, 'name');
     requireNonEmpty(input.categoryKey, 'categoryKey');
     this.assertAllowedKeys(input, ['organizationId', 'capabilityKey', 'name', 'shortDescription', 'categoryKey', 'audience']);
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'capability.manage');
       return tx.capability.create({
@@ -53,7 +54,7 @@ export class CapabilityService {
     requireNonEmpty(capabilityId, 'capabilityId');
     this.assertAllowedKeys(input, ['name', 'shortDescription', 'categoryKey', 'audience']);
     if (Object.keys(input).length === 0) throw validationFailed('at least one public field is required');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'capability.manage');
       const capability = await tx.capability.findUnique({ where: { id_organizationId: { id: capabilityId, organizationId: context.organizationId } } });
@@ -73,7 +74,7 @@ export class CapabilityService {
   async confirm(context: AuthContext, capabilityId: string) {
     validateAuthContext(context);
     requireNonEmpty(capabilityId, 'capabilityId');
-    return this.db.$transaction(async (tx) => {
+    return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       const actor = await requireMembershipPermission(tx, context, 'capability.confirm');
       const capability = await tx.capability.findUnique({ where: { id_organizationId: { id: capabilityId, organizationId: context.organizationId } } });
