@@ -1,37 +1,32 @@
-HANDOFF_ID: HANDOFF-20260918-GUARDIAN-Q8-3-MERGE
+HANDOFF_ID: HANDOFF-20260918-GUARDIAN-G14C1-REVIEW
 AUTHOR: CLAUDE
-PHASE: Q8_COMPLETE_G14C1_PENDING
+PHASE: G14C1_ACCEPTED_OWNER_DECISIONS_PENDING
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: Q8-3 (53cef38, 8bf18a1, 9630be3; published by the Guardian) SUCCEEDED and its evidence is merged.
-The owner granted the connection exception in chat: «اجازه‌ی فقط-حافظه‌ی خواندن DATABASE_URL برای Q8-3 هم برقرار است.» That exception EXPIRED with Q8-3; any future live-DB step needs a fresh one.
-Guardian verification, read-only and independent:
-- 8 finished migrations, none rolled back; the newest is 20260917010000_add_business_profile_published_unique
-- the index exists, is UNIQUE and valid, with the predicate WHERE publication_status = 'PUBLISHED'
-- triggers 13 and CHECKs 30 unchanged; registry 4; business_profiles 0; publications 0
-- both containers unchanged; read-api returns 401; no temp dump in the container; no dump in the repository
-- backup mlino_v1_pre_q8_20260917T202400Z.dump on the host: 103980 bytes, SHA-256 3ed1d514... equal to the in-container value, PGDMP header, 215 restore entries
-- c0.log carries only booleans; the five grep hits are the script's own redaction patterns and a localhost curl
-- migrate status exiting 1 was correctly read as "one migration pending", not as a failure; deploy ran once with exit 0
-- two earlier attempts stopped on script bugs BEFORE any DB connection, backup or migration, and their logs are kept
-Merged into main: merge commit c482318894e4b2dacc1ba3b18f9bee56bebdae1a, tree 8f39a942, parents 0bc1eb4 and 9630be3; 28 files, additions only, 0 product files.
-THE COMPOSE-BUILD HOLD IS LIFTED: the migration is applied, so a build can no longer apply it unbacked.
-Project state: G14a, G15, G14b and Q8 are all in main; G14a and Q8 are also applied to the local DB.
-Remaining: (1) G14c, the V2 consumer, starting with the design; (2) the real key adapter and scheduling, an operational owner decision; (3) tightening the error mapping noted as N1 in the Q8-2 review.
-G14c-1 is re-issued as CODEX-20260918-G14C1-V2-CONSUMER-DESIGN-006 against this handoff; only the id, target and pin change.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260918_CLAUDE_REVIEW_Q8_3_LOCAL_MIGRATION_MERGE.md
+REVIEW_VERDICT: G14c-1 (5a3cc98..0bd14bb; published by the Guardian as codex/v2-public-consumer-design) is ACCEPTED. The design document (9222ebd1, DRAFT) is a sound decision basis.
+Verified:
+- exactly three allowed files; the handoff is append-only; 0 files under implementation/, in the FINAL contract or on the V2 branch; the worktree is clean
+- the hash I computed matches the report; GW2-P recorded
+- citations verified independently: loader.ts is the only Mock entry point in V2; validate.ts accepts only draft-1; BusinessDirectoryService.loadSnapshot assigns snapshot and byId separately, which is exactly the atomicity gap the design closes; the producer always writes stale: false
+Strengths: the acceptance order ends with the cache swap so no rejection touches the cache; fail-closed for missing, corrupt, unsigned, unknown or revoked key, expired, future-dated and older-than-cache artifacts, with no Mock fallback; the signed stale field is correctly separated from real freshness; legacy filters are dropped rather than filled with invented data; validity dates are re-checked at read time; the cache swaps through one immutable reference.
+Guardian notes for G14c-2:
+- N1: the browser clock is user-controlled, so TTL is a correctness and UX guard, not a security control; real freshness comes from the short producer cycle. State this explicitly.
+- N2: write the threat model down - the signature protects the artifact in transit and at rest, not a compromised V2 origin, since the public key ships with the app.
+- N3: byte parity between V1 and V2 canonicalization must be proven by shared test vectors (non-Latin text with NFC, six-decimal numbers, -0, null versus absent key, empty string), as an acceptance condition.
+Guardian owner package, agreeing with all five document recommendations: C8-1=C (a read-only path on the deployment host, since V2 is a browser app) BUT the code must keep a pluggable transport so the choice does not block G14c-2; C8-2=A (fetch at most every minute, TTL five minutes); C8-3=A (public keys ship with the V2 build, never the private key, with a revocation path confirmed before real use); C8-4=A (drop legacy filters for real records); C8-5=A (cycle only for now, with the delay acknowledged). Authorize G14c-2 with N1-N3 and ephemeral test keys.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260918_CLAUDE_REVIEW_G14C1_V2_CONSUMER_DESIGN.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: c482318894e4b2dacc1ba3b18f9bee56bebdae1a (an evidence-only merge). Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-18T09:00:00+03:30
-NEXT_ACTION: Codex may run G14c1-006 with TARGET_HANDOFF_ID=HANDOFF-20260918-GUARDIAN-Q8-3-MERGE. The owner decides the key and scheduling whenever they wish.
+CODE_COMMIT_SHA: (none - review only). main is 25d44e2 before this commit; the G14c branch is at 0bd14bb on origin. Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-18T10:00:00+03:30
+NEXT_ACTION: The owner decides (suggested: "Guardian recommendations for C8-1..C8-5 approved; G14c-2 authorized"). Then the Guardian records the decisions and releases G14c-2. The real key, the schedule and the publishing path stay a separate operational decision.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260917-GUARDIAN-Q8-MERGE-Q8-3
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260917-Q8-3-LOCAL-INDEX-MIGRATION-001 and merging its evidence
+PREVIOUS_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-Q8-3-MERGE
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260918-G14C1-V2-CONSUMER-DESIGN-006
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: Read 9630be3 from the shared object store (scope, leak grep, report, all evidence logs). Independent read-only DB, container, read-api and backup-file verification. The trial merge-tree gave 8f39a942 and the merge tree equals it.
+HANDOFF_PRECONDITION_CHECK: Read 0bd14bb from the shared object store: scope, the full design document, the report, and independent verification of cited lines on both origin/main and origin/codex/v2-intent-flow-foundation.
 
-SCOPE_CONSTRAINT_NOTE: The evidence-only merge plus the AI_HANDOFF record files, and the Codex branch ref published unchanged. The Guardian performed no write to the database and never opened any .env file.
+SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main, plus the new Codex branch published unchanged. No credential, Docker, database or code action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
