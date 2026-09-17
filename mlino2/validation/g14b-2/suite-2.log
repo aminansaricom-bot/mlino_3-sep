@@ -1,0 +1,37 @@
+PASS test/core/identity-claim-verification.spec.ts (11.046 s)
+PASS test/core/g10c-profile-capability.spec.ts (7.023 s)
+PASS test/core/g10d-offer.spec.ts (6.617 s)
+PASS test/core/core-authority.spec.ts (6.326 s)
+PASS test/http/read-api.spec.ts (5.811 s)
+PASS test/core/g14a2-published-content.spec.ts
+PASS test/foundation/event-admission-concurrency.spec.ts
+PASS test/foundation/opportunity-read/opportunity-read.spec.ts
+PASS test/core/g10e-evidence.spec.ts
+PASS test/foundation/opportunity-projection/rebuild-projection.spec.ts
+PASS test/value-engines/cancellation/cancellation-detector.spec.ts
+PASS test/value-engines/capacity/capacity-detector.spec.ts
+PASS test/foundation/opportunity-projection/situation-lookup.spec.ts
+PASS test/value-engines/followup/followup-detector.spec.ts
+PASS test/foundation/access-decision/org-membership-ac2-port.spec.ts
+PASS test/public-export/public-export.spec.ts
+PASS test/foundation/event-admission-validation.spec.ts
+PASS test/foundation/workspace-link.spec.ts
+PASS test/feed/opportunity-feed.spec.ts
+PASS test/foundation/event-admission.spec.ts
+PASS test/core/g15-transaction-robustness.spec.ts
+PASS test/foundation/ownership-type.spec.ts
+PASS test/test-db-guard.spec.ts
+PASS test/foundation/recommendation/recommendation-contract.spec.ts
+PASS test/briefing/proactive-briefing.spec.ts
+PASS test/foundation/auth-adapter.spec.ts
+PASS test/foundation/business-context.spec.ts
+PASS test/core/error-adapter.spec.ts
+PASS test/core/db-guard.spec.ts
+PASS test/foundation/situation-key.spec.ts
+
+Test Suites: 30 passed, 30 total
+Tests:       384 passed, 384 total
+Snapshots:   0 total
+Time:        90.963 s, estimated 91 s
+Ran all test suites.
+EXIT_CODE=0

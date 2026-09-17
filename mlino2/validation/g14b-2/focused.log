@@ -1,0 +1,25 @@
+PASS test/public-export/public-export.spec.ts (6.267 s)
+  G14b-2 public export
+    √ Q1 Ed25519 verifies and one-byte tamper fails; key_id is signed, value excluded (21 ms)
+    √ Q2 unknown key fails closed and ephemeral keys never enter artifact (4 ms)
+    √ Q3 CLI preserves current on signing failure and writes an artifact outside repository (194 ms)
+    √ Q4 export stale flag is signed and cannot be edited by polling consumer (5 ms)
+    √ Q5 invalid business_hours becomes null and reports only a reason code (35 ms)
+    √ Q6 invalid terms drops only that offer and null terms remains allowed (2 ms)
+    √ Q7 and Q9 live fresh_until is metadata and stale or unconfirmed capability is hidden (6 ms)
+    √ Q8 two published profiles omit entire organization with reason code (2 ms)
+    √ Q10 same data and as_of yield identical bytes; different as_of only changes generated_at and signature (40 ms)
+    √ E1 withdrawn and tied newer events suppress older snapshots (3 ms)
+    √ E1 replacement keeps only the latest published OfferVersion, with withdrawn old version hidden (4 ms)
+    √ expired claim, retired capability and future or expired offer validity hide content (5 ms)
+    √ cross-organization live eligibility cannot expose another tenant and logs contain no secret (2 ms)
+    √ E4 canonical bytes normalize Unicode, coordinate negative zero and distinguish null from omission (10 ms)
+    √ eligibility hides archived organization/profile, unverified claim, internal capability and retired offer (4 ms)
+    √ real PostgreSQL builder runs in one read-only transaction without changing publications (2167 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       16 passed, 16 total
+Snapshots:   0 total
+Time:        6.77 s
+Ran all test suites matching /test\\public-export\\public-export.spec.ts/i.
+EXIT_CODE=0

@@ -13,6 +13,7 @@
     "start": "node dist/http/server.js",
     "test": "jest",
     "test:watch": "jest --watch",
+    "public-export": "node dist/public-export/cli.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
