@@ -1,34 +1,42 @@
-HANDOFF_ID: HANDOFF-20260917-GUARDIAN-G14B1-REVIEW
+HANDOFF_ID: HANDOFF-20260917-OWNER-APPROVAL-G14B2
 AUTHOR: CLAUDE
-PHASE: G14B1_ACCEPTED_OWNER_DECISIONS_PENDING
+PHASE: G14B1_DECIDED_G14B2_RELEASED
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: G14b-1 (477075c and 9430c22; published by the Guardian as the new branch codex/v1-public-export) is ACCEPTED. The design document (5eebd9ff, DRAFT) is a good decision basis.
-Verified:
-- exactly the three allowed files; the FINAL contract, schema, migrations, code and the V2 branch are untouched; the worktree is clean
-- the DTO block is byte-equal to section 7 of the FINAL contract; nothing added
-- no key or secret anywhere; no S decision reopened; no E9 question decided
-- content comes only from snapshots; live rows only hide; the ROW_NUMBER query implements the selection rule on existing indexes
-- the signature covers the whole snapshot with a domain separator, excluding only signature.value, and key_id is inside the signed bytes
-- canonical byte rules, atomic write, two retained artifacts, and the producer never writes to the DB
-Two real gaps, both independently confirmed by the Guardian:
-- No capability snapshot carries fresh_until (the approved CCR allowlist is capability_key, name, short_description, audience), yet the DTO has the field.
-- business_profiles has no unique constraint on organization_id alone, so one organization can have several profiles.
-Guardian owner package Q1-Q10: Q1 Ed25519; Q2 OS secret store with a versioned key_id; Q3 a 60s scheduled task plus the CLI, two retained artifacts; Q4 polling with a fail-closed TTL; Q5 null the field; Q6 drop that offer; Q7 DIFFERS from the document - treat fresh_until as LIVE eligibility metadata (the document's "hide capabilities lacking it" would hide every capability in v1); Q8 at most one PUBLISHED profile per organization via a small partial-unique-index CCR, fail-closed meanwhile; Q9 DIFFERS - state policy v1 explicitly as confirmation plus freshness only; Q10 as_of as part of the input, with byte identity defined over data plus as_of plus policy plus key_id.
-Runtime verified after the G15 merge, read-only, at the owner's request: 7 migrations, jsonb column, CHECK validated, triggers 13, CHECKs 30, publications 0, registry 4, 22 tables, both containers up with 0 restarts and the same images, read-api 401, all three backups present.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260917_CLAUDE_REVIEW_G14B1_EXPORT_DESIGN.md
+REVIEW_VERDICT: The owner approved in chat: «توصیه‌های نگهبان برای Q1 تا Q10 تصویب شد؛ G14b-2 مجاز است.»
+Decisions recorded:
+- Q1 Ed25519 detached, base64url unpadded.
+- Q2 the private key in an OS secret store, a versioned key_id, ephemeral keys only in dev and tests.
+- Q3 a 60s scheduled task running the CLI, two retained artifacts, output outside the repository.
+- Q4 polling with a fail-closed TTL in the consumer; an immediate invalidation signal is a later, separate step.
+- Q5 invalid business_hours becomes null.
+- Q6 invalid terms drops that offer.
+- Q7 fresh_until is LIVE eligibility metadata read at build time, no CCR, because content stays snapshot-only and freshness is not content.
+- Q8 at most one PUBLISHED profile per organization; until the partial-unique-index CCR is approved, the producer skips such organizations fail-closed.
+- Q9 policy v1 is confirmation plus freshness only.
+- Q10 as_of is part of the input; byte identity means data plus as_of plus policy plus key_id.
+Released CODEX-20260917-G14B2-PUBLIC-EXPORT-IMPLEMENTATION-001 on codex/v1-public-export from 9430c22, local commits only:
+- a new implementation/public-export module (canonical, signing over node:crypto, builder, CLI), tsconfig include entries and a scripts entry only, no dependency change
+- the producer never writes to the database and runs in one read-only snapshot
+- tests in implementation/test/public-export covering selection, every hiding gate, Q5, Q6, Q8, byte identity, signature verify and tamper, and no-secret logging
+- validation: tsc, the focused spec, then THREE consecutive full-suite runs on fresh disposable DBs with committed logs
+Out of scope, each needing separate approval: the Q8 unique-index CCR, G14c, and any real scheduled run in the owner's environment.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260917_OWNER_APPROVAL_G14B2_EXPORT_IMPLEMENTATION.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - review only). main is 2eb8947 before this commit; the G14b branch is at 9430c22 on origin. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-17T15:00:00+03:30
-NEXT_ACTION: The owner decides (suggested: "Guardian recommendations for Q1-Q10 approved; G14b-2 authorized"). Then the Guardian records the decisions, releases G14b-2, and separately proposes the small partial-unique-index CCR if Q8 is approved.
+CODE_COMMIT_SHA: (none - approval record only). main is 0837884 before this commit; the G14b branch is at 9430c22 on origin. Content Studio f6946a8 remains local only, see OD-09.
+CREATED_AT: 2026-09-17T15:40:00+03:30
+NEXT_ACTION: Codex executes G14b-2 with TARGET_HANDOFF_ID=HANDOFF-20260917-OWNER-APPROVAL-G14B2. Then:
+1. Guardian review.
+2. The owner decides the merge.
+3. Then the Q8 CCR, then G14c.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260917-OWNER-APPROVAL-G14B1
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260917-G14B1-PUBLIC-EXPORT-DESIGN-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260917-GUARDIAN-G14B1-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), recording the owner's Q1-Q10 decisions and releasing G14b-2
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: Read 9430c22 from the shared object store (scope, the leak grep, the full design document, the report). Independently checked the BusinessProfile uniqueness in schema.prisma and the migration, and the capability snapshot allowlist in the approved CCR. Read-only Docker and DB verification.
+HANDOFF_PRECONDITION_CHECK: origin/main is 0837884, and origin/codex/v1-public-export is 9430c22 (published by the Guardian). The runtime was verified after the G15 merge and is unchanged.
 
-SCOPE_CONSTRAINT_NOTE: Only the new review and the AI_HANDOFF files were added or changed on main, plus the new Codex branch published unchanged. No credential, Docker write, database write or code action.
+SCOPE_CONSTRAINT_NOTE: Only the new approval record and the AI_HANDOFF files were added or changed on main. No credential, Docker, database or code action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
