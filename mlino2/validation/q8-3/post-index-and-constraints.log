@@ -1,0 +1,3 @@
+index=true|true|(publication_status = 'PUBLISHED'::"PublicationStatus")
+non_internal_triggers=13
+check_constraints=30

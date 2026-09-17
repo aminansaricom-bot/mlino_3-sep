@@ -1,0 +1,6 @@
+STATUS=HARD_STOP_BEFORE_MIGRATION
+MESSAGE=PowerShell automatic Matches variable collided with a local list in C0 parsing.
+BACKUP_FILE=none
+MIGRATION_ATTEMPTED=false
+DATABASE_CONNECTION_ATTEMPTED=false
+RESOLUTION=renamed the local list to urlLines; rerun from the beginning.

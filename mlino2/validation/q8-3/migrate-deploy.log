@@ -1,0 +1,15 @@
+EXIT_CODE=0
+Prisma schema loaded from implementation\prisma\schema.prisma
+Datasource "db": PostgreSQL database "mlino_v1", schema "public" at "localhost:5435"
+
+8 migrations found in prisma/migrations
+
+Applying migration `20260917010000_add_business_profile_published_unique`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260917010000_add_business_profile_published_unique/
+    └─ migration.sql
+
+All migrations have been successfully applied.

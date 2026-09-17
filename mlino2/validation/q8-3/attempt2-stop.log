@@ -1,0 +1,5 @@
+STATUS=HARD_STOP_BEFORE_MIGRATION
+MESSAGE=InspectContainers returned an incomplete parsed result before any database query.
+BACKUP_FILE=none
+MIGRATION_ATTEMPTED=false
+RESOLUTION=split the inspect output only after assigning the Docker result to a scalar.
