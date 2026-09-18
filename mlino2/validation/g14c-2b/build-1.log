@@ -1,0 +1,13 @@
+
+> mlino-v2-app@0.1.0 build
+> tsc -b && vite build
+
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 82 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.42 kB │ gzip:   0.28 kB
+dist/assets/index-BdbcfrNV.css   55.38 kB │ gzip:  17.95 kB
+dist/assets/index-CSua4yfd.js   378.10 kB │ gzip: 118.57 kB
+✓ built in 2.52s

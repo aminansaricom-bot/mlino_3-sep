@@ -1,0 +1,8 @@
+V1_WORKTREE=C:/Users/galexy/mlino code/core-profile-unique
+V1_SOURCE=implementation/public-export/canonical.ts
+V1_SOURCE_BLOB=772dddbb3c29af11c44a06e17e741c07faaae9ff
+ORIGIN_MAIN_SOURCE_BLOB=772dddbb3c29af11c44a06e17e741c07faaae9ff
+COMMAND=node generate-v1-fixtures.cjs <absolute V2 fixture output path>
+V1_CANONICAL_FIXTURES=8
+OUTPUT=mlino2/app/src/publicExport/fixtures/v1-canonical.json
+NOTE=Node transpiled the unchanged V1 canonical.ts from the V1 worktree with its installed TypeScript; the V1 function computed expected bytes and sha256 once. No V2 canonical function generated these expected values.
