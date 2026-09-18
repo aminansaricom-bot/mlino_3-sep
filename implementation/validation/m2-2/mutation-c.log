@@ -1,0 +1,6 @@
+ACTIVE_ONLY: DETECTED; jest_exit=1; failing_tests=M2-2 key providers (TEST keys only) › privateKey only active; publicKey active and standby; unknown returns null
+PUBLIC_PRIVATE_MATCH: DETECTED; jest_exit=1; failing_tests=M2-2 key providers (TEST keys only) › signEnvelope via adapter verifies; public/private mismatch and non-Ed25519 reject
+KEY_ID_BINDING: DETECTED; jest_exit=1; failing_tests=M2-2 key providers (TEST keys only) › key_id derivation is bound to its 32-byte public key
+PLAINTEXT_ARGUMENT: DETECTED; jest_exit=1; failing_tests=M2-2 DPAPI spawn boundary (no real DPAPI) › plaintext travels only by stdin; powershell.exe, shell:false, no secret in args/options/env
+POWERSHELL_SEMICOLON_JOIN: DETECTED; jest_exit=1; failing_tests=PowerShell parser accepts exact generated script for protect | PowerShell parser accepts exact generated script for unprotect
+NUMERIC_TRUST_BUNDLE_VERSION: DETECTED; jest_exit=1; failing_tests=M2-2 key providers (TEST keys only) › trust bundle is public-only and matches V2 raw-key shape
