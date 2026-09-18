@@ -809,3 +809,22 @@ VALIDATION: GW2-P PASS; 3 builds PASS; each focused run 14 PASS / 1 SKIP (ACL_UN
 SCOPE: Additive distribution code, TEST-only specs, validation logs, report and append-only handoff.
 NEXT_ACTION: Architecture Guardian review and ACL spec under owner account; no automatic host wiring or real export.
 CREATED_AT: 2026-09-18
+
+---
+HANDOFF_ID: HANDOFF-20260918-PUBLIC-EXPORT-OPERATIONS
+AUTHOR: CODEX
+PHASE: M2_3R_JOINT_REVIEW
+STATUS: STOPPED_FOR_FORBIDDEN_PRODUCT_DEFECT
+INSTRUCTION_ID: CODEX-20260918-M2-3R-ASTRA-JOINT-REVIEW-001
+TARGET_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-M2-3B-REVIEW
+REVIEW_REFERENCE: d741a84a27656c244ec056ff8d45204e03277761:AI_HANDOFF/CLAUDE_REVIEWS/20260918_CLAUDE_REVIEW_M2_3B_AND_ASTRA_ROUND.md
+BRANCH: codex/public-export-distribution
+BASE_COMMIT: f9e48756e28788e4a28bcb48f468bfa2145c65e6
+EVIDENCE_COMMIT: 8151deb7236a886678570981933715ee2f372dfd
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260918_CODEX_M2_3R_ASTRA_REVIEW_REPORT.md
+REPORT_SHA256: 5bde0f99608ad82717c83aea1a7111b1e90d42c8533424b14855e274989509eb
+EVIDENCE_PATH: implementation/validation/m2-3r/
+VALIDATION: GW2-P PASS; one cross-component diagnostic confirms V1 acceptance / V2 rejection of noncanonical base64url signature; canonical/tamper/revocation/TTL controls pass. Full repeated builds/suites NOT RUN due to mandatory STOP.
+SCOPE: Evidence and report only. No product changes, no real keys, no Docker/database, no push.
+NEXT_ACTION: Guardian reviews M2-3R-F1 and issues further scope; remaining M2-3R work is not complete.
+CREATED_AT: 2026-09-18
