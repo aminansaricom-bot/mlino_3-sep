@@ -1,29 +1,25 @@
-HANDOFF_ID: HANDOFF-20260918-OWNER-APPROVAL-G14C2
+HANDOFF_ID: HANDOFF-20260918-GUARDIAN-G14C2-REVIEW
 AUTHOR: CLAUDE
-PHASE: G14C1_DECIDED_G14C2_RELEASED
-STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: The owner approved in chat: «توصیه‌های نگهبان برای C8-1 تا C8-5 تصویب شد؛ G14c-2 مجاز است.»
-Decisions: C8-1 a read-only path on the deployment host, with a PLUGGABLE transport in code; C8-2 fetch at most every 60s, TTL 300s from generated_at, clock skew 30s; C8-3 public keys ship with the V2 build, never a private key, with a revocation path confirmed before real use; C8-4 category, floor_level, building_id, products and discount_percent filters are dropped for real records with nothing invented; C8-5 removal after a claim suspension happens only through the normal cycle, with the one-cycle delay accepted.
-Released CODEX-20260918-G14C2-V2-CONSUMER-IMPLEMENTATION-001 on a NEW branch codex/v2-public-consumer from origin/codex/v2-intent-flow-foundation at f4d326f, local commits only:
-- a new mlino2/app/src/publicExport module: canonical (mirroring V1 byte rules), verify (Ed25519 via WebCrypto), trustBundle (public-key allowlist plus revocation, never modifiable by an artifact), transport (a pluggable port with fetch and file implementations), consumer (verify then TTL then atomic single-reference swap), mapping (C4, with absent fields never invented and validity re-checked at read time)
-- mock isolation behind an explicit demo mode, with no fallback or conversion
-- Guardian conditions: N1 the device clock makes TTL a correctness guard, not security; N2 a written threat model; N3 byte parity PROVEN with fixtures generated once from the V1 implementation and committed
-- vitest tests covering the design C7 list plus the parity fixtures; build and test three consecutive times with committed logs; no network, Docker or database
-Out of scope, separately approved later: merging into the V2 branch, and the operational key, publishing path and schedule.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260918_OWNER_APPROVAL_G14C2_IMPLEMENTATION.md
+PHASE: G14C2_REVIEWED_G14C2B_RELEASED
+STATUS: APPROVED_WITH_FIXES
+REVIEW_VERDICT: The G14c-2 V2 consumer code is accepted. Scope is clean: 23 allowed files, 0 under implementation/, no dependency change and no leak. The Guardian independently ran 221/221 tests on an isolated git-archive copy, and recomputed the N3 parity fixtures from V1 canonical.ts on main (8/8 match). The consumer's byte and snapshot_id rules match V1's real writer.
+Fixes: tests only. F1: the algorithm check can be deleted with all tests still green. F2: the base64url length and round-trip check can be deleted with all tests still green. F3: bare rejects.toThrow() calls must assert exact error codes.
+Released CODEX-20260918-G14C2B-V2-CONSUMER-TEST-HARDENING-001: tests plus a mutation proof on the existing branch, with no product-code change.
+Notes: N4, the check order differs slightly from design C2; accepted because every check still runs before the swap. N5, V1 writes the artifact with mode 0600; this is for the operational CCR, not now.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260918_CLAUDE_REVIEW_G14C2_V2_CONSUMER_IMPLEMENTATION.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: (none - approval record only). main is b56329e before this commit; the design branch is at 0bd14bb on origin; the V2 base is f4d326f. Content Studio f6946a8 remains local only, see OD-09.
-CREATED_AT: 2026-09-18T10:40:00+03:30
-NEXT_ACTION: Codex executes G14c-2 with TARGET_HANDOFF_ID=HANDOFF-20260918-OWNER-APPROVAL-G14C2. Then Guardian review, then the owner decides the V2-branch merge.
+CODE_COMMIT_SHA: codex/v2-public-consumer at ee4e70d53c8eb0ffafaf8fcd4a9bb478d98481dc was published by the Guardian (new branch, empty lease). main was b36be01 before this commit. The V2 base f4d326f is unchanged.
+CREATED_AT: 2026-09-18T12:30:00+03:30
+NEXT_ACTION: Codex executes G14c-2b with TARGET_HANDOFF_ID=HANDOFF-20260918-GUARDIAN-G14C2-REVIEW. The Guardian then reviews it. After that the owner decides M1 (merge into codex/v2-intent-flow-foundation); M2 (operational key, path and schedule) comes separately.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-G14C1-REVIEW
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), recording the owner's C8 decisions and releasing G14c-2
+PREVIOUS_HANDOFF_ID: HANDOFF-20260918-OWNER-APPROVAL-G14C2
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260918-G14C2-V2-CONSUMER-IMPLEMENTATION-001
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: origin/main is b56329e; origin/codex/v2-public-consumer-design is 0bd14bb; origin/codex/v2-intent-flow-foundation is f4d326f. The V2 app already uses vitest with 13 existing test files, so the required tests need no new dependency.
+HANDOFF_PRECONDITION_CHECK: origin/main was b36be01. The branch codex/v2-public-consumer did not exist before the Guardian published it. The commit descends from f4d326f and does not contain main.
 
-SCOPE_CONSTRAINT_NOTE: Only the new approval record and the AI_HANDOFF files were added or changed on main. No credential, Docker, database or code action.
+SCOPE_CONSTRAINT_NOTE: Only the review and AI_HANDOFF files changed on main. The test run and the mutation probes were done in a scratchpad copy; nothing was committed from them. No credential, Docker or database action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
