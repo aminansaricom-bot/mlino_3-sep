@@ -38,10 +38,10 @@ async function keyPair() {
   return { pair, publicKey, trust: new TrustBundle('test-v1', [{ keyId: 'test-key', rawPublicKey: publicKey }]) };
 }
 
-async function signed(pair: CryptoKeyPair, records: unknown[] = [record()], generatedAt = now): Promise<Uint8Array> {
+async function signed(pair: CryptoKeyPair, records: unknown[] = [record()], generatedAt = now, algorithm = 'Ed25519'): Promise<Uint8Array> {
   const unsigned = { contract_version: 'mlino.v2.public-business.v1', generated_at: iso(generatedAt),
     snapshot_id: await snapshotId('mlino.v2.public-business.v1', records), records };
-  const signature = { algorithm: 'Ed25519', key_id: 'test-key' };
+  const signature = { algorithm, key_id: 'test-key' };
   const signedContent = canonicalBytes({ ...unsigned, signature });
   const prefix = new TextEncoder().encode('MLINO-PUBLIC-BUSINESS-V1\n');
   const input = new Uint8Array(prefix.length + signedContent.length);
@@ -108,29 +108,46 @@ describe('signed public export consumer', () => {
     await consumer.refresh(now);
     const tampered = text(await signed(pair, [record('دیگر')], now + 1000)).replace('دیگر', 'دیکر');
     transport.replace(new TextEncoder().encode(tampered));
-    await expect(consumer.refresh(now + 1000)).rejects.toThrow();
+    await expect(consumer.refresh(now + 1000)).rejects.toThrow('PUBLIC_EXPORT_BAD_SIGNATURE');
     expect(consumer.read(now + 1000)[0].business.name).toBe('کافهٔ واقعی');
     expect(consumer.read(now + TTL_MS + 1)).toEqual([]);
   });
 
-  it('rejects unknown, revoked and non-Ed25519 key ids or algorithms', async () => {
+  it('rejects unknown and revoked key ids with their exact error code', async () => {
     const { pair, publicKey, trust } = await keyPair();
     const bytes = await signed(pair);
     const unknown = new TextEncoder().encode(text(bytes).replace('test-key', 'other-key'));
-    await expect(new PublicExportConsumer(new FileTransport(unknown), trust).refresh(now)).rejects.toThrow();
+    await expect(new PublicExportConsumer(new FileTransport(unknown), trust).refresh(now)).rejects.toThrow('PUBLIC_EXPORT_UNKNOWN_OR_REVOKED_KEY');
     const revoked = new TrustBundle('test-v2', [{ keyId: 'test-key', rawPublicKey: publicKey }], ['test-key']);
-    await expect(new PublicExportConsumer(new FileTransport(bytes), revoked).refresh(now)).rejects.toThrow();
-    const wrong = new TextEncoder().encode(text(bytes).replace('Ed25519', 'Ed25518'));
-    await expect(new PublicExportConsumer(new FileTransport(wrong), trust).refresh(now)).rejects.toThrow();
+    await expect(new PublicExportConsumer(new FileTransport(bytes), revoked).refresh(now)).rejects.toThrow('PUBLIC_EXPORT_UNKNOWN_OR_REVOKED_KEY');
     const parsed = JSON.stringify({ version: 'built-v1', keys: [{ keyId: 'test-key', rawPublicKeyBase64Url: btoa(String.fromCharCode(...publicKey)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') }], revokedIds: ['test-key'] });
     expect(trustBundleFromBuildJson(parsed).publicKey('test-key')).toBeNull();
+  });
+
+  it('rejects a non-Ed25519 algorithm even when its declared bytes have a valid Ed25519 signature', async () => {
+    const { pair, trust } = await keyPair();
+    const bytes = await signed(pair, [record()], now, 'Ed448');
+    await expect(new PublicExportConsumer(new FileTransport(bytes), trust).refresh(now)).rejects.toThrow('PUBLIC_EXPORT_SIGNATURE_SHAPE');
+  });
+
+  it.each([
+    ['non-base64url character', '+'],
+    ['wrong decoded length', 'AA'],
+    ['non-canonical trailing bits', 'AB'],
+  ])('rejects a signature value with %s', async (_case, value) => {
+    const { pair, trust } = await keyPair();
+    const artifact = JSON.parse(text(await signed(pair))) as Record<string, unknown>;
+    const signature = artifact.signature as Record<string, unknown>;
+    signature.value = value;
+    const bytes = canonicalBytes(artifact);
+    await expect(new PublicExportConsumer(new FileTransport(bytes), trust).refresh(now)).rejects.toThrow('PUBLIC_EXPORT_SIGNATURE_VALUE');
   });
 
   it('C8-2 and N1 use the supplied device clock for TTL, skew and ordering', async () => {
     const { pair, trust } = await keyPair();
     expect(FETCH_INTERVAL_MS).toBe(60_000);
-    await expect(new PublicExportConsumer(new FileTransport(await signed(pair, [record()], now - TTL_MS - 1)), trust).refresh(now)).rejects.toThrow();
-    await expect(new PublicExportConsumer(new FileTransport(await signed(pair, [record()], now + 30_001)), trust).refresh(now)).rejects.toThrow();
+    await expect(new PublicExportConsumer(new FileTransport(await signed(pair, [record()], now - TTL_MS - 1)), trust).refresh(now)).rejects.toThrow('PUBLIC_EXPORT_EXPIRED_OR_FUTURE');
+    await expect(new PublicExportConsumer(new FileTransport(await signed(pair, [record()], now + 30_001)), trust).refresh(now)).rejects.toThrow('PUBLIC_EXPORT_EXPIRED_OR_FUTURE');
     const transport = new FileTransport(await signed(pair));
     const consumer = new PublicExportConsumer(transport, trust);
     await consumer.refresh(now);
@@ -145,7 +162,7 @@ describe('signed public export consumer', () => {
     const { trust } = await keyPair();
     const consumer = new PublicExportConsumer(new FileTransport(new TextEncoder().encode('{"contract_version":"draft-1"}')), trust);
     expect(consumer.read(now)).toEqual([]);
-    await expect(consumer.refresh(now)).rejects.toThrow();
+    await expect(consumer.refresh(now)).rejects.toThrow('PUBLIC_EXPORT_VERSION');
     expect(consumer.read(now)).toEqual([]);
   });
 
@@ -153,8 +170,8 @@ describe('signed public export consumer', () => {
     const { pair, trust } = await keyPair();
     const raw = await signed(pair);
     const injected = text(raw).replace('"key_id":"test-key"', '"key_id":"test-key","public_key":"injected"');
-    await expect(new PublicExportConsumer(new FileTransport(new TextEncoder().encode(injected)), trust).refresh(now)).rejects.toThrow();
-    expect(() => trustBundleFromBuildJson(JSON.stringify({ version: 'test', keys: [], revokedIds: [], privateKey: 'forbidden' }))).toThrow();
+    await expect(new PublicExportConsumer(new FileTransport(new TextEncoder().encode(injected)), trust).refresh(now)).rejects.toThrow('PUBLIC_EXPORT_SIGNATURE_SHAPE');
+    expect(() => trustBundleFromBuildJson(JSON.stringify({ version: 'test', keys: [], revokedIds: [], privateKey: 'forbidden' }))).toThrow('TRUST_BUNDLE_SHAPE');
   });
 
   it('C8-5 removes a suspended business on the next accepted cycle, not before', async () => {

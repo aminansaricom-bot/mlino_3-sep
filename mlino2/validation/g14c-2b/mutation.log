@@ -1,0 +1,5 @@
+G14c-2b mutation proof: independent temporary app copy; product worktree untouched.
+MUTATION=algorithm EXIT=1 EXPECTED_TEST_FAILED=True RESULT=PASS
+MUTATION=signature-value EXIT=1 EXPECTED_TEST_FAILED=True RESULT=PASS
+MUTATION=revocation EXIT=1 EXPECTED_TEST_FAILED=True RESULT=PASS
+THROWAWAY_REMOVED=true
