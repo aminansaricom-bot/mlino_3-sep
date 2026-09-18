@@ -1,25 +1,29 @@
-HANDOFF_ID: HANDOFF-20260918-GUARDIAN-G14C2-REVIEW
+HANDOFF_ID: HANDOFF-20260918-GUARDIAN-G14C2B-REVIEW
 AUTHOR: CLAUDE
-PHASE: G14C2_REVIEWED_G14C2B_RELEASED
-STATUS: APPROVED_WITH_FIXES
-REVIEW_VERDICT: The G14c-2 V2 consumer code is accepted. Scope is clean: 23 allowed files, 0 under implementation/, no dependency change and no leak. The Guardian independently ran 221/221 tests on an isolated git-archive copy, and recomputed the N3 parity fixtures from V1 canonical.ts on main (8/8 match). The consumer's byte and snapshot_id rules match V1's real writer.
-Fixes: tests only. F1: the algorithm check can be deleted with all tests still green. F2: the base64url length and round-trip check can be deleted with all tests still green. F3: bare rejects.toThrow() calls must assert exact error codes.
-Released CODEX-20260918-G14C2B-V2-CONSUMER-TEST-HARDENING-001: tests plus a mutation proof on the existing branch, with no product-code change.
-Notes: N4, the check order differs slightly from design C2; accepted because every check still runs before the swap. N5, V1 writes the artifact with mode 0600; this is for the operational CCR, not now.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260918_CLAUDE_REVIEW_G14C2_V2_CONSUMER_IMPLEMENTATION.md
+PHASE: G14C2_COMPLETE_AWAITING_OWNER_M1
+STATUS: APPROVED_NEXT_STEP
+REVIEW_VERDICT: G14c-2b is accepted; G14c-2 is complete. It is tests only: 0 product-code changes and 0 files under implementation/.
+Independent Guardian checks:
+- 225/225 tests on an isolated git-archive copy.
+- F1: the Ed448 test is correctly signed, so only the algorithm check can reject it.
+- F2: three malformed signature values are covered.
+- F3: every rejection test now asserts its exact error code.
+- Mutation probes, repeated by the Guardian: removing the algorithm check, the length and round-trip check, or the revocation check each fails at least one test.
+Note N6: removing ONLY the round-trip check stays green, because the 'AB' case also fails the length check. There is no security impact, since signature.value is not part of the signed bytes. No action needed.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260918_CLAUDE_REVIEW_G14C2B_V2_CONSUMER_TEST_HARDENING.md
 ZIP_PATH: (none built this pass)
-CODE_COMMIT_SHA: codex/v2-public-consumer at ee4e70d53c8eb0ffafaf8fcd4a9bb478d98481dc was published by the Guardian (new branch, empty lease). main was b36be01 before this commit. The V2 base f4d326f is unchanged.
-CREATED_AT: 2026-09-18T12:30:00+03:30
-NEXT_ACTION: Codex executes G14c-2b with TARGET_HANDOFF_ID=HANDOFF-20260918-GUARDIAN-G14C2-REVIEW. The Guardian then reviews it. After that the owner decides M1 (merge into codex/v2-intent-flow-foundation); M2 (operational key, path and schedule) comes separately.
+CODE_COMMIT_SHA: the Guardian published codex/v2-public-consumer at bfcc3168067b4746798360013f58e0470a3691cd as a fast-forward with a lease on ee4e70d. codex/v2-intent-flow-foundation is still f4d326f, and a trial merge is clean. main was ee34297 before this commit.
+CREATED_AT: 2026-09-18T13:30:00+03:30
+NEXT_ACTION: The owner decides M1, merging bfcc316 into codex/v2-intent-flow-foundation. The Guardian executes it with --no-ff and a lease on f4d326f, then re-runs the tests on the merge result in an isolated copy. M2 (operational CCR for the key, path, schedule, revocation and N5 file mode) follows separately. No Codex instruction is outstanding.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260918-OWNER-APPROVAL-G14C2
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260918-G14C2-V2-CONSUMER-IMPLEMENTATION-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-G14C2-REVIEW
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (standing role), reviewing CODEX-20260918-G14C2B-V2-CONSUMER-TEST-HARDENING-001
 
 MODEL_ROUTING_NOTE: Executed by Claude Opus 5 as Architecture Guardian.
 
-HANDOFF_PRECONDITION_CHECK: origin/main was b36be01. The branch codex/v2-public-consumer did not exist before the Guardian published it. The commit descends from f4d326f and does not contain main.
+HANDOFF_PRECONDITION_CHECK: origin/main was ee34297, and the remote branch was at ee4e70d before the fast-forward. bfcc316 descends from ee4e70d.
 
-SCOPE_CONSTRAINT_NOTE: Only the review and AI_HANDOFF files changed on main. The test run and the mutation probes were done in a scratchpad copy; nothing was committed from them. No credential, Docker or database action.
+SCOPE_CONSTRAINT_NOTE: Only the review and AI_HANDOFF files changed on main. The tests and mutations ran in a scratchpad copy that has since been removed. No credential, Docker or database action.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN is still DELIVERED_AWAITING_INDEPENDENT_REVIEW; Mamad has not reviewed it and part B remains deliberately unexecuted.
