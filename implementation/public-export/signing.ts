@@ -34,13 +34,22 @@ export async function signEnvelope<T extends Record<string, unknown>>(
   return envelope;
 }
 
+// Only the canonical spelling is accepted: unpadded base64url of exactly 64 bytes that re-encodes identically.
+// Unused trailing bits would otherwise give several spellings of one signature, which V2 rejects (M2-3R-F1).
+function canonicalSignatureBytes(value: unknown): Buffer | null {
+  if (typeof value !== 'string' || !/^[A-Za-z0-9_-]{86}$/.test(value)) return null;
+  const bytes = Buffer.from(value, 'base64url');
+  return bytes.length === 64 && bytes.toString('base64url') === value ? bytes : null;
+}
+
 export async function verifyEnvelope(envelope: SignedEnvelope, provider: VerificationKeyProvider): Promise<boolean> {
-  if (envelope.signature?.algorithm !== 'Ed25519' || !envelope.signature.key_id ||
-      !/^[A-Za-z0-9_-]+$/.test(envelope.signature.value)) return false;
+  if (envelope.signature?.algorithm !== 'Ed25519' || !envelope.signature.key_id) return false;
+  const signature = canonicalSignatureBytes(envelope.signature.value);
+  if (!signature) return false;
   const key = await provider.publicKey(envelope.signature.key_id);
   if (!key || key.asymmetricKeyType !== 'ed25519') return false;
   try {
-    return verify(null, signedBytes(envelope), key, Buffer.from(envelope.signature.value, 'base64url'));
+    return verify(null, signedBytes(envelope), key, signature);
   } catch {
     return false;
   }
