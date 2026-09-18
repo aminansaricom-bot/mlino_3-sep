@@ -775,3 +775,20 @@ VALIDATION: GW2-P PASS; 3 builds PASS; each focused run 8 PASS / 1 SKIP with exp
 SCOPE: Additive key-provider code, TEST-only specs, validation logs, report and append-only handoff.
 NEXT_ACTION: Architecture Guardian review and real DPAPI spec under owner account; no automatic M2-3/M2-4 or real key.
 CREATED_AT: 2026-09-18
+
+---
+HANDOFF_ID: HANDOFF-20260918-PUBLIC-EXPORT-OPERATIONS
+AUTHOR: CODEX
+PHASE: M2_2C_DPAPI_KEY_ADAPTER_FIXES
+STATUS: DELIVERED_LOCALLY_AWAITING_GUARDIAN_REAL_DPAPI_TEST
+INSTRUCTION_ID: CODEX-20260918-M2-2C-DPAPI-KEY-ADAPTER-FIXES-001
+TARGET_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-M2-2B-REVIEW
+REVIEW_REFERENCE: 23d93ea9cca6f7e98cffad1bd08c0f7b872a98e2:AI_HANDOFF/CLAUDE_REVIEWS/20260918_CLAUDE_REVIEW_M2_2B_DPAPI_KEY_ADAPTER.md
+BRANCH: codex/public-export-key-adapter
+CODE_COMMIT: 289c2ee3abfba4afcaeb171c3ffeea95caaa1dd3
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260918_CODEX_M2_2C_DPAPI_KEY_ADAPTER_FIXES_REPORT.md
+EVIDENCE_PATH: implementation/validation/m2-2/*-c.*
+VALIDATION: GW2-P PASS; F1-F3 tests PASS; 3 builds PASS; each focused run 10 PASS / 1 SKIP with explicit DPAPI_PROFILE_UNAVAILABLE; 6/6 mutations detected; leak scan 0 matches.
+SCOPE: Allowed key-provider fixes, tests, c-suffix logs, report and append-only handoff; no database, real key or push.
+NEXT_ACTION: Guardian runs dpapi.integration.spec.ts under owner account; M2-2 acceptance requires PASS, not SKIP.
+CREATED_AT: 2026-09-18
