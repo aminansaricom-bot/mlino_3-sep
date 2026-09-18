@@ -3,6 +3,7 @@ import { PublicExportConsumer, FETCH_INTERVAL_MS } from './consumer';
 import type { PublicRecord } from './mapping';
 import { trustBundleFromBuildJson } from './trustBundle';
 import { FetchTransport } from './transport';
+import { checkForBuildUpdate } from './versionCheck';
 
 function configuredConsumer(): PublicExportConsumer | null {
   // Public keys and the URL are deployment configuration, never private signing material.
@@ -19,6 +20,19 @@ export default function RealPublicApp() {
   const [refreshFailed, setRefreshFailed] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [point, setPoint] = useState<{ latitude: number; longitude: number } | null>(null);
+
+  useEffect(() => {
+    const check = () => {
+      try {
+        void checkForBuildUpdate(import.meta.env.VITE_BUILD_ID, {
+          fetcher: window.fetch.bind(window), storage: window.sessionStorage,
+          reload: () => window.location.reload(),
+        });
+      } catch { /* دسترسی نداشتن به sessionStorage، نمایش دادهٔ امضاشده را تغییر نمی‌دهد. */ }
+    };
+    const timer = window.setInterval(check, FETCH_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     console.info('[public-export] real signed-artifact mode');

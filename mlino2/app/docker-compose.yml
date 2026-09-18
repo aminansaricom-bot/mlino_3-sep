@@ -14,10 +14,14 @@ services:
         # اجرا:  V2_NESHAN_MAP_KEY=web.xxx docker compose up --build -d
         V2_NESHAN_MAP_KEY: ${V2_NESHAN_MAP_KEY:-}
         V2_NESHAN_MAPTYPE: ${V2_NESHAN_MAPTYPE:-dreamy}
+        VITE_PUBLIC_EXPORT_URL: ${VITE_PUBLIC_EXPORT_URL:-/public-export/public-business.v1.json}
+        # فقط کلیدهای عمومی، تولیدشده با buildV2TrustBundle از M2-2.
+        VITE_PUBLIC_EXPORT_TRUST_BUNDLE: ${VITE_PUBLIC_EXPORT_TRUST_BUNDLE:-}
     ports:
       - "8443:8443"
     volumes:
       # گواهی بین rebuildها می‌ماند → پذیرش هشدار روی گوشی فقط یک بار
       - mlino2-certs:/etc/nginx/certs
+      - "${MLINO_PUBLIC_EXPORT_DIR:-./public-export-empty}:/srv/mlino-public-export:ro"
 volumes:
   mlino2-certs:
