@@ -792,3 +792,20 @@ VALIDATION: GW2-P PASS; F1-F3 tests PASS; 3 builds PASS; each focused run 10 PAS
 SCOPE: Allowed key-provider fixes, tests, c-suffix logs, report and append-only handoff; no database, real key or push.
 NEXT_ACTION: Guardian runs dpapi.integration.spec.ts under owner account; M2-2 acceptance requires PASS, not SKIP.
 CREATED_AT: 2026-09-18
+
+---
+HANDOFF_ID: HANDOFF-20260918-PUBLIC-EXPORT-OPERATIONS
+AUTHOR: CODEX
+PHASE: M2_3A_PUBLIC_EXPORT_DISTRIBUTION
+STATUS: DELIVERED_LOCALLY_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260918-M2-3A-PUBLIC-EXPORT-DISTRIBUTION-001
+TARGET_HANDOFF_ID: HANDOFF-20260918-OWNER-APPROVAL-M2-3
+REVIEW_REFERENCE: 8d7f709bee3ecf10c7ea6a9ec06bdc8e56444721:AI_HANDOFF/CLAUDE_REVIEWS/20260918_OWNER_APPROVAL_M2_3_HOST_WIRING.md
+BRANCH: codex/public-export-distribution
+CODE_COMMIT: 5d3d034e544b82d525a14cdb4aa4752e447b1cf5
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260918_CODEX_M2_3A_DISTRIBUTION_REPORT.md
+EVIDENCE_PATH: implementation/validation/m2-3a/
+VALIDATION: GW2-P PASS; 3 builds PASS; each focused run 14 PASS / 1 SKIP (ACL_UNAVAILABLE); 4/4 mutations detected; manifest 14/14 PASS; no real key, database, Docker or push.
+SCOPE: Additive distribution code, TEST-only specs, validation logs, report and append-only handoff.
+NEXT_ACTION: Architecture Guardian review and ACL spec under owner account; no automatic host wiring or real export.
+CREATED_AT: 2026-09-18
