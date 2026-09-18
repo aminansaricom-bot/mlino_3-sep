@@ -1,0 +1,9 @@
+COMMAND: node implementation/validation/m2-3r/signature-parity.cjs <V1 implementation directory> <V2 app directory>
+SOURCE_V1_HEAD=f9e48756e28788e4a28bcb48f468bfa2145c65e6
+SOURCE_V2_HEAD=be5577477319c3ef1c8709d478c8c30ea14737e6
+EXIT_CODE=0
+CONTROL canonical: V1 verify=true; distribute=PASS; V2 consumer=ACCEPT (1 record)
+CONTROLS tamper=PUBLIC_EXPORT_BAD_SIGNATURE; revoked=PUBLIC_EXPORT_UNKNOWN_OR_REVOKED_KEY; ttl=PUBLIC_EXPORT_EXPIRED_OR_FUTURE
+FINDING M2-3R-F1: same decoded signature; V1 verify=true; distribute=PASS; V2=PUBLIC_EXPORT_SIGNATURE_VALUE
+RESULT=CONFIRMED_ACCEPTANCE_MISMATCH; no content forgery demonstrated; mandatory review STOP
+TEST_TEMP_REMOVED=true; TEST_PRIVATE_BYTES_ZEROED=true
