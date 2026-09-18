@@ -725,3 +725,21 @@ VALIDATION: GW2-P PASS; backup SHA-256 matched inside container and host; one pe
 SCOPE: Local Q8-3 migration only, with owner-approved in-memory DATABASE_URL read; no product files changed and no push.
 NEXT_ACTION: Architecture Guardian review; no automatic G14c work, push, or further database action.
 CREATED_AT: 2026-09-17
+
+---
+HANDOFF_ID: HANDOFF-20260918-PUBLIC-EXPORT-OPERATIONS
+AUTHOR: CODEX
+PHASE: M2_1_PUBLIC_EXPORT_OPERATIONS_DESIGN
+STATUS: DRAFT_DELIVERED_LOCALLY_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260918-M2-1-PUBLIC-EXPORT-OPERATIONS-DESIGN-001
+TARGET_HANDOFF_ID: HANDOFF-20260918-OWNER-APPROVAL-M2-1
+REVIEW_REFERENCE: 0a7727b0553dc65d9d6f253ebf3726e359069ae5:AI_HANDOFF/CLAUDE_REVIEWS/20260918_OWNER_APPROVAL_M2_1_OPERATIONS_DESIGN.md
+BRANCH: codex/public-export-operations-design
+DESIGN_PATH: mlino2/MLINO_PUBLIC_EXPORT_OPERATIONS_DESIGN.md
+DESIGN_LF_SHA256: e00849edf21889f6492b3ed3ade93c10775bf7f26b311fc5e6c99435b778b295
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260918_CODEX_M2_1_OPERATIONS_DESIGN_REPORT.md
+REPORT_LF_SHA256: 8232f5a972ced779cb102f5b548db95e5e8c56b30adf2e176509bee677997f65
+VALIDATION: GW2-P PASS; 67 file:line citations over 20 Git sources valid; documentation-only diff check PASS.
+SCOPE: DRAFT design, report, append-only handoff; no code, keys, export, host change, database, scheduling, push or merge.
+NEXT_ACTION: Architecture Guardian review and owner decisions O1-O5; no M2 implementation without separate approval.
+CREATED_AT: 2026-09-18
