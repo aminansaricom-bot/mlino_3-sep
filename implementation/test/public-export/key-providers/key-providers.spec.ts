@@ -15,6 +15,26 @@ const fake: Protector = {
   unprotect: async (bytes) => Buffer.from(bytes).reverse(),
 };
 
+// Mirrors V2 trustBundleFromBuildJson + TrustBundle checks at
+// 540ad2d:mlino2/app/src/publicExport/trustBundle.ts:10-18,29-49.
+function acceptsV2TrustBundle(json: string): boolean {
+  const value: unknown = JSON.parse(json);
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const root = value as Record<string, unknown>;
+  if (Object.keys(root).sort().join(',') !== 'keys,revokedIds,version') return false;
+  if (typeof root.version !== 'string' || !root.version.trim() || !Array.isArray(root.keys) || !Array.isArray(root.revokedIds) || root.revokedIds.some((id) => typeof id !== 'string')) return false;
+  const ids = new Set<string>();
+  for (const item of root.keys) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return false;
+    const row = item as Record<string, unknown>;
+    if (Object.keys(row).sort().join(',') !== 'keyId,rawPublicKeyBase64Url') return false;
+    if (typeof row.keyId !== 'string' || !row.keyId || ids.has(row.keyId) || typeof row.rawPublicKeyBase64Url !== 'string' || !/^[A-Za-z0-9_-]+$/.test(row.rawPublicKeyBase64Url)) return false;
+    if (Buffer.from(row.rawPublicKeyBase64Url, 'base64url').length !== 32) return false;
+    ids.add(row.keyId);
+  }
+  return true;
+}
+
 async function fixture() {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'mlino-key-test-'));
   const active = await generateProtectedKey('20260918', fake);
@@ -94,7 +114,7 @@ describe('M2-2 key providers (TEST keys only)', () => {
   test('trust bundle is public-only and matches V2 raw-key shape', async () => {
     const f = await fixture();
     try {
-      const bundle = buildV2TrustBundle(f.descriptor, { version: 1, revokedIds: [f.standby.key_id] });
+      const bundle = buildV2TrustBundle(f.descriptor, { version: 'v1', revokedIds: [f.standby.key_id] });
       expect(bundle.keys).toHaveLength(2);
       for (const key of bundle.keys) {
         expect(key.keyId).toMatch(/^pb-v1-/);
@@ -105,11 +125,16 @@ describe('M2-2 key providers (TEST keys only)', () => {
       expect(serialized).not.toContain('protected');
       expect(serialized).not.toContain(f.active.protected_private_pkcs8_base64.toLowerCase());
       expect(serialized).not.toContain('private');
+      expect(acceptsV2TrustBundle(JSON.stringify(bundle))).toBe(true);
+      expect(acceptsV2TrustBundle(JSON.stringify({ ...bundle, version: 1 }))).toBe(false);
+      expect(() => buildV2TrustBundle(f.descriptor, { version: ' ', revokedIds: [] })).toThrow('TRUST_BUNDLE_INVALID');
     } finally { await rm(f.directory, { recursive: true, force: true }); }
   });
 
   test('relative and in-repository descriptor paths reject', async () => {
     await expect(createDpapiKeyProvider({ descriptorPath: 'relative.json' }, { protector: fake })).rejects.toThrow('KEY_DESCRIPTOR_PATH_INVALID');
+    await expect(createDpapiKeyProvider({ descriptorPath: '' }, { protector: fake })).rejects.toThrow('KEY_DESCRIPTOR_PATH_INVALID');
+    await expect(createDpapiKeyProvider({ descriptorPath: undefined as unknown as string }, { protector: fake })).rejects.toThrow('KEY_DESCRIPTOR_PATH_INVALID');
     await expect(createDpapiKeyProvider({ descriptorPath: path.resolve(__dirname, 'key-providers.spec.ts') }, { protector: fake })).rejects.toThrow('KEY_DESCRIPTOR_PATH_INVALID');
   });
 

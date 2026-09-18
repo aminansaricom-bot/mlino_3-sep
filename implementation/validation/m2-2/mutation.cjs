@@ -31,12 +31,26 @@ const cases = [
   },
   {
     name: 'PLAINTEXT_ARGUMENT', file: 'public-export/key-providers/protector.ts',
-    before: "['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', script.replace('__MODE__', mode)]",
-    after: "['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', script.replace('__MODE__', mode), bytes.toString('base64')]",
+    before: "['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', buildDpapiScript(mode)]",
+    after: "['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', buildDpapiScript(mode), bytes.toString('base64')]",
     before2: "child.stdin.end(bytes.toString('base64'));",
     after2: "child.stdin.end('');",
     test: 'test/public-export/key-providers/protector.spec.ts',
     expected: 'plaintext travels only by stdin;',
+  },
+  {
+    name: 'POWERSHELL_SEMICOLON_JOIN', file: 'public-export/key-providers/protector.ts',
+    before: "scriptLines.join('\\n')",
+    after: "scriptLines.join('; ')",
+    test: 'test/public-export/key-providers/powershell-parser.spec.ts',
+    expected: 'PowerShell parser accepts exact generated script',
+  },
+  {
+    name: 'NUMERIC_TRUST_BUNDLE_VERSION', file: 'public-export/key-providers/trustBundle.ts',
+    before: '    version,\n    keys:',
+    after: '    version: Number(version),\n    keys:',
+    test: 'test/public-export/key-providers/key-providers.spec.ts',
+    expected: 'trust bundle is public-only and matches V2 raw-key shape',
   },
 ];
 
@@ -77,7 +91,7 @@ try {
     fs.copyFileSync(path.join(source, item.file), target);
     if (!passed) throw new Error(`MUTATION_NOT_DETECTED_${item.name}`);
   }
-  fs.writeFileSync(path.join(__dirname, 'mutation.log'), `${log.join('\n')}\n`);
+  fs.writeFileSync(path.join(__dirname, 'mutation-c.log'), `${log.join('\n')}\n`);
   process.stdout.write(`${log.join('\n')}\n`);
 } finally {
   const resolved = path.resolve(scratch);

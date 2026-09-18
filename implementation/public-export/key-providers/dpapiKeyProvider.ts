@@ -19,7 +19,7 @@ function publicObject(entry: DescriptorEntry): KeyObject {
 }
 
 async function checkedDescriptorPath(descriptorPath: string): Promise<string> {
-  if (!path.isAbsolute(descriptorPath)) throw new Error('KEY_DESCRIPTOR_PATH_INVALID');
+  if (typeof descriptorPath !== 'string' || !descriptorPath.trim() || !path.isAbsolute(descriptorPath)) throw new Error('KEY_DESCRIPTOR_PATH_INVALID');
   const repositoryRoot = path.resolve(__dirname, __dirname.includes(`${path.sep}dist${path.sep}`) ? '../../../..' : '../../..');
   const root = await realpath(repositoryRoot);
   let target: string;

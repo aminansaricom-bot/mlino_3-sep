@@ -5,7 +5,7 @@ export interface Protector {
   unprotect(bytes: Buffer): Promise<Buffer>;
 }
 
-const script = [
+const scriptLines = [
   '$ErrorActionPreference = "Stop"',
   'Add-Type -AssemblyName System.Security',
   '$line = [Console]::In.ReadToEnd().Trim()',
@@ -17,7 +17,12 @@ const script = [
   '  [Console]::Out.Write([Convert]::ToBase64String($result))',
   '  [Array]::Clear($result, 0, $result.Length)',
   '} finally { [Array]::Clear($inputBytes, 0, $inputBytes.Length) }',
-].join('; ');
+];
+
+export function buildDpapiScript(mode: 'protect' | 'unprotect'): string {
+  if (mode !== 'protect' && mode !== 'unprotect') throw new Error('DPAPI_MODE_INVALID');
+  return scriptLines.join('\n').replace('__MODE__', mode);
+}
 
 export class DpapiProtector implements Protector {
   async protect(bytes: Buffer): Promise<Buffer> { return this.run('protect', bytes); }
@@ -26,7 +31,7 @@ export class DpapiProtector implements Protector {
   private run(mode: 'protect' | 'unprotect', bytes: Buffer): Promise<Buffer> {
     if (process.platform !== 'win32') return Promise.reject(new Error('DPAPI_WINDOWS_REQUIRED'));
     return new Promise((resolve, reject) => {
-      const child = spawn('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', script.replace('__MODE__', mode)], { shell: false, windowsHide: true, stdio: ['pipe', 'pipe', 'ignore'] });
+      const child = spawn('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', buildDpapiScript(mode)], { shell: false, windowsHide: true, stdio: ['pipe', 'pipe', 'ignore'] });
       let output = '';
       let failed = false;
       child.on('error', () => { failed = true; reject(new Error('DPAPI_OPERATION_FAILED')); });
