@@ -1,0 +1,39 @@
+RUN=1
+
+> mlino-v1-core@0.1.0 build
+> tsc -p tsconfig.json
+
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand --verbose --runTestsByPath test/public-export/key-providers/key-providers.spec.ts test/public-export/key-providers/protector.spec.ts test/public-export/key-providers/dpapi.integration.spec.ts
+
+DPAPI_PROFILE_UNAVAILABLE: CurrentUser probe failed; real integration test skipped
+PASS test/public-export/key-providers/key-providers.spec.ts
+  M2-2 key providers (TEST keys only)
+    √ descriptor round trip and strict shape rejection codes (47 ms)
+    √ key_id derivation is bound to its 32-byte public key (12 ms)
+    √ privateKey only active; publicKey active and standby; unknown returns null (18 ms)
+    √ signEnvelope via adapter verifies; public/private mismatch and non-Ed25519 reject (28 ms)
+    √ trust bundle is public-only and matches V2 raw-key shape (10 ms)
+    √ relative and in-repository descriptor paths reject (5 ms)
+
+PASS test/public-export/key-providers/protector.spec.ts
+  M2-2 DPAPI spawn boundary (no real DPAPI)
+    √ plaintext travels only by stdin; powershell.exe, shell:false, no secret in args/options/env (6 ms)
+    √ non-zero exit and empty output map to DPAPI_OPERATION_FAILED (11 ms)
+
+Test Suites: 1 skipped, 2 passed, 2 of 3 total
+Tests:       1 skipped, 8 passed, 9 total
+Snapshots:   0 total
+Time:        6.847 s
+Ran all test suites within paths "test/public-export/key-providers/key-providers.spec.ts", "test/public-export/key-providers/protector.spec.ts", "test/public-export/key-providers/dpapi.integration.spec.ts".
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice
