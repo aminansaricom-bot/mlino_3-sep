@@ -83,7 +83,11 @@ describe('L Core lifecycle activation', () => {
   test.each(['PENDING', 'SUSPENDED'] as const)('L1 profile activate rejects a %s identity claim', async (status) => {
     const owner = await organization(`profile-${status.toLowerCase()}`);
     const { profile, claim } = await linkedDraftProfile(owner, `profile-${status.toLowerCase()}`);
-    await prisma.businessIdentityClaim.update({ where: { id_organizationId: { id: claim.id, organizationId: owner.organizationId } }, data: { claimStatus: status } });
+    // business_identity_claim_status_audit_check: a PENDING claim must carry no status-change or verification audit.
+    const data = status === 'PENDING'
+      ? { claimStatus: status, statusChangedByPlatformIdentityRef: null, statusChangeReason: null, statusChangedAt: null, verifiedAt: null }
+      : { claimStatus: status };
+    await prisma.businessIdentityClaim.update({ where: { id_organizationId: { id: claim.id, organizationId: owner.organizationId } }, data });
     await expectCode(profiles.activate(owner.context, profile.id), 'VALIDATION_FAILED');
   });
 
