@@ -914,3 +914,20 @@ VALIDATION: GW2-P PASS; read-only pre-check PASS; B2 timestamp pattern FAIL befo
 SCOPE: Read-only metadata/count pre-check and stop evidence only. No product edit, dump, credential access, seed, database mutation, container restart or push.
 NEXT_ACTION: Guardian issues a superseding retry with invariant Gregorian UTC timestamp generation and all original safety gates.
 CREATED_AT: 2026-09-19
+
+---
+HANDOFF_ID: HANDOFF-20260918-TEST-SEED
+AUTHOR: CODEX
+PHASE: P1_SEED_LOCAL_DB_RETRY
+STATUS: HARD_STOP_C0_PATH_MISSING
+INSTRUCTION_ID: CODEX-20260919-P1-SEED-LOCAL-DB-002
+TARGET_HANDOFF_ID: HANDOFF-20260919-GUARDIAN-S1B-APPROVED-P1
+REVIEW_REFERENCE: 567ca1b2e12317063750c45f73820eb69f823f7d:AI_HANDOFF/CLAUDE_REVIEWS/20260919_P1_002_INVARIANT_TIMESTAMP.md
+BRANCH: codex/test-seed-vanak
+BASE_HEAD: b4e851c86f8d339382ba0ac95f83715069d57a51
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260919_CODEX_P1_SEED_LOCAL_DB_REPORT.md
+EVIDENCE_PATH: implementation/validation/p1/
+VALIDATION: GW2-P PASS; fresh pre-check PASS; verified backup PASS; temporary build PASS; C0 HARD STOP because the exact authorized file C:\mlino code\_PUSH_STAGING\.env does not exist; no alternate path read; seed attempts 0; read-only post-check confirms database/runtime unchanged; cleanup and leak scan PASS.
+SCOPE: Read-only metadata/count checks, verified external backup, temporary build, stop evidence, report and append-only handoff. No product edit, credential read, seed, database mutation, container restart or push.
+NEXT_ACTION: Guardian issues a superseding instruction naming the exact existing C0 file and preserving all P1 safety gates.
+CREATED_AT: 2026-09-19
