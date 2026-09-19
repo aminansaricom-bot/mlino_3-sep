@@ -89,6 +89,43 @@ export class CapabilityService {
     });
   }
 
+  async activate(context: AuthContext, capabilityId: string) {
+    validateAuthContext(context);
+    requireNonEmpty(capabilityId, 'capabilityId');
+    return runCoreTransaction(this.db, async (tx) => {
+      await lockOrganization(tx, context.organizationId);
+      await requireMembershipPermission(tx, context, 'capability.manage');
+      const capability = await tx.capability.findUnique({ where: { id_organizationId: { id: capabilityId, organizationId: context.organizationId } } });
+      if (!capability) throw validationFailed('capability not found in organization');
+      if (capability.capabilityStatus !== 'PLANNED') throw conflict('capability is not planned');
+      return tx.capability.update({
+        where: { id_organizationId: { id: capabilityId, organizationId: context.organizationId } },
+        data: { capabilityStatus: 'ACTIVE' },
+      });
+    }).catch((error: unknown) => {
+      throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);
+    });
+  }
+
+  async retire(context: AuthContext, capabilityId: string, reason: string) {
+    validateAuthContext(context);
+    requireNonEmpty(capabilityId, 'capabilityId');
+    requireNonEmpty(reason, 'reason');
+    return runCoreTransaction(this.db, async (tx) => {
+      await lockOrganization(tx, context.organizationId);
+      await requireMembershipPermission(tx, context, 'capability.manage');
+      const capability = await tx.capability.findUnique({ where: { id_organizationId: { id: capabilityId, organizationId: context.organizationId } } });
+      if (!capability) throw validationFailed('capability not found in organization');
+      if (capability.capabilityStatus !== 'ACTIVE') throw conflict('capability is not active');
+      return tx.capability.update({
+        where: { id_organizationId: { id: capabilityId, organizationId: context.organizationId } },
+        data: { capabilityStatus: 'RETIRED' },
+      });
+    }).catch((error: unknown) => {
+      throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);
+    });
+  }
+
   private assertAllowedKeys(input: object, allowed: readonly string[]): void {
     const unknownKeys = Object.keys(input).filter((key) => !allowed.includes(key));
     if (unknownKeys.length > 0) throw validationFailed(`unknown capability field: ${unknownKeys[0]}`);

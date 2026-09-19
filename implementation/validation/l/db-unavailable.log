@@ -1,0 +1,5 @@
+DATABASE_TEST_ENDPOINT=localhost:5499
+LISTENER_PRESENT=false
+DATABASE_SPECS=NOT_RUN
+DOCKER=NOT_STARTED
+REASON=Instruction requires stop after build when the disposable database is unreachable.
