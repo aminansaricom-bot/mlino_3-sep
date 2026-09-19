@@ -31,6 +31,13 @@ ARG V2_NESHAN_MAPTYPE=dreamy
 ENV V2_NESHAN_MAP_KEY=$V2_NESHAN_MAP_KEY
 ENV V2_NESHAN_MAPTYPE=$V2_NESHAN_MAPTYPE
 
+# خروجی عمومی از همان origin و فقط کلیدهای عمومی بستهٔ اعتماد.
+# VITE_PUBLIC_EXPORT_TRUST_BUNDLE با buildV2TrustBundle در M2-2 ساخته می‌شود؛ کلید خصوصی ممنوع است.
+ARG VITE_PUBLIC_EXPORT_URL=/public-export/public-business.v1.json
+ARG VITE_PUBLIC_EXPORT_TRUST_BUNDLE=
+ENV VITE_PUBLIC_EXPORT_URL=$VITE_PUBLIC_EXPORT_URL
+ENV VITE_PUBLIC_EXPORT_TRUST_BUNDLE=$VITE_PUBLIC_EXPORT_TRUST_BUNDLE
+
 # .npmrc برای رجیستری نشان لازم است و باید پیش از npm ci حاضر باشد
 COPY package.json package-lock.json .npmrc ./
 # فقط URLهای lockfile به رجیستری انتخابی هدایت می‌شوند؛ integrityها دست‌نخورده و verify می‌شوند

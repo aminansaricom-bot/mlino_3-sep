@@ -197,3 +197,52 @@ RESULTING_REPORT_SHA256: 0e256a46a48b135d0e1ff757297540bc45f7820ac92dc3096830749
 EVIDENCE_PATH: mlino2/validation/g14c-2b/
 DELIVERY_STATUS: TEST_EVIDENCE_COMPLETE_LOCALLY_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
 NEXT_ACTION: Architecture Guardian review of F1-F3 evidence; do not push, merge, alter product code, or begin the operational export work without a separate approved instruction.
+
+
+EXECUTED_INSTRUCTION_ID: CODEX-20260918-M2-3B-V2-SAME-ORIGIN-ROUTE-002
+EXECUTED_AT: 2026-09-18
+TARGET_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-M2-3B-REISSUE
+CODEX_WORKSTREAM_HANDOFF_ID: HANDOFF-20260918-PUBLIC-EXPORT-OPERATIONS
+REVIEW_REFERENCE: bd484012449b721a4da922c6a9d3330e47a0bde7:AI_HANDOFF/CLAUDE_REVIEWS/20260918_REISSUE_M2_3B_V2_ROUTE.md
+BASE_COMMIT: 540ad2d45f245a1bc5960bfdb15dc21b85f00947
+BRANCH: codex/v2-public-export-route
+CODE_COMMIT: ced4077460e3ef47b9baf23cc5499543b672e0d3
+RESULTING_REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260918_CODEX_M2_3B_V2_ROUTE_REPORT.md
+EVIDENCE_PATH: mlino2/validation/m2-3b/
+VALIDATION: GW2-P PASS; three builds and three full Vitest runs PASS with --configLoader runner; each run 238/238; three distinct matching build IDs; three mutations detected; no Docker, database, real key or push.
+DELIVERY_STATUS: IMPLEMENTED_LOCALLY_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+NEXT_ACTION: Guardian reviews M2-3b and runs nginx -t/live route checks; no automatic deployment or next phase.
+
+---
+HANDOFF_ID: HANDOFF-20260918-PUBLIC-EXPORT-OPERATIONS
+AUTHOR: CODEX
+PHASE: M2_3R_JOINT_REVIEW
+STATUS: STOPPED_FOR_FORBIDDEN_PRODUCT_DEFECT
+INSTRUCTION_ID: CODEX-20260918-M2-3R-ASTRA-JOINT-REVIEW-001
+TARGET_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-M2-3B-REVIEW
+REVIEW_REFERENCE: d741a84a27656c244ec056ff8d45204e03277761:AI_HANDOFF/CLAUDE_REVIEWS/20260918_CLAUDE_REVIEW_M2_3B_AND_ASTRA_ROUND.md
+BRANCH: codex/v2-public-export-route
+BASE_COMMIT: be5577477319c3ef1c8709d478c8c30ea14737e6
+EVIDENCE_COMMIT: 3ed8dfbf367c36c01114ceeab26db5d8f1120996
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260918_CODEX_M2_3R_ASTRA_REVIEW_REPORT.md
+REPORT_SHA256: 763bbdaaa8cc8c4eacac723fc66adbbaca04413f38a2e5bdebb788a066d89ac3
+EVIDENCE_PATH: mlino2/validation/m2-3r/
+VALIDATION: GW2-P PASS; one cross-component diagnostic confirms V1 acceptance / V2 rejection of noncanonical base64url signature; canonical/tamper/revocation/TTL controls pass. Full repeated builds/suites NOT RUN due to mandatory STOP.
+SCOPE: Evidence and report only. No product changes, no real keys, no Docker/database, no push.
+NEXT_ACTION: Guardian reviews M2-3R-F1 and issues further scope; remaining M2-3R work is not complete.
+CREATED_AT: 2026-09-18
+
+---
+HANDOFF_ID: HANDOFF-20260918-PUBLIC-EXPORT-OPERATIONS
+AUTHOR: CODEX
+PHASE: M2_3R_JOINT_REVIEW_004
+STATUS: DELIVERED_LOCALLY_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260919-M2-3R-ASTRA-JOINT-REVIEW-004
+TARGET_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-SIGNATURE-FIX-MERGED
+REVIEW_REFERENCE: 91a12c78624383cd69ee3bdf6a9d7980d8be831c:AI_HANDOFF/CLAUDE_REVIEWS/20260919_M2_3R_004_CONTINUE_FROM_WIP.md
+BRANCH: codex/v2-public-export-route
+EVIDENCE_PATH: mlino2/validation/m2-3r/run2/
+VALIDATION: Cross-component fixture accepted; tamper, revoked, TTL and non-canonical cases rejected; three builds and three full runs pass (241 tests each).
+SCOPE: Allowed V2 fixture/test/evidence/report and append-only handoff; no push.
+NEXT_ACTION: Guardian review.
+CREATED_AT: 2026-09-19
