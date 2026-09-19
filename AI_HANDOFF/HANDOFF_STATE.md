@@ -1,8 +1,8 @@
 HANDOFF_ID: HANDOFF-20260919-GUARDIAN-S1B-APPROVED-P1
 AUTHOR: CLAUDE
-PHASE: S1_APPROVED_P1_RELEASED
+PHASE: S1_APPROVED_P1_002_RELEASED
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: S1 و S1b پذیرفته شدند (شاخه‌ی codex/test-seed-vanak در 228a95f). نگهبان روی دیتابیس دور‌ریختنی 5499 اجرا کرد:
+REVIEW_VERDICT: به‌روزرسانی: P1-001 در B2 به‌خاطر برچسب زمانی با تقویم شمسی ویندوز متوقف شد؛ دیتابیس بی‌تغییر ماند و شاخه در b4e851c است. P1-002 با قاعده‌ی InvariantCulture صادر شد (AI_HANDOFF/CLAUDE_REVIEWS/20260919_P1_002_INVARIANT_TIMESTAMP.md). شناسه‌ی Handoff عمداً عوض نشد. — S1 و S1b پذیرفته شدند (شاخه‌ی codex/test-seed-vanak در 228a95f). نگهبان روی دیتابیس دور‌ریختنی 5499 اجرا کرد:
 - آزمون‌های ابزار: ۱۸ از ۱۸، سه بار روی دیتابیس تازه.
 - بازآزمایی: ۱۹۴ از ۱۹۴.
 - تمرین با ۱۵ کسب‌وکار واقعی: ۱۵ ساخته شد؛ اجرای دوم ۰ ساخته و ۱۵ رد شد؛ فایل عمومی دقیقاً ۱۵ رکورد داشت (۱۲ با مختصات، ۷ با ساعت، ۱۰ توانمندی)؛ برچسب آزمایشی روی همه.
