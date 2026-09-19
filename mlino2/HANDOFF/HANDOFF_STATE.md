@@ -879,3 +879,21 @@ VALIDATION: GW2-P PASS; 3 TypeScript builds PASS; database spec compiled but NOT
 SCOPE: Two lifecycle services, one new DB spec, validation evidence, report and append-only handoff. No schema, migration, export, publication, package, credential, database, Docker or push action.
 NEXT_ACTION: Guardian runs the lifecycle spec three times and the three mutations on disposable localhost:5499, then reviews for merge; S1 resumes only after lifecycle acceptance.
 CREATED_AT: 2026-09-19
+
+---
+HANDOFF_ID: HANDOFF-20260918-TEST-SEED
+AUTHOR: CODEX
+PHASE: S1B_TEST_SEED_ACTIVATION
+STATUS: IMPLEMENTED_AWAITING_DATABASE_VALIDATION
+INSTRUCTION_ID: CODEX-20260919-S1B-TEST-SEED-ACTIVATE-002
+TARGET_HANDOFF_ID: HANDOFF-20260919-GUARDIAN-L-MERGED
+REVIEW_REFERENCE: a3d9fbe4ad327d02d31970ae167b1f8115d54734:AI_HANDOFF/CLAUDE_REVIEWS/20260919_S1B_002_HANDOFF_CONFLICT_RULE.md
+BRANCH: codex/test-seed-vanak
+MERGE_COMMIT: a3890ae613012b8ee00d447b949ba54fad2b30f2
+IMPLEMENTATION_COMMIT: fba2f83
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260919_CODEX_S1B_TEST_SEED_ACTIVATE_REPORT.md
+EVIDENCE_PATH: implementation/validation/s1b/
+VALIDATION: GW2-P PASS; handoff-only conflict resolved by preserving both records; 3 builds PASS; 3 non-DB runs each 2 suites / 17 tests PASS; integration spec compiled but NOT RUN because localhost:5499 was unavailable; Docker not started.
+SCOPE: Seed lifecycle activation, optional post-withdraw profile archive, synthetic integration spec, evidence, report and append-only handoff. No post-merge Core/schema/migration/export/package/database/Docker/credential/push change.
+NEXT_ACTION: Guardian executes the integration spec three times on disposable localhost:5499 and reviews S1B.
+CREATED_AT: 2026-09-19
