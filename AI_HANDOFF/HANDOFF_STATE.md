@@ -1,31 +1,29 @@
-HANDOFF_ID: HANDOFF-20260919-GUARDIAN-S1-LIFECYCLE-GAP
+HANDOFF_ID: HANDOFF-20260919-OWNER-APPROVAL-L1-L5
 AUTHOR: CLAUDE
-PHASE: S1_BLOCKED_CORE_LIFECYCLE_GAP_AWAITING_OWNER
-STATUS: BLOCKED
-REVIEW_VERDICT: کدکس S1 را درست متوقف کرد.
-- بخش بدون دیتابیس آماده است: ۱۷ از ۱۷ در سه اجرا، و هر ۱۵ رکورد ونک از بررسی گذشتند. هیچ داده‌ی واقعی commit نشده است.
-- مانع ۱: دیتابیس آزمایشی 5499 روشن نیست. نگهبان خودش یکی دور‌ریختنی می‌سازد.
-- مانع ۲ (یافته‌ی مهم، تأییدشده به‌دست نگهبان): نمایه با پیش‌فرض DRAFT و توانمندی با پیش‌فرض PLANNED ساخته می‌شوند، ولی builder فقط ACTIVE می‌پذیرد، و هیچ سرویس هسته‌ای این وضعیت‌ها را عوض نمی‌کند. پس هیچ کسب‌وکاری هرگز در فایل عمومی ظاهر نمی‌شود.
-- بسته‌ی تصمیم مالک L1 تا L5:
-  - L1 و L2: activate و archive برای نمایه.
-  - L3: activate و retire برای توانمندی.
-  - L4: بدون migration.
-  - L5: ادغام در main پس از تأیید نگهبان.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260919_CLAUDE_REVIEW_S1_LIFECYCLE_GAP.md
+PHASE: L1_L5_DECIDED_L_RELEASED
+STATUS: APPROVED_NEXT_STEP
+REVIEW_VERDICT: مالک در گفت‌وگو نوشت: «توصیه‌های نگهبان برای L1 تا L5 تصویب شد.»
+- L1: activate نمایه از DRAFT به ACTIVE، با ادعای هویت VERIFIED و معتبر.
+- L2: archive پایانی.
+- L3: activate و retire برای توانمندی.
+- L4: بدون migration.
+- L5: ادغام در main پس از تأیید نگهبان.
+دستور CODEX-20260919-L-CORE-LIFECYCLE-ACTIVATION-001 با مدل سول صادر شد.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260919_OWNER_APPROVAL_L1_L5_LIFECYCLE.md
 ZIP_PATH: (در این مرحله ساخته نشد)
-CODE_COMMIT_SHA: نگهبان codex/test-seed-vanak را در 425b7167351a7a0ba341606550cef28cc39d2565 منتشر کرد (شاخه‌ی تازه). پیش از این commit، main روی 8c4e9dd بود.
-CREATED_AT: 2026-09-19T12:00:00+03:30
-NEXT_ACTION: مالک درباره‌ی L1 تا L5 تصمیم می‌گیرد. سپس دستور کدکس برای افزودن متدهای فعال‌سازی صادر می‌شود، بعد تکمیل S1، و در ادامه P1 و P2 طبق اجازه‌ی پیشاپیش. هیچ دستوری برای کدکس در جریان نیست.
-OWNER_ADVANCE_GRANT (2026-09-19): P1 و P2 و C0 همچنان معتبرند، ولی فقط پس از تأیید S1 به‌دست نگهبان فعال می‌شوند. ثبت: AI_HANDOFF/CLAUDE_REVIEWS/20260919_OWNER_ADVANCE_GRANT_SEED_AND_TEST_LAUNCH.md
+CODE_COMMIT_SHA: بدون کد؛ فقط ثبت تصویب. پیش از این commit، main روی cf81c43 بود. شاخه‌ی S1 روی 425b716 است.
+CREATED_AT: 2026-09-19T12:30:00+03:30
+NEXT_ACTION: کدکس L را اجرا می‌کند. سپس نگهبان آزمون‌های دیتابیسی را روی 5499 دور‌ریختنی اجرا می‌کند و L را در main ادغام می‌کند (L5). بعد S1 تکمیل می‌شود و در ادامه P1 و P2 انجام می‌شوند.
+OWNER_ADVANCE_GRANT (2026-09-19): P1 و P2 و C0 همچنان معتبرند، ولی فقط پس از تأیید S1. ثبت: AI_HANDOFF/CLAUDE_REVIEWS/20260919_OWNER_ADVANCE_GRANT_SEED_AND_TEST_LAUNCH.md
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-SIGNATURE-FIX-MERGED
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (نقش دائمی)، بازبینی CODEX-20260918-S1-TEST-SEED-TOOL-001
+PREVIOUS_HANDOFF_ID: HANDOFF-20260919-GUARDIAN-S1-LIFECYCLE-GAP
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (نقش دائمی)، ثبت تصمیم L1 تا L5 و صدور دستور L
 
 MODEL_ROUTING_NOTE: اجرا به‌دست Claude Opus 5 در نقش نگهبان معماری.
 
-HANDOFF_PRECONDITION_CHECK: origin/main روی 8c4e9dd بود و شاخه‌ی S1 از main منشعب شده است. main در e26c525 و 6dac7c5 شامل M2-3 است.
+HANDOFF_PRECONDITION_CHECK: origin/main روی cf81c43 است. کلیدهای مجوز business_profile.manage و capability.manage از قبل وجود دارند.
 
-SCOPE_CONSTRAINT_NOTE: در main فقط بازبینی و فایل‌های AI_HANDOFF تغییر کردند.
+SCOPE_CONSTRAINT_NOTE: در main فقط این ثبت و فایل‌های AI_HANDOFF تغییر کردند.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN هنوز در انتظار بازبینی مستقل ممد است و بخش B آن عمداً اجرا نشده.
