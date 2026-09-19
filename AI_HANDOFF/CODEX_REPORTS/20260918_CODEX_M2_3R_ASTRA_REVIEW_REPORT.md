@@ -104,3 +104,23 @@ Guardian باید درباره دامنه اصلاح بررسی‌کننده V1 
 بازبینی همین شاهد و صدور دستور محدود اصلاح/آزمون F1، سپس ادامه اقلام معوق M2-3R. تا آن زمان اجرای کار متوقف است.
 
 من کدکس هستم
+
+## ۱۱. اجرای ادامه‌ی ۰۰۴
+
+مرجع دستور: `91a12c78624383cd69ee3bdf6a9d7980d8be831c` با SHA-256 خام `57a12322b72853f0c8b84f8babfa129dd0687770849f6a13ecb8289232995be3`.
+
+در V1، اختلاف line ending تأیید و فقط `signing.ts` restore شد؛ merge عادی main با commit `9a9c8ad8d43c8b7f71ea6a53fc8f3d42bd713913` بدون تعارض انجام شد. diagnostic مشترک پس از merge canonical را پذیرفت و non-canonical را هم‌زمان با V1 (`DISTRIBUTION_SIGNATURE`) و V2 (`PUBLIC_EXPORT_SIGNATURE_VALUE`) رد کرد.
+
+| یافته | وضعیت | شاهد |
+| --- | --- | --- |
+| M2-3R-F1 | اصلاح‌شده در main، بدون تغییر در branch V2 | `signing-canonical.spec.ts` و `run2-parity-after-main-fix.log` |
+| O1 سقف فایل | در V1 اصلاح و در fixture مسیر مصرف حفظ شد | آزمون oversized در گزارش V1 |
+| O2 زمان | V2 TTL ثابت ۳۰۰ ثانیه؛ producer default اکنون ۱۲۰ ثانیه است | آزمون timing در V1 |
+| O3 rename | رفتار atomic و retry در V1؛ مصرف‌کننده به فایل کامل منتقل‌شده محدود است | آزمون‌های hardening V1 |
+| E2E | artifact تولیدشده در V1 با bundle عمومی در V2 پذیرفته شد؛ tamper، revoked، TTL و non-canonical رد شدند | `e2eFixture.test.ts` |
+
+fixture artifact SHA-256 برابر `72eae1a0575f2df6125e486b273320c28f1456091dffef7eb4a51abc6c4b1b65` است و در هر دو شاخه یکسان ثبت شده است. اعتبارسنجی V2 در سه دور: هر دور ۱۷ فایل تست و ۲۴۱ تست موفق، و سه build موفق با `--configLoader runner` به‌دلیل محدودیت loader محیط sandbox. هیچ network، Docker یا database استفاده نشد.
+
+هش تمام logها و fixtureها در manifest LF مسیر `mlino2/validation/m2-3r/run2/` ثبت خواهد شد. تست‌های nginx، HEAD/Range و نسخه‌گذاری redeploy از M2-3b Guardian evidence استفاده می‌کنند و دوباره اجرا نشدند.
+
+من کدکس هستم

@@ -231,3 +231,18 @@ VALIDATION: GW2-P PASS; one cross-component diagnostic confirms V1 acceptance / 
 SCOPE: Evidence and report only. No product changes, no real keys, no Docker/database, no push.
 NEXT_ACTION: Guardian reviews M2-3R-F1 and issues further scope; remaining M2-3R work is not complete.
 CREATED_AT: 2026-09-18
+
+---
+HANDOFF_ID: HANDOFF-20260918-PUBLIC-EXPORT-OPERATIONS
+AUTHOR: CODEX
+PHASE: M2_3R_JOINT_REVIEW_004
+STATUS: DELIVERED_LOCALLY_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260919-M2-3R-ASTRA-JOINT-REVIEW-004
+TARGET_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-SIGNATURE-FIX-MERGED
+REVIEW_REFERENCE: 91a12c78624383cd69ee3bdf6a9d7980d8be831c:AI_HANDOFF/CLAUDE_REVIEWS/20260919_M2_3R_004_CONTINUE_FROM_WIP.md
+BRANCH: codex/v2-public-export-route
+EVIDENCE_PATH: mlino2/validation/m2-3r/run2/
+VALIDATION: Cross-component fixture accepted; tamper, revoked, TTL and non-canonical cases rejected; three builds and three full runs pass (241 tests each).
+SCOPE: Allowed V2 fixture/test/evidence/report and append-only handoff; no push.
+NEXT_ACTION: Guardian review.
+CREATED_AT: 2026-09-19
