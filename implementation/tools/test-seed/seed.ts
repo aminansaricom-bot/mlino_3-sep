@@ -63,10 +63,12 @@ export async function seedVanakBusinesses(db: PrismaClient, rows: VanakBusinessI
     await verifications.decide(PLATFORM_CREDENTIAL, { organizationId: mapped.organizationId, verificationId: attempt.id, decision: 'VERIFIED', decisionReason: SEED_REASON });
     const profile = await profiles.create(context, { organizationId: mapped.organizationId, ...mapped.profile });
     await profiles.linkIdentityClaim(context, profile.id, claim.id);
+    await profiles.activate(context, profile.id);
     await publications.publish(context, 'BUSINESS_PROFILE', profile.id, SEED_REASON);
     for (const input of mapped.capabilities) {
       const capability = await capabilities.create(context, { organizationId: mapped.organizationId, ...input });
       await capabilities.confirm(context, capability.id);
+      await capabilities.activate(context, capability.id);
       await publications.publish(context, 'CAPABILITY', capability.id, SEED_REASON);
     }
     created += 1;

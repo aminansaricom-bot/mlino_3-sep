@@ -1,0 +1,5 @@
+ACTUAL_MOBILE_LITERAL_HITS=0
+REAL_BUSINESS_NAME_HITS=0
+PRIVATE_KEY_HITS=0
+DATABASE_URL_LITERAL_HITS=3
+DATABASE_URL_NOTE=All URL literals are synthetic unit-test values; no environment or .env value was read.

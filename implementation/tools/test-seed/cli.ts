@@ -20,8 +20,10 @@ async function main(): Promise<void> {
     const result = await seedVanakBusinesses(prisma, rows);
     process.stdout.write(`TEST_SEED_OK created=${result.created} skipped=${result.skipped} failed=0\n`);
   } else if (command === 'withdraw') {
-    const result = await withdrawVanakBusinesses(prisma);
-    process.stdout.write(`TEST_SEED_WITHDRAW_OK withdrawn=${result.withdrawn} failed=0\n`);
+    const flag = process.argv[3];
+    if (flag !== undefined && flag !== '--archive') throw new TestSeedError('TEST_SEED_COMMAND');
+    const result = await withdrawVanakBusinesses(prisma, process.env, flag === '--archive');
+    process.stdout.write(`TEST_SEED_WITHDRAW_OK withdrawn=${result.withdrawn} archived=${result.archived} failed=0\n`);
   } else {
     throw new TestSeedError('TEST_SEED_COMMAND');
   }
