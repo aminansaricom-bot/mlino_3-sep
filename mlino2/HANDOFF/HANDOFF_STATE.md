@@ -897,3 +897,20 @@ VALIDATION: GW2-P PASS; handoff-only conflict resolved by preserving both record
 SCOPE: Seed lifecycle activation, optional post-withdraw profile archive, synthetic integration spec, evidence, report and append-only handoff. No post-merge Core/schema/migration/export/package/database/Docker/credential/push change.
 NEXT_ACTION: Guardian executes the integration spec three times on disposable localhost:5499 and reviews S1B.
 CREATED_AT: 2026-09-19
+
+---
+HANDOFF_ID: HANDOFF-20260918-TEST-SEED
+AUTHOR: CODEX
+PHASE: P1_SEED_LOCAL_DB
+STATUS: HARD_STOP_B2_BACKUP_TIMESTAMP
+INSTRUCTION_ID: CODEX-20260919-P1-SEED-LOCAL-DB-001
+TARGET_HANDOFF_ID: HANDOFF-20260919-GUARDIAN-S1B-APPROVED-P1
+REVIEW_REFERENCE: 39b25e4d0b708d6399d993bc40fee31439cbfd0c:AI_HANDOFF/CLAUDE_REVIEWS/20260919_CLAUDE_REVIEW_S1B_AND_P1.md
+BRANCH: codex/test-seed-vanak
+BASE_HEAD: 228a95f8c80d85f311305021cf93fb191e1cf2bc
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260919_CODEX_P1_SEED_LOCAL_DB_REPORT.md
+EVIDENCE_PATH: implementation/validation/p1/
+VALIDATION: GW2-P PASS; read-only pre-check PASS; B2 timestamp pattern FAIL before pg_dump; C0 not read; seed not started; database unchanged.
+SCOPE: Read-only metadata/count pre-check and stop evidence only. No product edit, dump, credential access, seed, database mutation, container restart or push.
+NEXT_ACTION: Guardian issues a superseding retry with invariant Gregorian UTC timestamp generation and all original safety gates.
+CREATED_AT: 2026-09-19

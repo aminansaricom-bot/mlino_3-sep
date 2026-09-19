@@ -1,0 +1,9 @@
+BACKUP=FAIL
+FAILED_STEP=B2_TIMESTAMP_VALIDATION
+REASON=Culture-sensitive timestamp formatting did not match the mandatory UTC filename pattern.
+PG_DUMP_STARTED=false
+HOST_DUMP_CREATED=false
+C0_READ=false
+SEED_STARTED=false
+DATABASE_MUTATION=false
+ACTION=HARD_STOP_NO_RETRY
