@@ -844,3 +844,20 @@ VALIDATION: GW2-P PASS; one cross-component diagnostic confirms V1 acceptance / 
 SCOPE: Evidence and report only. No product changes, no real keys, no Docker/database, no push.
 NEXT_ACTION: Guardian reviews M2-3R-F1 and issues further scope; remaining M2-3R work is not complete.
 CREATED_AT: 2026-09-18
+
+---
+HANDOFF_ID: HANDOFF-20260919-CORE-LIFECYCLE
+AUTHOR: CODEX
+PHASE: L_CORE_LIFECYCLE_ACTIVATION
+STATUS: IMPLEMENTED_AWAITING_DATABASE_VALIDATION
+INSTRUCTION_ID: CODEX-20260919-L-CORE-LIFECYCLE-ACTIVATION-001
+TARGET_HANDOFF_ID: HANDOFF-20260919-OWNER-APPROVAL-L1-L5
+REVIEW_REFERENCE: 945fa10f2e2ac9a7db2a7736010561252885683d:AI_HANDOFF/CLAUDE_REVIEWS/20260919_OWNER_APPROVAL_L1_L5_LIFECYCLE.md
+BRANCH: codex/core-lifecycle-activation
+IMPLEMENTATION_COMMIT: 1da3d9c
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260919_CODEX_L_CORE_LIFECYCLE_REPORT.md
+EVIDENCE_PATH: implementation/validation/l/
+VALIDATION: GW2-P PASS; 3 TypeScript builds PASS; database spec compiled but NOT RUN because localhost:5499 was unavailable; Docker was not started; mutation plan recorded.
+SCOPE: Two lifecycle services, one new DB spec, validation evidence, report and append-only handoff. No schema, migration, export, publication, package, credential, database, Docker or push action.
+NEXT_ACTION: Guardian runs the lifecycle spec three times and the three mutations on disposable localhost:5499, then reviews for merge; S1 resumes only after lifecycle acceptance.
+CREATED_AT: 2026-09-19
