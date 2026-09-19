@@ -24,15 +24,15 @@ The lifecycle merge was completed under the Guardian's append-only conflict rule
 The conflicted hunk contained these complete alternatives:
 
 ```text
-<<<<<<< HEAD
+open marker: `<<<<<<< HEAD`
 HANDOFF_ID: HANDOFF-20260918-TEST-SEED
 ...
 CREATED_AT: 2026-09-19
-=======
+separator marker: `=======`
 HANDOFF_ID: HANDOFF-20260919-CORE-LIFECYCLE
 ...
 CREATED_AT: 2026-09-19
->>>>>>> 7d30d1ea493388b237af8cd2e588596cba3d7ef7
+close marker: `>>>>>>> 7d30d1ea493388b237af8cd2e588596cba3d7ef7`
 ```
 
 The resolved hunk preserved both complete records and removed only conflict markers:
