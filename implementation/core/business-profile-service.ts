@@ -2,7 +2,7 @@ import { runCoreTransaction } from './transaction';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { AuthContext, requireMembershipPermission, requireNonEmpty, requireSameOrganization, validateAuthContext } from './auth-context';
 import { mapCoreDatabaseError } from './error-adapter';
-import { CoreDomainError, validationFailed } from './errors';
+import { CoreDomainError, conflict, validationFailed } from './errors';
 import { lockOrganization } from './repositories';
 
 export interface BusinessProfilePublicFields {
@@ -51,6 +51,47 @@ export class BusinessProfileService {
       const profile = await tx.businessProfile.findUnique({ where: { id_organizationId: { id: profileId, organizationId: context.organizationId } } });
       if (!profile) throw validationFailed('business profile not found in organization');
       return tx.businessProfile.update({ where: { id_organizationId: { id: profileId, organizationId: context.organizationId } }, data: data as Prisma.BusinessProfileUncheckedUpdateInput });
+    }).catch((error: unknown) => {
+      throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);
+    });
+  }
+
+  async activate(context: AuthContext, profileId: string) {
+    validateAuthContext(context);
+    requireNonEmpty(profileId, 'profileId');
+    return runCoreTransaction(this.db, async (tx) => {
+      await lockOrganization(tx, context.organizationId);
+      await requireMembershipPermission(tx, context, 'business_profile.manage');
+      const profile = await tx.businessProfile.findUnique({ where: { id_organizationId: { id: profileId, organizationId: context.organizationId } } });
+      if (!profile) throw validationFailed('business profile not found in organization');
+      if (profile.lifecycleStatus !== 'DRAFT') throw conflict('business profile is not draft');
+      if (!profile.businessIdentityClaimId || profile.businessIdentityClaimOrganizationId !== context.organizationId) throw validationFailed('verified unexpired identity claim required');
+      const claim = await tx.businessIdentityClaim.findUnique({ where: { id_organizationId: { id: profile.businessIdentityClaimId, organizationId: context.organizationId } } });
+      if (!claim || claim.claimStatus !== 'VERIFIED' || (claim.validUntil !== null && claim.validUntil <= new Date())) throw validationFailed('verified unexpired identity claim required');
+      return tx.businessProfile.update({
+        where: { id_organizationId: { id: profileId, organizationId: context.organizationId } },
+        data: { lifecycleStatus: 'ACTIVE' },
+      });
+    }).catch((error: unknown) => {
+      throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);
+    });
+  }
+
+  async archive(context: AuthContext, profileId: string, reason: string) {
+    validateAuthContext(context);
+    requireNonEmpty(profileId, 'profileId');
+    requireNonEmpty(reason, 'reason');
+    return runCoreTransaction(this.db, async (tx) => {
+      await lockOrganization(tx, context.organizationId);
+      await requireMembershipPermission(tx, context, 'business_profile.manage');
+      const profile = await tx.businessProfile.findUnique({ where: { id_organizationId: { id: profileId, organizationId: context.organizationId } } });
+      if (!profile) throw validationFailed('business profile not found in organization');
+      if (profile.lifecycleStatus === 'ARCHIVED') throw conflict('business profile is already archived');
+      if (profile.lifecycleStatus !== 'DRAFT' && profile.lifecycleStatus !== 'ACTIVE') throw conflict('business profile cannot be archived');
+      return tx.businessProfile.update({
+        where: { id_organizationId: { id: profileId, organizationId: context.organizationId } },
+        data: { lifecycleStatus: 'ARCHIVED' },
+      });
     }).catch((error: unknown) => {
       throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);
     });

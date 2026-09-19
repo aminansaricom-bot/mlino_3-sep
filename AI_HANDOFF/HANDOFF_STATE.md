@@ -1,40 +1,29 @@
-HANDOFF_ID: HANDOFF-20260918-GUARDIAN-SIGNATURE-FIX-MERGED
+HANDOFF_ID: HANDOFF-20260919-OWNER-APPROVAL-L1-L5
 AUTHOR: CLAUDE
-PHASE: F1_FIXED_ON_MAIN_M2_3R_003_AND_S1_RELEASED
+PHASE: L1_L5_DECIDED_L_RELEASED
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: دو دستور موازی زیر همین شناسه‌ی Handoff معتبرند. شناسه عمداً عوض نشد تا دستور ۰۰۳ که ممکن است در حال اجرا باشد کهنه نشود.
-۱. دور استرا M2-3R-004 **پایان یافت و پذیرفته شد**. بازبینی: AI_HANDOFF/CLAUDE_REVIEWS/20260919_CLAUDE_REVIEW_M2_3R_004.md.
-   - نگهبان زیر حساب مالک اجرا کرد: نسخه‌ی اول ۳۷ از ۳۷ بدون skip، نسخه‌ی دوم ۲۴۱ از ۲۴۱.
-   - شاخه‌ها منتشر شدند: V1 در 6c5b664 و V2 در d8ad6e3. ادغام آزمایشی هر دو تمیز است.
-   - مالک تصویب کرد: «ادغام M2-3 در main و شاخه‌ی V2 مجاز است».
-     - ادغام در main: 6dac7c5.
-     - ادغام در شاخه‌ی نسخه‌ی دوم: e26c525.
-     - پس از ادغام: main ۳۷ از ۳۷، نسخه‌ی دوم ۲۴۱ از ۲۴۱ و ساخت موفق.
-     - ثبت: AI_HANDOFF/CLAUDE_REVIEWS/20260919_CLAUDE_MERGE_M2_3.md.
-۲. CODEX-20260918-S1-TEST-SEED-TOOL-001 (مدل سول): تازه صادر شد. مرجع آن AI_HANDOFF/CLAUDE_REVIEWS/20260918_OWNER_APPROVAL_TEST_SEED_TOOL.md است.
-   - تصویب مالک در گفت‌وگو: «ساخت ابزار وارد کردن داده‌ی آزمایشی مجاز است.»
-   - ورودی: C:\mlino code\_TEST_DATA\vanak_businesses.json، بیرون از مخزن؛ ۱۵ کسب‌وکار بررسی‌شده.
-   - تصمیم‌های نگهبان:
-     - S1-D1: روزهای ISO 8601، شنبه=6، با Asia/Tehran.
-     - S1-D2: برچسب آزمایشی test-vanak-NN.
-     - S1-D3: فقط سرویس‌های رسمی Core.
-     - S1-D4: تأییدکننده‌ی آزمایشی فقط با پرچم صریح و localhost.
-     - S1-D5: پاک‌سازی فقط با withdraw.
-   - اجرا فقط روی دیتابیس آزمایشی 5499.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260918_OWNER_APPROVAL_TEST_SEED_TOOL.md
+REVIEW_VERDICT: مالک در گفت‌وگو نوشت: «توصیه‌های نگهبان برای L1 تا L5 تصویب شد.»
+- L1: activate نمایه از DRAFT به ACTIVE، با ادعای هویت VERIFIED و معتبر.
+- L2: archive پایانی.
+- L3: activate و retire برای توانمندی.
+- L4: بدون migration.
+- L5: ادغام در main پس از تأیید نگهبان.
+دستور CODEX-20260919-L-CORE-LIFECYCLE-ACTIVATION-001 با مدل سول صادر شد.
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260919_OWNER_APPROVAL_L1_L5_LIFECYCLE.md
 ZIP_PATH: (در این مرحله ساخته نشد)
-CODE_COMMIT_SHA: اصلاح امضا در main برابر 4c8866c است. شاخه‌ها: codex/public-export-distribution در b4ac4ce و codex/v2-public-export-route در a809c2f.
-CREATED_AT: 2026-09-18T22:10:00+03:30
-NEXT_ACTION: کدکس دو دستور بالا را جداگانه اجرا می‌کند و نگهبان هر کدام را بازبینی می‌کند. اجرای S1 روی دیتابیس محلی 5435 به اجازه‌ی جداگانه‌ی مالک، پشتیبان‌گیری و اجازه‌ی خواندن نشانی دیتابیس فقط در حافظه نیاز دارد. اعمال روی میزبان هم اجازه‌ی جداگانه می‌خواهد.
+CODE_COMMIT_SHA: بدون کد؛ فقط ثبت تصویب. پیش از این commit، main روی cf81c43 بود. شاخه‌ی S1 روی 425b716 است.
+CREATED_AT: 2026-09-19T12:30:00+03:30
+NEXT_ACTION: کدکس L را اجرا می‌کند. سپس نگهبان آزمون‌های دیتابیسی را روی 5499 دور‌ریختنی اجرا می‌کند و L را در main ادغام می‌کند (L5). بعد S1 تکمیل می‌شود و در ادامه P1 و P2 انجام می‌شوند.
+OWNER_ADVANCE_GRANT (2026-09-19): P1 و P2 و C0 همچنان معتبرند، ولی فقط پس از تأیید S1. ثبت: AI_HANDOFF/CLAUDE_REVIEWS/20260919_OWNER_ADVANCE_GRANT_SEED_AND_TEST_LAUNCH.md
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
-PREVIOUS_HANDOFF_ID: HANDOFF-20260918-GUARDIAN-M2-3R-PARITY-STOP
-EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (نقش دائمی)، اصلاح و ادغام امضا به دستور مالک، سپس ثبت تصویب S1
+PREVIOUS_HANDOFF_ID: HANDOFF-20260919-GUARDIAN-S1-LIFECYCLE-GAP
+EXECUTED_INSTRUCTION_ID: CLAUDE-ARCHITECT-GUARDIAN-001 (نقش دائمی)، ثبت تصمیم L1 تا L5 و صدور دستور L
 
 MODEL_ROUTING_NOTE: اجرا به‌دست Claude Opus 5 در نقش نگهبان معماری.
 
-HANDOFF_PRECONDITION_CHECK: origin/main روی f3ebbff بود. سرویس‌های Core برای bootstrap، claim، verification، profile، capability و publication در implementation/core وجود دارند.
+HANDOFF_PRECONDITION_CHECK: origin/main روی cf81c43 است. کلیدهای مجوز business_profile.manage و capability.manage از قبل وجود دارند.
 
-SCOPE_CONSTRAINT_NOTE: در main فقط ثبت‌ها و فایل‌های AI_HANDOFF تغییر کردند. فایل داده‌ی آزمایشی بیرون از مخزن است و commit نمی‌شود.
+SCOPE_CONSTRAINT_NOTE: در main فقط این ثبت و فایل‌های AI_HANDOFF تغییر کردند.
 
 CARRIED_FORWARD_OPEN_REVIEW: HANDOFF-20260907-V1-DOCKER-LOCAL-RUN هنوز در انتظار بازبینی مستقل ممد است و بخش B آن عمداً اجرا نشده.
