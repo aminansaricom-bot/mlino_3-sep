@@ -6,6 +6,9 @@ import { SignedEnvelope, VerificationKeyProvider, verifyEnvelope } from '../sign
 
 const FILE = 'public-business.v1.json';
 const FUTURE_MS = 30_000;
+const MAX_ARTIFACT_BYTES = 2_000_000;
+const RENAME_ATTEMPTS = 5;
+const RENAME_DELAY_MS = 100;
 export type DistributionCode =
   'DISTRIBUTION_PATH' | 'DISTRIBUTION_SOURCE' | 'DISTRIBUTION_CANONICAL' |
   'DISTRIBUTION_CONTRACT' | 'DISTRIBUTION_SIGNATURE' | 'DISTRIBUTION_TIMESTAMP' |
@@ -72,10 +75,15 @@ export async function distributeCurrent(options: DistributionOptions, deps: Dist
   try {
     await validateDistributionDirectories(options.sourceDir, options.publicDir);
     const now = options.now ?? new Date();
-    const maxAgeMs = options.maxAgeMs ?? 300_000;
+    const maxAgeMs = options.maxAgeMs ?? 120_000;
     if (!Number.isFinite(now.getTime()) || !Number.isFinite(maxAgeMs) || maxAgeMs < 0) fail('DISTRIBUTION_TIMESTAMP');
     let raw: Buffer;
-    try { raw = await fs.readFile(path.join(options.sourceDir, FILE)); }
+    const sourceFile = path.join(options.sourceDir, FILE);
+    try {
+      const stat = await fs.lstat(sourceFile);
+      if (!stat.isFile() || stat.size > MAX_ARTIFACT_BYTES) fail('DISTRIBUTION_SOURCE');
+      raw = await fs.readFile(sourceFile);
+    }
     catch { return fail('DISTRIBUTION_SOURCE'); }
     const envelope = parse(raw);
     if (envelope.contract_version !== CONTRACT_VERSION) fail('DISTRIBUTION_CONTRACT');
@@ -87,7 +95,11 @@ export async function distributeCurrent(options: DistributionOptions, deps: Dist
     if (!valid) fail('DISTRIBUTION_SIGNATURE');
     const target = path.join(options.publicDir, FILE);
     let existing: Buffer | undefined;
-    try { existing = await fs.readFile(target); }
+    try {
+      const stat = await fs.lstat(target);
+      if (!stat.isFile() || stat.size > MAX_ARTIFACT_BYTES) fail('DISTRIBUTION_IO');
+      existing = await fs.readFile(target);
+    }
     catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') fail('DISTRIBUTION_IO'); }
     if (existing) {
       const old = parse(existing);
@@ -95,7 +107,20 @@ export async function distributeCurrent(options: DistributionOptions, deps: Dist
     }
     temp = path.join(options.publicDir, `.public-business.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`);
     await fs.writeFile(temp, raw, { flag: 'wx' });
-    await (deps.rename ?? fs.rename)(temp, target);
+    const rename = deps.rename ?? fs.rename;
+    let renamed = false;
+    for (let attempt = 1; attempt <= RENAME_ATTEMPTS; attempt += 1) {
+      try {
+        await rename(temp, target);
+        renamed = true;
+        break;
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException).code;
+        if (!['EPERM', 'EBUSY', 'EACCES'].includes(code ?? '') || attempt === RENAME_ATTEMPTS) throw error;
+        await new Promise((resolve) => setTimeout(resolve, RENAME_DELAY_MS));
+      }
+    }
+    if (!renamed) fail('DISTRIBUTION_IO');
     temp = undefined;
     log({ code: 'DISTRIBUTION_OK', ok: true });
   } catch (error) {

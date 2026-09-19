@@ -93,16 +93,15 @@ async function main() {
     assert.notEqual(alternative, original);
     assert.deepEqual(Buffer.from(alternative, 'base64url'), Buffer.from(original, 'base64url'));
     signed.signature.value = alternative;
-    assert.equal(await verifyEnvelope(signed, provider), true);
+    assert.equal(await verifyEnvelope(signed, provider), false);
     const alteredBytes = canonicalBytes(signed);
     await fsp.writeFile(source, alteredBytes);
-    await distributeCurrent({ sourceDir, publicDir, keyProvider: provider, now: at });
-    const distributed = await fsp.readFile(target);
-    assert.deepEqual(distributed, alteredBytes);
-    await assert.rejects(new PublicExportConsumer(new FileTransport(distributed), trust).refresh(at.getTime()),
+    await assert.rejects(distributeCurrent({ sourceDir, publicDir, keyProvider: provider, now: at }),
+      { code: 'DISTRIBUTION_SIGNATURE' });
+    await assert.rejects(new PublicExportConsumer(new FileTransport(alteredBytes), trust).refresh(at.getTime()),
       { message: 'PUBLIC_EXPORT_SIGNATURE_VALUE' });
-    console.log('FINDING M2-3R-F1: same decoded signature; V1 verify=true; distribute=PASS; V2=PUBLIC_EXPORT_SIGNATURE_VALUE');
-    console.log('RESULT=CONFIRMED_ACCEPTANCE_MISMATCH; no content forgery demonstrated; mandatory review STOP');
+    console.log('FINDING M2-3R-F1: same decoded signature; V1 verify=false; distribute=DISTRIBUTION_SIGNATURE; V2=PUBLIC_EXPORT_SIGNATURE_VALUE');
+    console.log('RESULT=JOINT_REJECTION_AFTER_MAIN_FIX; no content forgery demonstrated');
   } finally {
     for (const secret of secrets.values()) secret.fill(0);
     const resolved = await fsp.realpath(root);
@@ -115,4 +114,4 @@ async function main() {
     console.log('TEST_TEMP_REMOVED=true; TEST_PRIVATE_BYTES_ZEROED=true');
   }
 }
-main().catch(() => { console.error('DIAGNOSTIC_FAILED'); process.exitCode = 1; });
+main().catch((error) => { console.error('DIAGNOSTIC_FAILED', error?.message || 'unknown'); process.exitCode = 1; });

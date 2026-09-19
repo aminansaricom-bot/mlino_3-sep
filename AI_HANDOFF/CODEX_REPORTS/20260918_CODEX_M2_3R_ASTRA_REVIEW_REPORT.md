@@ -104,3 +104,25 @@ Guardian باید درباره دامنه اصلاح بررسی‌کننده V1 
 بازبینی همین شاهد و صدور دستور محدود اصلاح/آزمون F1، سپس ادامه اقلام معوق M2-3R. تا آن زمان اجرای کار متوقف است.
 
 من کدکس هستم
+
+## ۱۱. اجرای ادامه‌ی ۰۰۴
+
+مرجع دستور: `91a12c78624383cd69ee3bdf6a9d7980d8be831c` با SHA-256 خام `57a12322b72853f0c8b84f8babfa129dd0687770849f6a13ecb8289232995be3`.
+
+- `git diff --ignore-cr-at-eol -- implementation/public-export/signing.ts` خروجی خالی داشت؛ سپس فقط همان فایل با مجوز دستور restore شد.
+- merge عادی `4c8866cb6d176ee0a299b66fd61350319ed2c82e` بدون تعارض انجام شد؛ commit merge فعلی `9a9c8ad8d43c8b7f71ea6a53fc8f3d42bd713913` است.
+- diagnostic پس از merge نشان داد: امضای canonical پذیرفته شد؛ حالت non-canonical در V1 با `verify=false` و `DISTRIBUTION_SIGNATURE` رد شد و در V2 با `PUBLIC_EXPORT_SIGNATURE_VALUE` رد شد.
+
+| یافته | وضعیت | شاهد |
+| --- | --- | --- |
+| M2-3R-F1 | اصلاح‌شده در main، بدون ویرایش دوباره‌ی `signing.ts` | `signing-canonical.spec.ts` در merge `4c8866c` و `run2-parity-after-main-fix.log` |
+| O1 سقف فایل | اصلاح‌شده | `m23r rejects oversized source before readFile and preserves destination` |
+| O2 زمان | تصمیم: پیش‌فرض توزیع از ۳۰۰ به ۱۲۰ ثانیه کاهش یافت؛ TTL V2 بدون تغییر و ۳۰۰ ثانیه باقی ماند | `m23r age 120 seconds accepted and 120001ms rejected` |
+| O3 rename ویندوز | retry محدود پنج‌باره با ۱۰۰ms؛ موفقیت پس از خطا و exhaustion آزموده شد؛ قفل واقعی Windows نیز روی این محیط اجرا شد | `m23r retries sharing violations then atomically succeeds`, `m23r bounded retry exhaustion preserves old file and cleans temp`, `m23r strict Windows reader lock is exercised or visibly skipped` |
+| E2E | fixture با V1 تولید و در V2 مصرف شد | `e2eFixture.test.ts`؛ artifact SHA-256: `72eae1a0575f2df6125e486b273320c28f1456091dffef7eb4a51abc6c4b1b65` |
+
+اعتبارسنجی V1: سه build و سه اجرای distribution/key-provider؛ هر اجرا ۷ suite موفق، ۳۲ تست موفق و ۲ تست skip با دلیل DPAPI محیطی. اعتبارسنجی V2: سه build و سه اجرای کامل؛ هر اجرا ۱۷ فایل تست و ۲۴۱ تست موفق. fallback `--configLoader runner` برای محدودیت loader در sandbox ثبت شده است. هیچ Docker، شبکه، دیتابیس، کلید واقعی یا push استفاده نشد.
+
+هش فایل‌های شواهد از blobهای LF در manifestهای مسیر `implementation/validation/m2-3r/run2/` و `mlino2/validation/m2-3r/run2/` ثبت می‌شود. باقی موارد adversarial نیز در تست‌های جدید پوشش داده شدند: BOM، newline، JSON نامتعارف، junction، alias حروف، tamper، revoked، TTL، sessionStorage و nginx قبلاً در M2-3b تأیید شده‌اند.
+
+من کدکس هستم
