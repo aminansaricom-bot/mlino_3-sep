@@ -3,8 +3,10 @@ AUTHOR: CLAUDE
 PHASE: F1_FIXED_ON_MAIN_M2_3R_003_AND_S1_RELEASED
 STATUS: APPROVED_NEXT_STEP
 REVIEW_VERDICT: دو دستور موازی زیر همین شناسه‌ی Handoff معتبرند. شناسه عمداً عوض نشد تا دستور ۰۰۳ که ممکن است در حال اجرا باشد کهنه نشود.
-۱. CODEX-20260918-M2-3R-ASTRA-JOINT-REVIEW-003 (مدل استرا): پیش از این صادر شده بود. مرجع آن AI_HANDOFF/CLAUDE_REVIEWS/20260918_CLAUDE_FIX_SIGNATURE_CANONICAL_AND_M2_3R_003.md است.
-   - زمینه: اصلاح امضا (M2-3R-F1) در main ادغام شده است (4c8866c).
+۱. CODEX-20260919-M2-3R-ASTRA-JOINT-REVIEW-004 (مدل استرا)، جایگزین ۰۰۳. مرجع آن AI_HANDOFF/CLAUDE_REVIEWS/20260919_M2_3R_004_CONTINUE_FROM_WIP.md است.
+   - کدکس از کار نیمه‌تمام ۰۰۲ ادامه می‌دهد.
+   - فقط signing.ts برگردانده می‌شود، چون فرقش تنها پایان خط است.
+   - سپس main (4c8866c) در شاخه‌ی نسخه‌ی اول ادغام می‌شود.
 ۲. CODEX-20260918-S1-TEST-SEED-TOOL-001 (مدل سول): تازه صادر شد. مرجع آن AI_HANDOFF/CLAUDE_REVIEWS/20260918_OWNER_APPROVAL_TEST_SEED_TOOL.md است.
    - تصویب مالک در گفت‌وگو: «ساخت ابزار وارد کردن داده‌ی آزمایشی مجاز است.»
    - ورودی: C:\mlino code\_TEST_DATA\vanak_businesses.json، بیرون از مخزن؛ ۱۵ کسب‌وکار بررسی‌شده.
