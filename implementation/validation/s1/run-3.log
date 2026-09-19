@@ -1,0 +1,11 @@
+RUN=3
+BUILD_EXIT=0
+PASS test/tools/test-seed/parse-map.spec.ts
+PASS test/tools/test-seed/verifier.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       17 passed, 17 total
+Snapshots:   0 total
+Time:        5.14 s
+Ran all test suites matching /test\\tools\\test-seed\\parse-map.spec.ts|test\\tools\\test-seed\\verifier.spec.ts/i.
+TEST_EXIT=0

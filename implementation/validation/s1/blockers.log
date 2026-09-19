@@ -1,0 +1,7 @@
+BLOCKER_1=DISPOSABLE_POSTGRES_UNAVAILABLE
+DETAIL_1=No listener exists on the only permitted integration-test endpoint localhost:5499. Docker and network are forbidden by the instruction.
+BLOCKER_2=CORE_LIFECYCLE_SERVICE_GAP
+DETAIL_2=BusinessProfileService.create creates the schema default DRAFT and exposes no activation operation.
+DETAIL_3=CapabilityService.create creates the schema default PLANNED and exposes no activation operation.
+DETAIL_4=buildPublicExport admits only ACTIVE profiles and ACTIVE capabilities.
+CONSEQUENCE=The required three exported records with published active profiles/capabilities cannot be produced using only the named official Core services. Direct table writes are forbidden and were not used.
