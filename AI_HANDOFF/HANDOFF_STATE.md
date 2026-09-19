@@ -2,7 +2,7 @@ HANDOFF_ID: HANDOFF-20260919-GUARDIAN-L-MERGED
 AUTHOR: CLAUDE
 PHASE: L_MERGED_S1B_RELEASED
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: L (فعال‌سازی در هسته) پذیرفته و طبق L5 در main ادغام شد: 7d30d1e.
+REVIEW_VERDICT: L (فعال‌سازی در هسته) پذیرفته و طبق L5 در main ادغام شد: 7d30d1e. به‌روزرسانی: S1b-001 در تعارض فقط-Handoff متوقف شد و S1b-002 با قاعده‌ی حل آن صادر شد (AI_HANDOFF/CLAUDE_REVIEWS/20260919_S1B_002_HANDOFF_CONFLICT_RULE.md). شناسه‌ی Handoff عمداً عوض نشد.
 - نگهبان روی دیتابیس دور‌ریختنی 5499 اجرا کرد؛ به 5435 دست زده نشد.
 - آزمون PENDING یک ایراد در خود آزمون داشت (قید audit ادعای هویت). نگهبان آن را در 517d03d اصلاح کرد.
 - پس از اصلاح:
