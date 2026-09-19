@@ -25,6 +25,7 @@ REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260918_OWNER_APPROVAL_TEST_SEED_TOOL.md
 ZIP_PATH: (در این مرحله ساخته نشد)
 CODE_COMMIT_SHA: اصلاح امضا در main برابر 4c8866c است. شاخه‌ها: codex/public-export-distribution در b4ac4ce و codex/v2-public-export-route در a809c2f.
 CREATED_AT: 2026-09-18T22:10:00+03:30
+OWNER_ADVANCE_GRANT (2026-09-19): P1 وارد کردن داده‌ی ونک به 5435 با پشتیبان و P2 راه‌اندازی آزمایشی با کلید آزمایشی، هر دو پس از تأیید S1 به‌دست نگهبان؛ به‌علاوه‌ی C0 برای همین دو کار. ثبت: AI_HANDOFF/CLAUDE_REVIEWS/20260919_OWNER_ADVANCE_GRANT_SEED_AND_TEST_LAUNCH.md
 NEXT_ACTION: کدکس دو دستور بالا را جداگانه اجرا می‌کند و نگهبان هر کدام را بازبینی می‌کند. اجرای S1 روی دیتابیس محلی 5435 به اجازه‌ی جداگانه‌ی مالک، پشتیبان‌گیری و اجازه‌ی خواندن نشانی دیتابیس فقط در حافظه نیاز دارد. اعمال روی میزبان هم اجازه‌ی جداگانه می‌خواهد.
 PERMANENT RULE: never run npm test or jest in _PUSH_STAGING.
 
