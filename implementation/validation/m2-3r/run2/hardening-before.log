@@ -1,0 +1,109 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/public-export/distribution/hardening.spec.ts
+
+FAIL test/public-export/distribution/hardening.spec.ts
+  × m23r rejects oversized source before readFile and preserves destination (31 ms)
+  × m23r age 120 seconds accepted and 120001ms rejected (24 ms)
+  × m23r retries sharing violations then atomically succeeds (10 ms)
+  × m23r bounded retry exhaustion preserves old file and cleans temp (14 ms)
+  √ m23r rejects duplicate JSON keys BOM and trailing newline (17 ms)
+  × m23r rejects producer and repository junctions including uppercase aliases (10 ms)
+
+  ● m23r rejects oversized source before readFile and preserves destination
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: "C:\\Users\\galexy\\AppData\\Local\\Temp\\mlino-m23r-rAkxkW\\source\\public-business.v1.json"
+
+      31 |   try {
+      32 |     await expect(distributeCurrent(options())).rejects.toMatchObject({ code: 'DISTRIBUTION_SOURCE' });
+    > 33 |     expect(read).not.toHaveBeenCalled();
+         |                      ^
+      34 |   } finally { read.mockRestore(); }
+      35 | });
+      36 | test('m23r age 120 seconds accepted and 120001ms rejected', async () => {
+
+      at Object.<anonymous> (test/public-export/distribution/hardening.spec.ts:33:22)
+
+  ● m23r age 120 seconds accepted and 120001ms rejected
+
+    expect(received).rejects.toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "code": "DISTRIBUTION_EXPIRED",
+    +   "code": "DISTRIBUTION_ROLLBACK",
+      }
+
+      38 |   await distributeCurrent(options());
+      39 |   await fs.writeFile(path.join(sourceDir, FILE), await bytes(120_001));
+    > 40 |   await expect(distributeCurrent(options())).rejects.toMatchObject({ code: 'DISTRIBUTION_EXPIRED' });
+         |                                                      ^
+      41 | });
+      42 | test('m23r retries sharing violations then atomically succeeds', async () => {
+      43 |   let tries = 0;
+
+      at Object.toMatchObject (../../core-g14a-published-content/implementation/node_modules/expect/build/index.js:218:22)
+      at Object.<anonymous> (test/public-export/distribution/hardening.spec.ts:40:54)
+
+  ● m23r retries sharing violations then atomically succeeds
+
+    DISTRIBUTION_IO
+
+      102 |     const code = error instanceof DistributionError ? error.code : 'DISTRIBUTION_IO';
+      103 |     log({ code, ok: false });
+    > 104 |     throw new DistributionError(code);
+          |           ^
+      105 |   } finally {
+      106 |     if (temp) await fs.unlink(temp).catch(() => undefined);
+      107 |   }
+
+      at distributeCurrent (public-export/distribution/distribute.ts:104:11)
+      at Object.<anonymous> (test/public-export/distribution/hardening.spec.ts:44:3)
+
+  ● m23r bounded retry exhaustion preserves old file and cleans temp
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 5
+    Received number of calls: 1
+
+      55 |   const rename = jest.fn(async () => { throw Object.assign(new Error('test lock'), { code: 'EACCES' }); });
+      56 |   await expect(distributeCurrent(options(), { rename })).rejects.toMatchObject({ code: 'DISTRIBUTION_IO' });
+    > 57 |   expect(rename).toHaveBeenCalledTimes(5);
+         |                  ^
+      58 |   expect(await fs.readFile(path.join(publicDir, FILE))).toEqual(old);
+      59 |   expect(await fs.readdir(publicDir)).toEqual([FILE]);
+      60 | });
+
+      at Object.<anonymous> (test/public-export/distribution/hardening.spec.ts:57:18)
+
+  ● m23r rejects producer and repository junctions including uppercase aliases
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: undefined
+
+      74 |   await fs.unlink(link);
+      75 |   await fs.symlink(path.resolve(__dirname, '../../../../..'), link, 'junction');
+    > 76 |   await expect(validateDistributionDirectories(sourceDir, link)).rejects.toMatchObject({ code: 'DISTRIBUTION_PATH' });
+         |         ^
+      77 |   if (process.platform === 'win32') {
+      78 |     await expect(validateDistributionDirectories(sourceDir, link.toUpperCase())).rejects.toMatchObject({ code: 'DISTRIBUTION_PATH' });
+      79 |   }
+
+      at expect (../../core-g14a-published-content/implementation/node_modules/expect/build/index.js:113:15)
+      at Object.<anonymous> (test/public-export/distribution/hardening.spec.ts:76:9)
+
+Test Suites: 1 failed, 1 total
+Tests:       5 failed, 1 passed, 6 total
+Snapshots:   0 total
+Time:        3.505 s
+Ran all test suites matching /test\\public-export\\distribution\\hardening.spec.ts/i.

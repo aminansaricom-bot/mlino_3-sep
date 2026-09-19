@@ -1,0 +1,23 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/public-export/distribution/hardening.spec.ts
+
+PASS test/public-export/distribution/hardening.spec.ts
+  √ m23r rejects oversized source before readFile and preserves destination (26 ms)
+  √ m23r age 120 seconds accepted and 120001ms rejected (17 ms)
+  √ m23r retries sharing violations then atomically succeeds (238 ms)
+  √ m23r bounded retry exhaustion preserves old file and cleans temp (457 ms)
+  √ m23r strict Windows reader lock is exercised or visibly skipped (900 ms)
+  √ m23r rejects duplicate JSON keys BOM and trailing newline (32 ms)
+  √ m23r rejects producer and repository junctions including uppercase aliases (10 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total
+Snapshots:   0 total
+Time:        4.945 s, estimated 9 s
+Ran all test suites matching /test\\public-export\\distribution\\hardening.spec.ts/i.
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice

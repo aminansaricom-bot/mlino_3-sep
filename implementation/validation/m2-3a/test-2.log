@@ -1,0 +1,12 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/public-export/distribution
+
+PASS test/public-export/distribution/acl.spec.ts
+PASS test/public-export/distribution/distribute.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       1 skipped, 14 passed, 15 total
+Snapshots:   0 total
+Time:        4.732 s, estimated 5 s
+Ran all test suites matching /test\\public-export\\distribution/i.

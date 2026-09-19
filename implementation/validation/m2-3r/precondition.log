@@ -1,0 +1,17 @@
+INSTRUCTION_ID=CODEX-20260918-M2-3R-ASTRA-JOINT-REVIEW-001
+TARGET_HANDOFF_ID=HANDOFF-20260918-GUARDIAN-M2-3B-REVIEW
+REVIEW=d741a84a27656c244ec056ff8d45204e03277761:AI_HANDOFF/CLAUDE_REVIEWS/20260918_CLAUDE_REVIEW_M2_3B_AND_ASTRA_ROUND.md
+Latest git fetch origin: exit 1
+fatal: unable to access 'https://github.com/aminansaricom-bot/mlino_3-sep.git/': Failed to connect to github.com:443 after 54 ms: Could not connect to server
+git cat-file -e d741a84a27656c244ec056ff8d45204e03277761^{commit}: exit 0
+CAT_FILE_EXIT=0
+git merge-base --is-ancestor d741a84a27656c244ec056ff8d45204e03277761 origin/main: exit 0
+ANCESTOR_EXIT=0
+SHA256 raw git show bytes (Node execFileSync):
+46f4f3e743281e6ffa438d55e09ff383a4ea285c7482acc06d073393cc66ed2f
+EXPECTED_SHA256_MATCH=true
+V1 HEAD=f9e48756e28788e4a28bcb48f468bfa2145c65e6; initial git status --short empty
+V2 HEAD=be5577477319c3ef1c8709d478c8c30ea14737e6; initial git status --short empty
+origin/main:AI_HANDOFF/HANDOFF_STATE.md first line matches TARGET_HANDOFF_ID
+Incidental read-only diagnostic: no root AGENTS.md in either worktree; Get-ChildItem exited 1 for missing file.
+Git warnings about inability to access global ignore file observed; no config/credential changes attempted.

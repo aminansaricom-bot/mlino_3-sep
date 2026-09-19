@@ -1,0 +1,29 @@
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/public-export/distribution/parity.spec.ts
+
+FAIL test/public-export/distribution/parity.spec.ts (5.107 s)
+  × m23r canonical valid signature passes; noncanonical trailing bits and invalid sizes are rejected (14 ms)
+
+  ● m23r canonical valid signature passes; noncanonical trailing bits and invalid sizes are rejected
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      12 |   expect(Buffer.from(alternative, 'base64url')).toEqual(Buffer.from(value, 'base64url'));
+      13 |   for (const invalid of [alternative, Buffer.alloc(63).toString('base64url'), Buffer.alloc(65).toString('base64url'), value + '=']) {
+    > 14 |     expect(await verifyEnvelope({ ...artifact, signature: { ...artifact.signature, value: invalid } }, provider)).toBe(false);
+         |                                                                                                                   ^
+      15 |   }
+      16 | });
+      17 |
+
+      at Object.<anonymous> (test/public-export/distribution/parity.spec.ts:14:115)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        6.98 s
+Ran all test suites matching /test\\public-export\\distribution\\parity.spec.ts/i.
