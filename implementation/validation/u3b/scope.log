@@ -1,0 +1,14 @@
+CODE_COMMIT=a750a205b2139d8d50c556544e33d26f36b17de2
+SCOPE_CHECK=PASS
+PRICE_CONSTRAINT_CITATION=implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:690-694
+NON_DB_BUILD=PASS
+NON_DB_SUITES=3/3
+NON_DB_TESTS=30/30
+DISPOSABLE_DB_REACHABLE=false
+DATABASE_5435_USED=false
+DOCKER_USED=false
+NETWORK_USED=false
+REAL_KEY_USED=false
+PUSH_PERFORMED=false
+LEAK_SCAN=PASS
+EVIDENCE_PATH_CORRECTION=logs moved before stage from implementation/implementation/validation/u3b to implementation/validation/u3b; wrong path removed
