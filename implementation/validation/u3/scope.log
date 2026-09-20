@@ -1,0 +1,14 @@
+SCOPE_CHECK=PASS
+CODE_COMMIT=2a7dc57610ee188d944765e5c6972f857bc46758
+CHANGED_PRODUCT_PATHS=5
+ALLOWED_ONLY=true
+LEAK_SCAN=PASS
+DATABASE_5435_USED=false
+OWNER_DATABASE_USED=false
+DOCKER_USED=false
+NETWORK_USED=false
+REAL_KEY_USED=false
+PUSH_PERFORMED=false
+INTEGRATION_DB_5499_REACHABLE=false
+INTEGRATION_TEST_STATUS=NOT_RUN_ENVIRONMENT_UNAVAILABLE
+TOOLING_NOTE=Initial borrowed Prisma Client was stale; dependencies were copied locally and Prisma Client generated only inside this gitignored worktree node_modules.

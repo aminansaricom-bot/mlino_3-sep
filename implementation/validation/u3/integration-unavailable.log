@@ -1,0 +1,5 @@
+DISPOSABLE_DB_HOST=127.0.0.1
+DISPOSABLE_DB_PORT=5499
+REACHABLE=false
+REASON=TCP connection timed out; Docker is forbidden by instruction.
+INTEGRATION_SPEC=NOT_RUN

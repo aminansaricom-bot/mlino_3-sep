@@ -1,0 +1,140 @@
+U3 MUTATION PROOF
+TEMP_COPY_CREATED=true
+
+MUTATION=DROP_MARKER_REQUIREMENT
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/tools/test-seed/offers.spec.ts
+
+FAIL test/tools/test-seed/offers.spec.ts (5.305 s)
+  U3 strict sample-offer parser
+    √ shape rejection has the exact fixed code (6 ms)
+    √ unknown field rejection has the exact fixed code (1 ms)
+    √ wrong prefix rejection has the exact fixed code
+    √ name marker rejection has the exact fixed code
+    √ description marker rejection has the exact fixed code
+    × missing terms marker rejection has the exact fixed code (11 ms)
+    √ bad validity window rejection has the exact fixed code (1 ms)
+    √ accepts a marker-bearing terms object without echoing fields into errors (1 ms)
+    √ duplicate offer keys are rejected (1 ms)
+  U3 official Core call sequence
+    √ publishes only the created version after create, createVersion and optional capability link (2 ms)
+
+  ● U3 strict sample-offer parser › missing terms marker rejection has the exact fixed code
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "TEST_SEED_OFFER_MARKER"
+    Received: "NO_ERROR"
+
+      26 |     ['missing terms marker', [row({ terms: { schema_version: 'mlino.offer-terms.v1' } })], 'TEST_SEED_OFFER_MARKER'],
+      27 |     ['bad validity window', [row({ valid_until: '2025-01-01T00:00:00Z' })], 'TEST_SEED_OFFER_VALIDITY_WINDOW'],
+    > 28 |   ])('%s rejection has the exact fixed code', (_name, input, expected) => expect(code(input)).toBe(expected));
+         |                                                                                               ^
+      29 |
+      30 |   test('accepts a marker-bearing terms object without echoing fields into errors', () => {
+      31 |     const parsed = parseTestOffers([row({ terms: { test_marker: TEST_OFFER_MARKER } })]);
+
+      at test/tools/test-seed/offers.spec.ts:28:95
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 9 passed, 10 total
+Snapshots:   0 total
+Time:        5.839 s
+Ran all test suites matching /test\\tools\\test-seed\\offers.spec.ts/i.
+EXIT=1
+
+MUTATION=ALLOW_WRONG_PREFIX
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/tools/test-seed/offers.spec.ts
+
+FAIL test/tools/test-seed/offers.spec.ts
+  U3 strict sample-offer parser
+    √ shape rejection has the exact fixed code (4 ms)
+    √ unknown field rejection has the exact fixed code (1 ms)
+    × wrong prefix rejection has the exact fixed code (7 ms)
+    √ name marker rejection has the exact fixed code (1 ms)
+    √ description marker rejection has the exact fixed code (1 ms)
+    √ missing terms marker rejection has the exact fixed code (1 ms)
+    √ bad validity window rejection has the exact fixed code
+    √ accepts a marker-bearing terms object without echoing fields into errors
+    √ duplicate offer keys are rejected
+  U3 official Core call sequence
+    √ publishes only the created version after create, createVersion and optional capability link (1 ms)
+
+  ● U3 strict sample-offer parser › wrong prefix rejection has the exact fixed code
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "TEST_SEED_OFFER_KEY"
+    Received: "NO_ERROR"
+
+      26 |     ['missing terms marker', [row({ terms: { schema_version: 'mlino.offer-terms.v1' } })], 'TEST_SEED_OFFER_MARKER'],
+      27 |     ['bad validity window', [row({ valid_until: '2025-01-01T00:00:00Z' })], 'TEST_SEED_OFFER_VALIDITY_WINDOW'],
+    > 28 |   ])('%s rejection has the exact fixed code', (_name, input, expected) => expect(code(input)).toBe(expected));
+         |                                                                                               ^
+      29 |
+      30 |   test('accepts a marker-bearing terms object without echoing fields into errors', () => {
+      31 |     const parsed = parseTestOffers([row({ terms: { test_marker: TEST_OFFER_MARKER } })]);
+
+      at test/tools/test-seed/offers.spec.ts:28:95
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 9 passed, 10 total
+Snapshots:   0 total
+Time:        4.656 s, estimated 6 s
+Ran all test suites matching /test\\tools\\test-seed\\offers.spec.ts/i.
+EXIT=1
+
+MUTATION=PUBLISH_WITHOUT_VERSION_ID
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/tools/test-seed/offers.spec.ts
+
+FAIL test/tools/test-seed/offers.spec.ts
+  U3 strict sample-offer parser
+    √ shape rejection has the exact fixed code (5 ms)
+    √ unknown field rejection has the exact fixed code (2 ms)
+    √ wrong prefix rejection has the exact fixed code (1 ms)
+    √ name marker rejection has the exact fixed code (1 ms)
+    √ description marker rejection has the exact fixed code (1 ms)
+    √ missing terms marker rejection has the exact fixed code
+    √ bad validity window rejection has the exact fixed code
+    √ accepts a marker-bearing terms object without echoing fields into errors (2 ms)
+    √ duplicate offer keys are rejected (1 ms)
+  U3 official Core call sequence
+    × publishes only the created version after create, createVersion and optional capability link (10 ms)
+
+  ● U3 official Core call sequence › publishes only the created version after create, createVersion and optional capability link
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+        "create",
+        "createVersion",
+        "link:version-1:capability-1",
+    -   "publish:OFFER_VERSION:version-1",
+    +   "publish:OFFER_VERSION:offer-1",
+      ]
+
+      52 |     const parsed = parseTestOffers([row({ capability_index: 0 })])[0];
+      53 |     await createAndPublishTestOffer(offers, publications, context, parsed, ['capability-1']);
+    > 54 |     expect(calls).toEqual(['create', 'createVersion', 'link:version-1:capability-1', 'publish:OFFER_VERSION:version-1']);
+         |                   ^
+      55 |   });
+      56 | });
+      57 |
+
+      at Object.<anonymous> (test/tools/test-seed/offers.spec.ts:54:19)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 9 passed, 10 total
+Snapshots:   0 total
+Time:        4.651 s, estimated 5 s
+Ran all test suites matching /test\\tools\\test-seed\\offers.spec.ts/i.
+EXIT=1
+TEMP_COPY_REMOVED=True
