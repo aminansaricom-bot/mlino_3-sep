@@ -986,3 +986,23 @@ VALIDATION: GW2-P PASS; pre-check matches Run 2; backup reuse PASS; segmented C0
 SCOPE: Authorized one-time local test-data seed with verified pre-backup, read-only validation, memory-only C0 and signing key, evidence, report and append-only Handoff. No product/schema/migration/container/push change.
 NEXT_ACTION: Guardian reviews the capture incident and P1 evidence. Seed must not run again. P2 remains blocked pending Guardian decision.
 CREATED_AT: 2026-09-20
+
+---
+HANDOFF_ID: HANDOFF-20260918-TEST-SEED
+AUTHOR: CODEX
+PHASE: U3B_SAMPLE_OFFERS_FIXES
+STATUS: FIXES_IMPLEMENTED_LOCALLY_INTEGRATION_VALIDATION_BLOCKED_BY_UNAVAILABLE_DISPOSABLE_DB
+INSTRUCTION_ID: CODEX-20260920-U3B-SAMPLE-OFFERS-FIXES-001
+TARGET_HANDOFF_ID: HANDOFF-20260920-GUARDIAN-U3-REVIEW
+REVIEW_REFERENCE: 8298a4b77fd9d2a0e7de94a8f412950f16ad4a5c:AI_HANDOFF/CLAUDE_REVIEWS/20260920_CLAUDE_REVIEW_U3_SAMPLE_OFFERS.md
+BRANCH: codex/test-seed-vanak
+CODE_COMMIT: a750a205b2139d8d50c556544e33d26f36b17de2
+EVIDENCE_COMMIT: ec191a791435fe011a739316731a568669f78dd8
+REPORT_COMMIT: 574984253baabacaffb1410937619a9f9f81a0cd
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260920_CODEX_U3_SAMPLE_OFFERS_REPORT.md
+REPORT_SHA256: 0d8e50ab237a10aa1159b2ec884d57edd9df8e3196f968bba11a925a1f3bd996
+EVIDENCE_PATH: implementation/validation/u3b/
+VALIDATION: GW2-P PASS; build PASS; non-DB specs PASS at 3 suites and 30 tests; disposable DB 5499 unavailable, so the full test-seed suite and three fresh-DB runs were NOT RUN.
+SCOPE: Price-mode validation before Core, isolated integration organization ranges, evidence, report and append-only handoff only; no forbidden product/database/push actions.
+NEXT_ACTION: Guardian runs the complete test/tools/test-seed suite three times on fresh disposable PostgreSQL 5499 and reviews U3b. Owner database remains blocked.
+CREATED_AT: 2026-09-20T19:40:14Z
