@@ -1,8 +1,12 @@
 import type { V2BusinessDirectoryRecord } from '../directory/contract';
-import { categoryLabel } from '../uiFormat';
+import type { PublicUiRecord } from '../publicExport/uiAdapter';
 
-export function businessShareText(record: Pick<V2BusinessDirectoryRecord, 'name' | 'category'>): string {
-  return [record.name, categoryLabel(record.category), 'کشف با MLINO', 'داده‌ی آزمایشی MLINO'].join('\n');
+type ShareRecord = PublicUiRecord | Pick<V2BusinessDirectoryRecord, 'name' | 'category'>;
+
+export function businessShareText(record: ShareRecord): string {
+  if ('id' in record) return [record.name, `${record.category.label} (حدسی)`, 'کشف با MLINO'].join('\n');
+  const labels: Record<string, string> = { dental_clinic: 'دندان‌پزشکی', beauty_clinic: 'زیبایی', cafe: 'کافه', restaurant: 'رستوران', retail_shop: 'فروشگاه' };
+  return [record.name, labels[record.category] ?? record.category, 'کشف با MLINO', 'داده‌ی آزمایشی MLINO'].join('\n');
 }
 
 export interface ShareDelivery {

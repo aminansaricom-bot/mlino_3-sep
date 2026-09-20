@@ -1,6 +1,9 @@
-import type { V2BusinessDirectoryRecord } from '../directory/contract';
-import { categoryLabel, floorLabel, formatDistance } from '../uiFormat';
+import { floorLabel, formatDistance } from '../uiFormat';
 import { isOfferActiveAt } from '../offers';
+import {
+  businessActiveProductCount, businessCapabilityCount, businessCategory, businessCategoryGuessed,
+  businessCategoryLabel, businessName, businessOffers, isPublicUiRecord, type RichUiRecord,
+} from './businessView';
 
 /**
  * کارت کسب‌وکار — نمای مصرف‌کننده.
@@ -20,7 +23,7 @@ const CATEGORY_GLYPH: Record<string, string> = {
 };
 
 interface BusinessCardProps {
-  record: V2BusinessDirectoryRecord;
+  record: RichUiRecord;
   distanceMeters?: number;
   selected?: boolean;
   /** آفر فعالی که موتور تطبیق پیدا کرده — اگر باشد نشان تخفیف می‌آید */
@@ -45,21 +48,28 @@ export default function BusinessCard({
   onOpen,
   onRoute,
 }: BusinessCardProps) {
-  const activeProducts = record.products.filter((p) => p.is_active).length;
-  const floor = floorLabel(record.location.floor_level, record.location.building_id);
-  const offer = (hasOffer ?? true) && record.offers.some(o => isOfferActiveAt(o.valid_from, o.valid_until, now));
+  const activeProducts = businessActiveProductCount(record);
+  const capabilityCount = businessCapabilityCount(record);
+  const floor = isPublicUiRecord(record) ? null : floorLabel(record.location.floor_level, record.location.building_id);
+  const offers = businessOffers(record);
+  const offer = (hasOffer ?? true) && offers.some((item) => isOfferActiveAt(
+    isPublicUiRecord(record) ? item.valid_from : item.valid_from,
+    isPublicUiRecord(record) ? item.valid_until : item.valid_until,
+    now,
+  ));
+  const category = businessCategory(record);
 
   return (
     <div className={`biz-card${selected ? ' selected' : ''}`}>
       <div className="biz-thumb" aria-hidden="true">
-        {CATEGORY_GLYPH[record.category] ?? '📍'}
+        {CATEGORY_GLYPH[category] ?? '📍'}
       </div>
 
       <div className="biz-main">
-        <div className="biz-name">{record.name}</div>
+        <div className="biz-name">{businessName(record)}</div>
 
         <div className="biz-meta">
-          <span>{categoryLabel(record.category)}</span>
+          <span>{businessCategoryLabel(record)}{businessCategoryGuessed(record) ? ' · حدسی' : ''}</span>
           {distanceMeters !== undefined && (
             <>
               <i className="dot" />
@@ -76,8 +86,11 @@ export default function BusinessCard({
 
         <div className="biz-meta">
           {offer && <span className="tag offer">پیشنهاد ویژه</span>}
-          {activeProducts > 0 && (
+          {activeProducts !== null && activeProducts > 0 && (
             <span className="tag">{activeProducts.toLocaleString('fa-IR')} محصول</span>
+          )}
+          {capabilityCount !== null && capabilityCount > 0 && (
+            <span className="tag">{capabilityCount.toLocaleString('fa-IR')} خدمت</span>
           )}
         </div>
 

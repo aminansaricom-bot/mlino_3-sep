@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import L from '@neshan-maps-platform/leaflet';
 import '@neshan-maps-platform/leaflet/dist/leaflet.css';
-import type { V2BusinessDirectoryRecord } from '../directory/contract';
 import { clusterByScreenCell } from './clusterMarkers';
 import { categoryIcon, iconMarkup } from '../design/Icon';
+import { businessCategory, businessCoordinates, businessId, type RichUiRecord } from './businessView';
 
 /**
  * لایه‌ی نقشه — روی SDK نشان.
@@ -59,7 +59,7 @@ const meIcon = L.divIcon({
 export type TileStatus = 'loading' | 'ready' | 'error';
 
 interface MapViewProps {
-  records: V2BusinessDirectoryRecord[];
+  records: readonly RichUiRecord[];
   matchIds: Set<string>;
   selectedId: string | null;
   center: [number, number];
@@ -167,12 +167,10 @@ export default function MapView({
   const clusters = useMemo(
     () =>
       clusterByScreenCell(
-        records.map((r) => ({
-          id: r.business_id,
-          latitude: r.location.latitude,
-          longitude: r.location.longitude,
-          record: r,
-        })),
+        records.flatMap((record) => {
+          const point = businessCoordinates(record);
+          return point ? [{ id: businessId(record), latitude: point.latitude, longitude: point.longitude, record }] : [];
+        }),
         zoom,
       ),
     [records, zoom],
@@ -197,7 +195,7 @@ export default function MapView({
       const hasMatch = c.members.some((m) => matchIds.has(m.id));
       const icon = isCluster
         ? clusterIcon(c.members.length, hasMatch)
-        : pinIcon(c.members[0].record.category, hasMatch, selectedId === c.members[0].id);
+        : pinIcon(businessCategory(c.members[0].record), hasMatch, selectedId === c.members[0].id);
 
       const existing = markersRef.current.get(c.key);
       if (existing) {

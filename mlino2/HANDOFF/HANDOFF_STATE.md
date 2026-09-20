@@ -246,3 +246,24 @@ VALIDATION: Cross-component fixture accepted; tamper, revoked, TTL and non-canon
 SCOPE: Allowed V2 fixture/test/evidence/report and append-only handoff; no push.
 NEXT_ACTION: Guardian review.
 CREATED_AT: 2026-09-19
+
+---
+HANDOFF_ID: HANDOFF-20260920-V2-REAL-UI
+AUTHOR: CODEX
+PHASE: U2_REAL_UI_WIRING
+STATUS: DELIVERED_LOCALLY_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260920-U2-REAL-UI-WIRING-001
+TARGET_HANDOFF_ID: HANDOFF-20260920-OWNER-APPROVAL-U2
+REVIEW_REFERENCE: e7a99be7f8ba8d61170b4e0b3984d06fafad8d0c:AI_HANDOFF/CLAUDE_REVIEWS/20260920_OWNER_APPROVAL_U1_DECISIONS_AND_U2.md
+BRANCH: codex/v2-real-ui-wiring
+BASE_COMMIT: e26c52568811af5c6669b3458c5ce38d5b3e04a7
+CODE_COMMIT: f42ca24ec596359cda57359559949b06887c8045
+EVIDENCE_COMMIT: 424053f022a9b8f984524113ce8dad85c0eb9183
+REPORT_COMMIT: 6412fa104c651910631d9570033ef44e5ca308f1
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260920_CODEX_U2_REAL_UI_WIRING_REPORT.md
+REPORT_SHA256: 02f3d8d4f419a9713baa90ac07bc95f848e4b347eda79dd8840596c66613adef
+EVIDENCE_PATH: mlino2/validation/u2/
+VALIDATION: GW2-P PASS; three builds PASS; three full Vitest runs PASS at 21 suites and 272 tests each; all three required mutations detected; leak scan PASS.
+SCOPE: V2 real UI adapter/category/business-hours/wiring and shared rich-component props only; no U3/U4, acceptance logic, dependency, network, Docker, database, V1, main or push.
+NEXT_ACTION: Architecture Guardian reviews U2. No automatic next phase.
+CREATED_AT: 2026-09-20T14:16:41Z

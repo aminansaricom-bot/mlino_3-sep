@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import type { V2BusinessDirectoryRecord } from '../directory/contract';
 import { Icon } from '../design/Icon';
 import { businessShareText, shareBusiness, type ShareResult } from './shareBusiness';
+import type { RichUiRecord } from '../components/businessView';
 
-export default function ShareBusinessAction({record}: {record: V2BusinessDirectoryRecord}) {
+export default function ShareBusinessAction({record}: {record: RichUiRecord}) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ShareResult | null>(null);
   const text = businessShareText(record);

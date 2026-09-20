@@ -1,0 +1,15 @@
+U2 SCOPE VALIDATION
+CODE_COMMIT=f42ca24ec596359cda57359559949b06887c8045
+UNCHANGED mlino2/app/src/publicExport/canonical.ts EXIT=0
+UNCHANGED mlino2/app/src/publicExport/verify.ts EXIT=0
+UNCHANGED mlino2/app/src/publicExport/trustBundle.ts EXIT=0
+UNCHANGED mlino2/app/src/publicExport/consumer.ts EXIT=0
+UNCHANGED mlino2/app/src/publicExport/mapping.ts EXIT=0
+UNCHANGED mlino2/app/src/publicExport/transport.ts EXIT=0
+UNCHANGED mlino2/app/src/App.tsx EXIT=0
+UNCHANGED mlino2/app/package.json EXIT=0
+UNCHANGED mlino2/app/package-lock.json EXIT=0
+NO_DOCKER=true
+NO_DATABASE=true
+NO_NETWORK_IN_TESTS=true
+NO_PUSH=true
