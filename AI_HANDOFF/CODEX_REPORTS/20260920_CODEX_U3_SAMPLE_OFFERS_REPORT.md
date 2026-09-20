@@ -93,6 +93,27 @@ Guardian روی PostgreSQL یک‌بارمصرف پورت 5499، migrationها �
 
 من کدکس هستم
 
+## توقف پیش‌شرط U3c — commit الزامی در دسترس نیست
+
+- **Instruction:** `CODEX-20260920-U3C-OFFER-TERMS-CONTRACT-001`
+- **Pinned review:** `6ce1bdc7b85c0ffd9c6841cd2fe609bc87536444:AI_HANDOFF/CLAUDE_REVIEWS/20260920_CLAUDE_U2_MERGE_U3_RUN_AND_U3C.md`
+- **Required branch HEAD:** `95b68103f0f299f3e48dc3567d8f60733f47080e`
+- **Actual local HEAD:** `05c47d4a72941cb2f39babfaf8ce5696b4d1f776`
+- **Status:** `STOPPED_AT_PRECONDITION`
+
+Pinned review با GW2-P معتبر شد: `cat-file` و ancestor موفق بودند و SHA-256 بایت‌های `git show` دقیقاً `ea54b52d92cc3f27a0d8e116d7b5ec0bb86e716de3c474eb0260db5c13c2cf7f` بود.
+
+همگام‌سازی شاخه ممکن نشد:
+
+1. `git fetch origin` در sandbox به علت نبود اتصال شبکه شکست خورد.
+2. تکرار fetch با دسترسی شبکه، پیش از اتصال با خطای Git `dubious ownership` متوقف شد؛ process بیرون sandbox با حساب مالک اجرا می‌شود ولی worktree متعلق به حساب sandbox است.
+3. commit الزامی `95b6810...` در object store محلی موجود نبود و `origin/codex/test-seed-vanak` هنوز روی `4a51ed9...` بود.
+4. تغییر یا دور زدن `safe.directory` طبق دستور ممنوع بود و انجام نشد.
+
+هیچ فایل ابزار، آزمون، contract، builder یا Core برای U3c تغییر نکرد؛ هیچ تست، DB، Docker، کلید، push، rebase یا amend انجام نشد. ادامه نیازمند در دسترس قرار گرفتن commit `95b6810...` در object store یا دستور جدید Guardian با روش همگام‌سازی مجاز است.
+
+من کدکس هستم
+
 ## اصلاحیه U3b — Price mode و استقلال آزمون‌ها
 
 - **Instruction:** `CODEX-20260920-U3B-SAMPLE-OFFERS-FIXES-001`
