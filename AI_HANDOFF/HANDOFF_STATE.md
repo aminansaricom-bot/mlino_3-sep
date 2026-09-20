@@ -1,8 +1,8 @@
-HANDOFF_ID: HANDOFF-20260920-GUARDIAN-P1-VERIFIED-P2-LIVE
+HANDOFF_ID: HANDOFF-20260920-OWNER-APPROVAL-U1
 AUTHOR: CLAUDE
-PHASE: P1_VERIFIED_P2_TEST_LAUNCH_RUNNING
+PHASE: U1_REAL_UI_DESIGN_RELEASED
 STATUS: APPROVED_NEXT_STEP
-REVIEW_VERDICT: P1 پذیرفته شد و P2 اجرا شد.
+REVIEW_VERDICT: مالک سند طرح «رابط واقعی و دستیار هوشمند» را مجاز کرد. تصمیم‌ها: U-D1 حدس دسته‌بندی از روی خدمات، U-D2 ثبت پیشنهاد نمونه، U-D3 رفتن به‌سوی هوش مصنوعی واقعی. تصمیم‌های نگهبان U-G1 تا U-G6: کلید هرگز در مرورگر نیست، هوش مصنوعی فقط قصد کاربر را می‌فهمد و هرگز منبع داده نیست، دسته‌بندی حدسی برچسب نمایشی است، کلید فعلی لو رفته و باید باطل شود، متن پرسش به سرویس بیرونی می‌رود و باید صریح گفته شود، و مدل‌های پیشنهادی ثبت شدند. دستور CODEX-20260920-U1-REAL-UI-AND-ASSISTANT-DESIGN-001 صادر شد (فقط سند). — پیشین: P1 پذیرفته شد و P2 اجرا شد.
 - P1 (commit کدکس 3ecf7f5): بازبینی مستقل و فقط‌خواندنی نگهبان روی دیتابیس محلی: ۱۵ سازمان آزمایشی، ۱۵ نمایه‌ی ACTIVE با برچسب، ۱۰ توانمندی ACTIVE و تأییدشده، ۱۵ ادعای VERIFIED، ۲۵ رویداد انتشار، صفر ردیف غیرآزمایشی، ۸ migration، ۱۳ trigger، ۳۰ CHECK، کانتینرها بدون restart، API با 401.
 - P2 را نگهبان اجرا کرد، چون DPAPI به حساب گره خورده است (G5) و کدکس نمی‌تواند. مالک اجازه داد نگهبان خط DATABASE_URL را فقط برای P2 در حافظه بخواند.
   - کلید آزمایشی pb-v1-20260920-dbef05fbc08935dd در DPAPI حساب مالک؛ keystore و فهرست کلید عمومی در C:/mlino code/_KEYS_TEST، بیرون از مخزن.
@@ -13,7 +13,8 @@ REVIEW_VERDICT: P1 پذیرفته شد و P2 اجرا شد.
   - راستی‌آزمایی امضا مثل مرورگر: کلید در فهرست، بایت‌ها canonical، امضا معتبر، ۱۵ رکورد، سن ۳۱ ثانیه و داخل اعتبار ۳۰۰ ثانیه.
   - نشانی گوشی روی همان شبکه: https://192.168.1.65:8443/
 - کلید واقعی ساخته نشد و زمان‌بند دائمی نصب نشد. C0 با پایان P2 منقضی می‌شود.
-REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260920_CLAUDE_P1_VERIFIED_AND_P2_TEST_LAUNCH.md
+REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260920_OWNER_APPROVAL_REAL_UI_AND_ASSISTANT_DESIGN.md
+PREVIOUS_REPORT_PATH: AI_HANDOFF/CLAUDE_REVIEWS/20260920_CLAUDE_P1_VERIFIED_AND_P2_TEST_LAUNCH.md
 ZIP_PATH: (در این مرحله ساخته نشد)
 CODE_COMMIT_SHA: بدون تغییر کد. شاخه‌ی codex/test-seed-vanak روی سرور در cee6dbe است و commit اجرای P1 کدکس (3ecf7f5) هنوز منتشر نشده. main پیش از این commit روی cdd39b6 بود.
 CREATED_AT: 2026-09-20T05:00:00+03:30
