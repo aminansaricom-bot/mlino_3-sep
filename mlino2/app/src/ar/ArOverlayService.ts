@@ -7,6 +7,8 @@
 import type { BusinessDirectoryService } from '../directory/BusinessDirectoryService';
 import { bearingDegrees, placeOverlay } from './arOrientation';
 import { isOfferActiveAt } from '../offers';
+import type { PublicUiRecord } from '../publicExport/uiAdapter';
+import { nearbyPublicUiRecords } from '../publicExport/uiAdapter';
 
 export interface ArQuery {
   /** موقعیت افقی کاربر (GPS) */
@@ -34,9 +36,42 @@ export interface ArVitrineItem {
   distanceMeters: number;
   /** محصولات فعال این کسب‌وکار — از رکورد واقعی دایرکتوری */
   activeProducts: Array<{ product_id: string; name: string; price: number | null; currency: string | null }>;
+  /** در مسیر واقعی جایگزین products است؛ در Demo تعریف نمی‌شود. */
+  activeCapabilities?: Array<{ capability_id: string; name: string }>;
   /** آفر فعال (نخستین) — از رکورد واقعی دایرکتوری */
   activeOffer: { offer_id: string; title: string; discount_percent: number | null } | null;
+  categoryGuessed?: boolean;
   placement: { relativeBearingDeg: number; screenXPercent: number; scaleBucket: 'near' | 'mid' | 'far' };
+}
+
+/** سازندهٔ خالص مسیر واقعی؛ رکورد بدون مختصات هرگز به AR وارد نمی‌شود. */
+export function buildPublicArView(records: readonly PublicUiRecord[], query: ArQuery, now: number): ArViewResponse {
+  const near = nearbyPublicUiRecords(records, query.latitude, query.longitude, query.radiusMeters);
+  const fov = query.fovDeg ?? 60;
+  const items: ArVitrineItem[] = [];
+  let behindCount = 0;
+  for (const { record, distanceMeters } of near) {
+    const point = record.coordinates!;
+    const placement = placeOverlay(
+      bearingDegrees(query.latitude, query.longitude, point.latitude, point.longitude),
+      query.headingDeg, distanceMeters, fov,
+    );
+    if (!placement) { behindCount += 1; continue; }
+    const activeOffer = record.offers.find((offer) => isOfferActiveAt(offer.valid_from, offer.valid_until, now));
+    items.push({
+      businessId: record.id,
+      name: record.name,
+      category: record.category.key,
+      categoryGuessed: true,
+      distanceMeters,
+      activeProducts: [],
+      activeCapabilities: record.capabilities.map((item) => ({ capability_id: item.capability_id, name: item.name })),
+      activeOffer: activeOffer ? { offer_id: activeOffer.offer_id, title: activeOffer.name, discount_percent: null } : null,
+      placement,
+    });
+  }
+  items.sort((a, b) => a.distanceMeters - b.distanceMeters || a.businessId.localeCompare(b.businessId));
+  return { items, behindCount, declaredFloor: null, declaredBuildingId: null };
 }
 
 export interface ArViewResponse {

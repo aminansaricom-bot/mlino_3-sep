@@ -17,8 +17,10 @@ import {
   composeArScene,
   type ArSceneItem,
   type ArViewResponse,
+  buildPublicArView,
 } from './ArOverlayService';
 import { categoryLabel, floorLabel, formatDistance, formatPrice } from '../uiFormat';
+import type { PublicUiRecord } from '../publicExport/uiAdapter';
 
 interface ArVitrineViewProps {
   /** نقطه‌ی جست‌وجوی فعلی اپ (مشترک با تب دستیار) */
@@ -27,6 +29,9 @@ interface ArVitrineViewProps {
   /** دسته‌ی موردعلاقه‌ی کاربر از جست‌وجوی اخیر — فقط وزن انتخاب کارت اصلی */
   preferredCategory?: string | null;
   onSelectBusiness: (businessId: string) => void;
+  /** وقتی تعریف شود، AR فقط از snapshot واقعی پذیرفته‌شده تغذیه می‌شود. */
+  records?: readonly PublicUiRecord[];
+  now?: number;
 }
 
 export default function ArVitrineView({
@@ -34,6 +39,8 @@ export default function ArVitrineView({
   searchPointLabel,
   preferredCategory = null,
   onSelectBusiness,
+  records,
+  now,
 }: ArVitrineViewProps) {
   const camera = useCameraStream();
   const heading = useDeviceHeading(camera.state.kind === 'active');
@@ -65,8 +72,8 @@ export default function ArVitrineView({
 
   // ساختمان‌های چندطبقه‌ی اطراف — برای پرسش صریح طبقه
   const nearbyBuildings = useMemo(
-    () => arOverlayService.multiFloorBuildingsAround(searchPoint[0], searchPoint[1], arRadius),
-    [searchPoint, arRadius],
+    () => records ? [] : arOverlayService.multiFloorBuildingsAround(searchPoint[0], searchPoint[1], arRadius),
+    [searchPoint, arRadius, records],
   );
 
   // اگر نقطه‌ی جست‌وجو عوض شود، انتخاب ساختمان/طبقه اعتبارش را از دست می‌دهد
@@ -81,17 +88,16 @@ export default function ArVitrineView({
       setView(null);
       return;
     }
-    setView(
-      arOverlayService.buildView({
+    const query = {
         latitude: searchPoint[0],
         longitude: searchPoint[1],
         radiusMeters: arRadius,
         headingDeg: heading.headingDeg,
         buildingId: buildingId ?? undefined,
         floorLevel: floorLevel ?? undefined,
-      }),
-    );
-  }, [started, heading.headingDeg, searchPoint, arRadius, buildingId, floorLevel]);
+      };
+    setView(records ? buildPublicArView(records, query, now ?? 0) : arOverlayService.buildView(query));
+  }, [started, heading.headingDeg, searchPoint, arRadius, buildingId, floorLevel, records, now]);
 
   const headingReliable = heading.source === 'compass';
 
@@ -349,7 +355,7 @@ function ArPrimaryCard({
       <span className="ar-primary-copy">
         <span className="ar-primary-name">{item.name}</span>
         <span className="ar-primary-meta">
-          {categoryLabel(item.category)} · {formatDistance(item.distanceMeters)}
+          {categoryLabel(item.category)}{item.categoryGuessed ? ' · حدسی' : ''} · {formatDistance(item.distanceMeters)}
         </span>
       </span>
       {item.activeOffer && (
@@ -361,14 +367,20 @@ function ArPrimaryCard({
         </span>
       )}
       <span className="ar-primary-products">
-        {item.activeProducts.slice(0, 2).map((p) => (
+        {item.activeCapabilities?.slice(0, 2).map((capability) => (
+          <span key={capability.capability_id} className="ar-primary-product">{capability.name}</span>
+        ))}
+        {item.activeCapabilities === undefined && item.activeProducts.slice(0, 2).map((p) => (
           <span key={p.product_id} className="ar-primary-product">
             {p.name}
             {p.price !== null ? ` · ${formatPrice(p.price, p.currency)}` : ''}
           </span>
         ))}
-        {item.activeProducts.length === 0 && (
+        {item.activeCapabilities === undefined && item.activeProducts.length === 0 && (
           <span className="ar-primary-product">محصول فعالی ثبت نشده</span>
+        )}
+        {item.activeCapabilities !== undefined && item.activeCapabilities.length === 0 && (
+          <span className="ar-primary-product">خدمت منتشرشده‌ای ثبت نشده</span>
         )}
       </span>
       <span className="ar-primary-cta">جزئیات</span>
