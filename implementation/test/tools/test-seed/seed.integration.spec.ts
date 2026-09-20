@@ -37,6 +37,7 @@ describe('S1B test-seed integration', () => {
   afterAll(async () => prisma.$disconnect());
 
   test('seeds three ACTIVE published businesses, exports them, remains idempotent, withdraws and archives without deleting rows', async () => {
+    const organizationIds = ['test-vanak-91', 'test-vanak-92', 'test-vanak-93'];
     const rows = parseVanakBusinesses([
       synthetic('vanak-91', { latitude: null, longitude: null }),
       synthetic('vanak-92', { hours: { شنبه: [['09:00', '17:00']], دوشنبه: [['10:00', '14:00']], جمعه: [] } }),
@@ -46,7 +47,7 @@ describe('S1B test-seed integration', () => {
     await expect(seedVanakBusinesses(prisma, rows, env)).resolves.toEqual({ created: 3, skipped: 0 });
 
     const organizations = await prisma.organization.findMany({
-      where: { id: { in: ['test-vanak-91', 'test-vanak-92', 'test-vanak-93'] } },
+      where: { id: { in: organizationIds } },
       include: { businessProfiles: true, capabilities: true, identityClaims: true },
       orderBy: { id: 'asc' },
     });
@@ -55,7 +56,7 @@ describe('S1B test-seed integration', () => {
     expect(organizations.flatMap((item) => item.capabilities).every((item) => item.capabilityStatus === 'ACTIVE' && item.confirmationStatus === 'HUMAN_CONFIRMED' && item.publicationStatus === 'PUBLISHED')).toBe(true);
 
     const exported = await buildPublicExport(prisma, { asOf: new Date(Date.now() + 1000), keyId: 'test-key', signingKeyProvider });
-    const records = exported.artifact.records.filter((item) => item.business.organization_id.startsWith('test-vanak-'));
+    const records = exported.artifact.records.filter((item) => organizationIds.includes(item.business.organization_id));
     expect(records).toHaveLength(3);
     expect(records.every((item) => item.business.description?.endsWith(TEST_DATA_MARKER))).toBe(true);
     expect(records.find((item) => item.business.organization_id === 'test-vanak-91')?.business.location).toMatchObject({ latitude: null, longitude: null });
@@ -63,28 +64,28 @@ describe('S1B test-seed integration', () => {
     expect(records.find((item) => item.business.organization_id === 'test-vanak-93')?.capabilities).toHaveLength(2);
 
     const beforeSecondSeed = {
-      organizations: await prisma.organization.count(), profiles: await prisma.businessProfile.count(),
-      capabilities: await prisma.capability.count(), claims: await prisma.businessIdentityClaim.count(), publications: await prisma.publication.count(),
+      organizations: await prisma.organization.count({ where: { id: { in: organizationIds } } }), profiles: await prisma.businessProfile.count({ where: { organizationId: { in: organizationIds } } }),
+      capabilities: await prisma.capability.count({ where: { organizationId: { in: organizationIds } } }), claims: await prisma.businessIdentityClaim.count({ where: { organizationId: { in: organizationIds } } }), publications: await prisma.publication.count({ where: { organizationId: { in: organizationIds } } }),
     };
     await expect(seedVanakBusinesses(prisma, rows, env)).resolves.toEqual({ created: 0, skipped: 3 });
     await expect(Promise.all([
-      prisma.organization.count(), prisma.businessProfile.count(), prisma.capability.count(),
-      prisma.businessIdentityClaim.count(), prisma.publication.count(),
+      prisma.organization.count({ where: { id: { in: organizationIds } } }), prisma.businessProfile.count({ where: { organizationId: { in: organizationIds } } }), prisma.capability.count({ where: { organizationId: { in: organizationIds } } }),
+      prisma.businessIdentityClaim.count({ where: { organizationId: { in: organizationIds } } }), prisma.publication.count({ where: { organizationId: { in: organizationIds } } }),
     ])).resolves.toEqual(Object.values(beforeSecondSeed));
 
     const beforeWithdraw = {
-      organizations: await prisma.organization.count(), profiles: await prisma.businessProfile.count(),
-      capabilities: await prisma.capability.count(), claims: await prisma.businessIdentityClaim.count(),
+      organizations: await prisma.organization.count({ where: { id: { in: organizationIds } } }), profiles: await prisma.businessProfile.count({ where: { organizationId: { in: organizationIds } } }),
+      capabilities: await prisma.capability.count({ where: { organizationId: { in: organizationIds } } }), claims: await prisma.businessIdentityClaim.count({ where: { organizationId: { in: organizationIds } } }),
     };
-    await withdrawVanakBusinesses(prisma, env);
+    await withdrawVanakBusinesses(prisma, env, false, organizationIds);
     const afterWithdraw = await buildPublicExport(prisma, { asOf: new Date(Date.now() + 2000), keyId: 'test-key', signingKeyProvider });
-    expect(afterWithdraw.artifact.records.filter((item) => item.business.organization_id.startsWith('test-vanak-'))).toEqual([]);
+    expect(afterWithdraw.artifact.records.filter((item) => organizationIds.includes(item.business.organization_id))).toEqual([]);
 
-    const archived = await withdrawVanakBusinesses(prisma, env, true);
+    const archived = await withdrawVanakBusinesses(prisma, env, true, organizationIds);
     expect(archived.archived).toBe(3);
-    expect(await prisma.businessProfile.count({ where: { organizationId: { startsWith: 'test-vanak-' }, lifecycleStatus: 'ARCHIVED' } })).toBe(3);
+    expect(await prisma.businessProfile.count({ where: { organizationId: { in: organizationIds }, lifecycleStatus: 'ARCHIVED' } })).toBe(3);
     expect(await Promise.all([
-      prisma.organization.count(), prisma.businessProfile.count(), prisma.capability.count(), prisma.businessIdentityClaim.count(),
+      prisma.organization.count({ where: { id: { in: organizationIds } } }), prisma.businessProfile.count({ where: { organizationId: { in: organizationIds } } }), prisma.capability.count({ where: { organizationId: { in: organizationIds } } }), prisma.businessIdentityClaim.count({ where: { organizationId: { in: organizationIds } } }),
     ])).toEqual(Object.values(beforeWithdraw));
   });
 });

@@ -7,7 +7,7 @@ import { AuthContext, CORE_AUTH_ISSUER } from '../../../core/auth-context';
 function row(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     test_id: 'vanak-81', offer_key: 'test-ui-vanak-sample-1', name: 'پیشنهاد آزمایشی',
-    short_description: 'شرح آزمایشی', offer_shape: 'ITEM', valid_from: '2026-01-01T00:00:00Z',
+    short_description: 'شرح آزمایشی', offer_shape: 'ITEM', on_request: true, valid_from: '2026-01-01T00:00:00Z',
     ...overrides,
   };
 }
@@ -25,6 +25,8 @@ describe('U3 strict sample-offer parser', () => {
     ['description marker', [row({ short_description: 'شرح' })], 'TEST_SEED_OFFER_DESCRIPTION'],
     ['missing terms marker', [row({ terms: { schema_version: 'mlino.offer-terms.v1' } })], 'TEST_SEED_OFFER_MARKER'],
     ['bad validity window', [row({ valid_until: '2025-01-01T00:00:00Z' })], 'TEST_SEED_OFFER_VALIDITY_WINDOW'],
+    ['missing price mode', [row({ on_request: false })], 'TEST_SEED_OFFER_PRICE_MODE'],
+    ['on-request with a price pair', [row({ on_request: true, price_amount: 100, price_currency: 'IRR' })], 'TEST_SEED_OFFER_PRICE_MODE'],
   ])('%s rejection has the exact fixed code', (_name, input, expected) => expect(code(input)).toBe(expected));
 
   test('accepts a marker-bearing terms object without echoing fields into errors', () => {
@@ -33,6 +35,16 @@ describe('U3 strict sample-offer parser', () => {
   });
 
   test('duplicate offer keys are rejected', () => expect(code([row(), row({ test_id: 'vanak-82' })])).toBe('TEST_SEED_OFFER_KEY_DUPLICATE'));
+
+  test('invalid price mode is rejected before any Core call', async () => {
+    const coreWasCalled = jest.fn(() => { throw new Error('CORE_MUST_NOT_BE_CALLED'); });
+    const offers = { create: coreWasCalled, createVersion: coreWasCalled, linkCapability: coreWasCalled } as unknown as OfferService;
+    const publications = { publish: coreWasCalled } as unknown as PublicationService;
+    const context: AuthContext = { issuer: CORE_AUTH_ISSUER, organizationId: 'test-vanak-81', identityProvider: 'test-seed', externalSubject: 'vanak-81', membershipId: 'member-1' };
+    const invalid = { ...parseTestOffers([row()])[0], on_request: false };
+    await expect(createAndPublishTestOffer(offers, publications, context, invalid, [])).rejects.toMatchObject({ code: 'TEST_SEED_OFFER_PRICE_MODE' });
+    expect(coreWasCalled).not.toHaveBeenCalled();
+  });
 });
 
 describe('U3 official Core call sequence', () => {

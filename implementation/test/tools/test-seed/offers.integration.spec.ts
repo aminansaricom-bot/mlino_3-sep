@@ -35,19 +35,20 @@ describe('U3 sample offers through official Core services', () => {
 
   test('seeds four marked offers, exports only three active offers, is idempotent and withdraws without decreasing rows', async () => {
     const testEnv = env();
+    const organizationIds = ['test-vanak-81', 'test-vanak-82', 'test-vanak-83'];
     await seedVanakBusinesses(prisma, parseVanakBusinesses([
       business('vanak-81'), business('vanak-82', ['خدمت یک', 'خدمت دو']), business('vanak-83'),
     ]), testEnv);
     const rows = parseTestOffers([
       offer('vanak-81', 'request', { on_request: true }),
       offer('vanak-81', 'priced', { price_amount: 125000, price_currency: 'IRR' }),
-      offer('vanak-82', 'linked', { capability_index: 1 }),
-      offer('vanak-83', 'expired', { valid_until: '2026-02-01T00:00:00Z' }),
+      offer('vanak-82', 'linked', { capability_index: 1, on_request: true }),
+      offer('vanak-83', 'expired', { on_request: true, valid_until: '2026-02-01T00:00:00Z' }),
     ]);
     await expect(seedTestOffers(prisma, rows, testEnv)).resolves.toEqual({ created: 4, skipped: 0 });
 
     const exported = await buildPublicExport(prisma, { asOf: new Date('2026-09-20T12:00:00Z'), keyId: 'test-key', signingKeyProvider });
-    const records = exported.artifact.records.filter((item) => ['test-vanak-81', 'test-vanak-82', 'test-vanak-83'].includes(item.business.organization_id));
+    const records = exported.artifact.records.filter((item) => organizationIds.includes(item.business.organization_id));
     const visible = records.flatMap((item) => item.offers);
     expect(visible).toHaveLength(3);
     expect(visible.some((item) => item.name.includes('expired'))).toBe(false);
@@ -55,14 +56,14 @@ describe('U3 sample offers through official Core services', () => {
     expect(visible.find((item) => item.name.includes('priced'))).toMatchObject({ price_amount: '125000', price_currency: 'IRR' });
     expect(visible.find((item) => item.name.includes('linked'))?.capability_links).toHaveLength(1);
 
-    const beforeSecond = { offers: await prisma.offer.count(), versions: await prisma.offerVersion.count(), publications: await prisma.publication.count() };
+    const beforeSecond = { offers: await prisma.offer.count({ where: { organizationId: { in: organizationIds } } }), versions: await prisma.offerVersion.count({ where: { organizationId: { in: organizationIds } } }), publications: await prisma.publication.count({ where: { organizationId: { in: organizationIds } } }) };
     await expect(seedTestOffers(prisma, rows, testEnv)).resolves.toEqual({ created: 0, skipped: 4 });
-    expect({ offers: await prisma.offer.count(), versions: await prisma.offerVersion.count(), publications: await prisma.publication.count() }).toEqual(beforeSecond);
+    expect({ offers: await prisma.offer.count({ where: { organizationId: { in: organizationIds } } }), versions: await prisma.offerVersion.count({ where: { organizationId: { in: organizationIds } } }), publications: await prisma.publication.count({ where: { organizationId: { in: organizationIds } } }) }).toEqual(beforeSecond);
 
-    const beforeWithdraw = { organizations: await prisma.organization.count(), profiles: await prisma.businessProfile.count(), capabilities: await prisma.capability.count(), claims: await prisma.businessIdentityClaim.count(), offers: await prisma.offer.count(), versions: await prisma.offerVersion.count() };
-    await withdrawVanakBusinesses(prisma, testEnv);
+    const beforeWithdraw = { organizations: await prisma.organization.count({ where: { id: { in: organizationIds } } }), profiles: await prisma.businessProfile.count({ where: { organizationId: { in: organizationIds } } }), capabilities: await prisma.capability.count({ where: { organizationId: { in: organizationIds } } }), claims: await prisma.businessIdentityClaim.count({ where: { organizationId: { in: organizationIds } } }), offers: await prisma.offer.count({ where: { organizationId: { in: organizationIds } } }), versions: await prisma.offerVersion.count({ where: { organizationId: { in: organizationIds } } }) };
+    await withdrawVanakBusinesses(prisma, testEnv, false, organizationIds);
     const after = await buildPublicExport(prisma, { asOf: new Date('2026-09-20T12:01:00Z'), keyId: 'test-key', signingKeyProvider });
-    expect(after.artifact.records.filter((item) => ['test-vanak-81', 'test-vanak-82', 'test-vanak-83'].includes(item.business.organization_id))).toEqual([]);
-    expect({ organizations: await prisma.organization.count(), profiles: await prisma.businessProfile.count(), capabilities: await prisma.capability.count(), claims: await prisma.businessIdentityClaim.count(), offers: await prisma.offer.count(), versions: await prisma.offerVersion.count() }).toEqual(beforeWithdraw);
+    expect(after.artifact.records.filter((item) => organizationIds.includes(item.business.organization_id))).toEqual([]);
+    expect({ organizations: await prisma.organization.count({ where: { id: { in: organizationIds } } }), profiles: await prisma.businessProfile.count({ where: { organizationId: { in: organizationIds } } }), capabilities: await prisma.capability.count({ where: { organizationId: { in: organizationIds } } }), claims: await prisma.businessIdentityClaim.count({ where: { organizationId: { in: organizationIds } } }), offers: await prisma.offer.count({ where: { organizationId: { in: organizationIds } } }), versions: await prisma.offerVersion.count({ where: { organizationId: { in: organizationIds } } }) }).toEqual(beforeWithdraw);
   });
 });

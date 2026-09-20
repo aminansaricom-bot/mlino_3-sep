@@ -48,6 +48,16 @@ function parseTerms(value: unknown): Record<string, unknown> | undefined {
   return { ...terms };
 }
 
+function assertPriceMode(row: Pick<TestOfferInput, 'on_request' | 'price_amount' | 'price_currency'>): void {
+  const hasPrice = row.price_amount !== undefined;
+  const hasCurrency = row.price_currency !== undefined;
+  if (row.on_request === true) {
+    if (hasPrice || hasCurrency) fail('TEST_SEED_OFFER_PRICE_MODE');
+    return;
+  }
+  if (!hasPrice && !hasCurrency) fail('TEST_SEED_OFFER_PRICE_MODE');
+}
+
 function parseOne(value: unknown): TestOfferInput {
   const row = object(value);
   if (!row) fail('TEST_SEED_OFFER_INPUT_SHAPE');
@@ -65,7 +75,7 @@ function parseOne(value: unknown): TestOfferInput {
   if ((row.price_amount === undefined) !== (row.price_currency === undefined)) fail('TEST_SEED_OFFER_PRICE_PAIR');
   if (row.on_request !== undefined && typeof row.on_request !== 'boolean') fail('TEST_SEED_OFFER_ON_REQUEST');
   if (row.capability_index !== undefined && (!Number.isSafeInteger(row.capability_index) || (row.capability_index as number) < 0)) fail('TEST_SEED_OFFER_CAPABILITY_INDEX');
-  return {
+  const parsed: TestOfferInput = {
     test_id: row.test_id,
     offer_key: row.offer_key,
     name: row.name,
@@ -79,6 +89,8 @@ function parseOne(value: unknown): TestOfferInput {
     valid_until: validUntil,
     capability_index: row.capability_index as number | undefined,
   };
+  assertPriceMode(parsed);
+  return parsed;
 }
 
 export function parseTestOffers(value: unknown): TestOfferInput[] {
@@ -105,6 +117,7 @@ export async function createAndPublishTestOffer(
   row: TestOfferInput,
   capabilityIds: readonly string[],
 ): Promise<void> {
+  assertPriceMode(row);
   const offer = await offers.create(context, { organizationId: context.organizationId, offerKey: row.offer_key });
   const version = await offers.createVersion(context, {
     offerId: offer.id,

@@ -4,10 +4,10 @@ import { BusinessProfileService } from '../../core/business-profile-service';
 import { PublicationService } from '../../core/publication-service';
 import { SEED_REASON, createSeedPlatformVerifier } from './seed';
 
-export async function withdrawVanakBusinesses(db: PrismaClient, env: NodeJS.ProcessEnv = process.env, archive = false) {
+export async function withdrawVanakBusinesses(db: PrismaClient, env: NodeJS.ProcessEnv = process.env, archive = false, organizationIds?: readonly string[]) {
   createSeedPlatformVerifier(env);
   const organizations = await db.organization.findMany({
-    where: { id: { startsWith: 'test-vanak-' } },
+    where: organizationIds ? { id: { in: [...organizationIds] } } : { id: { startsWith: 'test-vanak-' } },
     select: {
       id: true,
       memberships: { where: { identityProvider: 'test-seed', membershipStatus: 'ACTIVE' }, take: 1, select: { id: true, externalSubject: true } },
