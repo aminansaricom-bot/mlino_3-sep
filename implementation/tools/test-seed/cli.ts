@@ -4,6 +4,7 @@ import { readVanakBusinesses } from './parse';
 import { seedVanakBusinesses } from './seed';
 import { TestSeedError } from './types';
 import { withdrawVanakBusinesses } from './withdraw';
+import { readTestOffers, seedTestOffers } from './offers';
 
 function checkedInputPath(value: string | undefined): string {
   if (!value || !isAbsolute(value)) throw new TestSeedError('TEST_SEED_INPUT_PATH');
@@ -19,6 +20,10 @@ async function main(): Promise<void> {
     const rows = readVanakBusinesses(checkedInputPath(process.argv[3]));
     const result = await seedVanakBusinesses(prisma, rows);
     process.stdout.write(`TEST_SEED_OK created=${result.created} skipped=${result.skipped} failed=0\n`);
+  } else if (command === 'offers') {
+    const rows = readTestOffers(checkedInputPath(process.argv[3]));
+    const result = await seedTestOffers(prisma, rows);
+    process.stdout.write(`TEST_SEED_OFFERS_OK created=${result.created} skipped=${result.skipped} failed=0\n`);
   } else if (command === 'withdraw') {
     const flag = process.argv[3];
     if (flag !== undefined && flag !== '--archive') throw new TestSeedError('TEST_SEED_COMMAND');

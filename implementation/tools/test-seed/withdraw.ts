@@ -28,6 +28,11 @@ export async function withdrawVanakBusinesses(db: PrismaClient, env: NodeJS.Proc
       if (archive && profile.lifecycleStatus !== 'ARCHIVED') { await profiles.archive(context, profile.id, 'TEST DATA cleanup'); archived += 1; }
     }
     for (const capability of organization.capabilities) { await publications.withdraw(context, 'CAPABILITY', capability.id, SEED_REASON); withdrawn += 1; }
+    const offerVersions = await db.offerVersion.findMany({
+      where: { organizationId: organization.id, publicationStatus: 'PUBLISHED', offer: { offerKey: { startsWith: 'test-ui-vanak-' } } },
+      select: { id: true },
+    });
+    for (const version of offerVersions) { await publications.withdraw(context, 'OFFER_VERSION', version.id, SEED_REASON); withdrawn += 1; }
   }
   return { withdrawn, archived };
 }
