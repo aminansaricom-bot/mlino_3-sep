@@ -1,0 +1,7 @@
+RUN3=NOT_RUN
+SEED_STARTED=false
+SEED_ATTEMPTS=0
+CREATED=0
+SKIPPED=0
+FAILED=0
+REASON=C0 hard stop occurred before temporary build and before the seed child process could be started.
