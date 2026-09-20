@@ -47,7 +47,8 @@ describe('U3 sample offers through official Core services', () => {
     ]);
     await expect(seedTestOffers(prisma, rows, testEnv)).resolves.toEqual({ created: 4, skipped: 0 });
 
-    const exported = await buildPublicExport(prisma, { asOf: new Date('2026-09-20T12:00:00Z'), keyId: 'test-key', signingKeyProvider });
+    // asOf must follow the publications this test just created; a hardcoded date makes the test clock-dependent.
+    const exported = await buildPublicExport(prisma, { asOf: new Date(Date.now() + 1_000), keyId: 'test-key', signingKeyProvider });
     const records = exported.artifact.records.filter((item) => organizationIds.includes(item.business.organization_id));
     const visible = records.flatMap((item) => item.offers);
     expect(visible).toHaveLength(3);
@@ -62,7 +63,7 @@ describe('U3 sample offers through official Core services', () => {
 
     const beforeWithdraw = { organizations: await prisma.organization.count({ where: { id: { in: organizationIds } } }), profiles: await prisma.businessProfile.count({ where: { organizationId: { in: organizationIds } } }), capabilities: await prisma.capability.count({ where: { organizationId: { in: organizationIds } } }), claims: await prisma.businessIdentityClaim.count({ where: { organizationId: { in: organizationIds } } }), offers: await prisma.offer.count({ where: { organizationId: { in: organizationIds } } }), versions: await prisma.offerVersion.count({ where: { organizationId: { in: organizationIds } } }) };
     await withdrawVanakBusinesses(prisma, testEnv, false, organizationIds);
-    const after = await buildPublicExport(prisma, { asOf: new Date('2026-09-20T12:01:00Z'), keyId: 'test-key', signingKeyProvider });
+    const after = await buildPublicExport(prisma, { asOf: new Date(Date.now() + 1_000), keyId: 'test-key', signingKeyProvider });
     expect(after.artifact.records.filter((item) => organizationIds.includes(item.business.organization_id))).toEqual([]);
     expect({ organizations: await prisma.organization.count({ where: { id: { in: organizationIds } } }), profiles: await prisma.businessProfile.count({ where: { organizationId: { in: organizationIds } } }), capabilities: await prisma.capability.count({ where: { organizationId: { in: organizationIds } } }), claims: await prisma.businessIdentityClaim.count({ where: { organizationId: { in: organizationIds } } }), offers: await prisma.offer.count({ where: { organizationId: { in: organizationIds } } }), versions: await prisma.offerVersion.count({ where: { organizationId: { in: organizationIds } } }) }).toEqual(beforeWithdraw);
   });
