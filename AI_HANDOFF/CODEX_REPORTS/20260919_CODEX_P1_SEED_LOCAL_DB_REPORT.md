@@ -264,3 +264,109 @@ The exact approved C0 file path is still incorrect or the file has not been crea
 The Guardian should verify the intended file path independently and issue a corrected, exact C0 path. The next instruction should preserve the one-run restriction, in-memory-only handling, Run 2 state comparison, backup reuse gate, and all original forbidden actions.
 
 من کدکس هستم
+
+---
+
+# P1-004 Completion Addendum
+
+**Instruction:** `CODEX-20260920-P1-SEED-LOCAL-DB-004`
+**Target handoff:** `HANDOFF-20260919-GUARDIAN-S1B-APPROVED-P1`
+**Status:** `COMPLETED_WITH_CAPTURE_INCIDENT_AWAITING_GUARDIAN_REVIEW`
+
+## 1. Task executed
+
+P1 completed its authorized operational goal. The exact C0 path was built from the three required path segments, the single database connection line was validated in memory, the seed tool was temporarily compiled, and the seed process was started exactly once. The resulting database state contains the required 15 test organizations and their published Core data.
+
+The child process completed its database work, but the parent execution ended before writing the expected CLI result log. The seed was not retried. Its outcome was established through a complete read-only database post-check and an in-memory signed public-export build.
+
+## 2. Source documents used
+
+- `cdd39b615e3aa63dc3d236f98315905e5cbaa242:AI_HANDOFF/CLAUDE_REVIEWS/20260920_P1_004_ENV_PATH_EXACT.md`
+- Pinned SHA-256 `e80ea8ce68de81f42fcd6314785903af2cb21a160b729380dfdb37ad509883ad`, verified through GW2-P after fetch failed because Git credentials were unavailable.
+- The P1-001 procedure, P1-002 invariant timestamp rule, and P1-003 backup-reuse rule.
+
+## 3. Files changed
+
+- Nine new Run 4 evidence logs under `implementation/validation/p1/`
+- This appended report section
+- One append-only Handoff record
+
+No tracked product, Core, seed-tool, schema, migration, Prisma, Docker, environment, package, lock, V1, or V2 file was changed.
+
+## 4. Files not changed
+
+- The authorized `.env` file was read only; it was not modified.
+- No container, image, volume, schema, or migration was changed.
+- No non-test database row was changed.
+- No connection value, password, real business name, mobile number, private key, or full input record was logged or committed.
+- The external dump was not committed.
+
+## 5. Execution and validation results
+
+| Step | Result |
+|---|---|
+| Start HEAD and clean state | PASS — `cee6dbe6f675e0f988b0de5b80374278412c33a5` |
+| GW2-P | PASS |
+| Fresh pre-check | PASS; exact match with Run 2 |
+| Backup reuse | PASS |
+| C0 path | PASS; exists and final segment is `.env` |
+| C0 target validation | PASS; one line, local host, port 5435, database `mlino_v1` |
+| Temporary TypeScript build | PASS |
+| Seed attempts | Exactly 1 |
+| CLI result capture | Incident — result log was not written after the child database work completed |
+| Database post-check | PASS |
+| Public export check | PASS |
+| API without token | HTTP 401 |
+| Cleanup | PASS |
+| Leak scan | PASS |
+
+## 6. Database and export result
+
+| Entity/result | Count |
+|---|---:|
+| Test organizations | 15 |
+| Active business profiles | 15 |
+| Active, human-confirmed capabilities | 10 |
+| Identity claims | 15 |
+| Memberships | 15 |
+| Permission grants | 240 |
+| Publications | 25 |
+| Non-test rows changed | 0 |
+| Export records | 15 |
+| Export records with coordinates | 12 |
+| Export records with business hours | 7 |
+| Export capabilities | 10 |
+
+The database still has 8 finished migrations, 13 non-internal triggers, and 30 CHECK constraints. Database and API containers retain their original images, start times, and zero restart counts.
+
+## 7. Backup and evidence
+
+The reused backup remains at `C:\Users\galexy\mlino-backups\mlino_v1_pre_p1_20260919T175223Z.dump`, size 104558 bytes, SHA-256 `1e0279183791da916bd626b7920e5cfba7113ea05e1260097da4e6b51cc27d7b`, with header `PGDMP`.
+
+| LF SHA-256 | Evidence |
+|---|---|
+| `aa1b02d14d2efd827c5c7c7c9e3bfe6d61a24d3e8b2d4bd1b5846273e23958d0` | `backup-run4.log` |
+| `81b2dd6c3788725db6ab87c8c98195ce9b7d71fdcad9d4329e8e90f53849a4f4` | `build-run4.log` |
+| `69eafa318225678e82ff46e7481e0303e907e0a1ef66d8edee4aeb24c9f3881d` | `c0-run4.log` |
+| `676baefcb6dc4b6ce64b1e572a091a191a4d192f836e55fe428d0f5ac82a7b7d` | `cleanup-run4.log` |
+| `bbbb9e335e859fda7d5ebe4566ff4ffd6668fadd15b2beba0e52731dd3d8614d` | `leak-grep-run4.log` |
+| `3c4dbe4c503fe76e84c1b1c1ef98bf3f2654a34fad8c54fd8112fb38dd4b65aa` | `postcheck-run4.log` |
+| `d6e0d20562b839d25965343c028e1657aeb9cfda27c238f1c6a7d2f615f88cd3` | `precheck-run4.log` |
+| `06d9f2833e4402998bfd2467584b3fcdcde66a04b22fb71ea602be5fb682aa3e` | `precondition-run4.log` |
+| `24ee58787ba8199e7de27376e23ec6a77fa5164a00d05a0138928ef26287e3ba` | `run-run4.log` |
+
+## 8. Tests and commit
+
+No test suite was authorized against the local database. Validation used the required read-only checks and an in-memory `buildPublicExport` call with a throwaway Ed25519 key that was never written to disk. The local evidence/report/Handoff commit is created after this report; no push is performed.
+
+## 9. Remaining risks and open questions
+
+The intended seed state is present and independently count-verified. The only incident is loss of the CLI's captured summary after the single process had committed its work. The database state and export result provide stronger outcome evidence, but the Guardian should review this incident explicitly before releasing P2.
+
+The verified pre-P1 backup must be retained until Guardian acceptance and any later rollback decision.
+
+## 10. Recommended next step
+
+Stop and submit this report to the Architecture Guardian. Do not run the seed again. If accepted, proceed only with the separately authorized P2 workflow.
+
+من کدکس هستم

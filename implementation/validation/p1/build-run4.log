@@ -1,0 +1,5 @@
+PRISMA_CLIENT_PUBLISHED_CONTENT=true
+NODE_MODULES_SOURCE=existing_local_install
+COMMAND=npx --no-install tsc tools/test-seed/cli.ts --outDir .p1-build --rootDir . --target ES2022 --module commonjs --esModuleInterop --skipLibCheck --resolveJsonModule
+BUILD_EXIT=0
+BUILD_OUTPUT_LINES=0

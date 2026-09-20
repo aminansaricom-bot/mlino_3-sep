@@ -948,3 +948,20 @@ VALIDATION: GW2-P PASS; fresh pre-check exactly matches Run 2; verified backup r
 SCOPE: Read-only metadata/count checks, external backup revalidation, stop evidence, report and append-only Handoff. No product edit, credential read, seed, database mutation, container restart or push.
 NEXT_ACTION: Guardian verifies and authorizes the exact existing C0 file path in a superseding P1 instruction.
 CREATED_AT: 2026-09-20
+
+---
+HANDOFF_ID: HANDOFF-20260918-TEST-SEED
+AUTHOR: CODEX
+PHASE: P1_SEED_LOCAL_DB_RUN4
+STATUS: COMPLETED_WITH_CAPTURE_INCIDENT_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260920-P1-SEED-LOCAL-DB-004
+TARGET_HANDOFF_ID: HANDOFF-20260919-GUARDIAN-S1B-APPROVED-P1
+REVIEW_REFERENCE: cdd39b615e3aa63dc3d236f98315905e5cbaa242:AI_HANDOFF/CLAUDE_REVIEWS/20260920_P1_004_ENV_PATH_EXACT.md
+BRANCH: codex/test-seed-vanak
+BASE_HEAD: cee6dbe6f675e0f988b0de5b80374278412c33a5
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260919_CODEX_P1_SEED_LOCAL_DB_REPORT.md
+EVIDENCE_PATH: implementation/validation/p1/
+VALIDATION: GW2-P PASS; pre-check matches Run 2; backup reuse PASS; segmented C0 path PASS; temporary build PASS; seed started exactly once; CLI result capture missing after database work; no retry; post-check PASS with 15 organizations, 15 active profiles, 10 active human-confirmed capabilities, 15 claims, 15 memberships, 240 grants and 25 publications; non-test counts unchanged; export PASS with 15 records, 12 coordinates, 7 hours and 10 capabilities; API 401; cleanup/leak scan PASS.
+SCOPE: Authorized one-time local test-data seed with verified pre-backup, read-only validation, memory-only C0 and signing key, evidence, report and append-only Handoff. No product/schema/migration/container/push change.
+NEXT_ACTION: Guardian reviews the capture incident and P1 evidence. Seed must not run again. P2 remains blocked pending Guardian decision.
+CREATED_AT: 2026-09-20
