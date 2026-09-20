@@ -92,3 +92,55 @@
 Guardian روی PostgreSQL یک‌بارمصرف پورت 5499، migrationها را اعمال و آزمون `offers.integration.spec.ts` را اجرا کند. پس از قبولی آن، کد و شواهد را بازبینی کند. هیچ اجرای دیتابیس مالک، push یا مرحلهٔ بعدی به‌صورت خودکار انجام نشود.
 
 من کدکس هستم
+
+## اصلاحیه U3b — Price mode و استقلال آزمون‌ها
+
+- **Instruction:** `CODEX-20260920-U3B-SAMPLE-OFFERS-FIXES-001`
+- **Guardian review:** `8298a4b77fd9d2a0e7de94a8f412950f16ad4a5c:AI_HANDOFF/CLAUDE_REVIEWS/20260920_CLAUDE_REVIEW_U3_SAMPLE_OFFERS.md`
+- **Code commit:** `a750a205b2139d8d50c556544e33d26f36b17de2`
+- **Evidence commit:** `ec191a791435fe011a739316731a568669f78dd8`
+- **Status:** `FIXES_IMPLEMENTED_LOCALLY_INTEGRATION_VALIDATION_BLOCKED_BY_UNAVAILABLE_DISPOSABLE_DB`
+
+### اصلاح F1
+
+قاعدهٔ ابزار اکنون دقیقاً با CHECK دیتابیس در `implementation/prisma/migrations/20260913010000_add_core_foundation/migration.sql:690-694` هم‌راستا است:
+
+- `on_request=true` فقط بدون قیمت و currency پذیرفته می‌شود.
+- حالت غیر on-request فقط با جفت کامل `price_amount` و `price_currency` پذیرفته می‌شود.
+- نبود هر دو mode یا ترکیب on-request با هر جزء قیمت با کد ثابت `TEST_SEED_OFFER_PRICE_MODE` پیش از اولین Core call رد می‌شود.
+- fixtureهای `linked` و `expired` به‌صورت صریح `on_request=true` شدند.
+
+آزمون‌های تازه/تغییریافته:
+
+- `missing price mode rejection has the exact fixed code`
+- `on-request with a price pair rejection has the exact fixed code`
+- `invalid price mode is rejected before any Core call`
+
+آزمون سوم Core doubleهایی دارد که در صورت فراخوانی خطا می‌دهند و علاوه بر کد خطا، `not.toHaveBeenCalled()` را بررسی می‌کند.
+
+### اصلاح F2
+
+دو integration spec اکنون rangeهای جدا دارند:
+
+- Offer spec: `test-vanak-81..83`
+- Seed spec: `test-vanak-91..93`
+
+تمام filterهای export، countها، withdraw و archive فقط IDهای همان spec را مصرف می‌کنند. تابع `withdrawVanakBusinesses` یک فیلتر اختیاری organization IDs برای آزمون‌ها دارد؛ CLI واقعی بدون این آرگومان رفتار قبلی و دامنهٔ کامل test-vanak را حفظ می‌کند. هیچ DELETE یا cleanup مخربی اضافه نشد.
+
+### اعتبارسنجی U3b
+
+GW2-P کامل و موفق بود؛ SHA-256 برابر `d1eaee4800b7a9aa15673d437214d80cc55980dd4bc34fdf20a5d2dd608c4b59` شد.
+
+| اجرا | نتیجه |
+|---|---|
+| `npm run build` | PASS |
+| سه spec غیر DB | 3/3 suite و 30/30 test PASS |
+| مجموعهٔ کامل `test/tools/test-seed` روی DB تازه، سه بار | NOT RUN — `localhost:5499` در دسترس نبود |
+
+Docker طبق دستور استفاده نشد. پورت 5435، دیتابیس مالک، شبکه، کلید واقعی و Push استفاده نشدند. شواهد و LF SHA-256 در `implementation/validation/u3b/LF-MANIFEST.txt` ثبت شده‌اند. هنگام ثبت شواهد، سه log ابتدا به‌دلیل working directory در مسیر تودرتوی اشتباه ساخته شدند؛ پیش از stage به مسیر مجاز منتقل و مسیر اشتباه حذف شد. هیچ فایل اشتباهی commit نشد.
+
+### گام بعد
+
+Guardian باید مجموعهٔ کامل `test/tools/test-seed` را سه بار، هر بار روی PostgreSQL موقت تازه در پورت 5499 اجرا کند. تا آن زمان پذیرش integration و اجرای ابزار روی دیتابیس مالک همچنان مسدود است.
+
+من کدکس هستم
