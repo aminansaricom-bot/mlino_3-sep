@@ -861,3 +861,21 @@ VALIDATION: GW2-P PASS; 3 TypeScript builds PASS; database spec compiled but NOT
 SCOPE: Two lifecycle services, one new DB spec, validation evidence, report and append-only handoff. No schema, migration, export, publication, package, credential, database, Docker or push action.
 NEXT_ACTION: Guardian runs the lifecycle spec three times and the three mutations on disposable localhost:5499, then reviews for merge; S1 resumes only after lifecycle acceptance.
 CREATED_AT: 2026-09-19
+
+---
+HANDOFF_ID: HANDOFF-20260921-CATALOG-MEDIA
+AUTHOR: CODEX
+PHASE: K2_CATALOG_ITEM_AND_MEDIA_CCR
+STATUS: DRAFT_DELIVERED_LOCALLY_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260921-K2-CATALOG-CCR-001
+TARGET_HANDOFF_ID: HANDOFF-20260921-OWNER-APPROVAL-K2
+REVIEW_REFERENCE: 290eb35423e0658ff760b734ef04b8f82ec0b0a3:AI_HANDOFF/CLAUDE_REVIEWS/20260921_OWNER_APPROVAL_KD_DECISIONS_AND_K2.md
+BRANCH: codex/catalog-ccr
+CCR_PATH: implementation/remediation/CONTRACT_CHANGE_REQUESTS/CONTRACT_CHANGE_REQUEST_CATALOG_ITEM_AND_MEDIA.md
+CCR_COMMIT: 24b3491
+CCR_SHA256_GIT_BLOB: 5918ab1ae3f8f431e565b8a4344e466e4769ae5292a28d98ae97abe80eb8c649
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260921_CODEX_K2_CATALOG_CCR_REPORT.md
+VALIDATION: GW2-P PASS; C1-C9 and balanced fences; staged diff check PASS; documentation only, no executable validation.
+SCOPE: New DRAFT CCR, new report and append-only handoff. No code, schema, migration, image, database, Docker, network or push.
+NEXT_ACTION: Architecture Guardian review; owner decides K-Q1 through K-Q4 and approves CCR before K3.
+CREATED_AT: 2026-09-21
