@@ -861,3 +861,25 @@ VALIDATION: GW2-P PASS; 3 TypeScript builds PASS; database spec compiled but NOT
 SCOPE: Two lifecycle services, one new DB spec, validation evidence, report and append-only handoff. No schema, migration, export, publication, package, credential, database, Docker or push action.
 NEXT_ACTION: Guardian runs the lifecycle spec three times and the three mutations on disposable localhost:5499, then reviews for merge; S1 resumes only after lifecycle acceptance.
 CREATED_AT: 2026-09-19
+
+---
+HANDOFF_ID: HANDOFF-20260921-CATALOG-MEDIA
+AUTHOR: CODEX
+PHASE: K1_CATALOG_MEDIA_DESIGN
+STATUS: COMPLETED_LOCALLY_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260921-K1-CATALOG-MEDIA-DESIGN-001
+TARGET_HANDOFF_ID: HANDOFF-20260921-OWNER-APPROVAL-K1
+REVIEW_REFERENCE: 7bbe75077017a4078fcd37ffe50466ed0973c0c7:AI_HANDOFF/CLAUDE_REVIEWS/20260921_OWNER_APPROVAL_CATALOG_MEDIA_DESIGN.md
+BRANCH: codex/catalog-media-design
+BASE_COMMIT: 7bbe75077017a4078fcd37ffe50466ed0973c0c7
+DESIGN_COMMIT: 577708c6951a23c821145fe8eefea478736eee71
+DESIGN_PATH: mlino2/MLINO_CATALOG_MEDIA_DESIGN.md
+DESIGN_SHA256: d0909e7910d3060bbc16ea053056f01cb82e9352ac955221e9ade0b31bbd9df8
+REPORT_COMMIT: d6282bb8da19f03c055e7e87251042077fcc7a4d
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260921_CODEX_K1_CATALOG_MEDIA_DESIGN_REPORT.md
+REPORT_SHA256: c404302f558b75b78611639bcea23ee98234bc5f07bfa8d6f9cb696e09543968
+VALIDATION: GW2-P PASS; documentation structure and diff checks PASS; git-show hashes verified; no code tests required.
+SCOPE: DRAFT Catalog/Media design, report and append-only handoff only; no code, schema, migration, image, V2 change, network, Docker, database or push.
+OPEN_ITEM: U2 adapter modules were absent from the named origin V2 ref; the locally available reviewed commit 77e7bdbc8bf121c0c45ff88590404a5e522d0477 was read and cited with that limitation disclosed.
+NEXT_ACTION: Guardian reviews K1; owner decides K-D1 through K-D14 before any K2 CCR or implementation instruction.
+CREATED_AT: 2026-09-21T00:57:28Z
