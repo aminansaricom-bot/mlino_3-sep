@@ -1,0 +1,129 @@
+U3C MUTATION PROOF
+TEMP_COPY_CREATED=true
+
+MUTATION=ALLOW_EXTRA_TERMS_KEY
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/tools/test-seed/offers.spec.ts
+
+FAIL test/tools/test-seed/offers.spec.ts
+  U3 strict sample-offer parser
+    √ shape rejection has the exact fixed code (3 ms)
+    √ unknown field rejection has the exact fixed code
+    √ wrong prefix rejection has the exact fixed code
+    √ name marker rejection has the exact fixed code (1 ms)
+    √ description marker rejection has the exact fixed code (1 ms)
+    × extra terms key rejection has the exact fixed code (6 ms)
+    √ wrong terms schema rejection has the exact fixed code (1 ms)
+    √ empty terms summary rejection has the exact fixed code
+    √ non-string terms condition rejection has the exact fixed code (1 ms)
+    √ too many terms conditions rejection has the exact fixed code (1 ms)
+    √ bad validity window rejection has the exact fixed code
+    √ missing price mode rejection has the exact fixed code
+    √ on-request with a price pair rejection has the exact fixed code
+    √ terms omitted builds contract-valid traceable terms
+    √ accepts contract-valid terms unchanged (1 ms)
+    √ duplicate offer keys are rejected
+    √ invalid price mode is rejected before any Core call (2 ms)
+  U3 official Core call sequence
+    √ publishes only the created version after create, createVersion and optional capability link (1 ms)
+
+  ● U3 strict sample-offer parser › extra terms key rejection has the exact fixed code
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "TEST_SEED_OFFER_TERMS_CONTRACT"
+    Received: "NO_ERROR"
+
+      32 |     ['missing price mode', [row({ on_request: false })], 'TEST_SEED_OFFER_PRICE_MODE'],
+      33 |     ['on-request with a price pair', [row({ on_request: true, price_amount: 100, price_currency: 'IRR' })], 'TEST_SEED_OFFER_PRICE_MODE'],
+    > 34 |   ])('%s rejection has the exact fixed code', (_name, input, expected) => expect(code(input)).toBe(expected));
+         |                                                                                               ^
+      35 |
+      36 |   test('terms omitted builds contract-valid traceable terms', () => {
+      37 |     const parsed = parseTestOffers([row()]);
+
+      at test/tools/test-seed/offers.spec.ts:34:95
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 17 passed, 18 total
+Snapshots:   0 total
+Time:        5.338 s
+Ran all test suites matching /test\\tools\\test-seed\\offers.spec.ts/i.
+EXIT=1
+
+MUTATION=EMIT_WRONG_SCHEMA_VERSION
+
+> mlino-v1-core@0.1.0 test
+> jest --runInBand test/tools/test-seed/offers.spec.ts
+
+FAIL test/tools/test-seed/offers.spec.ts
+  U3 strict sample-offer parser
+    √ shape rejection has the exact fixed code (3 ms)
+    √ unknown field rejection has the exact fixed code (1 ms)
+    √ wrong prefix rejection has the exact fixed code
+    √ name marker rejection has the exact fixed code
+    √ description marker rejection has the exact fixed code (1 ms)
+    √ extra terms key rejection has the exact fixed code (1 ms)
+    √ wrong terms schema rejection has the exact fixed code
+    √ empty terms summary rejection has the exact fixed code
+    √ non-string terms condition rejection has the exact fixed code (1 ms)
+    √ too many terms conditions rejection has the exact fixed code (1 ms)
+    √ bad validity window rejection has the exact fixed code
+    √ missing price mode rejection has the exact fixed code (1 ms)
+    √ on-request with a price pair rejection has the exact fixed code
+    × terms omitted builds contract-valid traceable terms (7 ms)
+    √ accepts contract-valid terms unchanged
+    √ duplicate offer keys are rejected
+    √ invalid price mode is rejected before any Core call (3 ms)
+  U3 official Core call sequence
+    × publishes only the created version after create, createVersion and optional capability link (1 ms)
+
+  ● U3 strict sample-offer parser › terms omitted builds contract-valid traceable terms
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+        "conditions": Array [],
+    -   "schema_version": "mlino.offer-terms.v1",
+    +   "schema_version": "wrong",
+        "summary": "پیشنهاد آزمایشی MLINO",
+      }
+
+      36 |   test('terms omitted builds contract-valid traceable terms', () => {
+      37 |     const parsed = parseTestOffers([row()]);
+    > 38 |     expect(parsed[0].terms).toEqual({ schema_version: 'mlino.offer-terms.v1', summary: TEST_OFFER_TERMS_SUMMARY, conditions: [] });
+         |                             ^
+      39 |   });
+      40 |
+      41 |   test('accepts contract-valid terms unchanged', () => {
+
+      at Object.<anonymous> (test/tools/test-seed/offers.spec.ts:38:29)
+
+  ● U3 official Core call sequence › publishes only the created version after create, createVersion and optional capability link
+
+    TestSeedError: TEST_SEED_OFFER_TERMS_CONTRACT
+
+      32 | ]);
+      33 |
+    > 34 | function fail(code: string): never { throw new TestSeedError(code); }
+         |                                            ^
+      35 | function object(value: unknown): Record<string, unknown> | null {
+      36 |   return typeof value === 'object' && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null;
+      37 | }
+
+      at fail (tools/test-seed/offers.ts:34:44)
+      at parseTerms (tools/test-seed/offers.ts:52:182)
+      at createAndPublishTestOffer (tools/test-seed/offers.ts:127:17)
+      at Object.<anonymous> (test/tools/test-seed/offers.spec.ts:75:36)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 16 passed, 18 total
+Snapshots:   0 total
+Time:        4.155 s, estimated 5 s
+Ran all test suites matching /test\\tools\\test-seed\\offers.spec.ts/i.
+EXIT=1
+TEMP_COPY_REMOVED=True
