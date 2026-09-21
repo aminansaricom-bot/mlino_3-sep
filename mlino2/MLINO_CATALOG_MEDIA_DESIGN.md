@@ -1,7 +1,9 @@
 # MLINO Catalog and Media Design
 
-**Status:** DRAFT  
-**Instruction:** `CODEX-20260921-K1-CATALOG-MEDIA-DESIGN-001`  
+**Status:** DRAFT
+
+**Instruction:** `CODEX-20260921-K1-CATALOG-MEDIA-DESIGN-001`
+
 **Scope:** طراحی دامنه، قرارداد عمومی، ذخیره‌سازی، تحویل و مصرف Catalog همراه Media؛ بدون تغییر کد، Prisma، migration یا V2.
 
 ## 1. هدف و مبنای موجود
