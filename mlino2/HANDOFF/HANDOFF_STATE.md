@@ -879,3 +879,38 @@ VALIDATION: GW2-P PASS; C1-C9 and balanced fences; staged diff check PASS; docum
 SCOPE: New DRAFT CCR, new report and append-only handoff. No code, schema, migration, image, database, Docker, network or push.
 NEXT_ACTION: Architecture Guardian review; owner decides K-Q1 through K-Q4 and approves CCR before K3.
 CREATED_AT: 2026-09-21
+
+---
+HANDOFF_ID: HANDOFF-20260921-CATALOG-MEDIA
+AUTHOR: CODEX
+PHASE: K3_CATALOG_CORE_IMPLEMENTATION
+STATUS: IMPLEMENTED_LOCALLY_AWAITING_GUARDIAN_DATABASE_VALIDATION
+INSTRUCTION_ID: CODEX-20260921-K3-CATALOG-CORE-001
+TARGET_HANDOFF_ID: HANDOFF-20260921-OWNER-APPROVAL-K3
+REVIEW_REFERENCE: 2786dfb9d169d50e41687d5a09a80e3beb697547:AI_HANDOFF/CLAUDE_REVIEWS/20260921_OWNER_APPROVAL_K2_CCR_AND_K3.md
+BRANCH: codex/catalog-core
+BASE_COMMIT: 2786dfb9d169d50e41687d5a09a80e3beb697547
+IMPLEMENTATION_COMMIT: 8c0aa1d
+MIGRATION_PATH: implementation/prisma/migrations/20260921010000_add_catalog_items/migration.sql
+MIGRATION_SHA256_GIT_BLOB: e032c92ff498d76c2fd93b35c0fd26c02a77efc16e8be636a0f54d2bcd7fd959
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260921_CODEX_K3_CATALOG_CORE_REPORT.md
+VALIDATION: GW2-P PASS; offline Prisma validate/generate PASS; TypeScript noEmit PASS; 2 DB-free Jest suites/11 tests PASS; 11 DB-backed tests NOT RUN under K3-G1.
+SCOPE: Catalog schema/migration/Core services/permission/publication/tests, CCR approval header, report and append-only handoff. No existing migration change, database, Docker, network or push.
+NEXT_ACTION: Architecture Guardian reviews K3 and runs new migration, DB-backed specs, mutation proofs, drift check and full suite on a disposable database. Owner DB apply and container rebuild remain blocked pending separate backup and approval.
+CREATED_AT: 2026-09-21
+
+---
+HANDOFF_ID: HANDOFF-20260921-CATALOG-MEDIA
+AUTHOR: CODEX
+PHASE: K3B_CATALOG_CORE_FIXES
+STATUS: FIXES_COMMITTED_LOCALLY_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260922-K3B-CATALOG-CORE-FIXES-001
+TARGET_HANDOFF_ID: HANDOFF-20260922-GUARDIAN-K3-FIXES
+REVIEW_REFERENCE: 4303e58b3dbd493acbd17ab0af260617be097638:AI_HANDOFF/CLAUDE_REVIEWS/20260922_CLAUDE_REVIEW_K3_CATALOG_CORE.md
+BRANCH: codex/catalog-core
+IMPLEMENTATION_COMMIT: 72459d4
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260922_CODEX_K3B_CATALOG_CORE_FIXES_REPORT.md
+VALIDATION: GW2-P PASS; offline Prisma validate PASS; TypeScript noEmit PASS; 2 database-free Jest suites/30 tests PASS; database-backed tests NOT RUN under K3-G1; migration hash unchanged.
+SCOPE: F1 availability validation and 19 K3 CHECK mappings; F2 dynamic permission count; report and append-only handoff. No database, Docker, network, schema or migration edit, or push.
+NEXT_ACTION: Architecture Guardian reviews K3b and runs database-backed checks on a disposable database. Codex stops here.
+CREATED_AT: 2026-09-22

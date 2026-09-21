@@ -28,6 +28,11 @@ export interface OfferCapabilityLinkInput {
   capabilityId: string;
 }
 
+export interface OfferCatalogItemLinkInput {
+  offerVersionId: string;
+  catalogItemId: string;
+}
+
 export class OfferService {
   constructor(private readonly db: PrismaClient) {}
 
@@ -83,6 +88,42 @@ export class OfferService {
 
   async unlinkCapability(context: AuthContext, input: OfferCapabilityLinkInput) {
     return this.changeCapabilityLink(context, input, 'unlink');
+  }
+
+  async linkCatalogItem(context: AuthContext, input: OfferCatalogItemLinkInput) {
+    return this.changeCatalogItemLink(context, input, 'link');
+  }
+
+  async unlinkCatalogItem(context: AuthContext, input: OfferCatalogItemLinkInput) {
+    return this.changeCatalogItemLink(context, input, 'unlink');
+  }
+
+  private async changeCatalogItemLink(context: AuthContext, input: OfferCatalogItemLinkInput, operation: 'link' | 'unlink') {
+    validateAuthContext(context);
+    this.assertAllowedKeys(input, ['offerVersionId', 'catalogItemId']);
+    requireNonEmpty(input.offerVersionId, 'offerVersionId');
+    requireNonEmpty(input.catalogItemId, 'catalogItemId');
+    return runCoreTransaction(this.db, async (tx) => {
+      await lockOrganization(tx, context.organizationId);
+      await requireMembershipPermission(tx, context, 'offer.manage');
+      const version = await tx.offerVersion.findUnique({ where: { id_organizationId: { id: input.offerVersionId, organizationId: context.organizationId } }, select: { offerId: true } });
+      if (!version) throw validationFailed('offer version not found in organization');
+      const offers = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`SELECT id FROM offers WHERE id = ${version.offerId} AND organization_id = ${context.organizationId} FOR UPDATE`);
+      if (offers.length !== 1) throw validationFailed('offer not found in organization');
+      const versions = await tx.$queryRaw<Array<{ id: string; published_at: Date | null }>>(Prisma.sql`SELECT id, published_at FROM offer_versions WHERE id = ${input.offerVersionId} AND organization_id = ${context.organizationId} FOR UPDATE`);
+      if (versions.length !== 1) throw validationFailed('offer version not found in organization');
+      if (versions[0].published_at !== null) throw conflict('offer version catalog links are immutable after publication');
+      const items = await tx.$queryRaw<Array<{ id: string; lifecycle_status: string }>>(Prisma.sql`SELECT id, lifecycle_status FROM catalog_items WHERE id = ${input.catalogItemId} AND organization_id = ${context.organizationId} FOR UPDATE`);
+      if (items.length !== 1) throw validationFailed('catalog item not found in organization');
+      if (items[0].lifecycle_status === 'RETIRED') throw conflict('catalog item is retired');
+      const where = { offerVersionId_catalogItemId: { offerVersionId: input.offerVersionId, catalogItemId: input.catalogItemId } };
+      if (operation === 'link') return tx.offerVersionCatalogItem.create({ data: { organizationId: context.organizationId, offerVersionId: input.offerVersionId, catalogItemId: input.catalogItemId } });
+      const existing = await tx.offerVersionCatalogItem.findUnique({ where, select: { catalogItemId: true } });
+      if (!existing) throw validationFailed('catalog item link not found');
+      return tx.offerVersionCatalogItem.delete({ where });
+    }).catch((error: unknown) => {
+      throw error instanceof CoreDomainError ? error : mapCoreDatabaseError(error);
+    });
   }
 
   private async changeCapabilityLink(context: AuthContext, input: OfferCapabilityLinkInput, operation: 'link' | 'unlink') {

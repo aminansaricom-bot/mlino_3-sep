@@ -5,12 +5,13 @@ import { mapCoreDatabaseError } from './error-adapter';
 import { CoreDomainError, conflict, validationFailed } from './errors';
 import { lockOrganization } from './repositories';
 
-export type PublicationTarget = 'BUSINESS_PROFILE' | 'CAPABILITY' | 'OFFER_VERSION';
+export type PublicationTarget = 'BUSINESS_PROFILE' | 'CAPABILITY' | 'OFFER_VERSION' | 'CATALOG_ITEM';
 
 type PublicationEvent = 'PUBLISHED' | 'WITHDRAWN';
 type LockedProfile = { kind: 'BUSINESS_PROFILE'; id: string; publication_status: string; content_revision: number; published_content_revision: number | null; name: string; description: string | null; latitude: Prisma.Decimal | null; longitude: Prisma.Decimal | null; address_text: string | null; contact_information: Prisma.JsonValue | null; links: Prisma.JsonValue | null; business_hours: Prisma.JsonValue | null };
 type LockedCapability = { kind: 'CAPABILITY'; id: string; publication_status: string; content_revision: number; published_content_revision: number | null; capability_key: string; name: string; short_description: string | null; audience: string };
-type LockedTarget = LockedProfile | LockedCapability;
+type LockedCatalogItem = { kind: 'CATALOG_ITEM'; id: string; publication_status: string; content_revision: number; published_content_revision: number | null; lifecycle_status: string; item_key: string; name: string; short_description: string | null; price_amount: Prisma.Decimal | null; price_currency: string | null; on_request: boolean; grouping_label: string | null; display_order: number; available_from: Date | null; available_until: Date | null };
+type LockedTarget = LockedProfile | LockedCapability | LockedCatalogItem;
 type LockedOfferVersion = { id: string; offer_id: string; version_number: number; name: string; short_description: string | null; offer_shape: string; terms: Prisma.JsonValue | null; price_amount: Prisma.Decimal | null; price_currency: string | null; on_request: boolean; valid_from: Date; valid_until: Date | null; publication_status: string };
 type PublishedContent = Prisma.InputJsonObject;
 
@@ -48,7 +49,8 @@ export class PublicationService {
       } else if (status !== 'PUBLISHED') {
         throw conflict('target is not published');
       }
-      const publishedContent = eventKind === 'PUBLISHED' ? this.snapshotForTarget(row) : null;
+      if (eventKind === 'PUBLISHED' && row.kind === 'CATALOG_ITEM' && row.lifecycle_status !== 'ACTIVE') throw conflict('catalog item is not active');
+      const publishedContent = eventKind === 'PUBLISHED' ? await this.snapshotForTarget(tx, row, context.organizationId) : null;
       const data = this.publicationData(target, targetId, context.organizationId, eventKind, eventKind === 'PUBLISHED' ? revision : publishedRevision!, membership.id, grant.id, reason, publishedContent);
       const publication = await tx.publication.create({ data });
       return eventKind === 'PUBLISHED' ? { outcome: 'PUBLISHED' as const, publication } : { outcome: 'WITHDRAWN' as const, publication };
@@ -83,7 +85,7 @@ export class PublicationService {
   }
 
   private validateTarget(target: PublicationTarget): void {
-    if (target !== 'BUSINESS_PROFILE' && target !== 'CAPABILITY' && target !== 'OFFER_VERSION') throw validationFailed('unsupported publication target');
+    if (target !== 'BUSINESS_PROFILE' && target !== 'CAPABILITY' && target !== 'OFFER_VERSION' && target !== 'CATALOG_ITEM') throw validationFailed('unsupported publication target');
   }
 
   private async lockTarget(tx: Prisma.TransactionClient, target: Exclude<PublicationTarget, 'OFFER_VERSION'>, id: string, organizationId: string): Promise<LockedTarget | undefined> {
@@ -91,11 +93,15 @@ export class PublicationService {
       const rows = await tx.$queryRaw<Omit<LockedProfile, 'kind'>[]>(Prisma.sql`SELECT id, publication_status, content_revision, published_content_revision, name, description, latitude, longitude, address_text, contact_information, links, business_hours FROM business_profiles WHERE id = ${id} AND organization_id = ${organizationId} FOR UPDATE`);
       return rows[0] ? { kind: 'BUSINESS_PROFILE', ...rows[0] } : undefined;
     }
-    const rows = await tx.$queryRaw<Omit<LockedCapability, 'kind'>[]>(Prisma.sql`SELECT id, publication_status, content_revision, published_content_revision, capability_key, name, short_description, audience FROM capabilities WHERE id = ${id} AND organization_id = ${organizationId} FOR UPDATE`);
-    return rows[0] ? { kind: 'CAPABILITY', ...rows[0] } : undefined;
+    if (target === 'CAPABILITY') {
+      const rows = await tx.$queryRaw<Omit<LockedCapability, 'kind'>[]>(Prisma.sql`SELECT id, publication_status, content_revision, published_content_revision, capability_key, name, short_description, audience FROM capabilities WHERE id = ${id} AND organization_id = ${organizationId} FOR UPDATE`);
+      return rows[0] ? { kind: 'CAPABILITY', ...rows[0] } : undefined;
+    }
+    const rows = await tx.$queryRaw<Omit<LockedCatalogItem, 'kind'>[]>(Prisma.sql`SELECT id, publication_status, content_revision, published_content_revision, lifecycle_status, item_key, name, short_description, price_amount, price_currency, on_request, grouping_label, display_order, available_from, available_until FROM catalog_items WHERE id = ${id} AND organization_id = ${organizationId} FOR UPDATE`);
+    return rows[0] ? { kind: 'CATALOG_ITEM', ...rows[0] } : undefined;
   }
 
-  private snapshotForTarget(row: LockedTarget): PublishedContent {
+  private async snapshotForTarget(tx: Prisma.TransactionClient, row: LockedTarget, organizationId: string): Promise<PublishedContent> {
     if (row.kind === 'BUSINESS_PROFILE') {
       const hasCoordinates = row.latitude !== null && row.longitude !== null;
       return {
@@ -109,6 +115,37 @@ export class PublicationService {
           contact_information: sanitizeObject(row.contact_information, ['public_phone', 'public_email', 'public_address']),
           links: sanitizeObject(row.links, ['website', 'public_social']),
           business_hours: row.business_hours,
+        },
+      } as Prisma.InputJsonObject;
+    }
+    if (row.kind === 'CATALOG_ITEM') {
+      const media = await tx.catalogItemMedia.findMany({ where: { catalogItemId: row.id, organizationId }, orderBy: [{ position: 'asc' }, { sha256: 'asc' }] });
+      const links = await tx.offerVersionCatalogItem.findMany({ where: { catalogItemId: row.id, organizationId }, select: { offerVersionId: true }, orderBy: { offerVersionId: 'asc' } });
+      return {
+        snapshot_version: 'core-publication-snapshot-v1',
+        content: {
+          item_key: row.item_key,
+          name: row.name,
+          short_description: row.short_description,
+          price_amount: row.price_amount?.toString() ?? null,
+          price_currency: row.price_currency,
+          on_request: row.on_request,
+          grouping_label: row.grouping_label,
+          display_order: row.display_order,
+          available_from: row.available_from?.toISOString() ?? null,
+          available_until: row.available_until?.toISOString() ?? null,
+          offer_version_links: links.map((link) => link.offerVersionId),
+          media: media.map((image) => ({
+            position: image.position,
+            path: image.objectPath,
+            sha256: image.sha256,
+            media_type: ({ AVIF: 'image/avif', WEBP: 'image/webp', JPEG: 'image/jpeg', PNG: 'image/png' } as const)[image.mediaType],
+            byte_size: image.byteSize,
+            width: image.widthPx,
+            height: image.heightPx,
+            alt_text: image.altText,
+            placeholder: image.placeholderKind === null ? null : { schema_version: image.placeholderKind, value: image.placeholderValue },
+          })),
         },
       } as Prisma.InputJsonObject;
     }
@@ -143,7 +180,9 @@ export class PublicationService {
       ? { businessProfileId: id, businessProfileOrganizationId: organizationId }
       : target === 'CAPABILITY'
         ? { capabilityId: id, capabilityOrganizationId: organizationId }
-        : { offerVersionId: id, offerVersionOrganizationId: organizationId };
+        : target === 'CATALOG_ITEM'
+          ? { catalogItemId: id, catalogItemOrganizationId: organizationId }
+          : { offerVersionId: id, offerVersionOrganizationId: organizationId };
     return {
       organizationId,
       ...targetFields,

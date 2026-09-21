@@ -1,6 +1,8 @@
 # CONTRACT_CHANGE_REQUEST — Catalog Item and Media
 
-**وضعیت:** DRAFT
+**وضعیت:** APPROVED
+
+**تصمیم مالک (2026-09-21):** K-Q1=B، K-Q2=A، K-Q3=A، K-Q4=B؛ ثبت‌شده در `2786dfb9d169d50e41687d5a09a80e3beb697547:AI_HANDOFF/CLAUDE_REVIEWS/20260921_OWNER_APPROVAL_K2_CCR_AND_K3.md`.
 
 **Instruction ID:** `CODEX-20260921-K2-CATALOG-CCR-001`
 
