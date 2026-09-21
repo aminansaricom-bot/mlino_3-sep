@@ -18,6 +18,19 @@ describe('K3 catalog validation without a database', () => {
     }
   });
 
+  test('k3 create rejects reversed or equal availability before DB access', async () => {
+    for (const availableUntil of [new Date('2026-01-01'), new Date('2026-02-01')]) {
+      await expect(catalog.create(context, {
+        organizationId: context.organizationId,
+        itemKey: 'item',
+        name: 'Name',
+        onRequest: true,
+        availableFrom: new Date('2026-02-01'),
+        availableUntil,
+      })).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });
+    }
+  });
+
   test('k3 catalog create allowlist rejects publication and revision fields before DB access', async () => {
     await expect(catalog.create(context, { organizationId: context.organizationId, itemKey: 'item', name: 'Name', onRequest: true, contentRevision: 999 } as never)).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });
     await expect(catalog.updatePublicFields(context, 'item', { publicationStatus: 'PUBLISHED' } as never)).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });

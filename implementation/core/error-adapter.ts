@@ -1,6 +1,28 @@
 import { Prisma } from '@prisma/client';
 import { CoreDomainError, conflict, validationFailed } from './errors';
 
+const CATALOG_CHECK_MESSAGES: Readonly<Record<string, string>> = {
+  catalog_item_price_check: 'catalog item price is invalid',
+  catalog_item_currency_check: 'catalog item currency is invalid',
+  catalog_item_availability_check: 'catalog item availability range is invalid',
+  catalog_item_display_order_check: 'catalog item display order is invalid',
+  catalog_item_content_revision_positive_check: 'catalog item revision is invalid',
+  catalog_item_lifecycle_audit_check: 'catalog item lifecycle audit is invalid',
+  catalog_item_publication_projection_check: 'catalog item publication projection is invalid',
+  catalog_item_media_position_check: 'catalog media position is invalid',
+  catalog_item_media_byte_size_check: 'catalog media byte size is invalid',
+  catalog_item_media_dimensions_check: 'catalog media dimensions are invalid',
+  catalog_item_media_sha256_check: 'catalog media hash is invalid',
+  catalog_item_media_alt_text_check: 'catalog media alt text is invalid',
+  catalog_item_media_path_check: 'catalog media path is invalid',
+  catalog_item_media_placeholder_check: 'catalog media placeholder is invalid',
+  catalog_item_activation_actor_pair_check: 'catalog item activation actor is invalid',
+  catalog_item_retirement_actor_pair_check: 'catalog item retirement actor is invalid',
+  publication_catalog_item_pair_check: 'publication catalog target organization is invalid',
+  publication_target_xor_check: 'publication must have exactly one target',
+  publication_content_revision_check: 'publication content revision is invalid',
+};
+
 function databaseCode(error: unknown): string | undefined {
   if (error instanceof Prisma.PrismaClientKnownRequestError) return error.code;
   if (typeof error === 'object' && error !== null && 'code' in error) {
@@ -53,8 +75,9 @@ export function mapCoreDatabaseError(error: unknown): CoreDomainError {
   }
   if (diagnostic.includes('offer_version_price_check')) return validationFailed('offer version price is invalid');
   if (diagnostic.includes('offer_version_validity_check')) return validationFailed('offer version validity range is invalid');
-  if (diagnostic.includes('catalog_item_price_check')) return validationFailed('catalog item price is invalid');
-  if (diagnostic.includes('catalog_item_media_') && (code === 'P2010' || code === '23514')) return validationFailed('catalog media constraint rejected the operation');
+  for (const [name, domainMessage] of Object.entries(CATALOG_CHECK_MESSAGES)) {
+    if (diagnostic.includes(name)) return validationFailed(domainMessage);
+  }
   if (code === 'P2028' || code === 'P2034' || code === '40001' || code === '40P01') return new CoreDomainError('TRANSACTION_RETRYABLE', 'transaction could not complete; retry');
   if (code === 'P2002' || code === '23505' || (code === 'P2010' && diagnostic.includes('23505'))) {
     if (diagnostic.includes('business_profile_one_published_per_organization_unique')) return conflict('another business profile is already published for this organization');

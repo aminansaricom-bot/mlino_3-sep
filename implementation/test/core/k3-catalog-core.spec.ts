@@ -97,10 +97,13 @@ describe('K3 catalog Core database contracts (disposable 5499 only)', () => {
     const a = await item('checks');
     await code(catalog.create(a.context, { organizationId: a.organizationId, itemKey: 'bad-price', name: 'Bad', onRequest: false }), 'VALIDATION_FAILED');
     await code(catalog.create(a.context, { organizationId: a.organizationId, itemKey: 'bad-range', name: 'Bad', onRequest: true, availableFrom: new Date('2026-02-01'), availableUntil: new Date('2026-01-01') }), 'VALIDATION_FAILED');
+    await catalog.updatePublicFields(a.context, a.record.id, { availableFrom: new Date('2026-02-01') });
+    await code(catalog.updatePublicFields(a.context, a.record.id, { availableUntil: new Date('2026-01-01') }), 'VALIDATION_FAILED');
+    expect((await prisma.catalogItem.findUniqueOrThrow({ where: { id: a.record.id } })).availableUntil).toBeNull();
     await code(catalog.updatePublicFields(a.context, a.record.id, { groupingLabel: '<script>' }), 'VALIDATION_FAILED');
     const updated = await catalog.updatePublicFields(a.context, a.record.id, { name: 'Renamed' });
-    expect(updated.contentRevision).toBe(2);
-    await expect(prisma.catalogItem.update({ where: { id: a.record.id }, data: { contentRevision: 3 } })).rejects.toThrow();
+    expect(updated.contentRevision).toBe(3);
+    await expect(prisma.catalogItem.update({ where: { id: a.record.id }, data: { contentRevision: 4 } })).rejects.toThrow();
   });
 
   test('k3 media caps, order, revisions and immutable metadata', async () => {

@@ -14,9 +14,28 @@ describe('K3 catalog database error mapping without a database', () => {
     expect(mapCoreDatabaseError(dbError('P2002', constraint))).toMatchObject({ code: 'CONFLICT', message });
   });
 
-  test('k3 price CHECK and media CHECK map to VALIDATION_FAILED', () => {
-    expect(mapCoreDatabaseError(dbError('P2010', 'catalog_item_price_check'))).toMatchObject({ code: 'VALIDATION_FAILED', message: 'catalog item price is invalid' });
-    expect(mapCoreDatabaseError(dbError('23514', 'catalog_item_media_dimensions_check'))).toMatchObject({ code: 'VALIDATION_FAILED' });
+  test.each([
+    'catalog_item_price_check',
+    'catalog_item_currency_check',
+    'catalog_item_availability_check',
+    'catalog_item_display_order_check',
+    'catalog_item_content_revision_positive_check',
+    'catalog_item_lifecycle_audit_check',
+    'catalog_item_publication_projection_check',
+    'catalog_item_media_position_check',
+    'catalog_item_media_byte_size_check',
+    'catalog_item_media_dimensions_check',
+    'catalog_item_media_sha256_check',
+    'catalog_item_media_alt_text_check',
+    'catalog_item_media_path_check',
+    'catalog_item_media_placeholder_check',
+    'catalog_item_activation_actor_pair_check',
+    'catalog_item_retirement_actor_pair_check',
+    'publication_catalog_item_pair_check',
+    'publication_target_xor_check',
+    'publication_content_revision_check',
+  ])('k3 CHECK %s maps to VALIDATION_FAILED', (constraint) => {
+    expect(mapCoreDatabaseError(dbError('P2010', constraint))).toMatchObject({ code: 'VALIDATION_FAILED' });
   });
 
   test('k3 named lifecycle and media trigger errors map to stable codes', () => {

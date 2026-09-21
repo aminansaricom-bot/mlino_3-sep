@@ -6,6 +6,7 @@ import { mapCoreDatabaseError } from '../../core/error-adapter';
 import { MembershipService } from '../../core/membership-service';
 import { PermissionGrantService } from '../../core/permission-grant-service';
 import { PlatformIdentityVerifier } from '../../core/platform-identity-verifier';
+import { CORE_PERMISSION_KEYS } from '../../core/permission-registry';
 import { PermissionGrantRepository } from '../../core/repositories';
 import { assertDisposableDatabase } from './db-guard';
 
@@ -57,7 +58,7 @@ describe('G10a2 Core authority slice', () => {
   it('bootstraps atomically through a verified platform actor and records the actor reference', async () => {
     const result = await bootstrap.execute('platform-token', bootstrapInput(`${TEST_PREFIX}positive`));
     expect(result.organization.id).toBe(`${TEST_PREFIX}positive`);
-    expect(await prisma.permissionGrant.count({ where: { organizationId: `${TEST_PREFIX}positive`, basisKey: 'founding', grantStatus: 'ACTIVE', reason: 'bootstrap:platform:test' } })).toBe(16);
+    expect(await prisma.permissionGrant.count({ where: { organizationId: `${TEST_PREFIX}positive`, basisKey: 'founding', grantStatus: 'ACTIVE', reason: 'bootstrap:platform:test' } })).toBe(CORE_PERMISSION_KEYS.length);
   });
 
   it('rejects missing or invalid platform credentials and leaves no bootstrap rows after a validation failure', async () => {

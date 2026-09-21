@@ -75,6 +75,10 @@ export class CatalogItemService {
       await this.authorize(tx, context);
       const item = await this.lockItem(tx, context.organizationId, catalogItemId);
       if (item.lifecycle_status === 'RETIRED') throw conflict('catalog item is retired');
+      validateAvailability(
+        input.availableFrom === undefined ? item.available_from : input.availableFrom,
+        input.availableUntil === undefined ? item.available_until : input.availableUntil,
+      );
       return tx.catalogItem.update({ where: { id_organizationId: { id: catalogItemId, organizationId: context.organizationId } }, data: input });
     });
   }
@@ -157,7 +161,7 @@ export class CatalogItemService {
   }
 
   private async lockItem(tx: Prisma.TransactionClient, organizationId: string, itemId: string) {
-    const rows = await tx.$queryRaw<Array<{ id: string; lifecycle_status: string; publication_status: string }>>(Prisma.sql`SELECT id, lifecycle_status, publication_status FROM catalog_items WHERE id = ${itemId} AND organization_id = ${organizationId} FOR UPDATE`);
+    const rows = await tx.$queryRaw<Array<{ id: string; lifecycle_status: string; publication_status: string; available_from: Date | null; available_until: Date | null }>>(Prisma.sql`SELECT id, lifecycle_status, publication_status, available_from, available_until FROM catalog_items WHERE id = ${itemId} AND organization_id = ${organizationId} FOR UPDATE`);
     if (rows.length !== 1) throw validationFailed('catalog item not found in organization');
     return rows[0];
   }
@@ -185,6 +189,11 @@ function validatePublic(input: CatalogPublicFields, creating: boolean): void {
   if (input.priceCurrency != null && (typeof input.priceCurrency !== 'string' || !/^[A-Z]{3}$/.test(input.priceCurrency))) throw validationFailed('invalid price currency');
   if (input.availableFrom != null && (!(input.availableFrom instanceof Date) || Number.isNaN(input.availableFrom.getTime()))) throw validationFailed('invalid availableFrom');
   if (input.availableUntil != null && (!(input.availableUntil instanceof Date) || Number.isNaN(input.availableUntil.getTime()))) throw validationFailed('invalid availableUntil');
+  if (creating) validateAvailability(input.availableFrom, input.availableUntil);
+}
+
+function validateAvailability(from: Date | null | undefined, until: Date | null | undefined): void {
+  if (from != null && until != null && until <= from) throw validationFailed('invalid catalog availability range');
 }
 
 function validateMedia(input: CatalogMediaInput): void {
