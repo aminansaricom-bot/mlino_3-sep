@@ -1,9 +1,13 @@
 # CODEX K1 Catalog Media Design Report
 
-**Instruction ID:** `CODEX-20260921-K1-CATALOG-MEDIA-DESIGN-001`  
-**Target Handoff:** `HANDOFF-20260921-OWNER-APPROVAL-K1`  
-**Workstream:** `HANDOFF-20260921-CATALOG-MEDIA`  
-**Branch:** `codex/catalog-media-design`  
+**Instruction ID:** `CODEX-20260921-K1-CATALOG-MEDIA-DESIGN-001`
+
+**Target Handoff:** `HANDOFF-20260921-OWNER-APPROVAL-K1`
+
+**Workstream:** `HANDOFF-20260921-CATALOG-MEDIA`
+
+**Branch:** `codex/catalog-media-design`
+
 **Status:** `COMPLETED_LOCALLY_AWAITING_GUARDIAN_REVIEW`
 
 ## 1. Task executed
@@ -54,7 +58,7 @@ Worktree تازه در `C:/Users/galexy/mlino code/catalog-media-design` و bran
 | `AI_HANDOFF/CODEX_REPORTS/20260921_CODEX_K1_CATALOG_MEDIA_DESIGN_REPORT.md` | new execution report |
 | `mlino2/HANDOFF/HANDOFF_STATE.md` | append-only handoff entry، پس از ثبت report |
 
-Design commit: `577708c6951a23c821145fe8eefea478736eee71`.
+Design commits: `577708c6951a23c821145fe8eefea478736eee71` و اصلاح قالب Markdown در `f9342114ec254ca39096ba62a1eeabe8ce0ef988`.
 
 ## 5. Files not changed
 
@@ -74,13 +78,13 @@ Design commit: `577708c6951a23c821145fe8eefea478736eee71`.
 
 | Artifact | Commit/source | LF / git-show SHA-256 |
 |---|---|---|
-| `mlino2/MLINO_CATALOG_MEDIA_DESIGN.md` | `577708c6951a23c821145fe8eefea478736eee71` | `d0909e7910d3060bbc16ea053056f01cb82e9352ac955221e9ade0b31bbd9df8` |
+| `mlino2/MLINO_CATALOG_MEDIA_DESIGN.md` | `f9342114ec254ca39096ba62a1eeabe8ce0ef988` | `9d9f826e9777d14af5a8eb6e6c01465a4119137e8da42dde2f83560b7cfe679d` |
 
 سند با وضعیت DRAFT پایان می‌یابد و هیچ implementation authorization صادر نمی‌کند.
 
 ## 8. Commit hash
 
-- Design: `577708c6951a23c821145fe8eefea478736eee71`
+- Design final: `f9342114ec254ca39096ba62a1eeabe8ce0ef988`
 - Report: در commit محلی بعدی ثبت می‌شود و در Handoff درج خواهد شد.
 - Push: انجام نشد.
 
