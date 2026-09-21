@@ -1025,3 +1025,24 @@ VALIDATION: GW2-P PASS; normal fetch failed network; escalated fetch stopped on 
 SCOPE: Stop documentation only. No U3c code, test, contract, builder, Core, DB, Docker, key, push, rebase or amend action.
 NEXT_ACTION: Guardian makes 95b68103f0f299f3e48dc3567d8f60733f47080e available through an authorized synchronization path and issues a superseding instruction from the new stop HEAD.
 CREATED_AT: 2026-09-20T20:14:25Z
+
+---
+HANDOFF_ID: HANDOFF-20260918-TEST-SEED
+AUTHOR: CODEX
+PHASE: U3C_OFFER_TERMS_CONTRACT
+STATUS: IMPLEMENTED_LOCALLY_INTEGRATION_VALIDATION_BLOCKED_BY_UNAVAILABLE_DISPOSABLE_DB
+INSTRUCTION_ID: CODEX-20260920-U3C-OFFER-TERMS-CONTRACT-002
+TARGET_HANDOFF_ID: HANDOFF-20260920-GUARDIAN-U3C-002
+REVIEW_REFERENCE: d00376f8b904315c252e07642fde5970cc664daa:AI_HANDOFF/CLAUDE_REVIEWS/20260920_U3C_002_OBJECT_AVAILABLE.md
+BRANCH: codex/test-seed-vanak
+MERGE_COMMIT: e28746b0e4c4db19b122593f4d0ffe81d4a75158
+CODE_COMMIT: 4313480bab007cacd42f647526f48e9b9bf3509c
+EVIDENCE_COMMIT: 3a10b06
+REPORT_COMMIT: 6c7d877236140fcf722e9b0e827dc468d212d77a
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260920_CODEX_U3_SAMPLE_OFFERS_REPORT.md
+REPORT_SHA256: 070acd913dcbe8bd3d6129293097b4367e140f532849abac3bfaddaa4244d685
+EVIDENCE_PATH: implementation/validation/u3c/
+VALIDATION: GW2-P PASS; required object/ref PASS; clean merge; build PASS; non-DB specs PASS at 3 suites and 35 tests; both mutations detected; localhost:5499 unavailable, so integration and three fresh-DB runs were NOT RUN.
+SCOPE: Offer terms parser/defaults/tests and U3c evidence/report only; public contract, Core, schema, migrations and package files unchanged; no owner DB, Docker, push or forbidden action.
+NEXT_ACTION: Guardian runs the complete test/tools/test-seed suite three times on fresh disposable PostgreSQL at localhost:5499 and reviews U3c. Owner database remains blocked.
+CREATED_AT: 2026-09-21T00:00:00Z
