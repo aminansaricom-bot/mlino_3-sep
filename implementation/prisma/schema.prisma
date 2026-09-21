@@ -324,6 +324,19 @@ enum PublicationEventKind {
   WITHDRAWN
 }
 
+enum CatalogItemLifecycle {
+  DRAFT
+  ACTIVE
+  RETIRED
+}
+
+enum CatalogMediaType {
+  AVIF
+  WEBP
+  JPEG
+  PNG
+}
+
 model Organization {
   id                            String                @id @db.Text
   displayName                   String                @map("display_name") @db.VarChar(200)
@@ -348,6 +361,9 @@ model Organization {
   offerCapabilityLinks OfferVersionCapability[]  @relation("OrganizationOfferCapabilityLinks")
   evidenceItems        Evidence[]                @relation("OrganizationEvidence")
   publications         Publication[]             @relation("OrganizationPublications")
+  catalogItems         CatalogItem[]             @relation("OrganizationCatalogItems")
+  catalogItemMedia     CatalogItemMedia[]        @relation("OrganizationCatalogItemMedia")
+  offerCatalogLinks    OfferVersionCatalogItem[] @relation("OrganizationOfferCatalogLinks")
 
   @@index([lifecycleStatus, createdAt], map: "organization_lifecycle_created_idx")
   @@map("organizations")
@@ -427,6 +443,8 @@ model Membership {
   confirmedCapabilities      Capability[]             @relation("CapabilityConfirmedByMembership")
   confirmedEvidenceItems     Evidence[]               @relation("EvidenceConfirmedByMembership")
   performedPublications      Publication[]            @relation("PublicationPerformedByMembership")
+  activatedCatalogItems      CatalogItem[]            @relation("CatalogItemActivatedByMembership")
+  retiredCatalogItems        CatalogItem[]            @relation("CatalogItemRetiredByMembership")
 
   @@unique([id, organizationId], map: "membership_id_organization_unique")
   @@index([organizationId, membershipStatus], map: "membership_organization_status_idx")
@@ -567,6 +585,7 @@ model OfferVersion {
   capabilityLinks   OfferVersionCapability[] @relation("OfferVersionCapabilityLinks")
   evidenceItems     Evidence[]               @relation("EvidenceOfferVersion")
   publicationEvents Publication[]            @relation("PublicationOfferVersion")
+  catalogItemLinks  OfferVersionCatalogItem[] @relation("OfferVersionCatalogItemLinks")
 
   @@unique([id, organizationId], map: "offer_version_id_organization_unique")
   @@unique([offerId, versionNumber], map: "offer_version_number_unique")
@@ -632,6 +651,8 @@ model Publication {
   capabilityOrganizationId              String?              @map("capability_organization_id") @db.Text
   offerVersionId                        String?              @map("offer_version_id") @db.Text
   offerVersionOrganizationId            String?              @map("offer_version_organization_id") @db.Text
+  catalogItemId                         String?              @map("catalog_item_id") @db.Text
+  catalogItemOrganizationId             String?              @map("catalog_item_organization_id") @db.Text
   eventKind                              PublicationEventKind @map("event_kind")
   contentRevision                        Int?                 @map("content_revision")
   publishedContent                       Json?                @map("published_content") @db.JsonB
@@ -645,12 +666,97 @@ model Publication {
   businessProfile     BusinessProfile?       @relation("PublicationBusinessProfile", fields: [businessProfileId, businessProfileOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_business_profile_fk")
   capability          Capability?            @relation("PublicationCapability", fields: [capabilityId, capabilityOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_capability_fk")
   offerVersion        OfferVersion?          @relation("PublicationOfferVersion", fields: [offerVersionId, offerVersionOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_offer_version_fk")
+  catalogItem         CatalogItem?           @relation("PublicationCatalogItem", fields: [catalogItemId, catalogItemOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_catalog_item_fk")
   performedByMembership Membership @relation("PublicationPerformedByMembership", fields: [performedByMembershipId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "publication_performed_by_membership_fk")
 
   @@unique([id, organizationId], map: "publication_id_organization_unique")
   @@index([organizationId, businessProfileId, occurredAt], map: "publication_business_profile_time_idx")
   @@index([organizationId, capabilityId, occurredAt], map: "publication_capability_time_idx")
   @@index([organizationId, offerVersionId, occurredAt], map: "publication_offer_version_time_idx")
+  @@index([organizationId, catalogItemId, occurredAt], map: "publication_catalog_item_time_idx")
   @@index([organizationId, performedByMembershipId, occurredAt], map: "publication_actor_time_idx")
   @@map("publications")
+}
+
+model CatalogItem {
+  id                         String               @id @default(uuid()) @db.Text
+  organizationId             String               @map("organization_id") @db.Text
+  itemKey                    String               @map("item_key") @db.VarChar(160)
+  name                       String               @db.VarChar(200)
+  shortDescription           String?              @map("short_description") @db.Text
+  priceAmount                Decimal?             @map("price_amount") @db.Decimal(12, 2)
+  priceCurrency              String?              @map("price_currency") @db.VarChar(3)
+  onRequest                  Boolean              @default(false) @map("on_request")
+  groupingLabel              String?              @map("grouping_label") @db.VarChar(160)
+  displayOrder               Int                  @default(0) @map("display_order")
+  availableFrom              DateTime?            @map("available_from") @db.Timestamptz(3)
+  availableUntil             DateTime?            @map("available_until") @db.Timestamptz(3)
+  lifecycleStatus            CatalogItemLifecycle @default(DRAFT) @map("lifecycle_status")
+  publicationStatus          PublicationStatus    @default(UNPUBLISHED) @map("publication_status")
+  contentRevision            Int                  @default(1) @map("content_revision")
+  publishedContentRevision   Int?                 @map("published_content_revision")
+  activatedAt                DateTime?            @map("activated_at") @db.Timestamptz(3)
+  activatedByMembershipId    String?              @map("activated_by_membership_id") @db.Text
+  activatedByOrganizationId  String?              @map("activated_by_organization_id") @db.Text
+  retiredAt                  DateTime?            @map("retired_at") @db.Timestamptz(3)
+  retiredByMembershipId      String?              @map("retired_by_membership_id") @db.Text
+  retiredByOrganizationId    String?              @map("retired_by_organization_id") @db.Text
+  retirementReason           String?              @map("retirement_reason") @db.Text
+  createdAt                  DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                  DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization          Organization              @relation("OrganizationCatalogItems", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "catalog_item_organization_fk")
+  activatedByMembership Membership?               @relation("CatalogItemActivatedByMembership", fields: [activatedByMembershipId, activatedByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "catalog_item_activated_by_membership_fk")
+  retiredByMembership   Membership?               @relation("CatalogItemRetiredByMembership", fields: [retiredByMembershipId, retiredByOrganizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "catalog_item_retired_by_membership_fk")
+  media                 CatalogItemMedia[]        @relation("CatalogItemMedia")
+  offerVersionLinks     OfferVersionCatalogItem[] @relation("CatalogItemOfferVersionLinks")
+  publicationEvents     Publication[]             @relation("PublicationCatalogItem")
+
+  @@unique([id, organizationId], map: "catalog_item_id_organization_unique")
+  @@unique([organizationId, itemKey], map: "catalog_item_organization_key_unique")
+  @@index([organizationId, lifecycleStatus, publicationStatus, displayOrder], map: "catalog_item_org_lifecycle_publication_order_idx")
+  @@index([organizationId, availableFrom, availableUntil], map: "catalog_item_organization_availability_idx")
+  @@map("catalog_items")
+}
+
+model CatalogItemMedia {
+  id             String           @id @default(uuid()) @db.Text
+  organizationId String           @map("organization_id") @db.Text
+  catalogItemId  String           @map("catalog_item_id") @db.Text
+  position       Int
+  objectPath     String           @map("object_path") @db.VarChar(255)
+  sha256         String           @db.VarChar(64)
+  mediaType      CatalogMediaType @map("media_type")
+  byteSize       Int              @map("byte_size")
+  widthPx        Int              @map("width_px")
+  heightPx       Int              @map("height_px")
+  altText        String           @map("alt_text") @db.VarChar(300)
+  placeholderKind  String?        @map("placeholder_kind") @db.VarChar(80)
+  placeholderValue String?        @map("placeholder_value") @db.VarChar(256)
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization @relation("OrganizationCatalogItemMedia", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "catalog_item_media_organization_fk")
+  catalogItem  CatalogItem  @relation("CatalogItemMedia", fields: [catalogItemId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "catalog_item_media_catalog_item_fk")
+
+  @@unique([id, organizationId], map: "catalog_item_media_id_organization_unique")
+  @@unique([catalogItemId, position], map: "catalog_item_media_item_position_unique")
+  @@unique([catalogItemId, sha256], map: "catalog_item_media_item_sha256_unique")
+  @@index([organizationId, catalogItemId], map: "catalog_item_media_organization_item_idx")
+  @@index([organizationId, sha256], map: "catalog_item_media_organization_sha256_idx")
+  @@map("catalog_item_media")
+}
+
+model OfferVersionCatalogItem {
+  organizationId String @map("organization_id") @db.Text
+  offerVersionId String @map("offer_version_id") @db.Text
+  catalogItemId  String @map("catalog_item_id") @db.Text
+
+  organization Organization @relation("OrganizationOfferCatalogLinks", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "offer_version_catalog_item_organization_fk")
+  offerVersion OfferVersion @relation("OfferVersionCatalogItemLinks", fields: [offerVersionId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "offer_version_catalog_item_offer_version_fk")
+  catalogItem  CatalogItem  @relation("CatalogItemOfferVersionLinks", fields: [catalogItemId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "offer_version_catalog_item_catalog_item_fk")
+
+  @@id([offerVersionId, catalogItemId], map: "offer_version_catalog_item_pk")
+  @@index([catalogItemId, offerVersionId], map: "offer_version_catalog_item_reverse_idx")
+  @@map("offer_version_catalog_items")
 }
