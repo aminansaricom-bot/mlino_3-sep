@@ -898,3 +898,19 @@ VALIDATION: GW2-P PASS; offline Prisma validate/generate PASS; TypeScript noEmit
 SCOPE: Catalog schema/migration/Core services/permission/publication/tests, CCR approval header, report and append-only handoff. No existing migration change, database, Docker, network or push.
 NEXT_ACTION: Architecture Guardian reviews K3 and runs new migration, DB-backed specs, mutation proofs, drift check and full suite on a disposable database. Owner DB apply and container rebuild remain blocked pending separate backup and approval.
 CREATED_AT: 2026-09-21
+
+---
+HANDOFF_ID: HANDOFF-20260921-CATALOG-MEDIA
+AUTHOR: CODEX
+PHASE: K3B_CATALOG_CORE_FIXES
+STATUS: FIXES_COMMITTED_LOCALLY_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260922-K3B-CATALOG-CORE-FIXES-001
+TARGET_HANDOFF_ID: HANDOFF-20260922-GUARDIAN-K3-FIXES
+REVIEW_REFERENCE: 4303e58b3dbd493acbd17ab0af260617be097638:AI_HANDOFF/CLAUDE_REVIEWS/20260922_CLAUDE_REVIEW_K3_CATALOG_CORE.md
+BRANCH: codex/catalog-core
+IMPLEMENTATION_COMMIT: 72459d4
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260922_CODEX_K3B_CATALOG_CORE_FIXES_REPORT.md
+VALIDATION: GW2-P PASS; offline Prisma validate PASS; TypeScript noEmit PASS; 2 database-free Jest suites/30 tests PASS; database-backed tests NOT RUN under K3-G1; migration hash unchanged.
+SCOPE: F1 availability validation and 19 K3 CHECK mappings; F2 dynamic permission count; report and append-only handoff. No database, Docker, network, schema or migration edit, or push.
+NEXT_ACTION: Architecture Guardian reviews K3b and runs database-backed checks on a disposable database. Codex stops here.
+CREATED_AT: 2026-09-22
