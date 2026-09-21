@@ -165,3 +165,63 @@ Docker طبق دستور استفاده نشد. پورت 5435، دیتابیس �
 Guardian باید مجموعهٔ کامل `test/tools/test-seed` را سه بار، هر بار روی PostgreSQL موقت تازه در پورت 5499 اجرا کند. تا آن زمان پذیرش integration و اجرای ابزار روی دیتابیس مالک همچنان مسدود است.
 
 من کدکس هستم
+
+## U3c — هم‌راستاسازی قرارداد terms پیشنهاد
+
+- **Instruction:** `CODEX-20260920-U3C-OFFER-TERMS-CONTRACT-002`
+- **Pinned review:** `d00376f8b904315c252e07642fde5970cc664daa:AI_HANDOFF/CLAUDE_REVIEWS/20260920_U3C_002_OBJECT_AVAILABLE.md`
+- **Merge commit:** `e28746b0e4c4db19b122593f4d0ffe81d4a75158`
+- **Code commit:** `4313480bab007cacd42f647526f48e9b9bf3509c`
+- **Evidence commit:** `3a10b06`
+- **Status:** `IMPLEMENTED_LOCALLY_INTEGRATION_VALIDATION_BLOCKED_BY_UNAVAILABLE_DISPOSABLE_DB`
+
+### تغییر قرارداد
+
+ابزار seed اکنون قرارداد عمومی موجود در `implementation/public-export/builder.ts:140-144` را پیش از هر Core call اعمال می‌کند. `terms` فقط سه کلید `schema_version`، `summary` و `conditions` را می‌پذیرد. نسخه باید دقیقاً `mlino.offer-terms.v1` باشد؛ summary باید غیرخالی، حداکثر ۲۰۰۰ نویسه و بدون angle bracket باشد؛ conditions باید حداکثر ۳۰ رشتهٔ غیرخالی، هرکدام حداکثر ۱۰۰۰ نویسه و بدون angle bracket باشد. هر نقض با کد ثابت `TEST_SEED_OFFER_TERMS_CONTRACT` رد می‌شود.
+
+اگر ورودی terms نداشته باشد، ابزار یک شیء معتبر با summary شامل «آزمایشی» می‌سازد. نشان دادهٔ آزمایشی فقط در `offer_key`، نام، توضیح کوتاه و summary نگه داشته می‌شود و کلید اضافهٔ `test_marker` در terms تولید یا پذیرفته نمی‌شود.
+
+### آزمون‌های افزوده یا تقویت‌شده
+
+- `extra terms key rejection has the exact fixed code`
+- `wrong terms schema rejection has the exact fixed code`
+- `empty terms summary rejection has the exact fixed code`
+- `non-string terms condition rejection has the exact fixed code`
+- `too many terms conditions rejection has the exact fixed code`
+- `terms omitted builds contract-valid traceable terms`
+- `accepts contract-valid terms unchanged`
+- `seeds four marked offers, exports only three active offers, is idempotent and withdraws without decreasing rows` اکنون یک Offer دارای terms معتبر می‌سازد و برابری terms خروجی را بررسی می‌کند.
+
+اصلاح Guardian در commit `95b6810` نیز با merge عادی وارد شد. آزمون integration اکنون `asOf` را دو بار از ساعت اجرای واقعی می‌سازد و هیچ تاریخ ثابت `2026-09-20T12:00:00Z` یا `12:01:00Z` در آن باقی نمانده است.
+
+### Mutation proof
+
+| Mutation | آزمون نام‌دار شکست‌خورده | نتیجه |
+|---|---|---|
+| پذیرش دوبارهٔ کلید اضافه در terms | `extra terms key rejection has the exact fixed code` | PASS — mutation با ۱ شکست از ۱۸ آزمون شناسایی شد |
+| تولید schema_version نادرست برای terms پیش‌فرض | `terms omitted builds contract-valid traceable terms` | PASS — mutation شناسایی شد؛ آزمون توالی Core نیز به‌سبب revalidation شکست خورد |
+
+Mutationها فقط در کپی موقت اجرا شدند؛ کپی پس از اجرا حذف شد و هیچ تغییر mutation در worktree باقی نماند.
+
+### اعتبارسنجی
+
+| بررسی | نتیجه |
+|---|---|
+| GW2-P و SHA-256 pinned review | PASS |
+| object و remote-tracking commit `95b6810` | PASS |
+| merge بدون conflict | PASS |
+| `npm run build` | PASS |
+| آزمون‌های غیر DB | ۳ suite و ۳۵ test PASS |
+| PostgreSQL موقت `localhost:5499` | در دسترس نبود |
+| integration و سه اجرای کامل روی DB تازه | NOT RUN — Docker طبق دستور ممنوع بود |
+| leak scan | PASS |
+| تغییر public builder/Core/schema/migration/package | انجام نشد |
+| Push | انجام نشد |
+
+شواهد در `implementation/validation/u3c/` ثبت شده‌اند و `LF-MANIFEST.txt` SHA-256 فایل‌های تغییرکرده و logها را نگه می‌دارد. هیچ اتصال به پورت 5435 یا دیتابیس مالک، Docker، شبکه، کلید واقعی یا `_PUSH_STAGING` انجام نشد.
+
+### ریسک و گام بعد
+
+پذیرش نهایی integration هنوز به اجرای کل مجموعهٔ `test/tools/test-seed` در سه PostgreSQL موقت تازه روی پورت 5499 نیاز دارد. Guardian باید این مرحله را اجرا و نتیجه را بازبینی کند؛ اجرای ابزار روی دیتابیس مالک همچنان مجاز نیست.
+
+من کدکس هستم
