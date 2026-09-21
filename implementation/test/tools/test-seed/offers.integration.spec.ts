@@ -41,7 +41,7 @@ describe('U3 sample offers through official Core services', () => {
     ]), testEnv);
     const rows = parseTestOffers([
       offer('vanak-81', 'request', { on_request: true }),
-      offer('vanak-81', 'priced', { price_amount: 125000, price_currency: 'IRR' }),
+      offer('vanak-81', 'priced', { price_amount: 125000, price_currency: 'IRR', terms: { schema_version: 'mlino.offer-terms.v1', summary: 'پیشنهاد آزمایشی قیمت‌دار', conditions: ['فقط خرید حضوری'] } }),
       offer('vanak-82', 'linked', { capability_index: 1, on_request: true }),
       offer('vanak-83', 'expired', { on_request: true, valid_until: '2026-02-01T00:00:00Z' }),
     ]);
@@ -54,7 +54,7 @@ describe('U3 sample offers through official Core services', () => {
     expect(visible).toHaveLength(3);
     expect(visible.some((item) => item.name.includes('expired'))).toBe(false);
     expect(visible.find((item) => item.name.includes('request'))).toMatchObject({ on_request: true, price_amount: null, price_currency: null });
-    expect(visible.find((item) => item.name.includes('priced'))).toMatchObject({ price_amount: '125000', price_currency: 'IRR' });
+    expect(visible.find((item) => item.name.includes('priced'))).toMatchObject({ price_amount: '125000', price_currency: 'IRR', terms: { schema_version: 'mlino.offer-terms.v1', summary: 'پیشنهاد آزمایشی قیمت‌دار', conditions: ['فقط خرید حضوری'] } });
     expect(visible.find((item) => item.name.includes('linked'))?.capability_links).toHaveLength(1);
 
     const beforeSecond = { offers: await prisma.offer.count({ where: { organizationId: { in: organizationIds } } }), versions: await prisma.offerVersion.count({ where: { organizationId: { in: organizationIds } } }), publications: await prisma.publication.count({ where: { organizationId: { in: organizationIds } } }) };

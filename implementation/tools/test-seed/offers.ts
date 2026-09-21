@@ -7,7 +7,7 @@ import { SEED_REASON, createSeedPlatformVerifier } from './seed';
 import { TestSeedError } from './types';
 
 export const TEST_OFFER_KEY_PREFIX = 'test-ui-vanak-';
-export const TEST_OFFER_MARKER = 'MLINO_TEST_UI_OFFER_V1';
+export const TEST_OFFER_TERMS_SUMMARY = 'پیشنهاد آزمایشی MLINO';
 
 type OfferShape = 'ITEM' | 'BUNDLE' | 'CAMPAIGN';
 
@@ -41,10 +41,16 @@ function iso(value: unknown, code: string): string {
   return value;
 }
 
-function parseTerms(value: unknown): Record<string, unknown> | undefined {
-  if (value === undefined) return undefined;
+function parseTerms(value: unknown): Record<string, unknown> {
+  // Keep public terms contract-clean. Test traceability lives in offer_key, name,
+  // short_description and summary; never in an extra test_marker property.
+  if (value === undefined) {
+    return { schema_version: 'mlino.offer-terms.v1', summary: TEST_OFFER_TERMS_SUMMARY, conditions: [] };
+  }
   const terms = object(value);
-  if (!terms || terms.test_marker !== TEST_OFFER_MARKER) fail('TEST_SEED_OFFER_MARKER');
+  if (!terms || Object.keys(terms).some((key) => !['schema_version', 'summary', 'conditions'].includes(key))) fail('TEST_SEED_OFFER_TERMS_CONTRACT');
+  if (terms.schema_version !== 'mlino.offer-terms.v1' || typeof terms.summary !== 'string' || !terms.summary.trim() || terms.summary.length > 2000 || /<[^>]*>/.test(terms.summary)) fail('TEST_SEED_OFFER_TERMS_CONTRACT');
+  if (!Array.isArray(terms.conditions) || terms.conditions.length > 30 || !terms.conditions.every((line) => typeof line === 'string' && !!line.trim() && line.length <= 1000 && !/<[^>]*>/.test(line))) fail('TEST_SEED_OFFER_TERMS_CONTRACT');
   return { ...terms };
 }
 
@@ -118,13 +124,14 @@ export async function createAndPublishTestOffer(
   capabilityIds: readonly string[],
 ): Promise<void> {
   assertPriceMode(row);
+  const terms = parseTerms(row.terms);
   const offer = await offers.create(context, { organizationId: context.organizationId, offerKey: row.offer_key });
   const version = await offers.createVersion(context, {
     offerId: offer.id,
     name: row.name,
     shortDescription: row.short_description,
     offerShape: row.offer_shape,
-    terms: row.terms,
+    terms,
     priceAmount: row.price_amount,
     priceCurrency: row.price_currency,
     onRequest: row.on_request,
