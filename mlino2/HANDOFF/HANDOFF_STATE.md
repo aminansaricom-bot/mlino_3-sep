@@ -883,3 +883,11 @@ SCOPE: DRAFT Catalog/Media design, report and append-only handoff only; no code,
 OPEN_ITEM: U2 adapter modules were absent from the named origin V2 ref; the locally available reviewed commit 77e7bdbc8bf121c0c45ff88590404a5e522d0477 was read and cited with that limitation disclosed.
 NEXT_ACTION: Guardian reviews K1; owner decides K-D1 through K-D14 before any K2 CCR or implementation instruction.
 CREATED_AT: 2026-09-21T00:57:28Z
+
+HANDOFF_CORRECTION_FOR_PRECEDING_K1_ENTRY:
+DESIGN_FINAL_COMMIT: f9342114ec254ca39096ba62a1eeabe8ce0ef988
+DESIGN_FINAL_SHA256: 9d9f826e9777d14af5a8eb6e6c01465a4119137e8da42dde2f83560b7cfe679d
+REPORT_FINAL_COMMIT: 37890486335c9a7598d7b12e533db742d1f59fe8
+REPORT_FINAL_SHA256: b081c9ae3483ca9a1118beefabed96c14fa68d10c80a1bb149d9b9f8f19ff01d
+REASON: Markdown trailing-space normalization after final diff-check; content decisions unchanged. These values supersede the preceding K1 design/report hashes.
+CORRECTED_AT: 2026-09-21T00:58:46Z
