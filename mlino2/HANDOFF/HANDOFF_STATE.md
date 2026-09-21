@@ -1046,3 +1046,4 @@ VALIDATION: GW2-P PASS; required object/ref PASS; clean merge; build PASS; non-D
 SCOPE: Offer terms parser/defaults/tests and U3c evidence/report only; public contract, Core, schema, migrations and package files unchanged; no owner DB, Docker, push or forbidden action.
 NEXT_ACTION: Guardian runs the complete test/tools/test-seed suite three times on fresh disposable PostgreSQL at localhost:5499 and reviews U3c. Owner database remains blocked.
 CREATED_AT: 2026-09-21T00:00:00Z
+CREATED_AT_CORRECTION_FOR_PRECEDING_U3C_ENTRY: 2026-09-21T00:36:01Z (the preceding placeholder timestamp is superseded)
