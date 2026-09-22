@@ -21,6 +21,8 @@ import {
 } from './ArOverlayService';
 import { categoryLabel, floorLabel, formatDistance, formatPrice } from '../uiFormat';
 import type { PublicUiRecord } from '../publicExport/uiAdapter';
+import type { CatalogRecord } from '../publicExport/catalog';
+import CatalogArStack from '../publicExport/catalogArStack';
 
 interface ArVitrineViewProps {
   /** نقطه‌ی جست‌وجوی فعلی اپ (مشترک با تب دستیار) */
@@ -31,6 +33,7 @@ interface ArVitrineViewProps {
   onSelectBusiness: (businessId: string) => void;
   /** وقتی تعریف شود، AR فقط از snapshot واقعی پذیرفته‌شده تغذیه می‌شود. */
   records?: readonly PublicUiRecord[];
+  catalogByOrg?: ReadonlyMap<string, CatalogRecord>;
   now?: number;
 }
 
@@ -40,6 +43,7 @@ export default function ArVitrineView({
   preferredCategory = null,
   onSelectBusiness,
   records,
+  catalogByOrg,
   now,
 }: ArVitrineViewProps) {
   const camera = useCameraStream();
@@ -171,6 +175,8 @@ export default function ArVitrineView({
             onSelect={onSelectBusiness}
           />
         )}
+
+        {scene?.primary && catalogByOrg && <CatalogArStack record={catalogByOrg.get(scene.primary.businessId)} />}
 
         {scene && scene.overflowCount > 0 && (
           <div className="ar-overflow">

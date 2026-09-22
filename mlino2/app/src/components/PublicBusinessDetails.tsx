@@ -3,17 +3,20 @@ import { openNow } from '../publicExport/businessHours';
 import { Icon } from '../design/Icon';
 import { formatIso } from '../uiFormat';
 import ShareBusinessAction from '../experience/ShareBusinessAction';
+import type { CatalogRecord } from '../publicExport/catalog';
+import { CatalogSection } from '../publicExport/catalogCards';
 import type { LocalExperience } from '../experience/useLocalExperience';
 
 interface Props {
   record: PublicUiRecord;
+  catalog?: CatalogRecord;
   now: number;
   experience: LocalExperience;
   onClose: () => void;
   onToggle: (key: 'saved' | 'later' | 'liked' | 'hidden', id: string) => void;
 }
 
-export default function PublicBusinessDetails({ record, now, experience, onClose, onToggle }: Props) {
+export default function PublicBusinessDetails({ record, catalog, now, experience, onClose, onToggle }: Props) {
   const hours = openNow(record, now);
   return <section className="panel" aria-label="جزئیات کسب‌وکار">
     <div className="panel-head"><h3>جزئیات کسب‌وکار</h3><button className="panel-close" onClick={onClose} aria-label="بستن"><Icon name="close" /></button></div>
@@ -46,6 +49,7 @@ export default function PublicBusinessDetails({ record, now, experience, onClose
           <div>{offer.on_request ? 'قیمت با درخواست' : offer.price_amount ? `${offer.price_amount} ${offer.price_currency ?? ''}` : 'قیمت عمومی ثبت نشده'}</div>
           <small>اعتبار: {formatIso(offer.valid_from)}{offer.valid_until ? ` تا ${formatIso(offer.valid_until)}` : ' — تا اطلاع ثانوی'}</small>
         </div>)}
+      <CatalogSection record={catalog} />
       {record.stale && <p role="status">این رکورد از آخرین snapshot معتبر نمایش داده می‌شود.</p>}
     </div>
   </section>;

@@ -1,3 +1,24 @@
+/* Catalog cards contain only signed text and hash-verified local blob URLs. */
+.catalog-section { margin-block: 1.5rem; display: grid; gap: .75rem; }
+.catalog-group-heading { color: var(--ink-soft, #46536b); font-size: .85rem; margin: .6rem 0 .2rem; }
+.catalog-card { display: grid; grid-template-columns: 5.5rem 1fr; gap: .85rem; align-items: center; padding: .7rem; border: 1px solid #dbe3f1; border-radius: 1rem; background: #fff; }
+.catalog-card-copy { display: grid; gap: .3rem; min-width: 0; }
+.catalog-card-copy p { margin: 0; color: var(--ink-soft, #46536b); font-size: .85rem; }
+.catalog-price { color: var(--navy-800, #111a2e); font-weight: 700; font-size: .88rem; }
+.catalog-image, .catalog-image-placeholder { width: 5.5rem; height: 5.5rem; border-radius: .7rem; object-fit: cover; }
+.catalog-image-placeholder { display: grid; place-content: center; text-align: center; gap: .2rem; background: #e9edf5; color: #45536d; overflow: hidden; }
+.catalog-image-placeholder span { font-size: 1.5rem; }
+.catalog-image-placeholder small { font-size: .6rem; padding-inline: .15rem; }
+.catalog-ar-stack { position: absolute; z-index: 8; inset-inline: 1rem; bottom: 5.25rem; max-width: 20rem; margin-inline: auto; display: grid; grid-template-columns: 4.6rem 1fr auto; gap: .7rem; align-items: center; padding: .7rem; border: 1px solid rgba(255,255,255,.55); border-radius: 1rem; background: rgba(10,19,38,.77); color: white; backdrop-filter: blur(14px); touch-action: pan-y; }
+.catalog-ar-image .catalog-image, .catalog-ar-image .catalog-image-placeholder { width: 4.6rem; height: 4.6rem; }
+.catalog-ar-copy { min-width: 0; display: grid; gap: .2rem; }
+.catalog-ar-copy strong, .catalog-ar-copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.catalog-ar-copy span { font-size: .8rem; }
+.catalog-ar-copy small { opacity: .78; }
+.catalog-ar-controls { display: grid; gap: .2rem; }
+.catalog-ar-controls button { border: 1px solid rgba(255,255,255,.35); border-radius: .4rem; background: rgba(255,255,255,.18); color: white; min-width: 2rem; min-height: 2rem; }
+.catalog-ar-controls button:disabled { opacity: .35; }
+
 /* MLINO V2 — Consumer app design system
  *
  * بازطراحی UI (تصمیم مالک محصول، ۸ سپتامبر ۲۰۲۶): از Developer Dashboard به
