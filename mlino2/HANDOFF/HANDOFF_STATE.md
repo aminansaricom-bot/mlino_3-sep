@@ -287,3 +287,21 @@ CREATED_AT: 2026-09-22T13:31:52Z
 K5 REPORT_HASH_CORRECTION: The REPORT_SHA256 in the immediately preceding K5 entry was calculated from Windows working-tree bytes. The committed git-show bytes of mlino2/HANDOFF/20260922_CODEX_K5_CATALOG_CONSUMER_AR_REPORT.md at f93442a have SHA-256 a092524e409ae5a4be35811a7837f4d54022ee08db2e65d5419d9c49edd89b7c. This correction supersedes that one hash field only; all earlier handoff text is retained.
 
 K5 OWNER-DIRECTED VALIDATION ADDENDUM: At code commit 2718564, final npm run build PASS (Vite 92 modules) and final npm test PASS (23 files, 288 tests). Report addendum commit c6d6373; current committed report git-show SHA-256 39f8d2706586c50247aa63f4dc7af327990480e557be4a12b670dae0524927fc. This supersedes the prior K5 report hash and pending-build validation status only. Nginx runtime/device remain for Guardian review; no push.
+
+---
+HANDOFF_ID: HANDOFF-20260921-CATALOG-MEDIA
+AUTHOR: CODEX
+PHASE: K6D_V2_DEMO_RELOCATION
+STATUS: DELIVERED_LOCALLY_AWAITING_ARCHITECTURE_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260922-K6D-DEMO-RELOCATION-001
+TARGET_HANDOFF_ID: HANDOFF-20260922-OWNER-APPROVAL-K6D
+BRANCH: codex/v2-demo-mode
+BASE_COMMIT: 8d83839dc649bd440e5a394a87b67a6f70a4d21c
+CODE_COMMIT: 67211da
+REPORT_COMMIT: dd807ab
+REPORT_PATH: mlino2/HANDOFF/20260922_CODEX_K6D_DEMO_RELOCATION_REPORT.md
+REPORT_SHA256: f43b0232151bdf06ceac25a787bc4c81ba719bac6392804a5173d42b9e0fab91
+VALIDATION: GW2-P PASS; flag-off and flag-on builds PASS; each full Vitest run PASS at 24 files/295 tests.
+SCOPE: UI-only demo relocation under literal VITE_DEMO_RELOCATE=1; local branch and commits only; no push.
+NEXT_ACTION: Guardian review and phone UI check. No K6b action.
+CREATED_AT: 2026-09-22T14:04:13Z
