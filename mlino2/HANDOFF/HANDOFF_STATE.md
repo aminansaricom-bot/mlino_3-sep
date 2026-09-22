@@ -285,3 +285,5 @@ NEXT_ACTION: Guardian review and approved-environment build/test/runtime verific
 CREATED_AT: 2026-09-22T13:31:52Z
 
 K5 REPORT_HASH_CORRECTION: The REPORT_SHA256 in the immediately preceding K5 entry was calculated from Windows working-tree bytes. The committed git-show bytes of mlino2/HANDOFF/20260922_CODEX_K5_CATALOG_CONSUMER_AR_REPORT.md at f93442a have SHA-256 a092524e409ae5a4be35811a7837f4d54022ee08db2e65d5419d9c49edd89b7c. This correction supersedes that one hash field only; all earlier handoff text is retained.
+
+K5 OWNER-DIRECTED VALIDATION ADDENDUM: At code commit 2718564, final npm run build PASS (Vite 92 modules) and final npm test PASS (23 files, 288 tests). Report addendum commit c6d6373; current committed report git-show SHA-256 39f8d2706586c50247aa63f4dc7af327990480e557be4a12b670dae0524927fc. This supersedes the prior K5 report hash and pending-build validation status only. Nginx runtime/device remain for Guardian review; no push.
