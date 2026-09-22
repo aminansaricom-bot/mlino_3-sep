@@ -948,3 +948,24 @@ VALIDATION: GW2-P PASS; Prisma validate PASS; TypeScript noEmit PASS; database-f
 SCOPE: Optional catalog failures isolated from business export/distribution; WebP RIFF parsing; media reads outside DB transaction; new E2E spec. No schema, migration, Core code, database, Docker, network or push.
 NEXT_ACTION: Guardian reviews K4b and runs the new guarded database E2E spec and full suite on disposable PostgreSQL; owner-approved merge remains separate. Codex stops here.
 CREATED_AT: 2026-09-22
+
+---
+HANDOFF_ID: HANDOFF-20260921-CATALOG-MEDIA
+AUTHOR: CODEX
+PHASE: K6A_CATALOG_SEED_TOOL
+STATUS: DELIVERED_LOCALLY_WITH_OLD_ORGANIZATION_PERMISSION_BLOCKER
+INSTRUCTION_ID: CODEX-20260922-K6A-CATALOG-SEED-TOOL-002
+TARGET_HANDOFF_ID: HANDOFF-20260922-GUARDIAN-K6D-ACCEPTED
+BRANCH: codex/catalog-seed
+BASE_COMMIT: 8a30a509fbc21b208dc6938a50cb1122577e1d57
+COPY_COMMIT: 730b63d
+DEMO_COMMIT: bd9cfa8
+CODE_COMMIT: 0c4ec57
+REPORT_COMMIT: 1ec0ef6
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260922_CODEX_K6A_CATALOG_SEED_TOOL_REPORT.md
+REPORT_SHA256: b851fc64af8dd57a33d5b979ff345d3fbc0ec554f4204704c2b254dcb854facd
+VALIDATION: GW2-P/input hashes/blob parity PASS; tsc and Prisma validate PASS; database-free Jest 5 suites/56 tests PASS; DB integration spec supplied but not run.
+RISK: PermissionGrantService cannot self-grant catalog_item.manage to a lone old founder; tool uses official path and fails closed, with no direct grant write.
+SCOPE: Test seed/catalog/media tooling and tests only; local commits; no database, Docker, network or push.
+NEXT_ACTION: Guardian review, disposable-DB integration run, and permission-gap decision before K6b. STOP.
+CREATED_AT: 2026-09-22T18:41:05Z
