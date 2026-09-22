@@ -41,3 +41,6 @@ No owner decision was made or changed. Guardian should determine whether the cac
 
 ## 10. Recommended next step
 Guardian review of K5, including a full Vite build/test rerun in an approved environment, Nginx runtime check, and media-cache retention assessment. Do not start the next task automatically.
+
+## Post-commit validation addendum (owner-directed)
+The owner requested Codex to perform the withheld final checks. At code commit 2718564 and without product edits, `npm run build` passed (`tsc -b` and Vite; 92 modules transformed; Vite build 2.87 s). `npm test` passed: 23/23 test files and 288/288 tests, including the catalog, media and Nginx structural tests. These runs used the existing node_modules junction and required an approved execution outside the sandbox because sandboxed esbuild could not resolve the junction. The earlier account-usage approval rejection no longer blocks the checks. Nginx runtime and a real phone remain unverified. No push was made.
