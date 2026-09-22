@@ -13,6 +13,7 @@ import ExperiencePanel from '../experience/ExperiencePanel';
 import { useLocalExperience } from '../experience/useLocalExperience';
 import ArVitrineView from '../ar/ArVitrineView';
 import { formatDistance } from '../uiFormat';
+import { CatalogConsumer, CatalogFetchTransport } from './catalog';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
 
@@ -28,6 +29,12 @@ type Overlay = 'none' | 'detail' | 'experience' | 'vitrine';
 
 export default function RealPublicApp() {
   const consumer = useMemo(configuredConsumer, []);
+  const catalog = useMemo(() => {
+    const bundle = import.meta.env.VITE_PUBLIC_EXPORT_TRUST_BUNDLE;
+    if (!consumer || !bundle) return null;
+    try { return new CatalogConsumer(new CatalogFetchTransport(), trustBundleFromBuildJson(bundle)); }
+    catch { return null; }
+  }, [consumer]);
   const [now, setNow] = useState(() => Date.now());
   const [refreshFailed, setRefreshFailed] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -62,15 +69,18 @@ export default function RealPublicApp() {
     const refresh = async () => {
       try { await consumer.refresh(); if (active) setRefreshFailed(false); }
       catch { if (active) setRefreshFailed(true); }
+      if (catalog) await catalog.refresh(consumer).catch(() => undefined);
       if (active) setNow(Date.now());
     };
     void refresh();
     const polling = window.setInterval(() => { void refresh(); }, FETCH_INTERVAL_MS);
     const clock = window.setInterval(() => setNow(Date.now()), 30_000);
     return () => { active = false; window.clearInterval(polling); window.clearInterval(clock); };
-  }, [consumer]);
+  }, [consumer, catalog]);
 
   const accepted = useMemo(() => consumer?.read(now) ?? [], [consumer, now]);
+  const catalogRecords = catalog && consumer ? catalog.read(consumer, now) : [];
+  const catalogByOrg = new Map(catalogRecords.map((record) => [record.organization_id, record]));
   const allRecords = useMemo(() => toPublicUiRecords(accepted), [accepted]);
   const categories = useMemo(() => [...new Map(allRecords.map((record) => [record.category.key, record.category])).values()], [allRecords]);
   const candidates = useMemo(() => {
@@ -130,14 +140,14 @@ export default function RealPublicApp() {
           onRoute={record.coordinates ? () => { setSelectedId(record.id); setPoint([record.coordinates!.latitude, record.coordinates!.longitude]); } : undefined} />)}
     </BottomSheet>
 
-    {overlay === 'detail' && selected && <PublicBusinessDetails record={selected} now={now} experience={experience.data} onClose={() => setOverlay('none')} onToggle={experience.toggle} />}
+    {overlay === 'detail' && selected && <PublicBusinessDetails record={selected} catalog={catalogByOrg.get(selected.id)} now={now} experience={experience.data} onClose={() => setOverlay('none')} onToggle={experience.toggle} />}
     {overlay === 'experience' && <ExperiencePanel data={experience.data} records={allRecords} storageFailed={experience.storageFailed} onClose={() => setOverlay('none')} onOpen={openDetail}
       onChange={experience.setData} onToggle={experience.toggle} onDiagnostics={() => setOverlay('none')}
       onSuggest={() => setSuggestionEmpty(!nearby.some((item) => item.record.offers.length > 0))} suggestionEmpty={suggestionEmpty}
       radiusLabel={formatDistance(5000)} pointLabel={pointLabel} filtersApplied={category !== null || openOnly}
       onChangePoint={() => setOverlay('none')} onUseLocation={useMyLocation} locating={locating} />}
     {overlay === 'vitrine' && <div className="panel dark"><div className="panel-head"><h3>ویترین زنده</h3><button className="panel-close" onClick={() => setOverlay('none')}>✕</button></div><div className="panel-body">
-       <ArVitrineView records={allRecords} now={now} searchPoint={point} searchPointLabel={pointLabel} preferredCategory={category} onSelectBusiness={openDetail} />
+       <ArVitrineView records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point} searchPointLabel={pointLabel} preferredCategory={category} onSelectBusiness={openDetail} />
     </div></div>}
   </div>;
 }

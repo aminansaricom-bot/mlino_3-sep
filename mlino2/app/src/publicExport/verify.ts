@@ -1,7 +1,11 @@
 import { canonicalBytes } from './canonical';
 import { TrustBundle } from './trustBundle';
 
-const DOMAIN_SEPARATOR = new TextEncoder().encode('MLINO-PUBLIC-BUSINESS-V1\n');
+export type SignatureDomain = 'business' | 'catalog';
+const DOMAIN_SEPARATORS: Record<SignatureDomain, Uint8Array> = {
+  business: new TextEncoder().encode('MLINO-PUBLIC-BUSINESS-V1\n'),
+  catalog: new TextEncoder().encode('MLINO-PUBLIC-CATALOG-V1\n'),
+};
 
 function object(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null;
@@ -18,10 +22,11 @@ function decodeBase64Url(value: string): Uint8Array | null {
   } catch { return null; }
 }
 
-export async function verifyArtifact(raw: Uint8Array, trust: TrustBundle): Promise<Record<string, unknown>> {
+export async function verifyArtifact(raw: Uint8Array, trust: TrustBundle, domain: SignatureDomain = 'business'): Promise<Record<string, unknown>> {
   const text = new TextDecoder('utf-8', { fatal: true }).decode(raw);
   const envelope = object(JSON.parse(text));
-  if (!envelope || envelope.contract_version !== 'mlino.v2.public-business.v1') throw new Error('PUBLIC_EXPORT_VERSION');
+  const version = domain === 'business' ? 'mlino.v2.public-business.v1' : 'mlino.v2.public-catalog.v1';
+  if (!envelope || envelope.contract_version !== version) throw new Error('PUBLIC_EXPORT_VERSION');
   if (Object.keys(envelope).some((key) => !['contract_version', 'generated_at', 'snapshot_id', 'signature', 'records'].includes(key))) throw new Error('PUBLIC_EXPORT_ENVELOPE_SHAPE');
   // V1 writes canonical JSON. This also rejects duplicate-key spellings and non-canonical text.
   const canonical = canonicalBytes(envelope);
@@ -35,9 +40,10 @@ export async function verifyArtifact(raw: Uint8Array, trust: TrustBundle): Promi
   if (!value) throw new Error('PUBLIC_EXPORT_SIGNATURE_VALUE');
   const { value: _ignored, ...metadata } = signature;
   const signed = canonicalBytes({ ...envelope, signature: metadata });
-  const bytes = new Uint8Array(DOMAIN_SEPARATOR.length + signed.length);
-  bytes.set(DOMAIN_SEPARATOR);
-  bytes.set(signed, DOMAIN_SEPARATOR.length);
+  const separator = DOMAIN_SEPARATORS[domain];
+  const bytes = new Uint8Array(separator.length + signed.length);
+  bytes.set(separator);
+  bytes.set(signed, separator.length);
   const key = await globalThis.crypto.subtle.importKey('raw', new Uint8Array(keyBytes) as BufferSource, { name: 'Ed25519' }, false, ['verify']);
   const valid = await globalThis.crypto.subtle.verify('Ed25519', key, new Uint8Array(value) as BufferSource, new Uint8Array(bytes) as BufferSource);
   if (!valid) throw new Error('PUBLIC_EXPORT_BAD_SIGNATURE');

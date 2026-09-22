@@ -27,7 +27,7 @@ describe('مسیرهای دقیق Nginx', () => {
     expect(block).not.toContain('/index.html')
   })
 
-  it.each(['/public-export/public-business.v1.json', '/version.json'])('sets JSON, no-store, nosniff and all security headers on %s', (route) => {
+  it.each(['/public-export/public-business.v1.json', '/public-export/public-catalog.v1.json', '/version.json'])('sets JSON, no-store, nosniff and all security headers on %s', (route) => {
     const block = exactLocation(route)
     expect(block).toContain('default_type application/json;')
     expect(block).toContain('charset_types application/json;')
@@ -36,6 +36,29 @@ describe('مسیرهای دقیق Nginx', () => {
     expect(block).toContain('X-Content-Type-Options "nosniff" always;')
     expect(block).toContain('Permissions-Policy')
     expect(block).toContain('Referrer-Policy "no-referrer" always;')
+  })
+
+  it('serves catalog only from its exact read-only path with a real 404', () => {
+    const block = exactLocation('/public-export/public-catalog.v1.json')
+    expect(block).toContain('alias /srv/mlino-public-export/public-catalog.v1.json;')
+    expect(block).toContain('if (!-f /srv/mlino-public-export/public-catalog.v1.json) { return 404; }')
+    expect(block).toContain('limit_except GET { deny all; }')
+    expect(block).not.toContain('/index.html')
+  })
+
+  it('restricts media to content-addressed paths and never falls back to the SPA', () => {
+    expect(config).toContain('location ^~ /public-export/media/sha256/ {')
+    expect(config).toContain('([0-9a-f]{2})/\\1[0-9a-f]{62}\\.(avif|webp|jpg|png)$')
+    expect(config).toContain('alias /srv/mlino-public-export/media/sha256/;')
+    expect(config).toContain('try_files $uri =404;')
+    expect(config).toContain('Cache-Control "public, max-age=31536000, immutable" always;')
+    expect(config).toContain('X-Content-Type-Options "nosniff" always;')
+    expect(config).toContain('location ^~ /public-export/ { return 404; }')
+    const media = config.split('location ^~ /public-export/media/sha256/ {')[1].split('location ^~ /public-export/ {')[0]
+    expect(media).toContain('limit_except GET { deny all; }')
+    expect(media).toContain('Permissions-Policy')
+    expect(media).toContain('Referrer-Policy "no-referrer" always;')
+    expect(media).not.toContain('/index.html')
   })
 
   it('does not cache index.html across a redeploy', () => {

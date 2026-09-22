@@ -267,3 +267,23 @@ VALIDATION: GW2-P PASS; three builds PASS; three full Vitest runs PASS at 21 sui
 SCOPE: V2 real UI adapter/category/business-hours/wiring and shared rich-component props only; no U3/U4, acceptance logic, dependency, network, Docker, database, V1, main or push.
 NEXT_ACTION: Architecture Guardian reviews U2. No automatic next phase.
 CREATED_AT: 2026-09-20T14:16:41Z
+
+---
+HANDOFF_ID: HANDOFF-20260922-K5-CATALOG-CONSUMER-AR
+AUTHOR: CODEX
+PHASE: K5_V2_CATALOG_CONSUMER_AR
+STATUS: IMPLEMENTED_LOCALLY_PENDING_FINAL_BUILD_AND_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260922-K5-CATALOG-CONSUMER-AR-001
+BRANCH: codex/v2-catalog-ui
+BASE_COMMIT: 47b17334f724268f0004c25b37c7849d606be08a
+CODE_COMMIT: 2718564
+REPORT_PATH: mlino2/HANDOFF/20260922_CODEX_K5_CATALOG_CONSUMER_AR_REPORT.md
+REPORT_SHA256: 9d31e877ff037b044843f55f7220ddb52b555ae5234dadad7a444053a2e87eab
+VALIDATION: GW2-P PASS; 23 Vitest files/288 tests PASS before final small corrections; final TypeScript tsc -b PASS; full post-correction build blocked by automatic approval review usage limit.
+SCOPE: Signed catalog consumer, verified media, detail and AR cards, Nginx routes; local commits only, no push.
+NEXT_ACTION: Guardian review and approved-environment build/test/runtime verification. STOP.
+CREATED_AT: 2026-09-22T13:31:52Z
+
+K5 REPORT_HASH_CORRECTION: The REPORT_SHA256 in the immediately preceding K5 entry was calculated from Windows working-tree bytes. The committed git-show bytes of mlino2/HANDOFF/20260922_CODEX_K5_CATALOG_CONSUMER_AR_REPORT.md at f93442a have SHA-256 a092524e409ae5a4be35811a7837f4d54022ee08db2e65d5419d9c49edd89b7c. This correction supersedes that one hash field only; all earlier handoff text is retained.
+
+K5 OWNER-DIRECTED VALIDATION ADDENDUM: At code commit 2718564, final npm run build PASS (Vite 92 modules) and final npm test PASS (23 files, 288 tests). Report addendum commit c6d6373; current committed report git-show SHA-256 39f8d2706586c50247aa63f4dc7af327990480e557be4a12b670dae0524927fc. This supersedes the prior K5 report hash and pending-build validation status only. Nginx runtime/device remain for Guardian review; no push.
