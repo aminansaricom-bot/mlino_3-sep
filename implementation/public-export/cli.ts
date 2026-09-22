@@ -2,6 +2,9 @@ import { PrismaClient } from '@prisma/client';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { buildPublicExport, CONTRACT_VERSION, Issue } from './builder';
+import { buildPublicCatalogExport, CATALOG_CONTRACT_VERSION } from './catalog-builder';
+import { CATALOG_FILE, verifyCatalogArtifact } from './catalog-artifact';
+import { stageMedia } from './media-stage';
 import { SigningKeyProvider, VerificationKeyProvider, verifyEnvelope } from './signing';
 
 export type ExportKeyProvider = SigningKeyProvider & VerificationKeyProvider;
@@ -39,6 +42,15 @@ export async function runPublicExportCli({ db, keyProvider, env, log }: CliDepen
     const issues: Issue[] = [];
     const { artifact, bytes } = await buildPublicExport(db, { asOf, keyId, signingKeyProvider: keyProvider, onIssue: (issue) => issues.push(issue) });
     if (!(await verifyEnvelope(artifact, keyProvider))) throw new Error('PUBLIC_EXPORT_SIGNATURE_SELF_CHECK_FAILED');
+    // Existing business-only deployments remain compatible. K4 is enabled by the private media store.
+    const catalog = env.MLINO_MEDIA_STORE_DIR
+      ? await buildPublicCatalogExport(db, { asOf, keyId, signingKeyProvider: keyProvider, businessArtifact: artifact,
+        mediaStoreDir: env.MLINO_MEDIA_STORE_DIR, onIssue: (issue) => issues.push(issue) })
+      : null;
+    if (catalog) {
+      await verifyCatalogArtifact(catalog.bytes, keyProvider, artifact, asOf);
+      await stageMedia(env.MLINO_MEDIA_STORE_DIR!, outputDirectory, catalog.artifact);
+    }
     const current = path.join(outputDirectory, 'public-business.v1.json');
     const previousOne = path.join(outputDirectory, 'public-business.v1.previous-1.json');
     const previousTwo = path.join(outputDirectory, 'public-business.v1.previous-2.json');
@@ -68,6 +80,32 @@ export async function runPublicExportCli({ db, keyProvider, env, log }: CliDepen
     tempPath = undefined;
     if (oldPrevious) await fs.writeFile(previousTwo, oldPrevious, { mode: 0o600 });
     if (oldCurrent) await fs.writeFile(previousOne, oldCurrent, { mode: 0o600 });
+    if (catalog) {
+      const catalogCurrent = path.join(outputDirectory, CATALOG_FILE);
+      const catalogPreviousOne = path.join(outputDirectory, 'public-catalog.v1.previous-1.json');
+      const catalogPreviousTwo = path.join(outputDirectory, 'public-catalog.v1.previous-2.json');
+      const prior = await fs.readFile(catalogCurrent).catch((error: NodeJS.ErrnoException) => { if (error.code === 'ENOENT') return null; throw error; });
+      const priorOne = await fs.readFile(catalogPreviousOne).catch((error: NodeJS.ErrnoException) => { if (error.code === 'ENOENT') return null; throw error; });
+      const validPrior = async (value: Buffer | null): Promise<Buffer | null> => {
+        if (!value) return null;
+        try {
+          const parsed = JSON.parse(value.toString('utf8'));
+          if (parsed.contract_version !== CATALOG_CONTRACT_VERSION || !(await verifyEnvelope(parsed, keyProvider, 'catalog'))) return null;
+          return value;
+        } catch { return null; }
+      };
+      const checkedPrior = await validPrior(prior);
+      const checkedPriorOne = await validPrior(priorOne);
+      const catalogTemp = path.join(outputDirectory, `.public-catalog.${process.pid}.${Date.now()}.tmp`);
+      try {
+        const file = await fs.open(catalogTemp, 'wx', 0o600);
+        try { await file.writeFile(catalog.bytes); await file.sync(); } finally { await file.close(); }
+        await fs.rename(catalogTemp, catalogCurrent);
+        if (checkedPriorOne) await fs.writeFile(catalogPreviousTwo, checkedPriorOne, { mode: 0o600 });
+        if (checkedPrior) await fs.writeFile(catalogPreviousOne, checkedPrior, { mode: 0o600 });
+      } finally { await fs.rm(catalogTemp, { force: true }); }
+      log(JSON.stringify({ code: 'CATALOG_EXPORT_PUBLISHED', snapshot_id: catalog.artifact.snapshot_id, records: catalog.artifact.records.length }));
+    }
     for (const issue of issues) log(JSON.stringify(issue));
     log(JSON.stringify({ code: 'PUBLIC_EXPORT_PUBLISHED', snapshot_id: artifact.snapshot_id, key_id: keyId, records: artifact.records.length }));
   } finally {

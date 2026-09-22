@@ -2,6 +2,9 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { canonicalBytes } from '../canonical';
 import { CONTRACT_VERSION } from '../builder';
+import { PublicBusinessExportV1 } from '../builder';
+import { CATALOG_FILE, CATALOG_CAP, verifyCatalogArtifact } from '../catalog-artifact';
+import { stageMedia } from '../media-stage';
 import { SignedEnvelope, VerificationKeyProvider, verifyEnvelope } from '../signing';
 
 const FILE = 'public-business.v1.json';
@@ -12,7 +15,8 @@ const RENAME_DELAY_MS = 100;
 export type DistributionCode =
   'DISTRIBUTION_PATH' | 'DISTRIBUTION_SOURCE' | 'DISTRIBUTION_CANONICAL' |
   'DISTRIBUTION_CONTRACT' | 'DISTRIBUTION_SIGNATURE' | 'DISTRIBUTION_TIMESTAMP' |
-  'DISTRIBUTION_EXPIRED' | 'DISTRIBUTION_FUTURE' | 'DISTRIBUTION_ROLLBACK' | 'DISTRIBUTION_IO';
+  'DISTRIBUTION_EXPIRED' | 'DISTRIBUTION_FUTURE' | 'DISTRIBUTION_ROLLBACK' | 'DISTRIBUTION_IO' |
+  'DISTRIBUTION_CATALOG' | 'DISTRIBUTION_MEDIA';
 
 export class DistributionError extends Error {
   constructor(readonly code: DistributionCode) { super(code); }
@@ -93,6 +97,33 @@ export async function distributeCurrent(options: DistributionOptions, deps: Dist
     let valid = false;
     try { valid = await verifyEnvelope(envelope as SignedEnvelope, options.keyProvider); } catch { valid = false; }
     if (!valid) fail('DISTRIBUTION_SIGNATURE');
+    let catalogRaw: Buffer | null = null;
+    let catalog: Awaited<ReturnType<typeof verifyCatalogArtifact>> | null = null;
+    const catalogSource = path.join(options.sourceDir, CATALOG_FILE);
+    try {
+      const stat = await fs.lstat(catalogSource);
+      if (!stat.isFile() || stat.isSymbolicLink() || stat.size > CATALOG_CAP) fail('DISTRIBUTION_CATALOG');
+      catalogRaw = await fs.readFile(catalogSource);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') fail('DISTRIBUTION_CATALOG');
+    }
+    if (catalogRaw) {
+      try { catalog = await verifyCatalogArtifact(catalogRaw, options.keyProvider, envelope as PublicBusinessExportV1, now, maxAgeMs); }
+      catch { fail('DISTRIBUTION_CATALOG'); }
+      const catalogTarget = path.join(options.publicDir, CATALOG_FILE);
+      const prior = await fs.readFile(catalogTarget).catch((error: NodeJS.ErrnoException) => {
+        if (error.code === 'ENOENT') return null;
+        fail('DISTRIBUTION_CATALOG');
+      });
+      if (prior) {
+        try {
+          const old = JSON.parse(prior.toString('utf8')) as { generated_at?: unknown };
+          if (timestamp(old.generated_at) > generated) fail('DISTRIBUTION_ROLLBACK');
+        } catch (error) { if (error instanceof DistributionError) throw error; fail('DISTRIBUTION_CATALOG'); }
+      }
+      try { await stageMedia(options.sourceDir, options.publicDir, catalog); }
+      catch { fail('DISTRIBUTION_MEDIA'); }
+    }
     const target = path.join(options.publicDir, FILE);
     let existing: Buffer | undefined;
     try {
@@ -122,6 +153,24 @@ export async function distributeCurrent(options: DistributionOptions, deps: Dist
     }
     if (!renamed) fail('DISTRIBUTION_IO');
     temp = undefined;
+    if (catalogRaw && catalog) {
+      const catalogTarget = path.join(options.publicDir, CATALOG_FILE);
+      const catalogTemp = path.join(options.publicDir, `.public-catalog.${process.pid}.${Date.now()}.tmp`);
+      try {
+        const file = await fs.open(catalogTemp, 'wx', 0o600);
+        try { await file.writeFile(catalogRaw); await file.sync(); } finally { await file.close(); }
+        const catalogRename = deps.rename ?? fs.rename;
+        let completed = false;
+        for (let attempt = 1; attempt <= RENAME_ATTEMPTS; attempt += 1) {
+          try { await catalogRename(catalogTemp, catalogTarget); completed = true; break; }
+          catch (error) {
+            if (!['EPERM', 'EBUSY', 'EACCES'].includes((error as NodeJS.ErrnoException).code ?? '') || attempt === RENAME_ATTEMPTS) throw error;
+            await new Promise((resolve) => setTimeout(resolve, RENAME_DELAY_MS));
+          }
+        }
+        if (!completed) fail('DISTRIBUTION_IO');
+      } finally { await fs.rm(catalogTemp, { force: true }); }
+    }
     log({ code: 'DISTRIBUTION_OK', ok: true });
   } catch (error) {
     const code = error instanceof DistributionError ? error.code : 'DISTRIBUTION_IO';
