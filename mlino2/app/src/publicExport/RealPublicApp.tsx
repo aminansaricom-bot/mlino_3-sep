@@ -14,6 +14,7 @@ import { useLocalExperience } from '../experience/useLocalExperience';
 import ArVitrineView from '../ar/ArVitrineView';
 import { formatDistance } from '../uiFormat';
 import { CatalogConsumer, CatalogFetchTransport } from './catalog';
+import { demoBanner, nextDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, validPoint, visibleDemoRecords, type Point } from '../demo/demoRelocation';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
 
@@ -28,6 +29,13 @@ function configuredConsumer(): PublicExportConsumer | null {
 type Overlay = 'none' | 'detail' | 'experience' | 'vitrine';
 
 export default function RealPublicApp() {
+  const demoBuildEnabled = import.meta.env.VITE_DEMO_RELOCATE === '1';
+  const demoAnchor = useMemo(() => {
+    if (!demoBuildEnabled) return null;
+    try { return parseDemoAnchor(import.meta.env.VITE_DEMO_ANCHOR); } catch { return null; }
+  }, [demoBuildEnabled]);
+  const [demoEnabled, setDemoEnabled] = useState(demoBuildEnabled);
+  const [demoTarget, setDemoTarget] = useState<Point | null>(null);
   const consumer = useMemo(configuredConsumer, []);
   const catalog = useMemo(() => {
     const bundle = import.meta.env.VITE_PUBLIC_EXPORT_TRUST_BUNDLE;
@@ -81,7 +89,12 @@ export default function RealPublicApp() {
   const accepted = useMemo(() => consumer?.read(now) ?? [], [consumer, now]);
   const catalogRecords = catalog && consumer ? catalog.read(consumer, now) : [];
   const catalogByOrg = new Map(catalogRecords.map((record) => [record.organization_id, record]));
-  const allRecords = useMemo(() => toPublicUiRecords(accepted), [accepted]);
+  const allRecords = useMemo(() => {
+    const ui = toPublicUiRecords(accepted);
+    if (!demoBuildEnabled) return ui;
+    if (!demoEnabled || !demoAnchor) return visibleDemoRecords(ui, null);
+    return presentationRecords(ui, true, demoAnchor, demoTarget);
+  }, [accepted, demoBuildEnabled, demoEnabled, demoAnchor, demoTarget]);
   const categories = useMemo(() => [...new Map(allRecords.map((record) => [record.category.key, record.category])).values()], [allRecords]);
   const candidates = useMemo(() => {
     let records = allRecords.filter((record) => !experience.data.hidden.includes(record.id));
@@ -101,13 +114,16 @@ export default function RealPublicApp() {
   const useMyLocation = () => {
     setLocating(true);
     navigator.geolocation?.getCurrentPosition(
-      ({ coords }) => { const next: [number, number] = [coords.latitude, coords.longitude]; setPoint(next); setMyPoint(next); setPointLabel('موقعیت من'); setNearbyOnly(true); setLocating(false); },
+      ({ coords }) => { const next: Point = [coords.latitude, coords.longitude]; if (demoBuildEnabled && !validPoint(next)) { setLocating(false); return; }
+        setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setPointLabel('موقعیت من'); setNearbyOnly(true); setLocating(false);
+        if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => nextDemoTarget(current, next)); },
       () => setLocating(false),
     );
   };
   const openDetail = (id: string) => { setSelectedId(id); experience.viewed(id); setOverlay('detail'); };
 
-  return <div className="app-shell" dir="rtl">
+  return <div className={`app-shell${demoBuildEnabled && demoEnabled ? ' demo-on' : ''}`} dir="rtl">
+    {demoBuildEnabled && demoEnabled && <div className="demo-banner" role="status">{demoBanner(true)}</div>}
     <MapView records={shown} matchIds={new Set()} selectedId={selectedId} center={TEHRAN_CENTER} myPoint={myPoint}
       flyTarget={selected?.coordinates ? [selected.coordinates.latitude, selected.coordinates.longitude] : null}
       tileRetryKey={tileRetryKey} onSelect={openDetail}
@@ -117,6 +133,13 @@ export default function RealPublicApp() {
     {!valid && <div className="app-banner warn" role="status">اطلاعات واقعی فعلاً در دسترس نیست. دادهٔ آزمایشی جای آن نمایش داده نمی‌شود.</div>}
     {valid && refreshFailed && <div className="app-banner warn" role="status">دریافت تازه انجام نشد؛ نسخهٔ معتبر پیشین فقط تا پایان اعتبارش نمایش داده می‌شود.</div>}
     {tileStatus === 'error' && <div className="map-state"><p>نقشه در دسترس نیست؛ فهرست دادهٔ امضاشده همچنان قابل استفاده است.</p><button onClick={() => setTileRetryKey((value) => value + 1)}>تلاش دوباره</button></div>}
+    {demoBuildEnabled && demoEnabled && <div className="demo-controls" aria-label="کنترل حالت نمایشی">
+      {!demoAnchor ? <span>نقطهٔ مرجع نمایشی نامعتبر است؛ دادهٔ آزمایشی پنهان شد.</span> : !demoTarget ?
+        <span>برای نمایش کسب‌وکارهای آزمایشی، «موقعیت من» را بزنید.</span> :
+        <button disabled={!myPoint} onClick={() => setDemoTarget(reanchorDemoTarget(myPoint))}>انتقال دستهٔ نمایشی به اینجا</button>}
+      <button onClick={() => { setDemoEnabled(false); setDemoTarget(null); }}>خاموش کردن حالت نمایشی</button>
+    </div>}
+    {demoBuildEnabled && !demoEnabled && <button className="demo-reenable" onClick={() => setDemoEnabled(true)}>روشن کردن حالت نمایشی</button>}
 
     <div className="top-bar"><div className="search-row"><div className="search-bar"><span className="search-icon">🔍</span>
       <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="نام، خدمت یا پیشنهاد" aria-label="جست‌وجوی اطلاعات واقعی" />
