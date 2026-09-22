@@ -914,3 +914,20 @@ VALIDATION: GW2-P PASS; offline Prisma validate PASS; TypeScript noEmit PASS; 2 
 SCOPE: F1 availability validation and 19 K3 CHECK mappings; F2 dynamic permission count; report and append-only handoff. No database, Docker, network, schema or migration edit, or push.
 NEXT_ACTION: Architecture Guardian reviews K3b and runs database-backed checks on a disposable database. Codex stops here.
 CREATED_AT: 2026-09-22
+
+---
+HANDOFF_ID: HANDOFF-20260921-CATALOG-MEDIA
+AUTHOR: CODEX
+PHASE: K4_CATALOG_EXPORT_AND_DISTRIBUTION
+STATUS: IMPLEMENTED_LOCALLY_AWAITING_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260922-K4-CATALOG-EXPORT-001
+TARGET_HANDOFF_ID: HANDOFF-20260922-OWNER-APPROVAL-K4
+REVIEW_REFERENCE: 16bbcbcc4d2bf32c354756cf07bab3bac3e3cdd0:AI_HANDOFF/CLAUDE_REVIEWS/20260922_OWNER_APPROVAL_K4.md
+BRANCH: codex/catalog-export
+BASE_COMMIT: 16bbcbcc4d2bf32c354756cf07bab3bac3e3cdd0
+IMPLEMENTATION_COMMIT: f43152a851a9ff1471215ec451fdb9e7b6a75d17
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260922_CODEX_K4_CATALOG_EXPORT_REPORT.md
+VALIDATION: GW2-P PASS; Prisma validate PASS; TypeScript noEmit PASS; 12 database-free public-export suites/66 tests PASS, 2 skipped; DPAPI profile test separately skipped; database tests NOT RUN under K4-G5.
+SCOPE: Signed catalog builder, media verification and staging, producer/distributor ordering, GC and new tests/fixture. No schema, migration, dependency, Docker, database, network, main or push.
+NEXT_ACTION: Architecture Guardian reviews K4, runs guarded database tests and resolves the documented rollout switch and atomic media-install choice. Codex stops here.
+CREATED_AT: 2026-09-22
