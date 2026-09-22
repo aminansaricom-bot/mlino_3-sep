@@ -931,3 +931,20 @@ VALIDATION: GW2-P PASS; Prisma validate PASS; TypeScript noEmit PASS; 12 databas
 SCOPE: Signed catalog builder, media verification and staging, producer/distributor ordering, GC and new tests/fixture. No schema, migration, dependency, Docker, database, network, main or push.
 NEXT_ACTION: Architecture Guardian reviews K4, runs guarded database tests and resolves the documented rollout switch and atomic media-install choice. Codex stops here.
 CREATED_AT: 2026-09-22
+
+---
+HANDOFF_ID: HANDOFF-20260921-CATALOG-MEDIA
+AUTHOR: CODEX
+PHASE: K4B_CATALOG_EXPORT_ISOLATION
+STATUS: FIXES_COMMITTED_LOCALLY_AWAITING_GUARDIAN_DATABASE_VALIDATION
+INSTRUCTION_ID: CODEX-20260922-K4B-CATALOG-EXPORT-ISOLATION-001
+TARGET_HANDOFF_ID: HANDOFF-20260922-GUARDIAN-K4-FIXES
+REVIEW_REFERENCE: ac3616522baea2ded04e69d09ccd63b38c61ce31:AI_HANDOFF/CLAUDE_REVIEWS/20260922_CLAUDE_REVIEW_K4_CATALOG_EXPORT.md
+BRANCH: codex/catalog-export
+BASE_COMMIT: b0e68f9514adf25e0a19b06470888cfb27cf7e7f
+IMPLEMENTATION_COMMIT: a958781
+REPORT_PATH: AI_HANDOFF/CODEX_REPORTS/20260922_CODEX_K4B_CATALOG_EXPORT_ISOLATION_REPORT.md
+VALIDATION: GW2-P PASS; Prisma validate PASS; TypeScript noEmit PASS; database-free public-export Jest 12 suites/71 tests PASS, 3 skipped; new database E2E spec NOT RUN.
+SCOPE: Optional catalog failures isolated from business export/distribution; WebP RIFF parsing; media reads outside DB transaction; new E2E spec. No schema, migration, Core code, database, Docker, network or push.
+NEXT_ACTION: Guardian reviews K4b and runs the new guarded database E2E spec and full suite on disposable PostgreSQL; owner-approved merge remains separate. Codex stops here.
+CREATED_AT: 2026-09-22
