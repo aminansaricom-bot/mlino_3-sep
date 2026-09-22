@@ -124,13 +124,6 @@ export async function buildPublicCatalogExport(db: PrismaClient, options: Catalo
         if (!liveItem || liveItem.organizationId !== org || liveItem.lifecycleStatus !== 'ACTIVE') continue;
         const parsed = parseItem(event, asOf, visibleOffers);
         if (!parsed) { emit('CATALOG_INVALID_SNAPSHOT', org, event.id); continue; }
-        try {
-          if (parsed.media.length && !options.mediaStoreDir) throw new Error('CATALOG_MEDIA_STORE');
-          for (const media of parsed.media) await readVerifiedMedia(options.mediaStoreDir!, media);
-        } catch (error) {
-          emit(error instanceof Error && /^CATALOG_[A-Z_]+$/.test(error.message) ? error.message : 'CATALOG_MEDIA_INVALID', org, event.id);
-          continue;
-        }
         entry.push(parsed);
       }
       if (!entry.length) continue;
@@ -140,7 +133,22 @@ export async function buildPublicCatalogExport(db: PrismaClient, options: Catalo
     }
     return result;
   }, { isolationLevel: 'RepeatableRead' });
-  const unsigned = { contract_version: CATALOG_CONTRACT_VERSION, generated_at: utcTimestamp(asOf), snapshot_id: snapshotId(CATALOG_CONTRACT_VERSION, records), records };
+  // File I/O is deliberately outside the read-only database transaction.
+  const verifiedRecords: PublicCatalogRecordV1[] = [];
+  for (const record of records) {
+    const verifiedItems: Item[] = [];
+    for (const item of record.items) {
+      try {
+        if (item.media.length && !options.mediaStoreDir) throw new Error('CATALOG_MEDIA_STORE');
+        for (const media of item.media) await readVerifiedMedia(options.mediaStoreDir!, media);
+        verifiedItems.push(item);
+      } catch (error) {
+        emit(error instanceof Error && /^CATALOG_[A-Z_]+$/.test(error.message) ? error.message : 'CATALOG_MEDIA_INVALID', record.organization_id, item.publication_id);
+      }
+    }
+    if (verifiedItems.length) verifiedRecords.push({ ...record, items: verifiedItems });
+  }
+  const unsigned = { contract_version: CATALOG_CONTRACT_VERSION, generated_at: utcTimestamp(asOf), snapshot_id: snapshotId(CATALOG_CONTRACT_VERSION, verifiedRecords), records: verifiedRecords };
   if (canonicalBytes(unsigned).length > MAX_ARTIFACT_BYTES) throw new Error('CATALOG_ARTIFACT_SIZE');
   const artifact = await signEnvelope(unsigned, options.keyId, options.signingKeyProvider, 'catalog') as PublicCatalogExportV1 & SignedEnvelope;
   const bytes = canonicalBytes(artifact);

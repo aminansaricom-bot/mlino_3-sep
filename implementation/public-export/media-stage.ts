@@ -16,6 +16,9 @@ export function referencedMedia(artifact: PublicCatalogExportV1): CatalogMedia[]
 // Verify the destination as well as the source; a poisoned content-addressed file is never replaced.
 export async function stageMedia(source: string, destination: string, artifact: PublicCatalogExportV1): Promise<void> {
   const root = await validateMediaStore(destination);
+  // Preflight every reference before installing any media. A poisoned or missing
+  // later file must not leave an earlier file installed for a skipped catalog.
+  const pending: Array<{ meta: CatalogMedia; bytes: Buffer; target: string }> = [];
   for (const meta of referencedMedia(artifact)) {
     const bytes = await readVerifiedMedia(source, meta);
     const target = path.join(root, ...meta.path.split('/'));
@@ -37,6 +40,9 @@ export async function stageMedia(source: string, destination: string, artifact: 
       verifyMediaBytes(old, meta);
       continue;
     }
+    pending.push({ meta, bytes, target });
+  }
+  for (const { meta, bytes, target } of pending) {
     const temp = `${target}.${process.pid}.${Date.now()}.tmp`;
     try {
       const file = await fs.open(temp, 'wx', 0o600);

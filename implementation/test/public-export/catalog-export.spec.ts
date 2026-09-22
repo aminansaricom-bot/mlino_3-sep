@@ -156,6 +156,13 @@ test('k4-media-headers-cover-static-JPEG-WebP-AVIF-and-reject-animation', () => 
   webp.write('RIFF', 0); webp.writeUInt32LE(22, 4); webp.write('WEBPVP8X', 8);
   webp.writeUInt32LE(10, 16); webp.writeUIntLE(319, 24, 3); webp.writeUIntLE(319, 27, 3);
   cases.push({ type: 'image/webp', ext: 'webp', bytes: webp });
+  const webpWithText = Buffer.concat([webp, Buffer.from('EXIF', 'ascii'), Buffer.from([4, 0, 0, 0]), Buffer.from('ANIM', 'ascii')]);
+  webpWithText.writeUInt32LE(webpWithText.length - 8, 4);
+  const textHash = createHash('sha256').update(webpWithText).digest('hex');
+  expect(() => verifyMediaBytes(webpWithText, { position: 0,
+    path: `media/sha256/${textHash.slice(0, 2)}/${textHash}.webp`, sha256: textHash,
+    media_type: 'image/webp', byte_size: webpWithText.length, width: 320, height: 320,
+    alt_text: 'Static WebP containing ANIM as data', placeholder: null })).not.toThrow();
   const avif = Buffer.alloc(64);
   avif.writeUInt32BE(16, 0); avif.write('ftypavif', 4);
   avif.writeUInt32BE(48, 16); avif.write('meta', 20);

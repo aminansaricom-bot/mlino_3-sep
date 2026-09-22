@@ -31,8 +31,14 @@ export type DistributionOptions = {
 };
 export type DistributionDeps = {
   rename?: (from: string, to: string) => Promise<void>;
-  log?: (entry: { code: string; ok: boolean }) => void;
+  log?: (entry: { code: string; ok: boolean } | { code: 'DISTRIBUTION_CATALOG_SKIPPED'; reason: string }) => void;
 };
+
+function catalogReason(error: unknown): string {
+  if (error instanceof DistributionError) return error.code;
+  const message = error instanceof Error ? error.message : '';
+  return /^CATALOG_[A-Z0-9_]+$/.test(message) ? message : 'DISTRIBUTION_CATALOG';
+}
 
 function fail(code: DistributionCode): never { throw new DistributionError(code); }
 function within(parent: string, child: string): boolean {
@@ -97,33 +103,6 @@ export async function distributeCurrent(options: DistributionOptions, deps: Dist
     let valid = false;
     try { valid = await verifyEnvelope(envelope as SignedEnvelope, options.keyProvider); } catch { valid = false; }
     if (!valid) fail('DISTRIBUTION_SIGNATURE');
-    let catalogRaw: Buffer | null = null;
-    let catalog: Awaited<ReturnType<typeof verifyCatalogArtifact>> | null = null;
-    const catalogSource = path.join(options.sourceDir, CATALOG_FILE);
-    try {
-      const stat = await fs.lstat(catalogSource);
-      if (!stat.isFile() || stat.isSymbolicLink() || stat.size > CATALOG_CAP) fail('DISTRIBUTION_CATALOG');
-      catalogRaw = await fs.readFile(catalogSource);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') fail('DISTRIBUTION_CATALOG');
-    }
-    if (catalogRaw) {
-      try { catalog = await verifyCatalogArtifact(catalogRaw, options.keyProvider, envelope as PublicBusinessExportV1, now, maxAgeMs); }
-      catch { fail('DISTRIBUTION_CATALOG'); }
-      const catalogTarget = path.join(options.publicDir, CATALOG_FILE);
-      const prior = await fs.readFile(catalogTarget).catch((error: NodeJS.ErrnoException) => {
-        if (error.code === 'ENOENT') return null;
-        fail('DISTRIBUTION_CATALOG');
-      });
-      if (prior) {
-        try {
-          const old = JSON.parse(prior.toString('utf8')) as { generated_at?: unknown };
-          if (timestamp(old.generated_at) > generated) fail('DISTRIBUTION_ROLLBACK');
-        } catch (error) { if (error instanceof DistributionError) throw error; fail('DISTRIBUTION_CATALOG'); }
-      }
-      try { await stageMedia(options.sourceDir, options.publicDir, catalog); }
-      catch { fail('DISTRIBUTION_MEDIA'); }
-    }
     const target = path.join(options.publicDir, FILE);
     let existing: Buffer | undefined;
     try {
@@ -135,6 +114,36 @@ export async function distributeCurrent(options: DistributionOptions, deps: Dist
     if (existing) {
       const old = parse(existing);
       if (timestamp(old.generated_at) > generated) fail('DISTRIBUTION_ROLLBACK');
+    }
+    let catalogRaw: Buffer | null = null;
+    let catalog: Awaited<ReturnType<typeof verifyCatalogArtifact>> | null = null;
+    const catalogSource = path.join(options.sourceDir, CATALOG_FILE);
+    try {
+      const stat = await fs.lstat(catalogSource);
+      if (!stat.isFile() || stat.isSymbolicLink() || stat.size > CATALOG_CAP) fail('DISTRIBUTION_CATALOG');
+      catalogRaw = await fs.readFile(catalogSource);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        log({ code: 'DISTRIBUTION_CATALOG_SKIPPED', reason: catalogReason(error) });
+      }
+    }
+    if (catalogRaw) {
+      try {
+        catalog = await verifyCatalogArtifact(catalogRaw, options.keyProvider, envelope as PublicBusinessExportV1, now, maxAgeMs);
+        const catalogTarget = path.join(options.publicDir, CATALOG_FILE);
+        const prior = await fs.readFile(catalogTarget).catch((error: NodeJS.ErrnoException) => {
+          if (error.code === 'ENOENT') return null;
+          fail('DISTRIBUTION_CATALOG');
+        });
+        if (prior) {
+          const old = JSON.parse(prior.toString('utf8')) as { generated_at?: unknown };
+          if (timestamp(old.generated_at) > generated) fail('DISTRIBUTION_ROLLBACK');
+        }
+        await stageMedia(options.sourceDir, options.publicDir, catalog);
+      } catch (error) {
+        catalog = null;
+        log({ code: 'DISTRIBUTION_CATALOG_SKIPPED', reason: catalogReason(error) });
+      }
     }
     temp = path.join(options.publicDir, `.public-business.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`);
     await fs.writeFile(temp, raw, { flag: 'wx' });
@@ -154,8 +163,9 @@ export async function distributeCurrent(options: DistributionOptions, deps: Dist
     if (!renamed) fail('DISTRIBUTION_IO');
     temp = undefined;
     if (catalogRaw && catalog) {
-      const catalogTarget = path.join(options.publicDir, CATALOG_FILE);
-      const catalogTemp = path.join(options.publicDir, `.public-catalog.${process.pid}.${Date.now()}.tmp`);
+      try {
+        const catalogTarget = path.join(options.publicDir, CATALOG_FILE);
+        const catalogTemp = path.join(options.publicDir, `.public-catalog.${process.pid}.${Date.now()}.tmp`);
       try {
         const file = await fs.open(catalogTemp, 'wx', 0o600);
         try { await file.writeFile(catalogRaw); await file.sync(); } finally { await file.close(); }
@@ -170,6 +180,9 @@ export async function distributeCurrent(options: DistributionOptions, deps: Dist
         }
         if (!completed) fail('DISTRIBUTION_IO');
       } finally { await fs.rm(catalogTemp, { force: true }); }
+      } catch (error) {
+        log({ code: 'DISTRIBUTION_CATALOG_SKIPPED', reason: catalogReason(error) });
+      }
     }
     log({ code: 'DISTRIBUTION_OK', ok: true });
   } catch (error) {

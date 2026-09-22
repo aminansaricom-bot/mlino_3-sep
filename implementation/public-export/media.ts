@@ -65,8 +65,17 @@ function dimensions(bytes: Buffer, type: CatalogMedia['media_type']): [number, n
   }
   if (type === 'image/webp') {
     if (bytes.length < 30 || bytes.toString('ascii', 0, 4) !== 'RIFF' || bytes.toString('ascii', 8, 12) !== 'WEBP') fail('CATALOG_MEDIA_TYPE');
+    if (bytes.readUInt32LE(4) + 8 !== bytes.length) fail('CATALOG_MEDIA_TYPE');
     const chunk = bytes.toString('ascii', 12, 16);
-    if (bytes.includes(Buffer.from('ANIM', 'ascii'))) fail('CATALOG_MEDIA_ANIMATED');
+    for (let offset = 12; offset < bytes.length;) {
+      if (offset + 8 > bytes.length) fail('CATALOG_MEDIA_TYPE');
+      const name = bytes.toString('ascii', offset, offset + 4);
+      const length = bytes.readUInt32LE(offset + 4);
+      const end = offset + 8 + length;
+      if (end > bytes.length) fail('CATALOG_MEDIA_TYPE');
+      if (name === 'ANIM' || (name === 'VP8X' && length > 0 && (bytes[offset + 8] & 0x02))) fail('CATALOG_MEDIA_ANIMATED');
+      offset = end + (length % 2);
+    }
     if (chunk === 'VP8X') {
       if (bytes[20] & 0x02) fail('CATALOG_MEDIA_ANIMATED');
       return [1 + bytes.readUIntLE(24, 3), 1 + bytes.readUIntLE(27, 3)];

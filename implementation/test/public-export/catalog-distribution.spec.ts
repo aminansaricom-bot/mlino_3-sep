@@ -70,14 +70,19 @@ test('k4-media-failure-preserves-previous-catalog-and-poisoned-destination-is-no
   const old = await fs.readFile(path.join(source, CATALOG_FILE));
   await fs.writeFile(path.join(publicDir, CATALOG_FILE), old);
   await fs.rm(path.join(source, ...meta!.path.split('/')));
-  await expect(distributeCurrent({ sourceDir: source, publicDir, keyProvider: provider, now: at })).rejects.toMatchObject({ code: 'DISTRIBUTION_MEDIA' });
+  const firstLog: unknown[] = [];
+  await distributeCurrent({ sourceDir: source, publicDir, keyProvider: provider, now: at }, { log: (entry) => firstLog.push(entry) });
+  expect(firstLog).toContainEqual(expect.objectContaining({ code: 'DISTRIBUTION_CATALOG_SKIPPED', reason: 'CATALOG_MEDIA_MISSING' }));
+  expect(await fs.readFile(path.join(publicDir, 'public-business.v1.json'))).toEqual(await fs.readFile(path.join(source, 'public-business.v1.json')));
   expect(await fs.readFile(path.join(publicDir, CATALOG_FILE))).toEqual(old);
   const full = path.join(source, ...meta!.path.split('/'));
   await fs.writeFile(full, png());
   const destination = path.join(publicDir, ...meta!.path.split('/'));
   await fs.mkdir(path.dirname(destination), { recursive: true });
   await fs.writeFile(destination, 'poison');
-  await expect(distributeCurrent({ sourceDir: source, publicDir, keyProvider: provider, now: at })).rejects.toMatchObject({ code: 'DISTRIBUTION_MEDIA' });
+  const secondLog: unknown[] = [];
+  await distributeCurrent({ sourceDir: source, publicDir, keyProvider: provider, now: at }, { log: (entry) => secondLog.push(entry) });
+  expect(secondLog).toContainEqual(expect.objectContaining({ code: 'DISTRIBUTION_CATALOG_SKIPPED', reason: 'CATALOG_MEDIA_POISONED' }));
   expect(await fs.readFile(destination, 'utf8')).toBe('poison');
   expect(await fs.readFile(path.join(publicDir, CATALOG_FILE))).toEqual(old);
 });
@@ -111,8 +116,34 @@ test('k4-newer-existing-catalog-blocks-rollback-before-business-replacement', as
     generated_at: new Date(at.getTime() + 1_000).toISOString(), snapshot_id: snapshotId(CATALOG_CONTRACT_VERSION, []), records: [] },
   'test', provider, 'catalog');
   await fs.writeFile(path.join(publicDir, CATALOG_FILE), canonicalBytes(newer));
-  await expect(distributeCurrent({ sourceDir: source, publicDir, keyProvider: provider, now: at })).rejects.toMatchObject({ code: 'DISTRIBUTION_ROLLBACK' });
-  await expect(fs.readFile(path.join(publicDir, 'public-business.v1.json'))).rejects.toMatchObject({ code: 'ENOENT' });
+  const prior = await fs.readFile(path.join(publicDir, CATALOG_FILE));
+  const log: unknown[] = [];
+  await distributeCurrent({ sourceDir: source, publicDir, keyProvider: provider, now: at }, { log: (entry) => log.push(entry) });
+  expect(log).toContainEqual(expect.objectContaining({ code: 'DISTRIBUTION_CATALOG_SKIPPED', reason: 'DISTRIBUTION_ROLLBACK' }));
+  expect(await fs.readFile(path.join(publicDir, 'public-business.v1.json'))).toEqual(await fs.readFile(path.join(source, 'public-business.v1.json')));
+  expect(await fs.readFile(path.join(publicDir, CATALOG_FILE))).toEqual(prior);
+});
+
+test.each(['bad-signature', 'older-business-binding'])('k4-%s-skips-catalog-but-publishes-business', async (scenario) => {
+  await artifacts();
+  const prior = Buffer.from('previous public catalog');
+  await fs.writeFile(path.join(publicDir, CATALOG_FILE), prior);
+  if (scenario === 'bad-signature') {
+    const bad = JSON.parse((await fs.readFile(path.join(source, CATALOG_FILE))).toString('utf8'));
+    bad.signature.value = 'A'.repeat(86);
+    await fs.writeFile(path.join(source, CATALOG_FILE), canonicalBytes(bad));
+  } else {
+    const records = [{ organization_id: 'org', business_snapshot_id: 'sha256:older-business',
+      business_publication_id: 'pub-business', items: [] }];
+    const stale = await signEnvelope({ contract_version: CATALOG_CONTRACT_VERSION, generated_at: at.toISOString(),
+      snapshot_id: snapshotId(CATALOG_CONTRACT_VERSION, records), records }, 'test', provider, 'catalog');
+    await fs.writeFile(path.join(source, CATALOG_FILE), canonicalBytes(stale));
+  }
+  const log: unknown[] = [];
+  await distributeCurrent({ sourceDir: source, publicDir, keyProvider: provider, now: at }, { log: (entry) => log.push(entry) });
+  expect(log).toContainEqual(expect.objectContaining({ code: 'DISTRIBUTION_CATALOG_SKIPPED', reason: scenario === 'bad-signature' ? 'CATALOG_ARTIFACT_SIGNATURE' : 'CATALOG_ARTIFACT_BINDING' }));
+  expect(await fs.readFile(path.join(publicDir, CATALOG_FILE))).toEqual(prior);
+  expect(await fs.readFile(path.join(publicDir, 'public-business.v1.json'))).toEqual(await fs.readFile(path.join(source, 'public-business.v1.json')));
 });
 
 test('k4-gc-dry-run-and-apply-retain-referenced-media-and-stop-on-corrupt-artifact', async () => {
