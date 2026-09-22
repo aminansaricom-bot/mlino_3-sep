@@ -3,6 +3,7 @@ import { TestSeedError, VanakBusinessInput } from './types';
 
 const DAY_NUMBER: Record<string, number> = { دوشنبه: 1, 'سه‌شنبه': 2, چهارشنبه: 3, پنجشنبه: 4, جمعه: 5, شنبه: 6, یکشنبه: 7 };
 export const TEST_DATA_MARKER = ' — داده‌ی آزمایشی (منبع: بلد)';
+const DEMO_DATA_MARKER = ' — داده‌ی آزمایشی (منبع: ساختگی)';
 
 export function mapBusinessHours(hours: VanakBusinessInput['hours']): unknown | null {
   if (hours === null) return null;
@@ -28,7 +29,7 @@ export function mapVanakBusiness(row: VanakBusinessInput) {
     identifierValue: row.test_id,
     profile: {
       name: row.name,
-      description: `${row.description}${TEST_DATA_MARKER}`,
+      description: `${row.description}${row.test_id.startsWith('demo-') ? DEMO_DATA_MARKER : TEST_DATA_MARKER}`,
       latitude: row.latitude,
       longitude: row.longitude,
       addressText: row.address_text,

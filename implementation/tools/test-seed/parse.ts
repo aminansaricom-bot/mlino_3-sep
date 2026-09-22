@@ -50,12 +50,14 @@ function parseOne(value: unknown): VanakBusinessInput {
   const keys = Object.keys(value);
   if (keys.some((key) => !(ROOT_KEYS as readonly string[]).includes(key))) fail('TEST_SEED_UNKNOWN_FIELD');
   if (ROOT_KEYS.some((key) => !Object.prototype.hasOwnProperty.call(value, key))) fail('TEST_SEED_INPUT_SHAPE');
-  if (typeof value.test_id !== 'string' || !/^vanak-\d{2}$/.test(value.test_id)) fail('TEST_SEED_TEST_ID');
+  if (typeof value.test_id !== 'string' || !/^(?:vanak|demo)-\d{2}$/.test(value.test_id)) fail('TEST_SEED_TEST_ID');
   for (const key of ['name', 'category_fa', 'description', 'address_text', 'source_url', 'checked_at'] as const) {
     if (!requiredString(value[key])) fail('TEST_SEED_STRING');
   }
   const sourceUrl = value.source_url as string;
-  if (!sourceUrl.startsWith('https://balad.ir/p/')) fail('TEST_SEED_SOURCE_URL');
+  if (value.test_id.startsWith('demo-')) {
+    if (sourceUrl !== 'synthetic://mlino-demo' || !(value.name as string).includes('(آزمایشی)')) fail('TEST_SEED_SOURCE_URL');
+  } else if (!sourceUrl.startsWith('https://balad.ir/p/')) fail('TEST_SEED_SOURCE_URL');
   const lat = value.latitude;
   const lon = value.longitude;
   if ((lat === null) !== (lon === null)) fail('TEST_SEED_COORDINATES');

@@ -68,7 +68,7 @@ function parseOne(value: unknown): TestOfferInput {
   const row = object(value);
   if (!row) fail('TEST_SEED_OFFER_INPUT_SHAPE');
   if (Object.keys(row).some((key) => !ALLOWED.has(key))) fail('TEST_SEED_OFFER_UNKNOWN_FIELD');
-  if (typeof row.test_id !== 'string' || !/^vanak-\d{2}$/.test(row.test_id)) fail('TEST_SEED_OFFER_TEST_ID');
+  if (typeof row.test_id !== 'string' || !/^(?:vanak|demo)-\d{2}$/.test(row.test_id)) fail('TEST_SEED_OFFER_TEST_ID');
   if (typeof row.offer_key !== 'string' || !row.offer_key.startsWith(TEST_OFFER_KEY_PREFIX) || row.offer_key.length > 160) fail('TEST_SEED_OFFER_KEY');
   if (typeof row.name !== 'string' || !row.name.trim() || !row.name.includes('آزمایشی') || row.name.length > 200) fail('TEST_SEED_OFFER_NAME');
   if (typeof row.short_description !== 'string' || !row.short_description.trim() || !row.short_description.includes('آزمایشی')) fail('TEST_SEED_OFFER_DESCRIPTION');

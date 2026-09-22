@@ -3,11 +3,17 @@ import { AuthContext, CORE_AUTH_ISSUER } from '../../core/auth-context';
 import { BusinessProfileService } from '../../core/business-profile-service';
 import { PublicationService } from '../../core/publication-service';
 import { SEED_REASON, createSeedPlatformVerifier } from './seed';
+import { TestSeedError } from './types';
+
+export function isTestSeedOrganizationId(id: string): boolean {
+  return id.startsWith('test-vanak-') || id.startsWith('test-demo-');
+}
 
 export async function withdrawVanakBusinesses(db: PrismaClient, env: NodeJS.ProcessEnv = process.env, archive = false, organizationIds?: readonly string[]) {
   createSeedPlatformVerifier(env);
+  if (organizationIds?.some((id) => !isTestSeedOrganizationId(id))) throw new TestSeedError('TEST_SEED_ORGANIZATION_SCOPE');
   const organizations = await db.organization.findMany({
-    where: organizationIds ? { id: { in: [...organizationIds] } } : { id: { startsWith: 'test-vanak-' } },
+    where: organizationIds ? { id: { in: [...organizationIds] } } : { OR: [{ id: { startsWith: 'test-vanak-' } }, { id: { startsWith: 'test-demo-' } }] },
     select: {
       id: true,
       memberships: { where: { identityProvider: 'test-seed', membershipStatus: 'ACTIVE' }, take: 1, select: { id: true, externalSubject: true } },
