@@ -283,3 +283,5 @@ VALIDATION: GW2-P PASS; 23 Vitest files/288 tests PASS before final small correc
 SCOPE: Signed catalog consumer, verified media, detail and AR cards, Nginx routes; local commits only, no push.
 NEXT_ACTION: Guardian review and approved-environment build/test/runtime verification. STOP.
 CREATED_AT: 2026-09-22T13:31:52Z
+
+K5 REPORT_HASH_CORRECTION: The REPORT_SHA256 in the immediately preceding K5 entry was calculated from Windows working-tree bytes. The committed git-show bytes of mlino2/HANDOFF/20260922_CODEX_K5_CATALOG_CONSUMER_AR_REPORT.md at f93442a have SHA-256 a092524e409ae5a4be35811a7837f4d54022ee08db2e65d5419d9c49edd89b7c. This correction supersedes that one hash field only; all earlier handoff text is retained.
