@@ -2,6 +2,9 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { canonicalBytes } from '../canonical';
 import { CONTRACT_VERSION } from '../builder';
+import { PublicBusinessExportV1 } from '../builder';
+import { CATALOG_FILE, CATALOG_CAP, verifyCatalogArtifact } from '../catalog-artifact';
+import { stageMedia } from '../media-stage';
 import { SignedEnvelope, VerificationKeyProvider, verifyEnvelope } from '../signing';
 
 const FILE = 'public-business.v1.json';
@@ -12,7 +15,8 @@ const RENAME_DELAY_MS = 100;
 export type DistributionCode =
   'DISTRIBUTION_PATH' | 'DISTRIBUTION_SOURCE' | 'DISTRIBUTION_CANONICAL' |
   'DISTRIBUTION_CONTRACT' | 'DISTRIBUTION_SIGNATURE' | 'DISTRIBUTION_TIMESTAMP' |
-  'DISTRIBUTION_EXPIRED' | 'DISTRIBUTION_FUTURE' | 'DISTRIBUTION_ROLLBACK' | 'DISTRIBUTION_IO';
+  'DISTRIBUTION_EXPIRED' | 'DISTRIBUTION_FUTURE' | 'DISTRIBUTION_ROLLBACK' | 'DISTRIBUTION_IO' |
+  'DISTRIBUTION_CATALOG' | 'DISTRIBUTION_MEDIA';
 
 export class DistributionError extends Error {
   constructor(readonly code: DistributionCode) { super(code); }
@@ -27,8 +31,14 @@ export type DistributionOptions = {
 };
 export type DistributionDeps = {
   rename?: (from: string, to: string) => Promise<void>;
-  log?: (entry: { code: string; ok: boolean }) => void;
+  log?: (entry: { code: string; ok: boolean } | { code: 'DISTRIBUTION_CATALOG_SKIPPED'; reason: string }) => void;
 };
+
+function catalogReason(error: unknown): string {
+  if (error instanceof DistributionError) return error.code;
+  const message = error instanceof Error ? error.message : '';
+  return /^CATALOG_[A-Z0-9_]+$/.test(message) ? message : 'DISTRIBUTION_CATALOG';
+}
 
 function fail(code: DistributionCode): never { throw new DistributionError(code); }
 function within(parent: string, child: string): boolean {
@@ -105,6 +115,36 @@ export async function distributeCurrent(options: DistributionOptions, deps: Dist
       const old = parse(existing);
       if (timestamp(old.generated_at) > generated) fail('DISTRIBUTION_ROLLBACK');
     }
+    let catalogRaw: Buffer | null = null;
+    let catalog: Awaited<ReturnType<typeof verifyCatalogArtifact>> | null = null;
+    const catalogSource = path.join(options.sourceDir, CATALOG_FILE);
+    try {
+      const stat = await fs.lstat(catalogSource);
+      if (!stat.isFile() || stat.isSymbolicLink() || stat.size > CATALOG_CAP) fail('DISTRIBUTION_CATALOG');
+      catalogRaw = await fs.readFile(catalogSource);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        log({ code: 'DISTRIBUTION_CATALOG_SKIPPED', reason: catalogReason(error) });
+      }
+    }
+    if (catalogRaw) {
+      try {
+        catalog = await verifyCatalogArtifact(catalogRaw, options.keyProvider, envelope as PublicBusinessExportV1, now, maxAgeMs);
+        const catalogTarget = path.join(options.publicDir, CATALOG_FILE);
+        const prior = await fs.readFile(catalogTarget).catch((error: NodeJS.ErrnoException) => {
+          if (error.code === 'ENOENT') return null;
+          fail('DISTRIBUTION_CATALOG');
+        });
+        if (prior) {
+          const old = JSON.parse(prior.toString('utf8')) as { generated_at?: unknown };
+          if (timestamp(old.generated_at) > generated) fail('DISTRIBUTION_ROLLBACK');
+        }
+        await stageMedia(options.sourceDir, options.publicDir, catalog);
+      } catch (error) {
+        catalog = null;
+        log({ code: 'DISTRIBUTION_CATALOG_SKIPPED', reason: catalogReason(error) });
+      }
+    }
     temp = path.join(options.publicDir, `.public-business.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`);
     await fs.writeFile(temp, raw, { flag: 'wx' });
     const rename = deps.rename ?? fs.rename;
@@ -122,6 +162,28 @@ export async function distributeCurrent(options: DistributionOptions, deps: Dist
     }
     if (!renamed) fail('DISTRIBUTION_IO');
     temp = undefined;
+    if (catalogRaw && catalog) {
+      try {
+        const catalogTarget = path.join(options.publicDir, CATALOG_FILE);
+        const catalogTemp = path.join(options.publicDir, `.public-catalog.${process.pid}.${Date.now()}.tmp`);
+      try {
+        const file = await fs.open(catalogTemp, 'wx', 0o600);
+        try { await file.writeFile(catalogRaw); await file.sync(); } finally { await file.close(); }
+        const catalogRename = deps.rename ?? fs.rename;
+        let completed = false;
+        for (let attempt = 1; attempt <= RENAME_ATTEMPTS; attempt += 1) {
+          try { await catalogRename(catalogTemp, catalogTarget); completed = true; break; }
+          catch (error) {
+            if (!['EPERM', 'EBUSY', 'EACCES'].includes((error as NodeJS.ErrnoException).code ?? '') || attempt === RENAME_ATTEMPTS) throw error;
+            await new Promise((resolve) => setTimeout(resolve, RENAME_DELAY_MS));
+          }
+        }
+        if (!completed) fail('DISTRIBUTION_IO');
+      } finally { await fs.rm(catalogTemp, { force: true }); }
+      } catch (error) {
+        log({ code: 'DISTRIBUTION_CATALOG_SKIPPED', reason: catalogReason(error) });
+      }
+    }
     log({ code: 'DISTRIBUTION_OK', ok: true });
   } catch (error) {
     const code = error instanceof DistributionError ? error.code : 'DISTRIBUTION_IO';
