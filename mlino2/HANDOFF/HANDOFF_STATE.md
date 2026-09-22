@@ -267,3 +267,19 @@ VALIDATION: GW2-P PASS; three builds PASS; three full Vitest runs PASS at 21 sui
 SCOPE: V2 real UI adapter/category/business-hours/wiring and shared rich-component props only; no U3/U4, acceptance logic, dependency, network, Docker, database, V1, main or push.
 NEXT_ACTION: Architecture Guardian reviews U2. No automatic next phase.
 CREATED_AT: 2026-09-20T14:16:41Z
+
+---
+HANDOFF_ID: HANDOFF-20260922-K5-CATALOG-CONSUMER-AR
+AUTHOR: CODEX
+PHASE: K5_V2_CATALOG_CONSUMER_AR
+STATUS: IMPLEMENTED_LOCALLY_PENDING_FINAL_BUILD_AND_GUARDIAN_REVIEW
+INSTRUCTION_ID: CODEX-20260922-K5-CATALOG-CONSUMER-AR-001
+BRANCH: codex/v2-catalog-ui
+BASE_COMMIT: 47b17334f724268f0004c25b37c7849d606be08a
+CODE_COMMIT: 2718564
+REPORT_PATH: mlino2/HANDOFF/20260922_CODEX_K5_CATALOG_CONSUMER_AR_REPORT.md
+REPORT_SHA256: 9d31e877ff037b044843f55f7220ddb52b555ae5234dadad7a444053a2e87eab
+VALIDATION: GW2-P PASS; 23 Vitest files/288 tests PASS before final small corrections; final TypeScript tsc -b PASS; full post-correction build blocked by automatic approval review usage limit.
+SCOPE: Signed catalog consumer, verified media, detail and AR cards, Nginx routes; local commits only, no push.
+NEXT_ACTION: Guardian review and approved-environment build/test/runtime verification. STOP.
+CREATED_AT: 2026-09-22T13:31:52Z
