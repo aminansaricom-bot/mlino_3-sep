@@ -120,6 +120,19 @@ export default function RealPublicApp() {
       () => setLocating(false),
     );
   };
+  // ویترین زنده باید از موقعیت واقعی گوشی کار کند، نه نقطهٔ پیش‌فرض تهران. در آزمون
+  // روی گوشی، ویترین با «مرکز تهران (پیش‌فرض)» باز می‌شد و هیچ کسب‌وکاری در شعاعش نبود.
+  // تا وقتی ویترین باز است موقعیت دنبال می‌شود؛ دستهٔ نمایشی فقط با نخستین موقعیت لنگر می‌گیرد.
+  useEffect(() => {
+    if (overlay !== 'vitrine' || !navigator.geolocation) return;
+    const watch = navigator.geolocation.watchPosition(({ coords }) => {
+      const next: Point = [coords.latitude, coords.longitude];
+      if (!validPoint(next)) return;
+      setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setPointLabel('موقعیت زندهٔ من');
+      if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => nextDemoTarget(current, next));
+    }, () => undefined, { enableHighAccuracy: true, maximumAge: 5_000, timeout: 20_000 });
+    return () => navigator.geolocation.clearWatch(watch);
+  }, [overlay, demoBuildEnabled, demoEnabled, demoAnchor]);
   const openDetail = (id: string) => { setSelectedId(id); experience.viewed(id); setOverlay('detail'); };
 
   return <div className={`app-shell${demoBuildEnabled && demoEnabled ? ' demo-on' : ''}`} dir="rtl">
@@ -170,7 +183,8 @@ export default function RealPublicApp() {
       radiusLabel={formatDistance(5000)} pointLabel={pointLabel} filtersApplied={category !== null || openOnly}
       onChangePoint={() => setOverlay('none')} onUseLocation={useMyLocation} locating={locating} />}
     {overlay === 'vitrine' && <div className="panel dark"><div className="panel-head"><h3>ویترین زنده</h3><button className="panel-close" onClick={() => setOverlay('none')}>✕</button></div><div className="panel-body">
-       <ArVitrineView records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point} searchPointLabel={pointLabel} preferredCategory={category} onSelectBusiness={openDetail} />
+       <ArVitrineView records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point} searchPointLabel={pointLabel} preferredCategory={category} onSelectBusiness={openDetail}
+         locationPending={myPoint === null} initialRadius={demoBuildEnabled && demoEnabled ? 100 : undefined} />
     </div></div>}
   </div>;
 }

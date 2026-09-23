@@ -1141,3 +1141,143 @@ button { font-family: inherit; }
 .share-result textarea { display: block; width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink); font: inherit; resize: vertical; }
 .offer-card[data-offer-status]:not([data-offer-status="active"]) { background: var(--surface-2); color: var(--ink-soft); border-color: var(--border); }
 .offer-card[data-offer-status]:not([data-offer-status="active"]) .discount { color: inherit; }
+
+/* ───────── کارت شیشه‌ای پیشنهادها روی دوربین (glassmorphism) ─────────
+ * لایهٔ شیشهٔ مات با لبهٔ نورانی بنفش‌صورتی، الهام‌گرفته از طرح مرجع مالک.
+ * شیشه با backdrop-filter ساخته می‌شود؛ اگر مرورگر پشتیبانی نکند، پس‌زمینهٔ تیرهٔ
+ * نیمه‌شفاف جایگزین می‌شود تا متن همیشه خوانا بماند.
+ */
+.glass-card {
+  position: absolute;
+  top: 58px;
+  transform: translateX(-50%);
+  width: min(272px, 84%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px 15px 13px;
+  border-radius: 24px;
+  color: #fff;
+  text-align: right;
+  cursor: pointer;
+  z-index: 9;
+  overflow: hidden;
+  /* لایهٔ زیرین بنفش تیره تا متن سفید روی دیوار روشن هم خوانا بماند */
+  background: linear-gradient(145deg, rgba(255,255,255,.24), rgba(255,255,255,.06) 55%, rgba(170,120,255,.16)), rgba(28, 16, 58, .38);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  backdrop-filter: blur(22px) saturate(170%);
+  border: 1px solid rgba(255,255,255,.42);
+  box-shadow:
+    0 18px 48px rgba(12, 6, 32, .45),
+    0 0 0 1px rgba(190, 140, 255, .18),
+    0 0 28px rgba(160, 100, 255, .35),
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -1px 0 rgba(255,255,255,.08);
+  transition: left .28s cubic-bezier(.22,.61,.36,1);
+}
+.glass-card.has-offer {
+  border-color: rgba(255, 225, 255, .62);
+  box-shadow:
+    0 18px 48px rgba(12, 6, 32, .45),
+    0 0 0 1px rgba(255, 150, 230, .22),
+    0 0 36px rgba(220, 110, 255, .45),
+    inset 0 1px 0 rgba(255,255,255,.6),
+    inset 0 -1px 0 rgba(255,255,255,.08);
+}
+.glass-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.26) 45%, transparent 60%);
+  transform: translateX(-120%);
+  animation: glass-sheen 6s ease-in-out infinite;
+}
+@keyframes glass-sheen { 0%, 62% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+.glass-head { display: flex; align-items: center; gap: 10px; }
+.glass-coin {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  font-size: 20px;
+  border: 1px solid rgba(255,255,255,.6);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 6px 16px rgba(0,0,0,.3);
+}
+.glass-title { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.glass-title strong { font-size: 16px; font-weight: 800; text-shadow: 0 1px 8px rgba(0,0,0,.35); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.glass-title small { font-size: 11.5px; color: rgba(255,255,255,.86); text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+.glass-test { flex: none; font-size: 10px; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35); }
+.glass-offers { display: flex; flex-direction: column; gap: 8px; }
+.glass-offer {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,.2), rgba(255,255,255,.06));
+  border: 1px solid rgba(255,255,255,.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+}
+.glass-offer-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.glass-offer-name { font-weight: 700; font-size: 13.5px; text-shadow: 0 1px 6px rgba(0,0,0,.3); }
+.glass-offer-price {
+  flex: none;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #9d6bff, #ff6fd8);
+  box-shadow: 0 4px 14px rgba(200, 90, 255, .45);
+  white-space: nowrap;
+}
+.glass-offer-desc { font-size: 11.5px; line-height: 1.55; color: rgba(255,255,255,.88); text-shadow: 0 1px 6px rgba(0,0,0,.3); }
+.glass-empty { font-size: 12px; color: rgba(255,255,255,.78); }
+.glass-cta {
+  align-self: stretch;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 8px 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,.16);
+  border: 1px solid rgba(255,255,255,.45);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
+}
+
+/* کاتالوگ روی دوربین: همان شیشه، با دو صفحهٔ شیشه‌ای لایه‌لایه پشت کارت */
+.catalog-ar-stack {
+  bottom: 14px;
+  isolation: isolate;
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(255,255,255,.22), rgba(255,255,255,.05) 60%, rgba(170,120,255,.14)), rgba(28, 16, 58, .38);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+  border: 1px solid rgba(255,255,255,.45);
+  box-shadow: 0 16px 40px rgba(12, 6, 32, .45), 0 0 26px rgba(160, 100, 255, .32), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.catalog-ar-stack::before,
+.catalog-ar-stack::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  border: 1px solid rgba(255,255,255,.28);
+  background: linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.03));
+  pointer-events: none;
+}
+.catalog-ar-stack::before { transform: translate(-9px, -9px) rotate(-3deg); }
+.catalog-ar-stack::after { transform: translate(9px, -15px) rotate(3deg); opacity: .7; }
+.catalog-ar-image .catalog-image,
+.catalog-ar-image .catalog-image-placeholder { border-radius: 14px; border: 1px solid rgba(255,255,255,.4); }
+.catalog-ar-controls button { border-radius: 12px; background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.45); }
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-card, .catalog-ar-stack { background: rgba(38, 22, 70, .88); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-sheen { animation: none; display: none; }
+  .glass-card { transition: none; }
+}

@@ -38,6 +38,12 @@ ARG VITE_PUBLIC_EXPORT_TRUST_BUNDLE=
 ENV VITE_PUBLIC_EXPORT_URL=$VITE_PUBLIC_EXPORT_URL
 ENV VITE_PUBLIC_EXPORT_TRUST_BUNDLE=$VITE_PUBLIC_EXPORT_TRUST_BUNDLE
 
+# حالت نمایشی K6-D: فقط برای ساخت آزمایشی. بدون این پرچم، کد نمایشی اصلاً وارد ساخت نمی‌شود.
+ARG VITE_DEMO_RELOCATE=
+ARG VITE_DEMO_ANCHOR=
+ENV VITE_DEMO_RELOCATE=$VITE_DEMO_RELOCATE
+ENV VITE_DEMO_ANCHOR=$VITE_DEMO_ANCHOR
+
 # .npmrc برای رجیستری نشان لازم است و باید پیش از npm ci حاضر باشد
 COPY package.json package-lock.json .npmrc ./
 # فقط URLهای lockfile به رجیستری انتخابی هدایت می‌شوند؛ integrityها دست‌نخورده و verify می‌شوند

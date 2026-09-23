@@ -81,6 +81,27 @@ interface OrientationEventIOS extends DeviceOrientationEvent {
   webkitCompassHeading?: number;
 }
 
+/** مهلتی که پس از آخرین خوانش absolute، رویداد غیر-absolute نادیده گرفته می‌شود. */
+export const ABSOLUTE_GRACE_MS = 2000;
+
+/**
+ * کروم اندروید هر دو رویداد `deviceorientationabsolute` (absolute) و
+ * `deviceorientation` (نسبی) را پشت سر هم می‌فرستد. اگر هر دو مستقیم وضعیت را
+ * عوض کنند، نوار «قطب‌نما مرجع شمال ندارد» چند بار در ثانیه روشن و خاموش
+ * می‌شود — همان چیزی که در ویدئوی آزمون روی گوشی دیده شد. پس رویداد نسبی فقط
+ * وقتی «notAbsolute» اعلام می‌شود که در این مهلت هیچ خوانش absolute نرسیده باشد.
+ * `null` یعنی وضعیت فعلی دست نخورد.
+ */
+export function resolveHeadingSource(
+  kind: 'ok' | 'not-absolute' | 'none',
+  lastAbsoluteAt: number | null,
+  now: number,
+): 'compass' | 'notAbsolute' | null {
+  if (kind === 'ok') return 'compass';
+  if (kind !== 'not-absolute') return null;
+  return lastAbsoluteAt !== null && now - lastAbsoluteAt < ABSOLUTE_GRACE_MS ? null : 'notAbsolute';
+}
+
 /**
  * قطب‌نما — رفع یافته‌ی A-1 بازبینی فاز ۳:
  * - iOS: webkitCompassHeading (واقعاً جهت جغرافیایی).
@@ -101,6 +122,7 @@ export function useDeviceHeading(enabled: boolean): {
   const [simulated, setSimulated] = useState(false);
   const [source, setSource] = useState<'none' | 'compass' | 'manual' | 'notAbsolute'>('none');
   const simulatedRef = useRef(false);
+  const lastAbsoluteRef = useRef<number | null>(null);
 
   const request = useCallback(() => {
     const withIOS = DeviceOrientationEvent as unknown as {
@@ -121,18 +143,18 @@ export function useDeviceHeading(enabled: boolean): {
         alpha: typeof e.alpha === 'number' ? e.alpha : null,
         absolute: e.absolute === true,
       });
-      switch (result.kind) {
-        case 'ok':
-          setHeadingDeg(result.headingDeg);
-          setSource('compass');
-          break;
-        case 'not-absolute':
-          // صادقانه: مرجع این رویداد شمال نیست — UI به جهت دستی برمی‌گردد
-          setSource('notAbsolute');
-          break;
-        default:
-          break;
+      const now = Date.now();
+      if (result.kind === 'ok') {
+        lastAbsoluteRef.current = now;
+        setHeadingDeg(result.headingDeg);
       }
+      // صادقانه: مرجع رویداد نسبی شمال نیست — ولی فقط وقتی اعلام می‌شود که خوانش absolute تازه‌ای نباشد
+      const next = resolveHeadingSource(
+        result.kind === 'ok' || result.kind === 'not-absolute' ? result.kind : 'none',
+        lastAbsoluteRef.current,
+        now,
+      );
+      if (next !== null) setSource(next);
     };
     // چنل absolute اولویت دارد؛ چنل معمولی فقط وقتی absolute=true است مقدار می‌دهد (داخل handler گارد هست)
     window.addEventListener('deviceorientationabsolute', handler, true);

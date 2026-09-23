@@ -23,6 +23,7 @@ import { categoryLabel, floorLabel, formatDistance, formatPrice } from '../uiFor
 import type { PublicUiRecord } from '../publicExport/uiAdapter';
 import type { CatalogRecord } from '../publicExport/catalog';
 import CatalogArStack from '../publicExport/catalogArStack';
+import ArGlassCard from './ArGlassCard';
 
 interface ArVitrineViewProps {
   /** نقطه‌ی جست‌وجوی فعلی اپ (مشترک با تب دستیار) */
@@ -35,6 +36,10 @@ interface ArVitrineViewProps {
   records?: readonly PublicUiRecord[];
   catalogByOrg?: ReadonlyMap<string, CatalogRecord>;
   now?: number;
+  /** هنوز موقعیت زندهٔ گوشی نرسیده است — نتیجهٔ ویترین را گمراه‌کننده نشان نده */
+  locationPending?: boolean;
+  /** شعاع آغازین؛ در حالت نمایشی ۱۰۰ متر تا کل دستهٔ نمایشی دیده شود */
+  initialRadius?: number;
 }
 
 export default function ArVitrineView({
@@ -45,6 +50,8 @@ export default function ArVitrineView({
   records,
   catalogByOrg,
   now,
+  locationPending = false,
+  initialRadius,
 }: ArVitrineViewProps) {
   const camera = useCameraStream();
   const heading = useDeviceHeading(camera.state.kind === 'active');
@@ -55,7 +62,7 @@ export default function ArVitrineView({
   const [floorLevel, setFloorLevel] = useState<number | null>(null);
   const [view, setView] = useState<ArViewResponse | null>(null);
   /** شعاع نمایش AR — مستقل از شعاع جست‌وجوی نقشه، پیش‌فرض مصوب ۳۰ متر */
-  const [arRadius, setArRadius] = useState<number>(AR_DEFAULT_RADIUS);
+  const [arRadius, setArRadius] = useState<number>(initialRadius ?? AR_DEFAULT_RADIUS);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [stageWidth, setStageWidth] = useState(0);
 
@@ -168,7 +175,17 @@ export default function ArVitrineView({
         ))}
 
         {/* کارت اصلی — دقیقاً یکی */}
-        {scene?.primary && (
+        {scene?.primary && records && (
+          <ArGlassCard
+            item={scene.primary}
+            record={records.find((record) => record.id === scene.primary!.businessId)}
+            now={now ?? Date.now()}
+            leftPercent={clampToStage(scene.primary.screenXPercent, stageWidth, 272)}
+            glyph={categoryGlyph(scene.primary.category)}
+            onSelect={onSelectBusiness}
+          />
+        )}
+        {scene?.primary && !records && (
           <ArPrimaryCard
             item={scene.primary}
             leftPercent={clampToStage(scene.primary.screenXPercent, stageWidth, 220)}
@@ -185,7 +202,11 @@ export default function ArVitrineView({
           </div>
         )}
 
-        {scene === null && (
+        {locationPending && (
+          <div className="ar-empty">در حال گرفتن موقعیت گوشی… اگر اجازهٔ موقعیت خواسته شد، «اجازه» را بزن.</div>
+        )}
+
+        {!locationPending && scene === null && (
           <div className="ar-empty">
             {heading.source === 'none'
               ? 'قطب‌نمای این دستگاه در دسترس نیست — با اسلایدر پایین جهت را دستی بچرخان تا ویترین ساخته شود.'
@@ -193,7 +214,7 @@ export default function ArVitrineView({
           </div>
         )}
 
-        {scene && scene.primary === null && (
+        {!locationPending && scene && scene.primary === null && (
           <div className="ar-empty">
             در این جهت کسب‌وکار مناسبی پیدا نشد — گوشی را بچرخان
             {scene.behindCount > 0 &&

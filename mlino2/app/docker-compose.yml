@@ -17,6 +17,9 @@ services:
         VITE_PUBLIC_EXPORT_URL: ${VITE_PUBLIC_EXPORT_URL:-/public-export/public-business.v1.json}
         # فقط کلیدهای عمومی، تولیدشده با buildV2TrustBundle از M2-2.
         VITE_PUBLIC_EXPORT_TRUST_BUNDLE: ${VITE_PUBLIC_EXPORT_TRUST_BUNDLE:-}
+        # حالت نمایشی فقط وقتی میزبان صریحاً VITE_DEMO_RELOCATE=1 بدهد؛ پیش‌فرض خاموش.
+        VITE_DEMO_RELOCATE: ${VITE_DEMO_RELOCATE:-}
+        VITE_DEMO_ANCHOR: ${VITE_DEMO_ANCHOR:-}
     ports:
       - "8443:8443"
     volumes:
