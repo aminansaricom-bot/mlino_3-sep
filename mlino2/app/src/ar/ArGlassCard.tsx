@@ -6,6 +6,8 @@ import { categoryLabel, formatDistance } from '../uiFormat';
 import type { PublicOffer } from '../publicExport/mapping';
 import type { PublicUiRecord } from '../publicExport/uiAdapter';
 import type { ArSceneItem } from './ArOverlayService';
+import { demoBusinessRating } from '../demo/demoSocial';
+import Stars from '../components/Stars';
 
 export const GLASS_OFFER_LIMIT = 3;
 
@@ -46,6 +48,7 @@ export default function ArGlassCard({
 }) {
   const offers = activeOffersFor(record, now);
   const business = offerTitle(item.name);
+  const rating = demoBusinessRating(item.businessId);
   return (
     <button className={`glass-card${offers.length ? ' has-offer' : ''}`} style={{ left: `${leftPercent}%` }}
       onClick={() => onSelect(item.businessId)} aria-label={`${business.title} — ${offers.length.toLocaleString('fa-IR')} پیشنهاد فعال`}>
@@ -54,9 +57,8 @@ export default function ArGlassCard({
         <span className={`glass-coin ar-coin-${item.category}`} aria-hidden="true">{glyph}</span>
         <span className="glass-title">
           <strong>{business.title}</strong>
-          <small>{categoryLabel(item.category)}{item.categoryGuessed ? ' · حدسی' : ''} · {formatDistance(item.distanceMeters)}</small>
+          <small>{rating && <Stars rating={rating} compact />} {categoryLabel(item.category)} · {formatDistance(item.distanceMeters)}</small>
         </span>
-        {business.test && <span className="glass-test">آزمایشی</span>}
       </span>
       {offers.length > 0 ? (
         <span className="glass-offers">

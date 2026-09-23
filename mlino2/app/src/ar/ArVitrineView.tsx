@@ -21,7 +21,7 @@ import {
 } from './ArOverlayService';
 import { categoryLabel, floorLabel, formatDistance, formatPrice } from '../uiFormat';
 import type { PublicUiRecord } from '../publicExport/uiAdapter';
-import type { CatalogRecord } from '../publicExport/catalog';
+import type { CatalogItem, CatalogRecord } from '../publicExport/catalog';
 import CatalogArStack from '../publicExport/catalogArStack';
 import ArGlassCard from './ArGlassCard';
 
@@ -40,6 +40,8 @@ interface ArVitrineViewProps {
   locationPending?: boolean;
   /** شعاع آغازین؛ در حالت نمایشی ۱۰۰ متر تا کل دستهٔ نمایشی دیده شود */
   initialRadius?: number;
+  /** باز کردن صفحه‌ی محصول از پشته‌ی کاتالوگ روی دوربین */
+  onOpenItem?: (organizationId: string, item: CatalogItem) => void;
 }
 
 export default function ArVitrineView({
@@ -52,6 +54,7 @@ export default function ArVitrineView({
   now,
   locationPending = false,
   initialRadius,
+  onOpenItem,
 }: ArVitrineViewProps) {
   const camera = useCameraStream();
   const heading = useDeviceHeading(camera.state.kind === 'active');
@@ -193,7 +196,8 @@ export default function ArVitrineView({
           />
         )}
 
-        {scene?.primary && catalogByOrg && <CatalogArStack record={catalogByOrg.get(scene.primary.businessId)} />}
+        {scene?.primary && catalogByOrg && <CatalogArStack record={catalogByOrg.get(scene.primary.businessId)}
+          onOpenItem={onOpenItem ? (item) => onOpenItem(scene.primary!.businessId, item) : undefined} />}
 
         {scene && scene.overflowCount > 0 && (
           <div className="ar-overflow">
@@ -235,9 +239,7 @@ export default function ArVitrineView({
           {heading.source === 'none' && (
             <span className="ar-badge warn">قطب‌نما در دسترس نیست — اسلایدر زیر را بچرخان</span>
           )}
-          {heading.source === 'compass' && (
-            <span className="ar-badge ok">قطب‌نمای واقعی (absolute) فعال</span>
-          )}
+
           {heading.source === 'manual' && <span className="ar-badge warn">جهت دستی (شبیه‌سازی)</span>}
           {(() => {
             const df = scene?.declaredFloor ?? null;
@@ -245,8 +247,7 @@ export default function ArVitrineView({
             const fl = df !== null && db !== null ? floorLabel(df, db) : null;
             return fl !== null ? <span className="ar-badge ok">طبقه‌ی انتخابی تو: {fl}</span> : null;
           })()}
-          <span className="ar-badge">شعاع {formatDistance(arRadius)}</span>
-          <span className="ar-badge">نقطه: {searchPointLabel}</span>
+
         </div>
       </div>
 
@@ -257,12 +258,9 @@ export default function ArVitrineView({
           <RadiusPicker value={arRadius} onChange={setArRadius} />
         </div>
 
-        <div className="sp-row">
-          <span className="sp-label">
-            {heading.source === 'compass'
-              ? 'جهت دستی (اگر قطب‌نما نادرست است):'
-              : 'شبیه‌سازی چرخش گوشی:'}
-          </span>
+        {/* وقتی قطب‌نمای واقعی کار می‌کند، اسلایدر جهت دستی فقط شلوغی است؛ فقط در نبود قطب‌نما دیده می‌شود */}
+        {heading.source !== 'compass' && <div className="sp-row">
+          <span className="sp-label">چرخاندن دستی جهت:</span>
           <input
             type="range"
             min={0}
@@ -275,7 +273,7 @@ export default function ArVitrineView({
             }}
           />
           <span className="sp-label">{manualHeading}°</span>
-        </div>
+        </div>}
 
         {nearbyBuildings.length > 0 && (
           <div className="sp-row ar-floor-row">
@@ -438,7 +436,7 @@ function ArBubble({
       <span className={`ar-bubble-coin ar-coin-${item.category}`} aria-hidden="true">
         {categoryGlyph(item.category)}
       </span>
-      <span className="ar-bubble-name">{item.name}</span>
+      <span className="ar-bubble-name">{item.name.replace('(آزمایشی)', '').trim()}</span>
       <span className="ar-bubble-dist">{formatDistance(item.distanceMeters)}</span>
       {item.activeOffer && <span className="ar-bubble-dot" aria-hidden="true" />}
     </button>

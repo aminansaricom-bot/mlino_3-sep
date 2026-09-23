@@ -14,17 +14,24 @@ export function visiblePlusNext(visible: readonly number[], total: number): numb
 
 export function CatalogImage({ media, load }: { media?: CatalogMedia; load: boolean }) {
   const [loaded, setLoaded] = useState<{ path: string; url: string } | null>(null);
+  // هر به‌روزرسانی فایل کاتالوگ (هر ۶۰ ثانیه) شیء media تازه‌ای می‌سازد. اگر اثر به خود
+  // شیء وابسته باشد، تصویر هر بار دوباره بار می‌شود و چشمک می‌زند؛ پس کلید، مسیر
+  // محتواآدرس‌پذیر است که با هر تغییر بایت‌ها عوض می‌شود و در غیر این صورت ثابت است.
+  const mediaRef = useRef(media);
+  mediaRef.current = media;
+  const mediaKey = media ? `${media.path}|${media.byte_size}` : null;
   useEffect(() => {
-    if (!media || !load) return;
+    const current = mediaRef.current;
+    if (!current || !load) return;
     let alive = true;
     let objectUrl: string | null = null;
-    void loadCatalogMedia(media).then((result) => {
+    void loadCatalogMedia(current).then((result) => {
       objectUrl = result.url;
-      if (alive) setLoaded(result.url ? { path: media.path, url: result.url } : null);
+      if (alive) setLoaded(result.url ? { path: current.path, url: result.url } : null);
       else if (objectUrl) URL.revokeObjectURL(objectUrl);
     });
     return () => { alive = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
-  }, [media, load]);
+  }, [mediaKey, load]);
   const src = loaded && loaded.path === media?.path ? loaded.url : null;
   if (!src) return <div className="catalog-image-placeholder" role="img" aria-label={media?.alt_text ?? 'تصویر ثبت نشده'}>
     <span aria-hidden="true">◇</span><small>{media?.alt_text ?? 'تصویر ثبت نشده'}</small>

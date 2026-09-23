@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import type { CatalogRecord } from './catalog';
+import type { CatalogItem, CatalogRecord } from './catalog';
 import { CatalogImage, catalogPrice } from './catalogCards';
 
 export function swipeIndex(current: number, direction: number, length: number): number {
   return length < 1 ? 0 : Math.max(0, Math.min(length - 1, current + Math.sign(direction)));
 }
 
-export default function CatalogArStack({ record }: { record?: CatalogRecord }) {
+export default function CatalogArStack({ record, onOpenItem }: { record?: CatalogRecord; onOpenItem?: (item: CatalogItem) => void }) {
   const [index, setIndex] = useState(0);
   const start = useRef<number | null>(null);
   useEffect(() => setIndex(0), [record?.organization_id]);
@@ -28,10 +28,12 @@ export default function CatalogArStack({ record }: { record?: CatalogRecord }) {
       }
     }}>
     <div className="catalog-ar-image"><CatalogImage key={item.catalog_item_id} media={item.media[0]} load /></div>
-    <div className="catalog-ar-copy"><strong>{item.name}</strong>
+    <button type="button" className="catalog-ar-open" onClick={() => onOpenItem?.(item)} disabled={!onOpenItem} aria-label={`مشاهدهٔ ${item.name}`}>
+    <div className="catalog-ar-copy"><strong>{item.name.replace('(آزمایشی)', '').trim()}</strong>
       <span>{catalogPrice(item)}</span>
-      <small>{(active + 1).toLocaleString('fa-IR')} از {items.length.toLocaleString('fa-IR')}</small>
+      <small>{(active + 1).toLocaleString('fa-IR')} از {items.length.toLocaleString('fa-IR')} · برای جزئیات بزن</small>
     </div>
+    </button>
     <div className="catalog-ar-controls">
       <button type="button" aria-label="مورد قبلی" disabled={active === 0} onClick={() => setIndex((value) => swipeIndex(value, -1, items.length))}>→</button>
       <button type="button" aria-label="مورد بعدی" disabled={active === items.length - 1} onClick={() => setIndex((value) => swipeIndex(value, 1, items.length))}>←</button>
