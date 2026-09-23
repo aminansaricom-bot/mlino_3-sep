@@ -14,6 +14,6 @@
     "sourceMap": true,
     "moduleResolution": "node"
   },
-  "include": ["shared-contracts/**/*.ts", "foundation/**/*.ts", "value-engines/**/*.ts", "feed/**/*.ts", "briefing/**/*.ts", "composition/**/*.ts", "http/**/*.ts", "core/**/*.ts", "public-export/**/*.ts", "test/**/*.ts"],
+  "include": ["shared-contracts/**/*.ts", "foundation/**/*.ts", "value-engines/**/*.ts", "feed/**/*.ts", "briefing/**/*.ts", "composition/**/*.ts", "http/**/*.ts", "core/**/*.ts", "public-export/**/*.ts", "accounting/**/*.ts", "test/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
