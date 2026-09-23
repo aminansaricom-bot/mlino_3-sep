@@ -1,0 +1,14 @@
+# nginx-assistant.conf.example — تکه‌ی پیکربندی دروازه‌ی دستیار برای /etc/nginx/mlino.d/
+# کلید هوش مصنوعی فقط در فرایند دروازه روی سرور است؛ nginx فقط درخواست را جابه‌جا می‌کند.
+location = /assistant/intent {
+    limit_except POST { deny all; }
+    client_max_body_size 4k;
+    proxy_pass http://host.docker.internal:8787/assistant/intent;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_connect_timeout 3s;
+    proxy_read_timeout 25s;
+    add_header Cache-Control "no-store" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer" always;
+}
