@@ -35,8 +35,8 @@ export default function ProductPage({ item, businessName, onClose }: { item: Cat
       <h3 className="product-section">نظرها</h3>
       {reviews.length === 0 ? <p className="product-empty">هنوز نظری ثبت نشده است.</p> : <>
         <ul className="review-list">
-          {reviews.map((review) => <li key={review.author} className="review">
-            <span className="review-avatar" aria-hidden="true">{review.author.replace('کاربر نمونه ', '')}</span>
+          {reviews.map((review) => <li key={`${review.author}|${review.text}`} className="review">
+            <span className="review-avatar" aria-hidden="true">{review.author.charAt(0)}</span>
             <div className="review-main">
               <div className="review-head"><strong>{review.author}</strong>
                 <span className="review-stars" aria-label={`${review.stars.toLocaleString('fa-IR')} ستاره`}>{'★'.repeat(review.stars)}<i>{'★'.repeat(5 - review.stars)}</i></span>

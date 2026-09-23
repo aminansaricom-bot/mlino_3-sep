@@ -24,7 +24,9 @@ describe('sample ratings and reviews (demo builds only)', () => {
   it('product reviews come from the owner texts by display name, with 3..5 stars', () => {
     const { reviews, rating } = demoProductReviews('چلوکباب کوبیده (آزمایشی)', true);
     expect(reviews).toHaveLength(3);
-    expect(reviews[0].author).toBe('کاربر نمونه ۱');
+    expect(reviews[0].author).toMatch(/^\S+ \S\.$/);
+    expect(reviews.some((review) => review.author.includes('کاربر نمونه'))).toBe(false);
+    expect(demoProductReviews('چلوکباب کوبیده (آزمایشی)', true).reviews[0].author).toBe(reviews[0].author);
     expect(reviews.every((review) => review.stars >= 3 && review.stars <= 5)).toBe(true);
     expect(rating!.count).toBe(3);
     expect(demoProductReviews('محصول ناشناخته', true)).toEqual({ reviews: [], rating: null });

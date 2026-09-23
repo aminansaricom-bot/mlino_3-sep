@@ -31,6 +31,16 @@ export function isDemoSocialRecord(id: string): boolean {
   return id.startsWith('test-');
 }
 
+/** نام‌های نمایشی ساختگی برای نظرهای نمونه — به خواست مالک به‌جای «کاربر نمونه». با حرف اول نام خانوادگی، مثل برنامه‌های سفارش غذا. */
+export const DEMO_REVIEWER_NAMES = ['سارا', 'علی', 'مریم', 'رضا', 'نگار', 'امیر', 'زهرا', 'محمد', 'الهام', 'حسین', 'پریسا', 'مهدی', 'نازنین', 'کیان', 'فاطمه', 'آرش', 'مینا', 'سینا', 'لیلا', 'بهراد', 'یاسمن', 'پویا', 'شیرین', 'رامین'] as const;
+const DEMO_SURNAME_INITIALS = ['ا', 'ب', 'ت', 'ج', 'ح', 'د', 'ر', 'ز', 'س', 'ش', 'ص', 'ع', 'ف', 'ق', 'ک', 'م', 'ن', 'ه', 'ی'] as const;
+
+/** نام ساختگی قطعی برای یک نظر؛ ثابت می‌ماند تا با هر بار باز کردن برنامه عوض نشود. */
+export function demoReviewerName(seed: string): string {
+  const hash = stableHash(seed);
+  return `${DEMO_REVIEWER_NAMES[hash % DEMO_REVIEWER_NAMES.length]} ${DEMO_SURNAME_INITIALS[Math.floor(hash / 97) % DEMO_SURNAME_INITIALS.length]}.`;
+}
+
 /** امتیاز نمونه‌ی کسب‌وکار: بین ۳٫۸ و ۴٫۹ با ۴۰ تا ۴۸۰ رأی، قطعی از روی شناسه. */
 export function demoBusinessRating(id: string, enabled = DEMO_SOCIAL_ENABLED): DemoRating | null {
   if (!enabled || !isDemoSocialRecord(id)) return null;
@@ -42,7 +52,7 @@ export function demoBusinessRating(id: string, enabled = DEMO_SOCIAL_ENABLED): D
 export function demoProductReviews(name: string, enabled = DEMO_SOCIAL_ENABLED): { reviews: DemoReview[]; rating: DemoRating | null } {
   if (!enabled) return { reviews: [], rating: null };
   const texts = DEMO_REVIEW_TEXTS[displayName(name)] ?? [];
-  const reviews = texts.map(([author, text]) => ({ author, text, stars: 3 + (stableHash(text) % 3) }));
+  const reviews = texts.map(([sample, text]) => ({ author: demoReviewerName(`${sample}|${text}`), text, stars: 3 + (stableHash(text) % 3) }));
   if (!reviews.length) return { reviews, rating: null };
   const average = Math.round((reviews.reduce((sum, review) => sum + review.stars, 0) / reviews.length) * 10) / 10;
   return { reviews, rating: { average, count: reviews.length } };
