@@ -198,7 +198,7 @@ export default function RealPublicApp() {
           if (voiceInput.listening) { voiceInput.stop(); return; }
           if (consent === 'unknown') { setPendingAsk({ query: '', voice: true }); return; }
           voiceInput.start();
-        }}>🎤</button>}
+        }}><img className="search-mic-img" src="/icons/voice.png" alt="" aria-hidden="true" draggable={false} /></button>}
       <button type="submit" className="search-ask" aria-label="پرسیدن از دستیار" disabled={query.trim().length < 2}>✦</button>
     </form><button className="profile-btn" onClick={() => setOverlay('experience')} aria-label="ذخیره‌های من"><Icon name="bookmark" /></button></div>
       <div className="chips" aria-label="فیلترهای واقعی">
