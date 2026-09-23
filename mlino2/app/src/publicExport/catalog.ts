@@ -96,12 +96,16 @@ function parseRecords(value: unknown): CatalogRecord[] {
 
 export interface CatalogTransport { read(): Promise<Uint8Array | null> }
 export class CatalogFetchTransport implements CatalogTransport {
-  constructor(private readonly fetcher: typeof fetch = fetch, private readonly url = CATALOG_URL) {}
+  // مرورگرها fetch را فقط با گیرندهٔ window می‌پذیرند؛ `this.fetcher(...)` گیرنده را این کلاس می‌کند و
+  // «Illegal invocation» می‌دهد. آن خطا بی‌صدا به «کاتالوگ خالی» تبدیل می‌شد و منو در هیچ مرورگری نمی‌آمد.
+  // Node گیرنده را نمی‌سنجد، پس آزمون‌ها سبز بودند. تابع پیش‌فرض fetch را همیشه از globalThis صدا می‌زند.
+  constructor(private readonly fetcher: typeof fetch = (input, init) => globalThis.fetch(input, init), private readonly url = CATALOG_URL) {}
   async read(): Promise<Uint8Array | null> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10_000);
     try {
-      const response = await this.fetcher(this.url, { cache: 'no-store', signal: controller.signal });
+      const fetcher = this.fetcher;
+      const response = await fetcher(this.url, { cache: 'no-store', signal: controller.signal });
       if (response.status === 404) return null;
       if (!response.ok) throw new Error('CATALOG_FETCH');
       const length = response.headers.get('content-length');
