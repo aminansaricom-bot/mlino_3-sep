@@ -1655,3 +1655,8 @@ body, button, input, textarea, select { font-family: Vazirmatn, "Segoe UI", Taho
 /* جا برای انتخاب نما و دکمه‌ی شعاع: کارت زیر انتخاب نما، پشته‌ی کاتالوگ کنار دکمه‌ی شعاع */
 .glass-card { top: 100px; }
 .catalog-ar-stack { inset-inline-start: 12px; inset-inline-end: 80px; margin-inline: 0; max-width: none; }
+
+/* آیکون ویترین (طرح مالک) در دکمه‌ی شیشه‌ای: دایره‌ی رنگی در ابتدا، برچسب کنارش */
+.action-fab.vitrine { height: 62px; padding: 5px 5px 5px 20px; gap: 10px; background: linear-gradient(145deg, rgba(255,255,255,.26), rgba(255,255,255,.08)), rgba(28,16,58,.55); -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%); border: 1px solid rgba(255,255,255,.5); box-shadow: 0 12px 30px rgba(122,92,255,.4), 0 0 24px rgba(255,90,54,.25), inset 0 1px 0 rgba(255,255,255,.5); }
+.action-fab-img { width: 52px; height: 52px; border-radius: 50%; flex: none; filter: drop-shadow(0 4px 10px rgba(122,92,255,.45)); }
+.action-fab.vitrine .action-fab-icon { display: none; }
