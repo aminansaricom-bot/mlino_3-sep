@@ -115,7 +115,7 @@ const ROUTES: readonly [RegExp, string, string][] = [
   [/سود|زیان|گزارش/, '/accounting/reports', 'گزارش‌ها'], [/سند|اسناد|دفتر/, '/accounting/journal', 'اسناد'], [/حسابداری/, '/accounting', 'حسابداری'],
   [/انبار|موجودی کالا|موجودی مواد/, '/inventory', 'انبار'], [/دستور مصرف|رسپی/, '/inventory/recipes', 'دستور مصرف'],
   [/ویترین/, '/storefront', 'ویترین'], [/محصول|منو/, '/products', 'محصولات'], [/آفر|تخفیف/, '/offers', 'آفرها'],
-  [/محتوا|اینستاگرام|پست/, '/content', 'تولید محتوا'], [/مشتری|crm/i, '/crm', 'مشتریان'], [/امروز|خانه|داشبورد/, '/', 'امروز'],
+  [/محتوا|اینستاگرام|پست/, '/content', 'تولید محتوا'], [/پیام|گفتگو|چت/, '/chat', 'گفتگو با مشتری'], [/مشتری|crm/i, '/crm', 'مشتریان'], [/امروز|خانه|داشبورد/, '/', 'امروز'],
 ];
 
 const SUFFIX = /^(ها|های|ی|ای|رو|را|مون|تون)?$/;
@@ -163,6 +163,17 @@ export function understand(raw: string, s: Snapshot): CommandResult {
     const to = /عکس|محصول|منو/.test(text) ? '/products' : /ویترین|پروفایل|ساعت/.test(text) ? '/storefront' : '/offers';
     return { type: 'governance', to, linkLabel: 'رفتن به همان بخش',
       text: 'انتشار و دادن دسترسی تصمیم خود شماست و روی همان مورد با دکمه‌ی انتشار انجام می‌شود؛ من فقط آماده‌اش می‌کنم. در این نسخه‌ی نمایشی، ویرایش و انتشار پس از ورود عضو فعال می‌شود.' };
+  }
+
+  // Chat (D-73): no AI reads or writes customer messages. The assistant knows only the unread count.
+  if (/پیام|گفتگو|چت/.test(text) && !/تبلیغ/.test(text)) {
+    if (/جواب|پاسخ|بفرست|بنویس|بگو به/.test(text)) {
+      return { type: 'governance', to: '/chat', linkLabel: 'گفتگو با مشتری', text: 'پاسخ به مشتری را خودت در صفحه‌ی گفتگو می‌نویسی. من پیام‌های مشتری را نمی‌خوانم و به جای کسی چیزی نمی‌فرستم؛ این قاعده‌ی مصوب گفتگوست (D-73).' };
+    }
+    const c = s.chat;
+    if (!c?.loggedIn) return { type: 'answer', to: '/chat', linkLabel: 'ورود و گفتگو', text: 'برای دیدن گفتگوها اول باید با شماره‌ی موبایل وارد شوی. بعد از ورود فقط شمار پیام‌های خوانده‌نشده را به تو می‌گویم، نه متن آن‌ها را.' };
+    if (!c.summary) return { type: 'answer', to: '/chat', linkLabel: 'گفتگو با مشتری', text: 'وضعیت گفتگوها الان خوانده نشد؛ حدسی نمی‌زنم. در خود صفحه‌ی گفتگو ببین.' };
+    return { type: 'answer', to: '/chat', linkLabel: 'گفتگو با مشتری', text: c.summary.sensitive ? 'گفتگو برای این کسب‌وکار خاموش است، چون در دسته‌ی حساس قرار دارد.' : `${faNum(c.summary.conversations)} گفتگو داری و ${c.summary.unreadMessages ? `${faNum(c.summary.unreadMessages)} پیام خوانده‌نشده در ${faNum(c.summary.unreadConversations)} گفتگو` : 'پیام خوانده‌نشده‌ای نیست'}. متن پیام‌ها را فقط خودت در صفحه‌ی گفتگو می‌بینی.` };
   }
 
   // CRM: the assistant speaks only in aggregates and never reads or repeats a person's data (R8-a §3.6).

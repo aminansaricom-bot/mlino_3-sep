@@ -10,8 +10,9 @@ import { OffersPage, ProductsPage, StorefrontPage } from '../modules/catalog/Cat
 import LockedModule from './LockedModule';
 import CrmModule from '../modules/crm/CrmModule';
 import Assistant from '../assistant/Assistant';
+import ChatModule from '../modules/chat/ChatModule';
 
-const STATUS_DOT: Record<string, string> = { demo: 'demo', 'published-view': 'live', design: 'design', blocked: 'blocked' };
+const STATUS_DOT: Record<string, string> = { demo: 'demo', 'published-view': 'live', live: 'live', design: 'design', blocked: 'blocked' };
 
 export function Link({ to, className, children, onNavigate }: { to: string; className?: string; children: ReactNode; onNavigate?: () => void }) {
   const { navigate } = useWorkspace();
@@ -49,6 +50,7 @@ export default function Shell() {
     case 'storefront': page = <StorefrontPage state={published} />; break;
     case 'offers': page = <OffersPage state={published} />; break;
     case 'crm': page = <CrmModule tab={sub} />; break;
+    case 'chat': page = <ChatModule tab={sub} />; break;
     case 'content': page = <LockedModule id={active} />; break;
     default: page = <Home published={pub} />;
   }

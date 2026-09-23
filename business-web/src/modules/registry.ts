@@ -18,7 +18,10 @@ export const ROLE_LABEL = {
 } as const;
 export type RoleKey = keyof typeof ROLE_LABEL;
 
-export type Snapshot = Readonly<{ today: string; book: BookData; ledger: Ledger; inventory: Inventory; crm: Crm; published: PublishedBusiness | null | undefined }>;
+/** Chat reaches the shell only as aggregates from the server (D-73); null when no member is logged in. */
+export type ChatSnap = Readonly<{ loggedIn: boolean; summary: Readonly<{ conversations: number; unreadConversations: number; unreadMessages: number; enabled: boolean; sensitive: boolean }> | null }>;
+
+export type Snapshot = Readonly<{ today: string; book: BookData; ledger: Ledger; inventory: Inventory; crm: Crm; published: PublishedBusiness | null | undefined; chat?: ChatSnap | null }>;
 
 export type DailyAction = Readonly<{
   id: string;
@@ -36,7 +39,7 @@ export type DailyAction = Readonly<{
 
 export type Stat = Readonly<{ label: string; value: string; tone?: 'good' | 'bad' }>;
 
-export type ModuleId = 'accounting' | 'inventory' | 'products' | 'storefront' | 'offers' | 'content' | 'crm';
+export type ModuleId = 'accounting' | 'inventory' | 'products' | 'storefront' | 'offers' | 'content' | 'crm' | 'chat';
 
 export type ModuleManifest = Readonly<{
   id: ModuleId;
@@ -44,7 +47,7 @@ export type ModuleManifest = Readonly<{
   icon: string;
   route: string;
   layer: 'core' | 'module';
-  status: 'demo' | 'published-view' | 'design' | 'blocked';
+  status: 'demo' | 'published-view' | 'live' | 'design' | 'blocked';
   statusNote: string;
   blockedBy?: string;
   summary: (s: Snapshot) => readonly Stat[];
@@ -203,6 +206,25 @@ export const MODULES: readonly ModuleManifest[] = [
         impact: 'بازگشت مشتری', kpi: 'نرخ مراجعه‌ی دوباره', outcome: 'پیام فقط به همین اعضا و ثبت مراجعه‌ی بعدی', to: '/crm',
       });
       return out;
+    },
+  },
+  {
+    id: 'chat', title: 'گفتگو با مشتری', icon: '💬', route: '/chat', layer: 'module', status: 'live',
+    statusNote: 'زنده روی سرور (D-73) — ورود عضو با شماره، حالت آزمایشی پیامک',
+    summary: ({ chat }) => {
+      if (!chat?.loggedIn) return [{ label: 'ورود عضو', value: 'لازم است' }];
+      if (!chat.summary) return [{ label: 'گفتگوها', value: '—' }];
+      if (chat.summary.sensitive) return [{ label: 'وضعیت', value: 'خاموش (حساس)' }];
+      return [{ label: 'گفتگوها', value: faNum(chat.summary.conversations) }, { label: 'خوانده‌نشده', value: faNum(chat.summary.unreadMessages), tone: chat.summary.unreadMessages ? 'bad' : undefined }];
+    },
+    actions: ({ chat }) => {
+      const u = chat?.summary;
+      if (!u || !u.unreadConversations) return [];
+      return [{
+        id: 'chat-unread', module: 'chat', urgency: 'now', title: 'پاسخ به پیام مشتری‌ها',
+        reason: `${faNum(u.unreadConversations)} گفتگو ${faNum(u.unreadMessages)} پیام خوانده‌نشده دارد`, owner: 'customer_service',
+        impact: 'پاسخ به‌موقع و بازگشت مشتری', kpi: 'زمان پاسخ‌گویی به پیام', outcome: 'پاسخ در همان گفتگو، تا امروز', to: '/chat',
+      }];
     },
   },
 ];

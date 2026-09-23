@@ -3,6 +3,7 @@ import { useWorkspace } from '../workspace';
 import { MODULES, ROLE_LABEL, dailyActions, type DailyAction, type Snapshot } from '../modules/registry';
 import type { PublishedBusiness } from '../published';
 import { Link } from './Shell';
+import { useChatSession } from '../chat/session';
 
 const URGENCY = { now: ['امروز', 'bad'], soon: ['این هفته', 'warn'], later: ['به‌زودی', 'info'] } as const;
 
@@ -30,8 +31,9 @@ function ActionCard({ a }: { a: DailyAction }) {
 
 export default function Home({ published }: { published: PublishedBusiness | null | undefined }) {
   const ws = useWorkspace();
-  const snapshot: Snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, crm: ws.crm, published };
-  const actions = useMemo(() => dailyActions(snapshot), [ws.ledger, ws.inventory, ws.crm, published, ws.today]); // eslint-disable-line react-hooks/exhaustive-deps
+  const cs = useChatSession();
+  const snapshot: Snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, crm: ws.crm, published, chat: { loggedIn: !!cs.me, summary: cs.summary } };
+  const actions = useMemo(() => dailyActions(snapshot), [ws.ledger, ws.inventory, ws.crm, published, ws.today, cs.me, cs.summary]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <div className="stack">
     <section className="hero-today">

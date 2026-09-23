@@ -6,6 +6,7 @@ import { compactRial, jDate, toFaDigits } from '../format';
 import { AmountInput, DateInput, Field, Segmented } from '../ui';
 import { vatOnNet } from '../engine';
 import Orb from './Orb';
+import { useChatSession } from '../chat/session';
 import { evaluate, understand, type CommandResult, type Money, type Proposal } from './brain';
 import { qtyText } from '../modules/inventory/InventoryModule';
 import type { InvOp } from '../modules/inventory/data';
@@ -18,8 +19,9 @@ type SpeechCtor = new () => { lang: string; interimResults: boolean; onresult: (
 export default function Assistant({ published }: { published: PublishedBusiness | null | undefined }) {
   const ws = useWorkspace();
   const surface = ws.path.split('/')[1] || 'home';
-  const snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, crm: ws.crm, published };
-  const ev = useMemo(() => { try { return evaluate(snapshot, surface); } catch { return null; } }, [ws.ledger, ws.inventory, ws.crm, published, surface]); // eslint-disable-line react-hooks/exhaustive-deps
+  const cs = useChatSession();
+  const snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, crm: ws.crm, published, chat: { loggedIn: !!cs.me, summary: cs.summary } };
+  const ev = useMemo(() => { try { return evaluate(snapshot, surface); } catch { return null; } }, [ws.ledger, ws.inventory, ws.crm, published, surface, cs.me, cs.summary]); // eslint-disable-line react-hooks/exhaustive-deps
   const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [text, setText] = useState('');
