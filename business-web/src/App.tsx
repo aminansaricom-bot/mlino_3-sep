@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { clearBook, loadBook, replay, saveBook, type BookData, type Op, type Settings } from './book';
+import { addAttachments, clearAttachments } from './attachments';
 import { generateSample } from './sample';
 import { errorText, faNum, jDateLong, todayIso } from './format';
 import { Field, Segmented, Sheet } from './ui';
@@ -32,6 +33,8 @@ export default function App() {
   const [form, setForm] = useState<FormKey | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [attachVersion, setAttachVersion] = useState(0);
+  const [reportView, setReportView] = useState<string | undefined>(undefined);
 
   useEffect(() => { history.replaceState(null, '', `#${tab}`); window.scrollTo({ top: 0 }); }, [tab]);
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 2600); return () => clearTimeout(t); }, [toast]);
@@ -43,35 +46,41 @@ export default function App() {
     return null;
   }, [data]);
 
+  const attach = useCallback((docId: string, files: readonly File[]) => {
+    void addAttachments(docId, files)
+      .then((r) => { setAttachVersion((v) => v + 1); if (r.rejected.length) setToast(`پیوست ذخیره نشد: ${r.rejected[0]}`); else setToast(`سند با ${faNum(r.added.length)} پیوست ثبت شد.`); })
+      .catch(() => setToast('سند ثبت شد، ولی ذخیره‌ی پیوست روی این مرورگر ممکن نشد.'));
+  }, []);
+
   const updateSettings = (settings: Settings) => { const next = { ...data, settings }; setData(next); saveBook(next); };
   const reset = () => {
     if (!window.confirm('همه‌ی ثبت‌های تو پاک می‌شود و دفتر نمونه از نو ساخته می‌شود. ادامه؟')) return;
-    clearBook(); const fresh = generateSample(today); saveBook(fresh); setData(fresh); setTab('home'); setToast('دفتر نمونه از نو ساخته شد.');
+    clearBook(); void clearAttachments().then(() => setAttachVersion((v) => v + 1)); const fresh = generateSample(today); saveBook(fresh); setData(fresh); setTab('home'); setToast('دفتر نمونه از نو ساخته شد.');
   };
   const formTitle = form ? FORMS.find((f) => f[0] === form)![2] : '';
 
   return <div className="app">
     <header className="top">
-      <a className="back" href="https://business.mlino.site/" aria-label="بازگشت به پنل کسب‌وکار"><img src="/accounting/logo.png" alt="" width="36" height="26" /></a>
+      <a className="back" href="https://business.mlino.site/" aria-label="بازگشت به پنل کسب‌وکار"><img src="/accounting/logo.png" alt="" width="30" height="30" /></a>
       <div className="title"><strong>{data.settings.businessName}</strong><small>حسابداری — {jDateLong(today)}</small></div>
       <span className="demo-tag">نمایشی</span>
       <button type="button" className="icon-btn" onClick={() => setShowSettings(true)} aria-label="تنظیمات">⚙️</button>
     </header>
     <nav className="tabs" aria-label="بخش‌ها">
-      {TABS.map(([key, icon, label]) => <button key={key} type="button" className={tab === key ? 'on' : ''} aria-current={tab === key ? 'page' : undefined} onClick={() => setTab(key)}>
+      {TABS.map(([key, icon, label]) => <button key={key} type="button" className={tab === key ? 'on' : ''} aria-current={tab === key ? 'page' : undefined} onClick={() => { setReportView(undefined); setTab(key); }}>
         <span aria-hidden="true">{icon}</span>{label}
       </button>)}
     </nav>
     <main className="content">
       <p className="demo-banner">این یک دفتر نمونه است: عددها ساختگی‌اند و ثبت‌های تو فقط روی همین مرورگر می‌ماند. <button type="button" className="link" onClick={reset}>شروع دوباره</button></p>
-      {tab === 'home' && <Dashboard ledger={ledger} today={today} onRecord={(f) => setForm(f as FormKey)} onTab={(t) => setTab(t as Tab)} />}
+      {tab === 'home' && <Dashboard ledger={ledger} today={today} onRecord={(f) => setForm(f as FormKey)} onTab={(t) => { const [name, view] = t.split(':'); setReportView(view); setTab(name as Tab); }} />}
       {tab === 'record' && <RecordMenu onOpen={setForm} />}
       {tab === 'cheques' && <Cheques ledger={ledger} today={today} commit={commit} />}
-      {tab === 'reports' && <Reports ledger={ledger} today={today} />}
-      {tab === 'journal' && <Journal ledger={ledger} today={today} commit={commit} />}
+      {tab === 'reports' && <Reports key={reportView ?? 'default'} ledger={ledger} today={today} initial={reportView} />}
+      {tab === 'journal' && <Journal ledger={ledger} today={today} commit={commit} attachVersion={attachVersion} onAttachmentsChanged={() => setAttachVersion((v) => v + 1)} />}
     </main>
     {form && <Sheet title={formTitle} onClose={() => setForm(null)}>
-      <RecordForm form={form} ledger={ledger} settings={data.settings} today={today} commit={commit} done={() => setForm(null)} />
+      <RecordForm form={form} ledger={ledger} settings={data.settings} today={today} commit={commit} attach={attach} done={() => setForm(null)} />
     </Sheet>}
     {showSettings && <Sheet title="تنظیمات" onClose={() => setShowSettings(false)}>
       <SettingsForm settings={data.settings} onSave={(s) => { updateSettings(s); setShowSettings(false); setToast('تنظیمات ذخیره شد.'); }} />

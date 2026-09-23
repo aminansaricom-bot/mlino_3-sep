@@ -4,9 +4,12 @@ import { docId, type Op, type Settings } from '../book';
 import { DEMO_MENU } from '../sample';
 import { addDays, faNum } from '../format';
 import { AmountInput, DateInput, Field, Money, Segmented } from '../ui';
+import { AttachPicker } from './Attachments';
 
 export type Commit = (op: Op, success: string) => string | null;
-type FormProps = { ledger: Ledger; settings: Settings; today: string; commit: Commit; done: () => void };
+/** Saves files picked in a form once the document has posted (async, never blocks the posting). */
+export type Attach = (docId: string, files: readonly File[]) => void;
+type FormProps = { ledger: Ledger; settings: Settings; today: string; commit: Commit; done: () => void; attach: Attach };
 
 export const FORMS = [
   ['daily', '💵', 'فروش روزانه', 'جمع فروش یک روز، نقد و کارت'],
@@ -73,17 +76,20 @@ function settlement(ledger: Ledger, method: Method, bankId: string, amount: numb
   return {};
 }
 
-function useCommon(ledger: Ledger, today: string) {
+function useCommon(ledger: Ledger, today: string, prefix: string, attach: Attach) {
+  const [id] = useState(() => docId(prefix));
+  const [files, setFiles] = useState<File[]>([]);
+  const finish = (done: () => void) => { if (files.length) attach(id, files); done(); };
   const [date, setDate] = useState(today);
   const [error, setError] = useState<string | null>(null);
   const [method, setMethod] = useState<Method>('cash');
   const [bankId, setBankId] = useState(ledger.listTreasuries().find((t) => t.kind === 'bank')?.id ?? '');
   const [cheque, setCheque] = useState<ChequeFields>({ number: '', bank: '', due: addDays(today, 30) });
-  return { date, setDate, error, setError, method, setMethod, bankId, setBankId, cheque, setCheque };
+  return { id, files, setFiles, finish, date, setDate, error, setError, method, setMethod, bankId, setBankId, cheque, setCheque };
 }
 
-function DailyForm({ ledger, settings, today, commit, done }: FormProps) {
-  const c = useCommon(ledger, today);
+function DailyForm({ ledger, settings, today, commit, done, attach }: FormProps) {
+  const c = useCommon(ledger, today, 'day', attach);
   const [total, setTotal] = useState<number | null>(null);
   const [card, setCard] = useState<number | null>(null);
   const cashBox = ledger.listTreasuries().find((t) => t.kind === 'cash')!;
@@ -94,8 +100,8 @@ function DailyForm({ ledger, settings, today, commit, done }: FormProps) {
     if (!total) return c.setError('جمع فروش را وارد کن.');
     if (cash < 0) return c.setError('مبلغ کارت از جمع فروش بیشتر است.');
     const payments = [...(cash > 0 ? [{ treasuryId: cashBox.id, amount: cash }] : []), ...((card ?? 0) > 0 ? [{ treasuryId: c.bankId, amount: card! }] : [])];
-    const err = commit({ k: 'daily', input: { id: docId('day'), date: c.date, amount: total, vat: { rateBp: settings.vatRateBp, pricesIncludeVat: settings.pricesIncludeVat }, payments } }, 'فروش روز ثبت شد.');
-    c.setError(err); if (!err) done();
+    const err = commit({ k: 'daily', input: { id: c.id, date: c.date, amount: total, vat: { rateBp: settings.vatRateBp, pricesIncludeVat: settings.pricesIncludeVat }, payments } }, 'فروش روز ثبت شد.');
+    c.setError(err); if (!err) c.finish(done);
   }}>
     <Field label="تاریخ">{(id) => <DateInput id={id} today={today} value={c.date} onChange={c.setDate} />}</Field>
     <Field label="جمع فروش روز" hint={settings.pricesIncludeVat && vat > 0 ? <>شامل <Money value={vat} /> ارزش افزوده</> : undefined}>{(id) => <AmountInput id={id} value={total} onChange={setTotal} />}</Field>
@@ -104,12 +110,13 @@ function DailyForm({ ledger, settings, today, commit, done }: FormProps) {
       <Field label="به حساب">{(id) => <select id={id} value={c.bankId} onChange={(e) => c.setBankId(e.target.value)}>{ledger.listTreasuries().filter((t) => t.kind === 'bank').map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</select>}</Field>
     </div>
     <p className="calc">نقد به صندوق: <Money value={Math.max(0, cash)} /></p>
+    <AttachPicker files={c.files} onChange={c.setFiles} />
     <Submit error={c.error} />
   </form>;
 }
 
-function InvoiceForm({ ledger, settings, today, commit, done }: FormProps) {
-  const c = useCommon(ledger, today);
+function InvoiceForm({ ledger, settings, today, commit, done, attach }: FormProps) {
+  const c = useCommon(ledger, today, 'inv', attach);
   const [customerId, setCustomerId] = useState('');
   const [qty, setQty] = useState<Record<string, number>>({});
   const [discount, setDiscount] = useState<number | null>(null);
@@ -122,8 +129,8 @@ function InvoiceForm({ ledger, settings, today, commit, done }: FormProps) {
     e.preventDefault();
     if (!totals) return c.setError('دست‌کم یک قلم به فاکتور اضافه کن.');
     const pay = settlement(ledger, c.method, c.bankId, totals.total, c.cheque);
-    const err = commit({ k: 'invoice', input: { id: docId('inv'), date: c.date, ...(customerId ? { customerId } : {}), lines, discount: discount ?? 0, vat, ...pay } }, 'فاکتور ثبت شد.');
-    c.setError(err); if (!err) done();
+    const err = commit({ k: 'invoice', input: { id: c.id, date: c.date, ...(customerId ? { customerId } : {}), lines, discount: discount ?? 0, vat, ...pay } }, 'فاکتور ثبت شد.');
+    c.setError(err); if (!err) c.finish(done);
   }}>
     <div className="row2">
       <Field label="تاریخ">{(id) => <DateInput id={id} today={today} value={c.date} onChange={c.setDate} />}</Field>
@@ -147,12 +154,13 @@ function InvoiceForm({ ledger, settings, today, commit, done }: FormProps) {
       <div className="grand"><dt>مبلغ فاکتور</dt><dd><Money value={totals.total} /></dd></div>
     </dl>}
     <MethodPicker ledger={ledger} value={c.method} onChange={c.setMethod} bankId={c.bankId} onBank={c.setBankId} allowCredit cheque={c.cheque} onCheque={c.setCheque} today={today} />
+    <AttachPicker files={c.files} onChange={c.setFiles} />
     <Submit error={c.error} label="ثبت فاکتور" />
   </form>;
 }
 
-function ExpenseForm({ ledger, settings, today, commit, done }: FormProps) {
-  const c = useCommon(ledger, today);
+function ExpenseForm({ ledger, settings, today, commit, done, attach }: FormProps) {
+  const c = useCommon(ledger, today, 'exp', attach);
   const categories = ledger.listAccounts().filter((a) => a.kind === 'expense' && a.userSelectable && a.active);
   const [account, setAccount] = useState(categories[0]?.code ?? '');
   const [amount, setAmount] = useState<number | null>(null);
@@ -166,8 +174,8 @@ function ExpenseForm({ ledger, settings, today, commit, done }: FormProps) {
     e.preventDefault();
     if (!amount) return c.setError('مبلغ را وارد کن.');
     const pay = settlement(ledger, c.method, c.bankId, total, c.cheque);
-    const err = commit({ k: 'expense', input: { id: docId('exp'), date: c.date, account, amount, inputVat, ...(supplierId ? { supplierId } : {}), ...pay, ...(note.trim() ? { note: note.trim() } : {}) } }, 'هزینه ثبت شد.');
-    c.setError(err); if (!err) done();
+    const err = commit({ k: 'expense', input: { id: c.id, date: c.date, account, amount, inputVat, ...(supplierId ? { supplierId } : {}), ...pay, ...(note.trim() ? { note: note.trim() } : {}) } }, 'هزینه ثبت شد.');
+    c.setError(err); if (!err) c.finish(done);
   }}>
     <div className="row2">
       <Field label="تاریخ">{(id) => <DateInput id={id} today={today} value={c.date} onChange={c.setDate} />}</Field>
@@ -179,12 +187,13 @@ function ExpenseForm({ ledger, settings, today, commit, done }: FormProps) {
     <Field label="توضیح">{(id) => <input id={id} value={note} maxLength={120} onChange={(e) => setNote(e.target.value)} placeholder="مثلاً قبض برق مهر" />}</Field>
     <p className="calc">جمع پرداختنی: <Money value={total} /></p>
     <MethodPicker ledger={ledger} value={c.method} onChange={c.setMethod} bankId={c.bankId} onBank={c.setBankId} allowCredit cheque={c.cheque} onCheque={c.setCheque} today={today} />
+    <AttachPicker files={c.files} onChange={c.setFiles} />
     <Submit error={c.error} />
   </form>;
 }
 
-function SettleForm({ ledger, today, commit, done, kind }: FormProps & { kind: 'receipt' | 'payment' }) {
-  const c = useCommon(ledger, today);
+function SettleForm({ ledger, today, commit, done, attach, kind }: FormProps & { kind: 'receipt' | 'payment' }) {
+  const c = useCommon(ledger, today, kind === 'receipt' ? 'rcpt' : 'pay', attach);
   const balances = partyBalances(ledger, today);
   const parties = ledger.listParties().filter((p) => (kind === 'receipt' ? p.role !== 'supplier' : p.role !== 'customer'));
   const owed = (id: string) => { const b = balances.find((x) => x.id === id); return kind === 'receipt' ? b?.receivable ?? 0 : b?.payable ?? 0; };
@@ -196,8 +205,8 @@ function SettleForm({ ledger, today, commit, done, kind }: FormProps & { kind: '
     if (!partyId) return c.setError(kind === 'receipt' ? 'مشتری را انتخاب کن.' : 'تأمین‌کننده را انتخاب کن.');
     if (!amount) return c.setError('مبلغ را وارد کن.');
     const pay = settlement(ledger, c.method, c.bankId, amount, c.cheque);
-    const err = commit({ k: kind, input: { id: docId(kind === 'receipt' ? 'rcpt' : 'pay'), date: c.date, partyId, ...pay } }, kind === 'receipt' ? 'دریافت ثبت شد.' : 'پرداخت ثبت شد.');
-    c.setError(err); if (!err) done();
+    const err = commit({ k: kind, input: { id: c.id, date: c.date, partyId, ...pay } }, kind === 'receipt' ? 'دریافت ثبت شد.' : 'پرداخت ثبت شد.');
+    c.setError(err); if (!err) c.finish(done);
   }}>
     <div className="row2">
       <Field label="تاریخ">{(id) => <DateInput id={id} today={today} value={c.date} onChange={c.setDate} />}</Field>
@@ -207,12 +216,13 @@ function SettleForm({ ledger, today, commit, done, kind }: FormProps & { kind: '
     </div>
     <Field label="مبلغ">{(id) => <AmountInput id={id} value={amount} onChange={setAmount} />}</Field>
     <MethodPicker ledger={ledger} value={c.method} onChange={c.setMethod} bankId={c.bankId} onBank={c.setBankId} allowCredit={false} cheque={c.cheque} onCheque={c.setCheque} today={today} />
+    <AttachPicker files={c.files} onChange={c.setFiles} />
     <Submit error={c.error} />
   </form>;
 }
 
-function TransferForm({ ledger, today, commit, done }: FormProps) {
-  const c = useCommon(ledger, today);
+function TransferForm({ ledger, today, commit, done, attach }: FormProps) {
+  const c = useCommon(ledger, today, 'xfer', attach);
   const all = ledger.listTreasuries();
   const [from, setFrom] = useState(all[0]?.id ?? '');
   const [to, setTo] = useState(all[1]?.id ?? '');
@@ -221,8 +231,8 @@ function TransferForm({ ledger, today, commit, done }: FormProps) {
   return <form onSubmit={(e) => {
     e.preventDefault();
     if (!amount) return c.setError('مبلغ را وارد کن.');
-    const err = commit({ k: 'transfer', input: { id: docId('xfer'), date: c.date, fromTreasuryId: from, toTreasuryId: to, amount, fee: fee ?? 0 } }, 'انتقال ثبت شد.');
-    c.setError(err); if (!err) done();
+    const err = commit({ k: 'transfer', input: { id: c.id, date: c.date, fromTreasuryId: from, toTreasuryId: to, amount, fee: fee ?? 0 } }, 'انتقال ثبت شد.');
+    c.setError(err); if (!err) c.finish(done);
   }}>
     <Field label="تاریخ">{(id) => <DateInput id={id} today={today} value={c.date} onChange={c.setDate} />}</Field>
     <div className="row2">
@@ -233,12 +243,13 @@ function TransferForm({ ledger, today, commit, done }: FormProps) {
       <Field label="مبلغ">{(id) => <AmountInput id={id} value={amount} onChange={setAmount} />}</Field>
       <Field label="کارمزد">{(id) => <AmountInput id={id} value={fee} onChange={setFee} />}</Field>
     </div>
+    <AttachPicker files={c.files} onChange={c.setFiles} />
     <Submit error={c.error} />
   </form>;
 }
 
-function OwnerForm({ ledger, today, commit, done }: FormProps) {
-  const c = useCommon(ledger, today);
+function OwnerForm({ ledger, today, commit, done, attach }: FormProps) {
+  const c = useCommon(ledger, today, 'owner', attach);
   const all = ledger.listTreasuries();
   const [kind, setKind] = useState<'withdrawal' | 'contribution'>('withdrawal');
   const [treasuryId, setTreasuryId] = useState(all[0]?.id ?? '');
@@ -246,8 +257,8 @@ function OwnerForm({ ledger, today, commit, done }: FormProps) {
   return <form onSubmit={(e) => {
     e.preventDefault();
     if (!amount) return c.setError('مبلغ را وارد کن.');
-    const err = commit({ k: kind, input: { id: docId(kind === 'withdrawal' ? 'draw' : 'cap'), date: c.date, treasuryId, amount } }, kind === 'withdrawal' ? 'برداشت ثبت شد.' : 'آورده ثبت شد.');
-    c.setError(err); if (!err) done();
+    const err = commit({ k: kind, input: { id: c.id, date: c.date, treasuryId, amount } }, kind === 'withdrawal' ? 'برداشت ثبت شد.' : 'آورده ثبت شد.');
+    c.setError(err); if (!err) c.finish(done);
   }}>
     <Field label="نوع">{() => <Segmented label="نوع" value={kind} onChange={setKind} options={[['withdrawal', 'برداشت مالک'], ['contribution', 'آورده‌ی مالک']]} />}</Field>
     <div className="row2">
@@ -255,6 +266,7 @@ function OwnerForm({ ledger, today, commit, done }: FormProps) {
       <Field label={kind === 'withdrawal' ? 'از' : 'به'}>{(id) => <select id={id} value={treasuryId} onChange={(e) => setTreasuryId(e.target.value)}>{all.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select>}</Field>
     </div>
     <Field label="مبلغ">{(id) => <AmountInput id={id} value={amount} onChange={setAmount} />}</Field>
+    <AttachPicker files={c.files} onChange={c.setFiles} />
     <Submit error={c.error} />
   </form>;
 }

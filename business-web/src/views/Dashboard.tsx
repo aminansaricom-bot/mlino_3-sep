@@ -1,4 +1,4 @@
-import { chequeRegister, jalaliMonthRange, jalaliSeasonRange, partyBalances, profitAndLoss, toJalali, treasuryBalances, vatReport, JALALI_MONTHS, type Ledger } from '../engine';
+import { balanceSheet, chequeRegister, jalaliMonthRange, jalaliSeasonRange, partyBalances, profitAndLoss, toJalali, treasuryBalances, vatReport, JALALI_MONTHS, type Ledger } from '../engine';
 import { addDays, compactRial, faNum, jDate, toFaDigits } from '../format';
 import { Badge, Card, Money } from '../ui';
 
@@ -17,6 +17,7 @@ export default function Dashboard({ ledger, today, onRecord, onTab }: { ledger: 
   const payable = parties.reduce((s, p) => s + p.payable, 0);
   const season = jalaliSeasonRange(t.jy, (Math.floor((t.jm - 1) / 3) + 1) as 1 | 2 | 3 | 4);
   const vat = vatReport(ledger, season);
+  const bs = balanceSheet(ledger, today);
   const soon = chequeRegister(ledger, today, { status: 'open' }).filter((c) => c.dueDate <= addDays(today, 14));
 
   // Last four Jalali months, sales vs expenses.
@@ -69,7 +70,7 @@ export default function Dashboard({ ledger, today, onRecord, onTab }: { ledger: 
           {treasuries.map((x) => <li key={x.id}><span>{x.kind === 'cash' ? '💵' : '🏦'} {x.name}</span><Money value={x.balance} /></li>)}
         </ul>
       </Card>
-      <Card title="طلب و بدهی" action={<button type="button" className="link" onClick={() => onTab('reports')}>جزئیات</button>}>
+      <Card title="طلب و بدهی" action={<button type="button" className="link" onClick={() => onTab('reports:parties')}>جزئیات</button>}>
         <ul className="rows">
           <li><span>طلب از مشتری‌ها</span><Money value={receivable} /></li>
           <li><span>بدهی به تأمین‌کننده‌ها</span><Money value={payable} /></li>
@@ -77,6 +78,16 @@ export default function Dashboard({ ledger, today, onRecord, onTab }: { ledger: 
         </ul>
       </Card>
     </div>
+
+    <Card title="ترازنامه در یک نگاه" action={<button type="button" className="link" onClick={() => onTab('reports:balance')}>ترازنامه‌ی کامل</button>}>
+      <div className="bs-summary">
+        <div><span>دارایی‌ها</span><strong><Money value={bs.totalAssets} compact /></strong></div>
+        <b aria-hidden="true">=</b>
+        <div><span>بدهی‌ها</span><strong><Money value={bs.totalLiabilities} compact /></strong></div>
+        <b aria-hidden="true">+</b>
+        <div><span>سرمایه</span><strong><Money value={bs.totalEquity} compact /></strong></div>
+      </div>
+    </Card>
 
     <Card title="چک‌های دو هفته‌ی پیش رو" action={<button type="button" className="link" onClick={() => onTab('cheques')}>همه‌ی چک‌ها</button>}>
       {soon.length === 0 ? <p className="empty">چک سررسیدی در دو هفته‌ی آینده نیست.</p> :

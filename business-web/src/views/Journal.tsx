@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { attachmentCounts } from '../attachments';
+import { AttachmentList } from './Attachments';
 import type { JournalEntry, Ledger, SourceType } from '../engine';
 import { faNum, jDate } from '../format';
 import { Badge, Card, Money } from '../ui';
@@ -12,7 +14,9 @@ const TYPE: Record<SourceType, string> = {
 
 const PAGE = 40;
 
-export default function Journal({ ledger, today, commit }: { ledger: Ledger; today: string; commit: Commit }) {
+export default function Journal({ ledger, today, commit, attachVersion, onAttachmentsChanged }: { ledger: Ledger; today: string; commit: Commit; attachVersion: number; onAttachmentsChanged: () => void }) {
+  const [counts, setCounts] = useState<Map<string, number>>(new Map());
+  useEffect(() => { let live = true; void attachmentCounts().then((c) => { if (live) setCounts(c); }); return () => { live = false; }; }, [attachVersion]);
   const [open, setOpen] = useState<string | null>(null);
   const [limit, setLimit] = useState(PAGE);
   const [filter, setFilter] = useState<SourceType | ''>('');
@@ -37,7 +41,7 @@ export default function Journal({ ledger, today, commit }: { ledger: Ledger; tod
             <button type="button" className="j-head" aria-expanded={open === e.id} onClick={() => setOpen(open === e.id ? null : e.id)}>
               <span className="j-date">{jDate(e.date)}</span>
               <span className="j-desc"><strong>{e.description}</strong><small>{TYPE[e.source.type]}، سند {faNum(Number(e.id.slice(1)))}</small></span>
-              <span className="j-amt"><Money value={amount(e)} />{reversed && <Badge tone="muted">برگشت خورده</Badge>}</span>
+              <span className="j-amt"><Money value={amount(e)} />{reversed && <Badge tone="muted">برگشت خورده</Badge>}{!e.reversalOf && e.source.documentId && counts.get(e.source.documentId) ? <Badge tone="info">📎 {faNum(counts.get(e.source.documentId)!)}</Badge> : null}</span>
             </button>
             {open === e.id && <div className="j-body">
               <table className="lines">
@@ -47,6 +51,7 @@ export default function Journal({ ledger, today, commit }: { ledger: Ledger; tod
                   <td>{l.debit ? faNum(l.debit) : ''}</td><td>{l.credit ? faNum(l.credit) : ''}</td>
                 </tr>)}</tbody>
               </table>
+              {!e.reversalOf && e.source.documentId && <AttachmentList docId={e.source.documentId} onChanged={onAttachmentsChanged} />}
               {!reversed && !e.reversalOf && <button type="button" className="btn small ghost danger" onClick={() => {
                 const reason = window.prompt('چرا این سند برگشت می‌خورد؟ (مثلاً «ثبت تکراری»)');
                 if (reason && reason.trim()) setError(commit({ k: 'reverse', entryId: e.id, date: today < e.date ? e.date : today, reason: reason.trim().slice(0, 150) }, 'سند برگشت خورد.'));

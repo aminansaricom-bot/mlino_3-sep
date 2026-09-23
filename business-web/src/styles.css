@@ -232,3 +232,35 @@ table.lines td:not(:first-child), table.lines th:not(:first-child) { text-align:
 .toast { position: fixed; z-index: 60; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%); padding: 10px 18px; border-radius: 99px; background: var(--ink); color: var(--bg); font-size: 13.5px; font-weight: 800; box-shadow: 0 12px 30px rgba(0,0,0,.25); animation: rise .2s ease; max-width: calc(100% - 32px); }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* balance sheet */
+.bs-summary { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 10px 12px; margin-bottom: 8px; border-radius: 16px; background: var(--surface-2); }
+.bs-summary div { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.bs-summary span { font-size: 12px; color: var(--muted); font-weight: 700; }
+.bs-summary strong { font-size: 13.5px; }
+.bs-summary b { color: var(--violet); font-size: 18px; }
+.bs-grid { display: grid; grid-template-columns: 1fr; gap: 4px 24px; }
+@media (min-width: 720px) { .bs-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+.table-scroll { overflow-x: auto; }
+table.report.trial { min-width: 520px; }
+table.report.trial th { text-align: right; }
+table.report.trial td:first-child { color: var(--muted); font-size: 12px; }
+table.report tfoot tr { border-top: 2px solid var(--line); }
+
+/* attachments */
+.attach-picker { margin: 0 0 12px; padding: 10px 12px; border-radius: 16px; border: 1px dashed var(--line); background: var(--surface); }
+.attach-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.attach-row small { color: var(--muted); font-size: 12px; }
+.attach-chips { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.attach-chips li { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 10px; border-radius: 12px; background: var(--surface-2); }
+.attach-chips li span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.attach-chips li small { color: var(--muted); font-size: 11.5px; }
+.attach-chips li button { border: 0; background: none; color: var(--neg); font-weight: 900; }
+.attachments { margin: 4px 0 10px; padding: 10px 12px; border-radius: 16px; background: var(--surface-2); }
+.attach-grid { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.attach-grid li { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 12px; }
+.attach-thumb { width: 100%; aspect-ratio: 1; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); overflow: hidden; display: grid; place-items: center; font-size: 30px; padding: 0; }
+.attach-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.attach-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.attach-grid small { color: var(--muted); font-size: 11px; }
+.link.danger { color: var(--neg); font-size: 12px; align-self: flex-start; }
