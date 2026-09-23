@@ -6,7 +6,8 @@ import { formatDistance } from '../uiFormat';
 import Stars from '../components/Stars';
 
 /** رضایت پیش از نخستین ارسال (U-N3): روشن و بدون ابهام. */
-export function AssistantConsent({ onAccept, onLocal }: { onAccept: () => void; onLocal: () => void }) {
+export function AssistantConsent({ onAccept, onLocal, remote = true }: { onAccept: () => void; onLocal: () => void; remote?: boolean }) {
+  if (!remote) return <VoiceConsent onAccept={onAccept} onDecline={onLocal} />;
   return <div className="assist-consent" role="dialog" aria-modal="true" aria-labelledby="assist-consent-title">
     <div className="assist-consent-card">
       <span className="assist-spark" aria-hidden="true">✦</span>
@@ -17,6 +18,21 @@ export function AssistantConsent({ onAccept, onLocal }: { onAccept: () => void; 
       <div className="assist-consent-actions">
         <button type="button" className="primary" onClick={onAccept}>موافقم</button>
         <button type="button" onClick={onLocal}>نه، فقط جست‌وجوی محلی</button>
+      </div>
+    </div>
+  </div>;
+}
+
+/** نسخه‌ی بدون سرویس بیرونی: فقط افشای گفتار مرورگر پیش از نخستین استفاده از میکروفون. */
+function VoiceConsent({ onAccept, onDecline }: { onAccept: () => void; onDecline: () => void }) {
+  return <div className="assist-consent" role="dialog" aria-modal="true" aria-labelledby="voice-consent-title">
+    <div className="assist-consent-card">
+      <span className="assist-spark" aria-hidden="true">✦</span>
+      <h3 id="voice-consent-title">پرسیدن با صدا</h3>
+      <p>برای تبدیل صدا به متن، صدایت به سرویس گفتار مرورگر (در کروم: گوگل) می‌رود. فهم منظور و پیشنهادها روی خود گوشی انجام می‌شود.</p>
+      <div className="assist-consent-actions">
+        <button type="button" className="primary" onClick={onAccept}>موافقم</button>
+        <button type="button" onClick={onDecline}>نه، فقط نوشتن</button>
       </div>
     </div>
   </div>;

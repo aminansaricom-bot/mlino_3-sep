@@ -17,7 +17,7 @@ import { formatDistance } from '../uiFormat';
 import { CatalogConsumer, CatalogFetchTransport, type CatalogItem } from './catalog';
 import { displayName } from '../demo/demoSocial';
 import { Icon } from '../design/Icon';
-import { askAssistant, readConsent, writeConsent, type ConsentState } from '../assistant/assistantApi';
+import { ASSISTANT_REMOTE, askAssistant, readConsent, writeConsent, type ConsentState } from '../assistant/assistantApi';
 import type { AssistantAnswer } from '../assistant/assistantIntent';
 import { rankRecords } from '../assistant/rankRecords';
 import AssistantPanel, { AssistantConsent } from '../assistant/AssistantPanel';
@@ -152,9 +152,9 @@ export default function RealPublicApp() {
   const runAssistant = (text: string, voice: boolean, granted: ConsentState = consent) => {
     const q = text.trim();
     if (q.length < 2) return;
-    if (granted === 'unknown') { setPendingAsk({ query: q, voice }); return; }
+    if (ASSISTANT_REMOTE && granted === 'unknown') { setPendingAsk({ query: q, voice }); return; }
     setAssistant({ query: q, answer: null, loading: true, voice });
-    void askAssistant(q, { consented: granted === 'granted' }).then((answer) => {
+    void askAssistant(q, { consented: ASSISTANT_REMOTE && granted === 'granted' }).then((answer) => {
       setAssistant((current) => current && current.query === q ? { ...current, answer, loading: false } : current);
       if (voice) speakPersian(answer.answer);
     });
@@ -162,7 +162,7 @@ export default function RealPublicApp() {
   const decideConsent = (value: 'granted' | 'local') => {
     writeConsent(value); setConsent(value);
     const pending = pendingAsk; setPendingAsk(null);
-    if (pending) runAssistant(pending.query, pending.voice, value);
+    if (pending && pending.query) runAssistant(pending.query, pending.voice, value);
   };
   const voiceInput = useVoiceInput((text) => setQuery(text), (text) => { setQuery(text); runAssistant(text, true); });
   const assistantDistances = useMemo(() => new Map(nearbyPublicUiRecords(allRecords, point[0], point[1], 20000).map((item) => [item.record.id, item.distanceMeters])), [allRecords, point]);
@@ -196,7 +196,8 @@ export default function RealPublicApp() {
       {voiceInput.supported && <button type="button" className={`search-mic${voiceInput.listening ? ' on' : ''}`} aria-pressed={voiceInput.listening}
         aria-label={voiceInput.listening ? 'توقف شنیدن' : 'پرسیدن با صدا'} onClick={() => {
           if (voiceInput.listening) { voiceInput.stop(); return; }
-          if (consent === 'unknown') { setPendingAsk({ query: '', voice: true }); return; }
+          // بدون سرویس بیرونی، رضایت فقط برای گفتار است؛ «نه» یعنی میکروفون تا موافقت بعدی خاموش می‌ماند.
+          if (ASSISTANT_REMOTE ? consent === 'unknown' : consent !== 'granted') { setPendingAsk({ query: '', voice: true }); return; }
           voiceInput.start();
         }}><img className="search-mic-img" src="/icons/voice.png" alt="" aria-hidden="true" draggable={false} /></button>}
       <button type="submit" className="search-ask" aria-label="پرسیدن از دستیار" disabled={query.trim().length < 2}>✦</button>
@@ -232,8 +233,8 @@ export default function RealPublicApp() {
     {voiceInput.error && <div className="app-banner warn" role="status">{voiceInput.error}</div>}
     {assistant && <AssistantPanel query={assistant.query} answer={assistant.answer} results={assistantResults} loading={assistant.loading}
       onOpen={(id) => openDetail(id)} onClose={() => setAssistant(null)} />}
-    {pendingAsk && <AssistantConsent onAccept={() => { const voice = pendingAsk.voice && !pendingAsk.query; decideConsent('granted'); if (voice) voiceInput.start(); }}
-      onLocal={() => { const voice = pendingAsk.voice && !pendingAsk.query; decideConsent('local'); if (voice) voiceInput.start(); }} />}
+    {pendingAsk && <AssistantConsent remote={ASSISTANT_REMOTE} onAccept={() => { const voice = pendingAsk.voice && !pendingAsk.query; decideConsent('granted'); if (voice) voiceInput.start(); }}
+      onLocal={() => { const voice = ASSISTANT_REMOTE && pendingAsk.voice && !pendingAsk.query; decideConsent('local'); if (voice) voiceInput.start(); }} />}
     {product && <ProductPage item={product.item} businessName={product.businessName} onClose={() => setProduct(null)} />}
   </div>;
 }

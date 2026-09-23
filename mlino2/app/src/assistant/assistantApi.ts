@@ -1,6 +1,8 @@
 import { localIntent, validateGatewayResponse, type AssistantAnswer } from './assistantIntent';
 
 export const ASSISTANT_ENDPOINT = '/assistant/intent';
+/** VITE_ASSISTANT_REMOTE=0: هیچ متنی به سرویس بیرونی نمی‌رود و فهم منظور فقط محلی است (نسخه‌ی سرور نمایشی). */
+export const ASSISTANT_REMOTE = import.meta.env.VITE_ASSISTANT_REMOTE !== '0';
 const TIMEOUT_MS = 10_000;
 
 /**
