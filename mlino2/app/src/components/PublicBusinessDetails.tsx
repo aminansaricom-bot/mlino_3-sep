@@ -10,6 +10,7 @@ import { activeOffersFor, offerPriceLabel } from '../ar/ArGlassCard';
 import { demoBusinessRating, displayName } from '../demo/demoSocial';
 import { formatDistance } from '../uiFormat';
 import Stars from './Stars';
+import { ChatBubbleIcon } from '../chat/ChatPanel';
 
 interface Props {
   record: PublicUiRecord;
@@ -20,6 +21,8 @@ interface Props {
   onClose: () => void;
   onToggle: (key: 'saved' | 'later' | 'liked' | 'hidden', id: string) => void;
   onOpenItem: (item: CatalogItem) => void;
+  /** گفتگو با کسب‌وکار (D-73)؛ فقط وقتی ساخت با VITE_CHAT=1 باشد. */
+  onMessage?: () => void;
 }
 
 /** «تا ۱۱ دی» — فقط روز و ماه؛ ساعت برای کاربر اهمیتی ندارد. */
@@ -50,7 +53,7 @@ function MenuRow({ item, onOpen }: { item: CatalogItem; onOpen: () => void }) {
   </button>;
 }
 
-export default function PublicBusinessDetails({ record, catalog, now, distanceMeters, experience, onClose, onToggle, onOpenItem }: Props) {
+export default function PublicBusinessDetails({ record, catalog, now, distanceMeters, experience, onClose, onToggle, onOpenItem, onMessage }: Props) {
   const hours = openNow(record, now);
   const rating = demoBusinessRating(record.id);
   const offers = activeOffersFor(record, now, 10);
@@ -77,6 +80,7 @@ export default function PublicBusinessDetails({ record, catalog, now, distanceMe
         {distanceMeters !== undefined && <span>{formatDistance(distanceMeters)}</span>}
         <span className={hours === 'open' ? 'open' : hours === 'closed' ? 'closed' : ''}>{hours === 'open' ? 'باز است' : hours === 'closed' ? 'بسته است' : 'ساعت نامشخص'}</span>
       </div>
+      {onMessage && <button className="biz-message-btn" onClick={onMessage}><ChatBubbleIcon />پیام به کسب‌وکار</button>}
     </header>
 
     <div className="panel-body biz-page-body">

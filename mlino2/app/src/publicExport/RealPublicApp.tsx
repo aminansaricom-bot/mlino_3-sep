@@ -22,6 +22,8 @@ import type { AssistantAnswer } from '../assistant/assistantIntent';
 import { rankRecords } from '../assistant/rankRecords';
 import AssistantPanel, { AssistantConsent } from '../assistant/AssistantPanel';
 import { speakPersian, useVoiceInput } from '../assistant/voice';
+import { CHAT_ENABLED } from '../chat/chatApi';
+import ChatPanel, { ChatInboxButton, type ChatTarget } from '../chat/ChatPanel';
 import { demoBanner, nextDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, validPoint, visibleDemoRecords, type Point } from '../demo/demoRelocation';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
@@ -34,7 +36,7 @@ function configuredConsumer(): PublicExportConsumer | null {
   catch { return null; }
 }
 
-type Overlay = 'none' | 'detail' | 'experience' | 'vitrine';
+type Overlay = 'none' | 'detail' | 'experience' | 'vitrine' | 'chat';
 
 export default function RealPublicApp() {
   const demoBuildEnabled = import.meta.env.VITE_DEMO_RELOCATE === '1';
@@ -73,6 +75,9 @@ export default function RealPublicApp() {
   const [consent, setConsent] = useState<ConsentState>(readConsent);
   const [pendingAsk, setPendingAsk] = useState<{ query: string; voice: boolean } | null>(null);
   const experience = useLocalExperience();
+  const [chatTarget, setChatTarget] = useState<ChatTarget | null>(null);
+  const [chatRefresh, setChatRefresh] = useState(0);
+  const openChat = (target: ChatTarget | null) => { setChatTarget(target); setOverlay('chat'); };
 
   useEffect(() => {
     const check = () => {
@@ -201,7 +206,7 @@ export default function RealPublicApp() {
           voiceInput.start();
         }}><img className="search-mic-img" src="/icons/voice.png" alt="" aria-hidden="true" draggable={false} /></button>}
       <button type="submit" className="search-ask" aria-label="پرسیدن از دستیار" disabled={query.trim().length < 2}>✦</button>
-    </form><button className="profile-btn" onClick={() => setOverlay('experience')} aria-label="ذخیره‌های من"><Icon name="bookmark" /></button></div>
+    </form>{CHAT_ENABLED && <ChatInboxButton refreshKey={chatRefresh} onOpen={() => openChat(null)} />}<button className="profile-btn" onClick={() => setOverlay('experience')} aria-label="ذخیره‌های من"><Icon name="bookmark" /></button></div>
       <div className="chips" aria-label="فیلترهای واقعی">
         <button className={`chip${category === null ? ' active' : ''}`} onClick={() => setCategory(null)}>همه</button>
         {categories.filter((item) => item.key !== 'uncategorized').map((item) => <button key={item.key} className={`chip${category === item.key ? ' active' : ''}`} onClick={() => setCategory(item.key)}>{item.label}</button>)}
@@ -220,7 +225,9 @@ export default function RealPublicApp() {
     </BottomSheet>
 
     {overlay === 'detail' && selected && <PublicBusinessDetails record={selected} catalog={catalogByOrg.get(selected.id)} now={now} distanceMeters={distanceById.get(selected.id)} experience={experience.data}
-      onClose={() => setOverlay('none')} onToggle={experience.toggle} onOpenItem={(item) => openProduct(selected.id, item)} />}
+      onClose={() => setOverlay('none')} onToggle={experience.toggle} onOpenItem={(item) => openProduct(selected.id, item)}
+      onMessage={CHAT_ENABLED ? () => openChat({ organizationId: selected.id, name: selected.name }) : undefined} />}
+    {overlay === 'chat' && <ChatPanel target={chatTarget} onClose={() => { setOverlay(chatTarget ? 'detail' : 'none'); setChatRefresh((n) => n + 1); }} />}
     {overlay === 'experience' && <ExperiencePanel data={experience.data} records={allRecords} storageFailed={experience.storageFailed} onClose={() => setOverlay('none')} onOpen={openDetail}
       onChange={experience.setData} onToggle={experience.toggle} onDiagnostics={() => setOverlay('none')}
       onSuggest={() => setSuggestionEmpty(!nearby.some((item) => item.record.offers.length > 0))} suggestionEmpty={suggestionEmpty}
