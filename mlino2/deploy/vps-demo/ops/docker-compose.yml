@@ -1,0 +1,12 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: mlino-core-db
+    restart: unless-stopped
+    env_file: /etc/mlino/core-db.env
+    ports:
+      - "127.0.0.1:5440:5432"
+    volumes:
+      - mlino_core_db:/var/lib/postgresql/data
+volumes:
+  mlino_core_db:

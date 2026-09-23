@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f5ff">
+<title>ملینو برای کسب‌وکارها</title>
+<meta name="description" content="نسخه‌ی کسب‌وکار ملینو (V1)">
+<link rel="icon" href="/logo.png">
+<style>
+@font-face { font-family: Vazirmatn; src: url('/fonts/Vazirmatn-wght.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+:root {
+  --bg: #f6f5ff; --surface: #ffffff; --ink: #14122b; --soft: #5b5877; --muted: #8a87a6; --line: #e7e4f5;
+  --violet: #7a5cff; --pink: #d946ef; --cyan: #06b6d4; --ok: #0f9f6e; --ok-bg: #e3f7ef; --soon: #b45309; --soon-bg: #fdf1dc; --next: #6d28d9; --next-bg: #efe9ff;
+  --shadow: 0 10px 30px rgba(40,20,120,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0d0c1c; --surface: #16152b; --ink: #f1efff; --soft: #b7b3d6; --muted: #8d89ad; --line: #2a2846;
+    --ok: #34d399; --ok-bg: rgba(52,211,153,.12); --soon: #fbbf24; --soon-bg: rgba(251,191,36,.12); --next: #c4b5fd; --next-bg: rgba(139,92,255,.18); --shadow: 0 10px 30px rgba(0,0,0,.35); }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: Vazirmatn, Tahoma, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.8; overflow-x: hidden; }
+a { color: inherit; }
+.wrap { width: min(960px, 100%); margin: 0 auto; padding: 0 16px; }
+header.top { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; align-items: center; gap: 10px; height: 60px; }
+header.top img { width: 40px; height: auto; }
+header.top b { font-size: 17px; font-weight: 900; }
+header.top .tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--next-bg); color: var(--next); }
+header.top .spacer { flex: 1; }
+header.top a.switch { font-size: 13px; color: var(--soft); text-decoration: none; }
+.hero { padding: 36px 0 18px; }
+.hero h1 { margin: 0; font-size: clamp(26px, 6vw, 38px); font-weight: 900; line-height: 1.4; letter-spacing: -.5px; }
+.hero h1 em { font-style: normal; background: linear-gradient(90deg, var(--pink), var(--violet), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { margin: 10px 0 20px; color: var(--soft); font-size: 15.5px; max-width: 560px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 16px; font-weight: 800; font-size: 15px; text-decoration: none; border: 0; cursor: pointer; font-family: inherit; }
+.btn.primary { color: #fff; background: linear-gradient(135deg, var(--pink), var(--violet)); box-shadow: 0 10px 26px rgba(122,92,255,.35); }
+.btn.primary[aria-disabled="true"] { opacity: .55; cursor: default; box-shadow: none; }
+.btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+.btn img { width: 22px; height: 22px; }
+.stat { display: flex; gap: 12px; flex-wrap: wrap; margin: 22px 0 8px; }
+.stat div { flex: 1 1 140px; padding: 14px 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.stat strong { display: block; font-size: 24px; font-weight: 900; }
+.stat span { font-size: 12.5px; color: var(--muted); }
+h2 { margin: 30px 0 12px; font-size: 19px; font-weight: 900; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.card { padding: 16px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 6px; }
+.card .head { display: flex; align-items: center; gap: 10px; }
+.card .ico { flex: none; width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; font-size: 20px; background: var(--next-bg); }
+.card h3 { margin: 0; font-size: 15.5px; font-weight: 800; flex: 1; }
+.card p { margin: 0; font-size: 13.5px; color: var(--soft); }
+.pill { font-size: 11.5px; font-weight: 800; padding: 2px 9px; border-radius: 99px; white-space: nowrap; }
+.pill.ok { color: var(--ok); background: var(--ok-bg); }
+.pill.next { color: var(--next); background: var(--next-bg); }
+.pill.soon { color: var(--soon); background: var(--soon-bg); }
+.note { margin: 28px 0 40px; padding: 14px 16px; border-radius: 18px; border: 1px dashed var(--line); color: var(--soft); font-size: 13px; }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <img src="/logo.png" alt="" width="40" height="28"><b>ملینو</b><span class="tag">کسب‌وکار · V1</span>
+  <span class="spacer"></span><a class="switch" href="https://app.mlino.site/">تغییر نقش</a>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>کسب‌وکارت را به <em>مشتری‌های اطرافت</em> نشان بده</h1>
+    <p>ملینو کسب‌وکار تو را روی نقشه و در ویترین زنده‌ی دوربین مشتری‌ها می‌آورد: با منو، عکس، قیمت، ساعت کاری و پیشنهادهای ویژه. همه‌چیز امضاشده و قابل اعتماد.</p>
+    <div class="actions">
+      <a class="btn primary" aria-disabled="true" title="به‌زودی" href="#modules">ثبت کسب‌وکار · به‌زودی</a>
+      <a class="btn ghost" href="https://explore.mlino.site/"><img src="/icons/vitrine.png" alt="">ببین مشتری چه می‌بیند</a>
+    </div>
+    <div class="stat" aria-live="polite">
+      <div><strong id="s-biz">…</strong><span>کسب‌وکار روی نقشه (نمایشی)</span></div>
+      <div><strong id="s-items">…</strong><span>قلم منو با قیمت</span></div>
+      <div><strong id="s-offers">…</strong><span>پیشنهاد فعال</span></div>
+    </div>
+  </section>
+
+  <h2 id="modules">بخش‌های نسخه‌ی کسب‌وکار</h2>
+  <div class="grid">
+    <article class="card"><div class="head"><span class="ico">🗺️</span><h3>نمایش روی نقشه و ویترین زنده</h3><span class="pill ok">فعال</span></div>
+      <p>کسب‌وکار با منو، ستاره، فاصله و پیشنهاد در نقشه و دوربین مشتری دیده می‌شود.</p></article>
+    <article class="card"><div class="head"><span class="ico">🍽️</span><h3>منو و محصولات با عکس</h3><span class="pill ok">آماده در هسته</span></div>
+      <p>قلم‌ها با قیمت، عکس تأییدشده و بازه‌ی زمانی در دسترس بودن.</p></article>
+    <article class="card"><div class="head"><span class="ico">🏷️</span><h3>پیشنهادها و تخفیف‌ها</h3><span class="pill ok">آماده در هسته</span></div>
+      <p>پیشنهاد با تاریخ شروع و پایان، که روی کارت و حباب ویترین طلایی می‌درخشد.</p></article>
+    <article class="card"><div class="head"><span class="ico">📝</span><h3>ثبت کسب‌وکار و ورود صاحب آن</h3><span class="pill next">قدم بعدی</span></div>
+      <p>ثبت‌نام خود کسب‌وکار، ساخت پروفایل و ساعت کاری، و تأیید پیش از نمایش عمومی.</p></article>
+    <article class="card"><div class="head"><span class="ico">💬</span><h3>پیام با مشتری‌ها</h3><span class="pill soon">در حال طراحی</span></div>
+      <p>گفت‌وگوی دوطرفه‌ی مشتری و کسب‌وکار، بدون نمایش شماره‌ی مشتری.</p></article>
+    <article class="card"><div class="head"><span class="ico">✨</span><h3>محتوا و شبکه‌های اجتماعی</h3><span class="pill soon">در صف اتصال</span></div>
+      <p>Content Studio به‌عنوان بخشی از همین پنل: ایده، تقویم محتوا و یادگیری از نتیجه‌ها.</p></article>
+  </div>
+
+  <p class="note">این نسخه‌ی آزمایشی است. کسب‌وکارهای روی نقشه ساختگی‌اند و برای نمایش، اطراف موقعیت بیننده قرار می‌گیرند. اطلاعات واقعی هیچ کسب‌وکاری این‌جا منتشر نشده است.</p>
+</main>
+
+<script>
+(function () {
+  function set(id, v) { var el = document.getElementById(id); if (el) el.textContent = v.toLocaleString('fa-IR'); }
+  function fallback() { ['s-biz', 's-items', 's-offers'].forEach(function (id) { var el = document.getElementById(id); if (el) el.textContent = '—'; }); }
+  Promise.all([
+    fetch('/public-export/public-business.v1.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }),
+    fetch('/public-export/public-catalog.v1.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; })
+  ]).then(function (res) {
+    var biz = res[0] && res[0].payload ? res[0].payload : res[0];
+    var cat = res[1] && res[1].payload ? res[1].payload : res[1];
+    var records = (biz && biz.records) || [];
+    if (!records.length) return fallback();
+    set('s-biz', records.length);
+    set('s-offers', records.reduce(function (n, r) { return n + ((r.offers && r.offers.length) || 0); }, 0));
+    set('s-items', ((cat && cat.records) || []).reduce(function (n, r) { return n + ((r.items && r.items.length) || 0); }, 0));
+  }).catch(fallback);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+[Unit]
+Description=MLINO demo signed public export (one run)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/mlino/core/ops/export-once.sh
