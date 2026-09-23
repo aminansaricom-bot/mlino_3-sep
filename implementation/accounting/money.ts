@@ -23,7 +23,10 @@ export function divideHalfUp(numerator: number, denominator: number): number {
   return remainder * 2 >= denominator ? quotient + 1 : quotient;
 }
 
-/** VAT rate in basis points: 1000 = 10%. Stored per business with an effective date, never hard-coded. */
+/** Default VAT rate for a new business: 10% (owner decision, 2026-09-23). Each business can still change it. */
+export const DEFAULT_VAT_RATE_BP = 1000;
+
+/** VAT rate in basis points: 1000 = 10%. Stored per business; the default above only seeds new settings. */
 export function assertRateBp(value: unknown): number {
   if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 5000) {
     throw new AccountingError('VAT_RATE_INVALID', 'VAT rate must be 0..5000 basis points');

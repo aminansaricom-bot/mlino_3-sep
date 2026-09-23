@@ -1,5 +1,5 @@
 import {
-  AccountingError, assertIsoDate, divideHalfUp, formatJalali, fromJalali, isJalaliLeap, jalaliMonthLength,
+  AccountingError, DEFAULT_VAT_RATE_BP, assertIsoDate, divideHalfUp, formatJalali, fromJalali, isJalaliLeap, jalaliMonthLength,
   jalaliMonthRange, jalaliSeasonRange, toJalali, vatInGross, vatOnNet,
 } from '../../accounting';
 
@@ -65,6 +65,10 @@ describe('money', () => {
     expect(divideHalfUp(15, 10)).toBe(2);
     expect(divideHalfUp(14, 10)).toBe(1);
     expect(divideHalfUp(25, 10)).toBe(3);
+  });
+  it('default VAT rate is 10%', () => {
+    expect(DEFAULT_VAT_RATE_BP).toBe(1000);
+    expect(vatOnNet(2_000_000, DEFAULT_VAT_RATE_BP)).toBe(200_000);
   });
   it('VAT on net and inside gross agree', () => {
     expect(vatOnNet(1_000_000, 1000)).toBe(100_000);
