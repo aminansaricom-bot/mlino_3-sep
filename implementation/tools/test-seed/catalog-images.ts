@@ -84,7 +84,8 @@ export async function storeCatalogTestMedia(store: string, bytes: Buffer, media:
   const resolvedParent = await fs.realpath(parent);
   const relation = path.relative(base, resolvedParent);
   if (relation.startsWith('..') || path.isAbsolute(relation)) throw new TestSeedError('TEST_SEED_MEDIA_STORE_UNSAFE');
-  const destination = path.join(parent, `${media.sha256}.png`);
+  // The content-addressed name carries the real extension (png or jpg), taken from the verified path.
+  const destination = path.join(parent, path.posix.basename(media.path));
   const temporary = path.join(parent, `.staging-${randomBytes(12).toString('hex')}`);
   const handle = await fs.open(temporary, 'wx', 0o600);
   try { await handle.writeFile(bytes); await handle.sync(); } finally { await handle.close(); }

@@ -1,4 +1,7 @@
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import path from 'node:path';
+import { CatalogMedia, verifyMediaBytes } from '../../public-export/media';
 import { PrismaClient } from '@prisma/client';
 import { AuthContext, CORE_AUTH_ISSUER } from '../../core/auth-context';
 import { CatalogItemService } from '../../core/catalog-item-service';
@@ -10,16 +13,40 @@ import { createSeedPlatformVerifier, SEED_REASON } from './seed';
 import { TestSeedError } from './types';
 import { isTestSeedOrganizationId } from './withdraw';
 
+/** Either a generated TEST image, or a prepared local photo file with its declared pixel size. */
+export interface TestCatalogImage { alt_text: string; file?: string; width?: number; height?: number }
+
 export interface TestCatalogInput {
   test_id: string; item_key: string; name: string; short_description: string | null;
   price_amount: number | null; price_currency: string | null; on_request: boolean;
-  grouping_label: string | null; display_order: number; images: Array<{ alt_text: string }>;
+  grouping_label: string | null; display_order: number; images: TestCatalogImage[];
 }
 const FIELDS = ['test_id', 'item_key', 'name', 'short_description', 'price_amount', 'price_currency',
   'on_request', 'grouping_label', 'display_order', 'images'];
 const object = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 function fail(code: string): never { throw new TestSeedError(code); }
+
+function validImage(image: unknown): boolean {
+  if (!object(image) || typeof image.alt_text !== 'string' || !image.alt_text.trim() || image.alt_text.length > 300) return false;
+  const keys = Object.keys(image);
+  if (keys.length === 1) return keys[0] === 'alt_text';
+  if (keys.length !== 4 || !['alt_text', 'file', 'width', 'height'].every((key) => keys.includes(key))) return false;
+  return typeof image.file === 'string' && path.isAbsolute(image.file) && !image.file.split(/[\\/]/).includes('..') &&
+    /\.(?:jpe?g|png)$/i.test(image.file) && Number.isSafeInteger(image.width) && Number.isSafeInteger(image.height);
+}
+
+/** Media metadata for a prepared photo file; type comes from the bytes, never from the file name. */
+export function catalogFileMedia(bytes: Buffer, position: number, altText: string, width: number, height: number): CatalogMedia {
+  const jpeg = bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  const png = bytes.length > 8 && bytes.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex'));
+  if (!jpeg && !png) fail('TEST_SEED_CATALOG_IMAGE_TYPE');
+  const sha256 = createHash('sha256').update(bytes).digest('hex');
+  const media: CatalogMedia = { position, path: `media/sha256/${sha256.slice(0, 2)}/${sha256}.${jpeg ? 'jpg' : 'png'}`, sha256,
+    media_type: jpeg ? 'image/jpeg' : 'image/png', byte_size: bytes.length, width, height, alt_text: altText, placeholder: null };
+  verifyMediaBytes(bytes, media);
+  return media;
+}
 
 function parseOne(value: unknown): TestCatalogInput {
   if (!object(value) || Object.keys(value).length !== FIELDS.length ||
@@ -36,8 +63,7 @@ function parseOne(value: unknown): TestCatalogInput {
   } else if (typeof value.price_amount !== 'number' || !Number.isFinite(value.price_amount) ||
       !/^(0|[1-9]\d{0,9})(\.\d{1,2})?$/.test(String(value.price_amount)) ||
       typeof value.price_currency !== 'string' || !/^[A-Z]{3}$/.test(value.price_currency)) fail('TEST_SEED_CATALOG_PRICE_MODE');
-  if (!Array.isArray(value.images) || value.images.length > 8 || value.images.some((image) => !object(image) ||
-      Object.keys(image).length !== 1 || typeof image.alt_text !== 'string' || !image.alt_text.trim() || image.alt_text.length > 300)) fail('TEST_SEED_CATALOG_IMAGES');
+  if (!Array.isArray(value.images) || value.images.length > 8 || value.images.some((image) => !validImage(image))) fail('TEST_SEED_CATALOG_IMAGES');
   return value as unknown as TestCatalogInput;
 }
 
@@ -98,11 +124,13 @@ export async function seedTestCatalog(db: PrismaClient, rows: TestCatalogInput[]
       shortDescription: row.short_description, priceAmount: row.price_amount, priceCurrency: row.price_currency,
       onRequest: row.on_request, groupingLabel: row.grouping_label, displayOrder: row.display_order });
     for (const [position, image] of row.images.entries()) {
-      const bytes = generateCatalogTestPng(row.item_key, position);
-      const media = catalogTestMedia(bytes, position, image.alt_text);
+      const bytes = image.file ? readFileSync(image.file) : generateCatalogTestPng(row.item_key, position);
+      const media = image.file
+        ? catalogFileMedia(bytes, position, image.alt_text, image.width!, image.height!)
+        : catalogTestMedia(bytes, position, image.alt_text);
       await storeCatalogTestMedia(base, bytes, media);
       await catalog.addMedia(context, item.id, { position, objectPath: media.path, sha256: media.sha256,
-        mediaType: 'PNG', byteSize: media.byte_size, widthPx: media.width, heightPx: media.height,
+        mediaType: media.media_type === 'image/jpeg' ? 'JPEG' : 'PNG', byteSize: media.byte_size, widthPx: media.width, heightPx: media.height,
         altText: media.alt_text });
       images++;
     }
