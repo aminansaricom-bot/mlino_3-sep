@@ -13,7 +13,6 @@ import { arOverlayService } from './container';
 import { cameraErrorMessage, useCameraStream, useDeviceHeading } from './browserSensors';
 import {
   AR_DEFAULT_RADIUS,
-  AR_RADIUS_OPTIONS,
   composeArScene,
   type ArSceneItem,
   type ArViewResponse,
@@ -24,6 +23,14 @@ import type { PublicUiRecord } from '../publicExport/uiAdapter';
 import type { CatalogItem, CatalogRecord } from '../publicExport/catalog';
 import CatalogArStack from '../publicExport/catalogArStack';
 import ArGlassCard from './ArGlassCard';
+import ArBubbles from './ArBubbles';
+import RadiusDial, { clampRadius } from './RadiusDial';
+
+type VitrineMode = 'cards' | 'bubbles';
+const MODE_KEY = 'mlino.vitrine.mode';
+function initialMode(): VitrineMode {
+  try { return window.localStorage.getItem(MODE_KEY) === 'bubbles' ? 'bubbles' : 'cards'; } catch { return 'cards'; }
+}
 
 interface ArVitrineViewProps {
   /** نقطه‌ی جست‌وجوی فعلی اپ (مشترک با تب دستیار) */
@@ -46,7 +53,6 @@ interface ArVitrineViewProps {
 
 export default function ArVitrineView({
   searchPoint,
-  searchPointLabel,
   preferredCategory = null,
   onSelectBusiness,
   records,
@@ -59,13 +65,24 @@ export default function ArVitrineView({
   const camera = useCameraStream();
   const heading = useDeviceHeading(camera.state.kind === 'active');
 
-  const [started, setStarted] = useState(false);
+  // صفحه‌ی آغاز حذف شد: ویترین با باز شدن مستقیم دوربین را روشن می‌کند.
+  const started = true;
+  const [mode, setMode] = useState<VitrineMode>(initialMode);
+  const chooseMode = (next: VitrineMode) => { setMode(next); try { window.localStorage.setItem(MODE_KEY, next); } catch { /* optional */ } };
+  const canAskCompass = typeof (globalThis.DeviceOrientationEvent as unknown as { requestPermission?: unknown } | undefined)?.requestPermission === 'function';
   const [manualHeading, setManualHeading] = useState(0);
   const [buildingId, setBuildingId] = useState<string | null>(null);
   const [floorLevel, setFloorLevel] = useState<number | null>(null);
   const [view, setView] = useState<ArViewResponse | null>(null);
   /** شعاع نمایش AR — مستقل از شعاع جست‌وجوی نقشه، پیش‌فرض مصوب ۳۰ متر */
-  const [arRadius, setArRadius] = useState<number>(initialRadius ?? AR_DEFAULT_RADIUS);
+  const [arRadius, setArRadius] = useState<number>(clampRadius(initialRadius ?? AR_DEFAULT_RADIUS));
+
+  useEffect(() => {
+    heading.request();
+    void camera.start();
+    // فقط یک بار هنگام باز شدن ویترین
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [stageWidth, setStageWidth] = useState(0);
 
@@ -121,36 +138,6 @@ export default function ArVitrineView({
     [view, arRadius, preferredCategory, headingReliable],
   );
 
-  if (!started) {
-    return (
-      <div className="ar-start">
-        <div className="section-title">ویترین مجازی (AR)</div>
-        <p className="ar-note">
-          دوربین را روشن کن و گوشی را به‌سمت مغازه‌ها بگیر؛ ویترین کسب‌وکارهای عضو MLINO روی
-          تصویر واقعی نمایش داده می‌شود. نقطه‌ی فعلی: {searchPointLabel} — شعاع نمایش{' '}
-          {formatDistance(arRadius)}.
-        </p>
-        <RadiusPicker value={arRadius} onChange={setArRadius} />
-        {nearbyBuildings.length > 0 && (
-          <p className="ar-note">
-            مکان‌های چندطبقه‌ی نزدیک شناسایی شدند — هنگام ورود، طبقه از تو پرسیده می‌شود (طبقه
-            هرگز از GPS حدس زده نمی‌شود).
-          </p>
-        )}
-        <button
-          className="ar-start-btn"
-          onClick={() => {
-            setStarted(true);
-            heading.request();
-            void camera.start();
-          }}
-        >
-          شروع ویترین AR
-        </button>
-      </div>
-    );
-  }
-
   const simulatedCamera = camera.state.kind !== 'active';
 
   return (
@@ -167,8 +154,10 @@ export default function ArVitrineView({
         />
         {simulatedCamera && <div className="ar-video ar-video-sim" aria-hidden />}
 
+        {mode === 'bubbles' && view && <ArBubbles items={view.items} radiusMeters={arRadius} catalogByOrg={catalogByOrg} onSelect={onSelectBusiness} />}
+
         {/* حباب‌های فرعی — پیش از کارت اصلی رندر می‌شوند تا آن غالب بماند */}
-        {scene?.secondary.map((item) => (
+        {mode === 'cards' && scene?.secondary.map((item) => (
           <ArBubble
             key={item.businessId}
             item={item}
@@ -178,7 +167,7 @@ export default function ArVitrineView({
         ))}
 
         {/* کارت اصلی — دقیقاً یکی */}
-        {scene?.primary && records && (
+        {mode === 'cards' && scene?.primary && records && (
           <ArGlassCard
             item={scene.primary}
             record={records.find((record) => record.id === scene.primary!.businessId)}
@@ -196,10 +185,10 @@ export default function ArVitrineView({
           />
         )}
 
-        {scene?.primary && catalogByOrg && <CatalogArStack record={catalogByOrg.get(scene.primary.businessId)}
+        {mode === 'cards' && scene?.primary && catalogByOrg && <CatalogArStack record={catalogByOrg.get(scene.primary.businessId)}
           onOpenItem={onOpenItem ? (item) => onOpenItem(scene.primary!.businessId, item) : undefined} />}
 
-        {scene && scene.overflowCount > 0 && (
+        {mode === 'cards' && scene && scene.overflowCount > 0 && (
           <div className="ar-overflow">
             {scene.overflowCount.toLocaleString('fa-IR')} مورد دیگر در همین جهت — کمی بچرخ یا شعاع
             را کم کن
@@ -218,7 +207,7 @@ export default function ArVitrineView({
           </div>
         )}
 
-        {!locationPending && scene && scene.primary === null && (
+        {!locationPending && scene && (mode === 'cards' ? scene.primary === null : (view?.items.length ?? 0) === 0) && (
           <div className="ar-empty">
             در این جهت کسب‌وکار مناسبی پیدا نشد — گوشی را بچرخان
             {scene.behindCount > 0 &&
@@ -226,8 +215,19 @@ export default function ArVitrineView({
           </div>
         )}
 
+        {/* انتخاب نما: کارت بزرگ یا حباب‌های سه‌بعدی */}
+        <div className="ar-mode" role="group" aria-label="نوع نمایش ویترین">
+          <button type="button" className={mode === 'cards' ? 'on' : ''} aria-pressed={mode === 'cards'} onClick={() => chooseMode('cards')}>کارت</button>
+          <button type="button" className={mode === 'bubbles' ? 'on' : ''} aria-pressed={mode === 'bubbles'} onClick={() => chooseMode('bubbles')}>حباب</button>
+        </div>
+
+        <RadiusDial value={arRadius} onChange={setArRadius} />
+
         {/* نوار وضعیت صادقانه */}
         <div className="ar-status">
+          {canAskCompass && heading.source === 'none' && (
+            <button type="button" className="ar-badge action" onClick={() => heading.request()}>فعال کردن قطب‌نما</button>
+          )}
           {cameraErrorMessage(camera.state) && (
             <span className="ar-badge warn">{cameraErrorMessage(camera.state)}</span>
           )}
@@ -253,11 +253,6 @@ export default function ArVitrineView({
 
       {/* کنترل‌ها */}
       <div className="ar-controls">
-        <div className="sp-row">
-          <span className="sp-label">شعاع نمایش:</span>
-          <RadiusPicker value={arRadius} onChange={setArRadius} />
-        </div>
-
         {/* وقتی قطب‌نمای واقعی کار می‌کند، اسلایدر جهت دستی فقط شلوغی است؛ فقط در نبود قطب‌نما دیده می‌شود */}
         {heading.source !== 'compass' && <div className="sp-row">
           <span className="sp-label">چرخاندن دستی جهت:</span>
@@ -305,16 +300,6 @@ export default function ArVitrineView({
           </div>
         )}
 
-        <div className="sp-row">
-          <button
-            onClick={() => {
-              camera.stop();
-              setStarted(false);
-            }}
-          >
-            پایان AR
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -332,23 +317,6 @@ function clampToStage(xPercent: number, stageWidth: number, elementWidth: number
   return Math.min(100 - halfPercent, Math.max(halfPercent, xPercent));
 }
 
-/** انتخاب شعاع نمایش — چهار مقدار مصوب، بدون مقدار دلخواه */
-function RadiusPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  return (
-    <div className="ar-radius" role="group" aria-label="شعاع نمایش ویترین">
-      {AR_RADIUS_OPTIONS.map((r) => (
-        <button
-          key={r}
-          className={value === r ? 'active' : ''}
-          onClick={() => onChange(r)}
-          aria-pressed={value === r}
-        >
-          {formatDistance(r)}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 /**
  * کارت اصلی. موقعیت افقی با ترنزیشن حرکت می‌کند تا با چرخش گوشی نپرد —

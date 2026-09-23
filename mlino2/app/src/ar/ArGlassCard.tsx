@@ -57,7 +57,7 @@ export default function ArGlassCard({
         <span className={`glass-coin ar-coin-${item.category}`} aria-hidden="true">{glyph}</span>
         <span className="glass-title">
           <strong>{business.title}</strong>
-          <small>{rating && <Stars rating={rating} compact />} {categoryLabel(item.category)} · {formatDistance(item.distanceMeters)}</small>
+          <small>{rating && <Stars rating={rating} compact />} {item.category !== 'uncategorized' ? `${categoryLabel(item.category)} · ` : ''}{formatDistance(item.distanceMeters)}</small>
         </span>
       </span>
       {offers.length > 0 ? (

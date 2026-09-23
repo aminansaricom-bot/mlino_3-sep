@@ -1490,3 +1490,168 @@ html, body, #root { height: 100%; overflow: hidden; overflow: clip; overscroll-b
 .panel { z-index: 1100; }
 .product-page { z-index: 1200; }
 .demo-banner { z-index: 1300; }
+
+/* ═══════════════ فونت: وزیرمتن (آزاد، OFL) به‌صورت محلی ═══════════════
+ * فونت اسنپ و تپسی تجاری و دارای لایسنس پولی‌اند؛ وزیرمتن هم‌سبک و آزاد است و با
+ * برنامه بسته‌بندی می‌شود تا گوشی برای فونت به اینترنت نیاز نداشته باشد. */
+@font-face {
+  font-family: Vazirmatn;
+  src: url('/fonts/Vazirmatn-wght.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+body, button, input, textarea, select { font-family: Vazirmatn, "Segoe UI", Tahoma, system-ui, sans-serif; font-feature-settings: "ss01"; }
+
+/* ویترین تمام‌قد: بدون صفحه‌ی آغاز، صحنه کل پنل را می‌گیرد */
+.panel.dark .panel-body { display: flex; flex-direction: column; padding: 10px; }
+.ar-root { flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.ar-stage { flex: 1; min-height: 360px; border-radius: 22px; }
+.ar-controls:empty { display: none; }
+
+/* انتخاب نما — شیشه‌ای، بالا وسط */
+.ar-mode {
+  position: absolute; z-index: 30; top: 10px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 4px; padding: 4px; border-radius: 999px;
+  background: linear-gradient(145deg, rgba(255,255,255,.22), rgba(255,255,255,.06)), rgba(28,16,58,.35);
+  -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255,255,255,.4);
+  box-shadow: 0 8px 24px rgba(12,6,32,.35), inset 0 1px 0 rgba(255,255,255,.45);
+}
+.ar-mode button { border: 0; border-radius: 999px; padding: 6px 16px; font-size: 13px; font-weight: 800; color: rgba(255,255,255,.85); background: transparent; cursor: pointer; transition: background .2s, color .2s; }
+.ar-mode button.on { background: linear-gradient(135deg, #7a5cff, #ff5a36); color: #fff; box-shadow: 0 4px 14px rgba(200,90,255,.45); }
+.ar-status { top: 56px; }
+.ar-badge.action { cursor: pointer; border: 1px solid rgba(255,255,255,.5); background: rgba(122,92,255,.55); color: #fff; }
+
+/* ───────── دکمه‌ی گرد شعاع که عمودی باز می‌شود ───────── */
+.radius-dial { position: absolute; z-index: 40; left: 12px; bottom: 14px; display: flex; flex-direction: column; align-items: center; }
+.radius-button {
+  width: 58px; height: 58px; border-radius: 50%;
+  display: grid; place-items: center; align-content: center; gap: 0;
+  color: #fff; cursor: pointer;
+  background: linear-gradient(145deg, rgba(255,255,255,.28), rgba(255,255,255,.07)), rgba(28,16,58,.38);
+  -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%);
+  border: 1px solid rgba(255,255,255,.5);
+  box-shadow: 0 10px 28px rgba(12,6,32,.45), 0 0 22px rgba(160,100,255,.35), inset 0 1px 0 rgba(255,255,255,.55);
+  transition: transform .25s cubic-bezier(.22,.61,.36,1);
+}
+.radius-button:active { transform: scale(.94); }
+.radius-button-icon { font-size: 12px; line-height: 1; opacity: .8; }
+.radius-button-text { font-size: 15px; font-weight: 900; line-height: 1.1; }
+.radius-button-text small { font-size: 10px; font-weight: 700; margin-inline-start: 1px; }
+.radius-panel {
+  position: absolute; bottom: 66px; left: 50%;
+  width: 64px; height: 264px; padding: 10px 0 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  border-radius: 32px;
+  background: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,.06)), rgba(28,16,58,.4);
+  -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%);
+  border: 1px solid rgba(255,255,255,.45);
+  box-shadow: 0 16px 40px rgba(12,6,32,.5), 0 0 26px rgba(160,100,255,.35), inset 0 1px 0 rgba(255,255,255,.5);
+  /* باز شدن از وسط به بالا و پایین */
+  transform: translateX(-50%) scaleY(.08);
+  transform-origin: 50% 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .38s cubic-bezier(.22,1.2,.36,1), opacity .22s ease;
+}
+.radius-dial.open .radius-panel { transform: translateX(-50%) scaleY(1); opacity: 1; pointer-events: auto; }
+.radius-value { color: #fff; font-size: 17px; font-weight: 900; line-height: 1; display: flex; flex-direction: column; align-items: center; }
+.radius-value small { font-size: 10px; font-weight: 700; opacity: .8; }
+.radius-track { position: relative; flex: 1; width: 44px; cursor: ns-resize; touch-action: none; outline: none; }
+.radius-track:focus-visible { box-shadow: 0 0 0 2px rgba(255,255,255,.7); border-radius: 12px; }
+.radius-rail { position: absolute; left: 50%; top: 0; bottom: 0; width: 6px; transform: translateX(-50%); border-radius: 6px; background: rgba(255,255,255,.22); }
+.radius-fill { position: absolute; left: 50%; bottom: 0; width: 6px; transform: translateX(-50%); border-radius: 6px; background: linear-gradient(0deg, #7a5cff, #ff5a36); }
+.radius-thumb { position: absolute; left: 50%; width: 22px; height: 22px; margin-bottom: -11px; transform: translateX(-50%); border-radius: 50%; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.35), 0 0 0 4px rgba(255,255,255,.25); }
+.radius-tick { position: absolute; right: -4px; transform: translate(100%, 50%); font-size: 9.5px; color: rgba(255,255,255,.7); pointer-events: none; }
+
+/* ───────── حباب‌های سه‌بعدی ───────── */
+.ar-bubbles { position: absolute; inset: 0; z-index: 12; pointer-events: none; }
+.orb {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  border: 0; padding: 0; background: none; cursor: pointer; pointer-events: auto;
+  transition: left .3s cubic-bezier(.22,.61,.36,1), top .3s cubic-bezier(.22,.61,.36,1);
+  animation: orb-float 4.2s ease-in-out infinite;
+}
+.orb:nth-child(3n) { animation-delay: -1.4s; }
+.orb:nth-child(3n+1) { animation-delay: -2.8s; }
+@keyframes orb-float { 0%, 100% { margin-top: 0; } 50% { margin-top: -7px; } }
+.orb-sphere {
+  position: relative;
+  width: var(--orb); height: var(--orb);
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 35% 30%, #fff, #e9e3f8 45%, #b7a6e6);
+  border: 2px solid rgba(255,255,255,.75);
+  box-shadow:
+    0 calc(var(--orb) * .18) calc(var(--orb) * .32) rgba(10,6,30,.45),
+    inset 0 -8px 18px rgba(60,30,120,.35),
+    0 0 0 1px rgba(160,120,255,.35),
+    0 0 22px rgba(160,100,255,.35);
+}
+.orb-sphere .catalog-image, .orb-sphere .catalog-image-placeholder { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.orb-sphere .catalog-image-placeholder small { display: none; }
+.orb-glyph { display: grid; place-items: center; width: 100%; height: 100%; font-size: calc(var(--orb) * .44); }
+/* درخشش شیشه‌ای کره: نور بالا-چپ و بازتاب پایین */
+.orb-shine {
+  position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255,255,255,.85) 0 9%, rgba(255,255,255,.25) 18%, transparent 36%),
+    radial-gradient(circle at 70% 85%, rgba(255,255,255,.28), transparent 38%),
+    radial-gradient(circle at 50% 50%, transparent 58%, rgba(40,20,90,.35) 100%);
+}
+.orb-label {
+  display: flex; flex-direction: column; align-items: center;
+  max-width: calc(var(--orb) + 60px);
+  padding: 3px 10px; border-radius: 999px;
+  color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.45);
+  background: linear-gradient(145deg, rgba(255,255,255,.22), rgba(255,255,255,.06)), rgba(28,16,58,.35);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.35);
+}
+.orb-label b { font-size: 11.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.orb-label small { font-size: 10px; opacity: .85; }
+
+/* پیشنهاد ویژه: حلقه‌ی طلایی چرخان، برق عبوری و نشان ٪ */
+.orb-offer .orb-sphere {
+  border-color: #ffd66c;
+  box-shadow:
+    0 calc(var(--orb) * .18) calc(var(--orb) * .32) rgba(10,6,30,.45),
+    inset 0 -8px 18px rgba(120,70,0,.3),
+    0 0 0 3px rgba(255,200,70,.55),
+    0 0 26px rgba(255,190,60,.75),
+    0 0 52px rgba(255,160,40,.45);
+  animation: orb-glow 1.8s ease-in-out infinite;
+}
+@keyframes orb-glow {
+  0%, 100% { box-shadow: 0 calc(var(--orb) * .18) calc(var(--orb) * .32) rgba(10,6,30,.45), inset 0 -8px 18px rgba(120,70,0,.3), 0 0 0 3px rgba(255,200,70,.5), 0 0 18px rgba(255,190,60,.55), 0 0 36px rgba(255,160,40,.3); }
+  50% { box-shadow: 0 calc(var(--orb) * .18) calc(var(--orb) * .32) rgba(10,6,30,.45), inset 0 -8px 18px rgba(120,70,0,.3), 0 0 0 4px rgba(255,220,110,.85), 0 0 34px rgba(255,200,80,.95), 0 0 70px rgba(255,170,50,.6); }
+}
+.orb-offer .orb-sphere::after {
+  content: ''; position: absolute; inset: -40%; pointer-events: none;
+  background: linear-gradient(115deg, transparent 38%, rgba(255,245,200,.85) 48%, rgba(255,215,90,.5) 52%, transparent 62%);
+  transform: translateX(-70%) rotate(0deg);
+  animation: orb-sparkle 2.6s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+@keyframes orb-sparkle { 0%, 55% { transform: translateX(-70%); } 100% { transform: translateX(70%); } }
+.orb-badge {
+  position: absolute; top: 6%; right: 6%;
+  width: calc(var(--orb) * .3); height: calc(var(--orb) * .3); min-width: 20px; min-height: 20px;
+  display: grid; place-items: center; border-radius: 50%;
+  font-size: calc(var(--orb) * .15); font-weight: 900; color: #5a3500;
+  background: radial-gradient(circle at 35% 30%, #fff6c9, #ffcf4a 55%, #d99a12);
+  box-shadow: 0 2px 8px rgba(0,0,0,.35), 0 0 12px rgba(255,200,70,.8);
+}
+.orb-offer .orb-label { border-color: rgba(255,214,108,.8); box-shadow: 0 0 14px rgba(255,190,60,.45); }
+
+@media (prefers-reduced-motion: reduce) {
+  .orb, .orb-offer .orb-sphere, .orb-offer .orb-sphere::after { animation: none; }
+  .radius-panel { transition: opacity .15s; }
+}
+
+/* جا برای انتخاب نما و دکمه‌ی شعاع: کارت زیر انتخاب نما، پشته‌ی کاتالوگ کنار دکمه‌ی شعاع */
+.glass-card { top: 100px; }
+.catalog-ar-stack { inset-inline-start: 12px; inset-inline-end: 80px; margin-inline: 0; max-width: none; }
