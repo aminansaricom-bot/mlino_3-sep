@@ -56,7 +56,7 @@ function StockTab({ inv, onForm }: { inv: Inventory; onForm: (kind: Form, itemId
     </div>
     <Card>
       <ul className="stock-list">{rows.map((r) => <li key={r.id} className={r.negative ? 'negative' : r.low ? 'low' : ''}>
-        <div className="stock-main"><strong>{r.name}</strong><small>{r.kind === 'goods' ? 'کالای آماده' : 'ماده‌ی اولیه'} · حد سفارش {qtyText(r.reorderLevel, r.unit)}</small></div>
+        <div className="stock-main"><strong>{r.name}</strong><small>{r.kind === 'goods' ? 'کالای آماده' : 'ماده‌ی اولیه'}، حد سفارش {qtyText(r.reorderLevel, r.unit)}</small></div>
         <div className="stock-side"><b>{qtyText(r.qty, r.unit)}</b><small><Money value={Math.max(0, r.value)} compact /></small>
           <span className="badges">{r.negative ? <Badge tone="bad">منفی — شمارش کن</Badge> : r.low ? <Badge tone="warn">کم</Badge> : <Badge tone="ok">کافی</Badge>}</span></div>
         <div className="ch-actions">

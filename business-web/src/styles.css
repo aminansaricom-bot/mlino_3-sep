@@ -435,3 +435,17 @@ b.pos { color: var(--pos); } b.neg { color: var(--neg); }
 .orb-tilt { animation: orb-tilt 4.5s ease-in-out infinite; }
 .orb-halo.orb-halo { animation: orb-halo-pulse 3.6s ease-in-out infinite; }
 .orb-halo.orb-halo-fast { animation: orb-halo-pulse-fast 1.7s ease-in-out infinite; }
+
+/* ═══════════ CRM (consent level A) ═══════════ */
+.policy-note { margin: 0; padding: 10px 14px; border-radius: 14px; background: var(--info-bg); color: var(--violet); font-size: 13px; line-height: 1.9; }
+.consent-box { margin: 4px 0 12px; padding: 12px 14px; border-radius: 16px; border: 1.5px solid color-mix(in srgb, var(--violet) 45%, var(--line)); background: var(--surface); }
+.consent-box legend { padding: 0 6px; font-weight: 900; font-size: 13.5px; color: var(--violet); }
+.consent-box small { display: block; font-size: 11.5px; color: var(--muted); }
+.consent-box .check { margin: 4px 0 8px; align-items: flex-start; line-height: 1.8; }
+.consent-box .check input { margin-top: 5px; }
+.member-row { flex: 1; min-width: 0; border: 0; background: none; padding: 0; text-align: right; display: flex; flex-direction: column; line-height: 1.6; }
+.member-row strong { font-size: 14.5px; }
+.member-row small { font-size: 12px; color: var(--muted); }
+.profile-head { display: flex; flex-direction: column; gap: 4px; }
+.profile-head small { color: var(--muted); font-size: 12.5px; }
+.consent-renew { display: flex; flex-direction: column; gap: 8px; }

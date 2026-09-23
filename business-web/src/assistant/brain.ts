@@ -11,6 +11,7 @@ import {
 import { lowStock, type BaseUnit } from '../inventoryEngine';
 import { compactRial, faNum, jDate, addDays, toFaDigits } from '../format';
 import { dailyActions, type Snapshot } from '../modules/registry';
+import { crmSummary, expiredConsents, expiringConsents, followUpList } from '../crmEngine';
 import type { AssistantState } from './Orb';
 
 // ---------- proactive ----------
@@ -162,6 +163,19 @@ export function understand(raw: string, s: Snapshot): CommandResult {
     const to = /عکس|محصول|منو/.test(text) ? '/products' : /ویترین|پروفایل|ساعت/.test(text) ? '/storefront' : '/offers';
     return { type: 'governance', to, linkLabel: 'رفتن به همان بخش',
       text: 'انتشار و دادن دسترسی تصمیم خود شماست و روی همان مورد با دکمه‌ی انتشار انجام می‌شود؛ من فقط آماده‌اش می‌کنم. در این نسخه‌ی نمایشی، ویرایش و انتشار پس از ورود عضو فعال می‌شود.' };
+  }
+
+  // CRM: the assistant speaks only in aggregates and never reads or repeats a person's data (R8-a §3.6).
+  if (/مشتری|عضو|باشگاه/.test(text) && !/(به|از) (شرکت|خانم|آقای)/.test(text)) {
+    if (/جدید|تازه|ثبت نام|ثبت‌نام|اضافه کن|عضو کن/.test(text)) {
+      return { type: 'governance', to: '/crm/register', linkLabel: 'فرم عضو تازه', text: 'عضو تازه فقط با رضایت خود مشتری ثبت می‌شود و این رضایت را خودت در فرم ثبت می‌کنی؛ من اطلاعات کسی را بدون آن ثبت نمی‌کنم.' };
+    }
+    if (isQuestion(text) || /غیرفعال|نیامده|رضایت/.test(text)) {
+      const cs = crmSummary(s.crm, s.today, monthRange(s.today).from);
+      const follow = followUpList(s.crm, s.today).length;
+      const exp = expiredConsents(s.crm, s.today).length + expiringConsents(s.crm, s.today).length;
+      return { type: 'answer', to: '/crm', linkLabel: 'مشتریان', text: `${faNum(cs.members)} عضو فعال با رضایت؛ ${faNum(cs.visitsThisMonth)} مراجعه این ماه؛ ${faNum(cs.marketingOptIn)} نفر پیام تبلیغاتی را پذیرفته‌اند؛ ${faNum(follow)} نفر از آن‌ها بیش از ۳۰ روز نیامده‌اند${exp ? `؛ رضایت ${faNum(exp)} عضو تمام شده یا رو به پایان است` : ''}. جزئیات هر نفر فقط در خود بخش مشتریان و با ثبت دسترسی دیده می‌شود.` };
+    }
   }
 
   if (isQuestion(text)) {

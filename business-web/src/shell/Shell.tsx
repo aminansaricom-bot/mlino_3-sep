@@ -8,6 +8,7 @@ import AccountingModule from '../modules/accounting/AccountingApp';
 import InventoryModule from '../modules/inventory/InventoryModule';
 import { OffersPage, ProductsPage, StorefrontPage } from '../modules/catalog/CatalogPages';
 import LockedModule from './LockedModule';
+import CrmModule from '../modules/crm/CrmModule';
 import Assistant from '../assistant/Assistant';
 
 const STATUS_DOT: Record<string, string> = { demo: 'demo', 'published-view': 'live', design: 'design', blocked: 'blocked' };
@@ -47,7 +48,8 @@ export default function Shell() {
     case 'products': page = <ProductsPage state={published} />; break;
     case 'storefront': page = <StorefrontPage state={published} />; break;
     case 'offers': page = <OffersPage state={published} />; break;
-    case 'content': case 'crm': page = <LockedModule id={active} />; break;
+    case 'crm': page = <CrmModule tab={sub} />; break;
+    case 'content': page = <LockedModule id={active} />; break;
     default: page = <Home published={pub} />;
   }
 

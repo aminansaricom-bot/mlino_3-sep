@@ -18,8 +18,8 @@ type SpeechCtor = new () => { lang: string; interimResults: boolean; onresult: (
 export default function Assistant({ published }: { published: PublishedBusiness | null | undefined }) {
   const ws = useWorkspace();
   const surface = ws.path.split('/')[1] || 'home';
-  const snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, published };
-  const ev = useMemo(() => { try { return evaluate(snapshot, surface); } catch { return null; } }, [ws.ledger, ws.inventory, published, surface]); // eslint-disable-line react-hooks/exhaustive-deps
+  const snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, crm: ws.crm, published };
+  const ev = useMemo(() => { try { return evaluate(snapshot, surface); } catch { return null; } }, [ws.ledger, ws.inventory, ws.crm, published, surface]); // eslint-disable-line react-hooks/exhaustive-deps
   const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [text, setText] = useState('');

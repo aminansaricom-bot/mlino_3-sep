@@ -30,8 +30,8 @@ function ActionCard({ a }: { a: DailyAction }) {
 
 export default function Home({ published }: { published: PublishedBusiness | null | undefined }) {
   const ws = useWorkspace();
-  const snapshot: Snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, published };
-  const actions = useMemo(() => dailyActions(snapshot), [ws.ledger, ws.inventory, published, ws.today]); // eslint-disable-line react-hooks/exhaustive-deps
+  const snapshot: Snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, crm: ws.crm, published };
+  const actions = useMemo(() => dailyActions(snapshot), [ws.ledger, ws.inventory, ws.crm, published, ws.today]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <div className="stack">
     <section className="hero-today">

@@ -29,7 +29,7 @@ export function ProductsPage({ state }: { state: PublishedState }) {
           <ul className="product-list">{items.map((i) => <li key={i.catalog_item_id}>
             <span className="product-thumb">{i.media[0] ? <img src={mediaUrl(i.media[0].path)} alt={i.media[0].alt_text ?? ''} loading="lazy" /> : <span aria-hidden="true">🖼️</span>}</span>
             <span className="product-main"><strong>{clean(i.name)}</strong>{i.short_description && <small>{clean(i.short_description)}</small>}
-              <small>{i.media.length ? `${faNum(i.media.length)} عکس` : <b className="bad">بدون عکس</b>} · منتشر {jDate(i.published_at.slice(0, 10))}</small></span>
+              <small>{i.media.length ? `${faNum(i.media.length)} عکس` : <b className="bad">بدون عکس</b>}، منتشر {jDate(i.published_at.slice(0, 10))}</small></span>
             <span className="product-price">{priceLabel(i.price_amount)}</span>
           </li>)}</ul>
         </section>)}

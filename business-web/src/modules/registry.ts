@@ -9,6 +9,7 @@ import { lowStock, stockReport, stockValue, displayQty, type Inventory } from '.
 import { compactRial, faNum, jDate, addDays, toFaDigits } from '../format';
 import type { BookData } from '../book';
 import type { PublishedBusiness } from '../published';
+import { crmSummary, expiredConsents, expiringConsents, followUpList, type Crm } from '../crmEngine';
 
 /** The eleven Core responsibility categories (D-55 · D-65), in Persian. */
 export const ROLE_LABEL = {
@@ -17,7 +18,7 @@ export const ROLE_LABEL = {
 } as const;
 export type RoleKey = keyof typeof ROLE_LABEL;
 
-export type Snapshot = Readonly<{ today: string; book: BookData; ledger: Ledger; inventory: Inventory; published: PublishedBusiness | null | undefined }>;
+export type Snapshot = Readonly<{ today: string; book: BookData; ledger: Ledger; inventory: Inventory; crm: Crm; published: PublishedBusiness | null | undefined }>;
 
 export type DailyAction = Readonly<{
   id: string;
@@ -175,9 +176,34 @@ export const MODULES: readonly ModuleManifest[] = [
     summary: () => [{ label: 'اتصال', value: 'وصل نشده' }], actions: () => [],
   },
   {
-    id: 'crm', title: 'مشتریان (CRM)', icon: '👥', route: '/crm', layer: 'module', status: 'blocked',
-    statusNote: 'قفل تا تصویب سیاست رضایت (OD-01)', blockedBy: 'OD-01',
-    summary: () => [{ label: 'وضعیت', value: 'قفل' }], actions: () => [],
+    id: 'crm', title: 'مشتریان (CRM)', icon: '👥', route: '/crm', layer: 'module', status: 'demo',
+    statusNote: 'رضایت سطح A (D-72) — فقط اعضای با رضایت، با تاریخ پایان و حذف واقعی',
+    summary: ({ crm, today }) => {
+      const s = crmSummary(crm, today, monthOf(today).from);
+      return [{ label: 'اعضای فعال', value: `${faNum(s.members)} نفر` }, { label: 'مراجعه‌ی این ماه', value: faNum(s.visitsThisMonth) }];
+    },
+    actions: ({ crm, today }) => {
+      const out: DailyAction[] = [];
+      const expired = expiredConsents(crm, today);
+      if (expired.length) out.push({
+        id: 'crm-expired', module: 'crm', urgency: 'now', title: 'تمدید یا حذف اعضای با رضایت تمام‌شده',
+        reason: `رضایت ${faNum(expired.length)} عضو تمام شده و اطلاعاتشان بدون رضایت نگه داشته شده`, owner: 'customer_service',
+        impact: 'پایبندی به سیاست رضایت (R8-a)', kpi: 'صفر داده‌ی بدون رضایت معتبر', outcome: 'تمدید با رضایت تازه یا حذف کامل', to: '/crm',
+      });
+      const expiring = expiringConsents(crm, today);
+      if (expiring.length) out.push({
+        id: 'crm-expiring', module: 'crm', urgency: 'soon', title: 'درخواست تمدید رضایت از اعضا',
+        reason: `رضایت ${faNum(expiring.length)} عضو تا دو هفته‌ی دیگر تمام می‌شود`, owner: 'customer_service',
+        impact: 'حفظ باشگاه مشتریان', kpi: 'نرخ تمدید رضایت', outcome: 'ثبت رضایت تازه در مراجعه‌ی بعدی', to: '/crm',
+      });
+      const follow = followUpList(crm, today);
+      if (follow.length) out.push({
+        id: 'crm-follow', module: 'crm', urgency: 'later', title: 'پیگیری اعضایی که مدتی نیامده‌اند',
+        reason: `${faNum(follow.length)} عضو با رضایت بازاریابی بیش از ۳۰ روز نیامده‌اند`, owner: 'marketing',
+        impact: 'بازگشت مشتری', kpi: 'نرخ مراجعه‌ی دوباره', outcome: 'پیام فقط به همین اعضا و ثبت مراجعه‌ی بعدی', to: '/crm',
+      });
+      return out;
+    },
   },
 ];
 
