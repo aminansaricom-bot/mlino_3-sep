@@ -173,7 +173,7 @@ export default function RealPublicApp() {
     </div>
 
     <div className="map-fabs"><button className={`fab-locate${locating ? ' busy' : ''}`} onClick={useMyLocation} aria-label="موقعیت من">◎</button></div>
-    <div className="primary-actions"><button className="action-fab vitrine" onClick={() => setOverlay('vitrine')}><img className="action-fab-img" src="/icons/vitrine.png" alt="" width={52} height={52} /><span className="action-fab-label">ویترین زنده</span></button></div>
+    <div className="primary-actions"><button className="action-fab vitrine" onClick={() => setOverlay('vitrine')} aria-label="ویترین زنده" title="ویترین زنده"><img className="action-fab-img" src="/icons/vitrine.png" alt="" width={64} height={64} /></button></div>
 
     <BottomSheet state={sheet} onStateChange={setSheet} title="اطراف شما" subtitle={`${shown.length.toLocaleString('fa-IR')} مورد`}>
       {shown.length === 0 ? <div className="empty">موردی مطابق فیلترهای فعلی نیست.</div> : shown.map((record) =>
