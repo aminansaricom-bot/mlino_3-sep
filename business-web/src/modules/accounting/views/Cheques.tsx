@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { chequeRegister, type Ledger } from '../engine';
-import { docId } from '../book';
-import { faNum, jDate, toFaDigits } from '../format';
-import { Badge, Card, Money, Segmented } from '../ui';
+import { chequeRegister, type Ledger } from '../../../engine';
+import { docId } from '../../../book';
+import { faNum, jDate, toFaDigits } from '../../../format';
+import { Badge, Card, Money, Segmented } from '../../../ui';
 import type { Commit } from './Record';
 
 const STATUS = { open: ['در جریان', 'info'], cleared: ['وصول شد', 'ok'], bounced: ['برگشتی', 'bad'], void: ['باطل', 'muted'] } as const;

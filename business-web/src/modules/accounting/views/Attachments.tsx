@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { addAttachments, attachmentBlob, listAttachments, removeAttachment, ATTACHMENT_LIMITS, type AttachmentMeta } from '../attachments';
-import { faNum } from '../format';
+import { addAttachments, attachmentBlob, listAttachments, removeAttachment, ATTACHMENT_LIMITS, type AttachmentMeta } from '../../../attachments';
+import { faNum } from '../../../format';
 
 const kb = (n: number) => (n >= 1024 * 1024 ? `${faNum(Math.round((n / 1024 / 1024) * 10) / 10)} مگابایت` : `${faNum(Math.max(1, Math.round(n / 1024)))} کیلوبایت`);
 

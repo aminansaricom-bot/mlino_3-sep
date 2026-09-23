@@ -2,9 +2,9 @@ import { useState } from 'react';
 import {
   balanceSheet, trialBalance, jalaliMonthRange, jalaliSeasonRange, monthlySummary, partyBalances, profitAndLoss, toJalali, treasuryBalances, vatReport,
   JALALI_MONTHS, type Ledger,
-} from '../engine';
-import { jDate, toFaDigits } from '../format';
-import { Card, Money, Segmented } from '../ui';
+} from '../../../engine';
+import { jDate, toFaDigits } from '../../../format';
+import { Card, Money, Segmented } from '../../../ui';
 
 type Report = 'pnl' | 'months' | 'balance' | 'parties' | 'vat' | 'trial';
 const REPORTS: readonly (readonly [Report, string])[] = [['balance', 'ترازنامه'], ['pnl', 'سود و زیان'], ['months', 'ماه‌به‌ماه'], ['parties', 'طرف حساب‌ها'], ['vat', 'ارزش افزوده'], ['trial', 'تراز آزمایشی']];

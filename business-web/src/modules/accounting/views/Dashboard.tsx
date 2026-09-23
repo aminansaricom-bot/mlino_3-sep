@@ -1,6 +1,6 @@
-import { balanceSheet, chequeRegister, jalaliMonthRange, jalaliSeasonRange, partyBalances, profitAndLoss, toJalali, treasuryBalances, vatReport, JALALI_MONTHS, type Ledger } from '../engine';
-import { addDays, compactRial, faNum, jDate, toFaDigits } from '../format';
-import { Badge, Card, Money } from '../ui';
+import { balanceSheet, chequeRegister, jalaliMonthRange, jalaliSeasonRange, partyBalances, profitAndLoss, toJalali, treasuryBalances, vatReport, JALALI_MONTHS, type Ledger } from '../../../engine';
+import { addDays, compactRial, faNum, jDate, toFaDigits } from '../../../format';
+import { Badge, Card, Money } from '../../../ui';
 
 export default function Dashboard({ ledger, today, onRecord, onTab }: { ledger: Ledger; today: string; onRecord: (form: string) => void; onTab: (tab: string) => void }) {
   const t = toJalali(today);

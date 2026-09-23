@@ -31,7 +31,7 @@ export type Op =
 
 export type BookData = Readonly<{ version: 1; settings: Settings; ops: readonly Op[] }>;
 
-export const DEFAULT_SETTINGS: Settings = { businessName: 'کافه‌ی نمونه', vatRateBp: DEFAULT_VAT_RATE_BP, pricesIncludeVat: true };
+export const DEFAULT_SETTINGS: Settings = { businessName: 'کافه نیلوفر', vatRateBp: DEFAULT_VAT_RATE_BP, pricesIncludeVat: true };
 
 export function newLedger(): Ledger {
   let n = 0;

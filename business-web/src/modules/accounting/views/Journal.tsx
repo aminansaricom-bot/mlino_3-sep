@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { attachmentCounts } from '../attachments';
+import { attachmentCounts } from '../../../attachments';
 import { AttachmentList } from './Attachments';
-import type { JournalEntry, Ledger, SourceType } from '../engine';
-import { faNum, jDate } from '../format';
-import { Badge, Card, Money } from '../ui';
+import type { JournalEntry, Ledger, SourceType } from '../../../engine';
+import { faNum, jDate } from '../../../format';
+import { Badge, Card, Money } from '../../../ui';
 import type { Commit } from './Record';
 
 const TYPE: Record<SourceType, string> = {
