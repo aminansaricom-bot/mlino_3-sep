@@ -17,6 +17,9 @@ business.mlino.site {
         Referrer-Policy "no-referrer"
         Permissions-Policy "microphone=(self), camera=(), geolocation=()"
     }
+    handle /api/* {
+        reverse_proxy 127.0.0.1:8741
+    }
     handle_path /public-export/* {
         root * /var/www/mlino-public-export
         @json path /public-business.v1.json /public-catalog.v1.json
@@ -53,6 +56,9 @@ explore.mlino.site {
     }
     handle /assistant/* {
         respond 404
+    }
+    handle /api/* {
+        reverse_proxy 127.0.0.1:8741
     }
     handle_path /public-export/* {
         root * /var/www/mlino-public-export
