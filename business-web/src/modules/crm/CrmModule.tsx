@@ -1,3 +1,4 @@
+import { usePack } from '../../industry/context';
 import { useMemo, useState } from 'react';
 import { crmSummary, expiredConsents, expiringConsents, followUpList, MAX_CONSENT_MONTHS, POLICY_VERSION, type Consent, type Customer } from '../../crmEngine';
 import { jalaliMonthRange, toJalali } from '../../engine';
@@ -8,7 +9,7 @@ import { consentFor } from './data';
 
 type Tab = 'summary' | 'members' | 'register' | 'ledger';
 const TABS: readonly (readonly [Tab, string, string])[] = [['summary', '📊', 'خلاصه'], ['members', '👥', 'اعضا'], ['register', '➕', 'عضو تازه'], ['ledger', '🛡️', 'رضایت و حذف']];
-const SOURCE = { in_store_form: 'فرم در کافه', qr_form: 'فرم QR', phone_recorded: 'تلفنی، ثبت‌شده' } as const;
+const sourceLabels = (place: string) => ({ in_store_form: `فرم در ${place}`, qr_form: 'فرم QR', phone_recorded: 'تلفنی، ثبت‌شده' }) as const;
 const REASON = { withdrawn: 'لغو رضایت عضویت', request: 'درخواست حذف', expired: 'پایان رضایت' } as const;
 const MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
 
@@ -18,7 +19,8 @@ export default function CrmModule({ tab: raw }: { tab: string }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const go = (t: Tab) => ws.navigate(t === 'summary' ? '/crm' : `/crm/${t}`);
 
-  if (!ws.crm.enabled) return <Card title="مشتریان (CRM)"><p className="empty">CRM برای دسته‌های حساس (مثل سلامت) خاموش است — سیاست رضایت R8-a بند ۳٫۱۰.</p></Card>;
+  const { pack } = usePack();
+  if (!ws.crm.enabled || pack.sensitive) return <Card title="مشتریان (CRM)"><p className="empty">CRM برای دسته‌های حساس (مثل سلامت) خاموش است — سیاست رضایت R8-a بند ۳٫۱۰.</p></Card>;
 
   const open = (id: string) => { ws.commitCrm({ k: 'view', input: { customerId: id, by: DEMO_MEMBER.name, at: new Date().toISOString() } }, ''); setOpenId(id); };
 
@@ -94,12 +96,13 @@ function MembersTab({ onOpen }: { onOpen: (id: string) => void }) {
 }
 
 function ConsentFields({ value, onChange }: { value: { agreed: boolean; marketing: boolean; source: Consent['source']; months: string }; onChange: (v: { agreed: boolean; marketing: boolean; source: Consent['source']; months: string }) => void }) {
+  const place = usePack().pack.place;
   return <fieldset className="consent-box">
     <legend>رضایت مشتری (الزامی)</legend>
     <label className="check"><input type="checkbox" checked={value.agreed} onChange={(e) => onChange({ ...value, agreed: e.target.checked })} /> مشتری خودش عضویت در باشگاه مشتریان و نگه‌داری نام و مراجعه‌هایش را پذیرفت</label>
     <label className="check"><input type="checkbox" checked={value.marketing} onChange={(e) => onChange({ ...value, marketing: e.target.checked })} /> پیام‌های تبلیغاتی و تخفیف را هم پذیرفت (اختیاری، جدا)</label>
     <div className="row2">
-      <Field label="چطور ثبت شد">{(id) => <select id={id} value={value.source} onChange={(e) => onChange({ ...value, source: e.target.value as Consent['source'] })}>{Object.entries(SOURCE).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>}</Field>
+      <Field label="چطور ثبت شد">{(id) => <select id={id} value={value.source} onChange={(e) => onChange({ ...value, source: e.target.value as Consent['source'] })}>{Object.entries(sourceLabels(place)).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>}</Field>
       <Field label="مدت رضایت">{() => <Segmented label="مدت رضایت" value={value.months} onChange={(months) => onChange({ ...value, months })} options={[['6', '۶ ماه'], ['12', '۱۲ ماه'], ['24', '۲۴ ماه']]} />}</Field>
     </div>
     <small>نسخه‌ی سیاست: {POLICY_VERSION}، حداکثر {faNum(MAX_CONSENT_MONTHS)} ماه؛ بعد از آن یا رضایت تازه یا حذف.</small>
@@ -146,6 +149,7 @@ function ProfileSheet({ id, onClose }: { id: string; onClose: () => void }) {
   const [amount, setAmount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [renew, setRenew] = useState({ agreed: false, marketing: false, source: 'in_store_form' as Consent['source'], months: '12' });
+  const place = usePack().pack.place;
   if (!c) return null;
   // Full profile read (phone, note) — this very open was logged in the access log.
   const full = (() => { try { return ws.crm.readLogged(id, DEMO_MEMBER.name, new Date()); } catch { return null; } })();
@@ -153,7 +157,7 @@ function ProfileSheet({ id, onClose }: { id: string; onClose: () => void }) {
   const visits = [...ws.crm.visitsOf(id)].reverse();
   return <Sheet title={c.displayName} onClose={onClose}>
     <div className="stack">
-      <div className="profile-head">{consentBadge(c, ws.today)}<small>عضو از {jDate(c.createdAt)}، رضایت تا {jDate(c.consent.expiresAt)}، {SOURCE[c.consent.source]}</small></div>
+      <div className="profile-head">{consentBadge(c, ws.today)}<small>عضو از {jDate(c.createdAt)}، رضایت تا {jDate(c.consent.expiresAt)}، {sourceLabels(place)[c.consent.source]}</small></div>
       {full?.phone && <p className="calc">تلفن: <span dir="ltr">{full.phone}</span></p>}
       {full?.note && <p className="calc">یادداشت: {full.note}</p>}
       {c.tags.length > 0 && <div className="chips">{c.tags.map((t) => <span key={t} className="chip">{t}</span>)}</div>}

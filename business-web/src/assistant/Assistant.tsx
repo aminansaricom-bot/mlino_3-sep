@@ -1,3 +1,4 @@
+import { usePack } from '../industry/context';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useWorkspace } from '../workspace';
 import type { PublishedBusiness } from '../published';
@@ -14,15 +15,16 @@ import { qtyText } from '../modules/inventory/InventoryModule';
 import type { InvOp } from '../modules/inventory/data';
 
 const STATE_LABEL = { idle: 'آماده', thinking: 'در حال بررسی', happy: 'وضعیت خوب', concerned: 'نیاز به توجه', warning: 'هشدار', suggesting: 'یک پیشنهاد دارم', celebrating: 'خبر خوب!', processing: 'در حال انجام' } as const;
-const EXAMPLES = ['سود این ماه چقدره؟', 'هزینه‌ی برق ۱۲ میلیون از بانک ملت', '۲۰ کیلو شیر وارد انبار شد به قیمت ۹ میلیون', 'چک‌های این هفته چیه؟'];
+const examples = (stock: string) => ['سود این ماه چقدره؟', 'هزینه‌ی برق ۱۲ میلیون از بانک ملت', stock, 'چک‌های این هفته چیه؟'];
 
 
 export default function Assistant({ published }: { published: PublishedBusiness | null | undefined }) {
+  const { pack } = usePack();
   const ws = useWorkspace();
   const surface = ws.path.split('/')[1] || 'home';
   const cs = useChatSession();
-  const snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, crm: ws.crm, published, chat: { loggedIn: !!cs.me, summary: cs.summary } };
-  const ev = useMemo(() => { try { return evaluate(snapshot, surface); } catch { return null; } }, [ws.ledger, ws.inventory, ws.crm, published, surface, cs.me, cs.summary]); // eslint-disable-line react-hooks/exhaustive-deps
+  const snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, crm: ws.crm, published, chat: { loggedIn: !!cs.me, summary: cs.summary }, pack };
+  const ev = useMemo(() => { try { return evaluate(snapshot, surface); } catch { return null; } }, [ws.ledger, ws.inventory, ws.crm, published, surface, cs.me, cs.summary, pack]); // eslint-disable-line react-hooks/exhaustive-deps
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [result, setResult] = useState<CommandResult | null>(null);
@@ -37,7 +39,7 @@ export default function Assistant({ published }: { published: PublishedBusiness 
   const memory = useRef<CoachMemory>(loadMemory());
   const bubbleRef = useRef<HTMLDivElement>(null);
   const remember = (next: CoachMemory) => { memory.current = next; saveMemory(next); };
-  const tips = useMemo(() => { try { return tipsFor(ws.path, snapshot); } catch { return []; } }, [ws.path, ws.ledger, ws.inventory, ws.crm, published, cs.me, cs.summary]); // eslint-disable-line react-hooks/exhaustive-deps
+  const tips = useMemo(() => { try { return tipsFor(ws.path, snapshot); } catch { return []; } }, [ws.path, ws.ledger, ws.inventory, ws.crm, published, cs.me, cs.summary, pack]); // eslint-disable-line react-hooks/exhaustive-deps
   const closeTip = (kind: 'used' | 'ignored' | 'closed') => { remember(outcome(memory.current, kind, Date.now())); setTip(null); setGlance(null); };
 
   // A new page: wait until the member settles (no typing, no open form or sheet), then offer one tip at most.
@@ -121,7 +123,7 @@ export default function Assistant({ published }: { published: PublishedBusiness 
             <button type="button" onClick={() => { ws.navigate(s.to); setOpen(false); }}>{s.label}<span aria-hidden="true">‹</span></button></li>)}</ul>}
         </>}
         {result && <ResultView result={result} onDone={(msg) => { setResult(msg ? { type: 'answer', text: msg } : null); setText(''); }} onNavigate={(to) => { ws.navigate(to); setOpen(false); }} />}
-        {!result && <div className="assist-examples">{EXAMPLES.map((e) => <button key={e} type="button" onClick={() => { setText(e); ask(e); }}>{e}</button>)}</div>}
+        {!result && <div className="assist-examples">{examples(pack.stockExample).map((e) => <button key={e} type="button" onClick={() => { setText(e); ask(e); }}>{e}</button>)}</div>}
       </div>
 
       <form className="assist-input" onSubmit={(e) => { e.preventDefault(); ask(text); }}>

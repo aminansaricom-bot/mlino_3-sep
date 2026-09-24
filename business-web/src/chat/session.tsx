@@ -36,7 +36,7 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
       setMe(who.person);
       const orgs = (who.organizations ?? []).filter((o) => o.published);
       setOrganizations(orgs);
-      setOrgIdState((cur) => (cur && orgs.some((o) => o.organizationId === cur) ? cur : (orgs.find((o) => /نیلوفر/.test(o.name)) ?? orgs[0])?.organizationId ?? null));
+      setOrgIdState((cur) => (cur && orgs.some((o) => o.organizationId === cur) ? cur : orgs[0]?.organizationId ?? null));
     } catch {
       setMe(null);
     } finally {

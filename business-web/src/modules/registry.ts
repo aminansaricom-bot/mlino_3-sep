@@ -2,6 +2,7 @@
 // summary() returns real numbers or «—»; actions() returns daily actions that carry all five D-12
 // requirements (reason, owner, expected impact, KPI, measurable outcome) or nothing at all.
 
+import type { Pack } from '../industry/packs';
 import {
   chequeRegister, jalaliMonthRange, jalaliSeasonRange, partyBalances, profitAndLoss, toJalali, treasuryBalances, vatReport, type Ledger,
 } from '../engine';
@@ -21,7 +22,7 @@ export type RoleKey = keyof typeof ROLE_LABEL;
 /** Chat reaches the shell only as aggregates from the server (D-73); null when no member is logged in. */
 export type ChatSnap = Readonly<{ loggedIn: boolean; summary: Readonly<{ conversations: number; unreadConversations: number; unreadMessages: number; pendingQuestions: number; enabled: boolean; sensitive: boolean; autoReply?: boolean; autoReplyAllowed?: boolean }> | null }>;
 
-export type Snapshot = Readonly<{ today: string; book: BookData; ledger: Ledger; inventory: Inventory; crm: Crm; published: PublishedBusiness | null | undefined; chat?: ChatSnap | null }>;
+export type Snapshot = Readonly<{ today: string; book: BookData; ledger: Ledger; inventory: Inventory; crm: Crm; published: PublishedBusiness | null | undefined; chat?: ChatSnap | null; pack?: Pack }>;
 
 export type DailyAction = Readonly<{
   id: string;
@@ -127,7 +128,7 @@ export const MODULES: readonly ModuleManifest[] = [
           id: `low-${r.id}`, module: 'inventory', urgency: r.qty <= 0 ? 'now' : 'soon',
           title: r.negative ? `شمارش ${r.name} — موجودی منفی` : `سفارش ${r.name}`,
           reason: r.negative ? `فروش بیش از موجودی ثبت‌شده؛ موجودی دفتری ${faNum(q.value)} ${q.label}` : `موجودی ${faNum(q.value)} ${q.label}، حد سفارش ${faNum(lvl.value)} ${lvl.label}`,
-          owner: 'operations_manager', impact: 'تمام نشدن اقلام منو', kpi: 'در دسترس بودن منو',
+          owner: 'operations_manager', impact: 'تمام نشدن موجودی', kpi: 'در دسترس بودن کالا و مواد',
           outcome: r.negative ? 'ثبت شمارش واقعی' : 'ثبت ورود کالا به انبار', to: '/inventory/record',
         });
       }
@@ -135,7 +136,7 @@ export const MODULES: readonly ModuleManifest[] = [
     },
   },
   {
-    id: 'products', title: 'محصولات و منو', icon: '🍽️', route: '/products', layer: 'core', status: 'published-view',
+    id: 'products', title: 'محصولات و خدمات', icon: '🏷️', route: '/products', layer: 'core', status: 'published-view',
     statusNote: 'از فایل امضاشده‌ی منتشرشده در V2 — ویرایش پس از ورود عضو',
     summary: ({ published }) => published ? [
       { label: 'قلم منتشرشده', value: `${faNum(published.items.length)} قلم` },

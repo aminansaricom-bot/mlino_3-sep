@@ -91,12 +91,12 @@ export function generateCrmSample(book: BookData, today: string): CrmData {
   PEOPLE.forEach(([name, tags, marketing], i) => {
     // One old member whose consent has run out, one that runs out within two weeks, the rest fresh.
     const joined = i === 11 ? addDays(today, -380) : i === 8 ? addDays(today, -358) : addDays(start, Math.floor(rnd() * 70));
-    push({ k: 'register', input: { id: `m-${i + 1}`, displayName: name, tags, createdAt: joined, consent: consentFor(joined, 12, marketing ? ['membership', 'marketing'] : ['membership'], i % 3 === 0 ? 'qr_form' : 'in_store_form', 'مالک کافه') } });
+    push({ k: 'register', input: { id: `m-${i + 1}`, displayName: name, tags, createdAt: joined, consent: consentFor(joined, 12, marketing ? ['membership', 'marketing'] : ['membership'], i % 3 === 0 ? 'qr_form' : 'in_store_form', 'مالک کسب‌وکار') } });
   });
   // The accounting customer who ordered a party, signed up that day with consent.
   const eventInvoice = book.ops.find((o) => o.k === 'invoice' && o.input.customerId === 'event');
   if (eventInvoice && eventInvoice.k === 'invoice') {
-    push({ k: 'register', input: { id: 'm-event', displayName: 'خانم احمدی', tags: ['مراسم'], accountingPartyId: 'event', createdAt: eventInvoice.input.date, consent: consentFor(eventInvoice.input.date, 12, ['membership', 'marketing'], 'in_store_form', 'مالک کافه') } });
+    push({ k: 'register', input: { id: 'm-event', displayName: 'خانم احمدی', tags: ['مراسم'], accountingPartyId: 'event', createdAt: eventInvoice.input.date, consent: consentFor(eventInvoice.input.date, 12, ['membership', 'marketing'], 'in_store_form', 'مالک کسب‌وکار') } });
   }
   // Visits over the period, while each consent is active.
   for (let d = start; d <= today; d = addDays(d, 1)) {

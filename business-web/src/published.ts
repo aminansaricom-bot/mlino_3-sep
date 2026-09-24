@@ -25,17 +25,20 @@ export type PublishedBusiness = Readonly<{
 
 export type PublishedState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; business: PublishedBusiness | null };
 
-/** Demo: the panel's business is the signed demo café whose name matches. */
-const DEMO_BUSINESS_NAME = /نیلوفر/;
+/**
+ * Whose business: the organization the logged-in member chose (membership, D-57) — never a name match.
+ * Before anyone logs in, the panel shows one fictional demo business, by its id, and says so.
+ */
+export const DEMO_ORGANIZATION_ID = 'test-demo-07';
 
-let cache: Promise<PublishedBusiness | null> | null = null;
+const cache = new Map<string, Promise<PublishedBusiness | null>>();
 
-async function load(): Promise<PublishedBusiness | null> {
+async function load(organizationId: string): Promise<PublishedBusiness | null> {
   const [b, c] = await Promise.all([
     fetch('/public-export/public-business.v1.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : Promise.reject(new Error('business')))),
     fetch('/public-export/public-catalog.v1.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
   ]);
-  const record = (b.records as Array<Record<string, any>>).find((r) => DEMO_BUSINESS_NAME.test(r.business?.display_name ?? r.business?.name ?? ''));
+  const record = (b.records as Array<Record<string, any>>).find((r) => r.business?.organization_id === organizationId);
   if (!record) return null;
   const biz = record.business ?? {};
   const orgId = biz.organization_id as string;
@@ -54,15 +57,17 @@ async function load(): Promise<PublishedBusiness | null> {
   };
 }
 
-export function usePublished(): PublishedState {
+export function usePublished(organizationId: string | null): PublishedState {
+  const orgId = organizationId ?? DEMO_ORGANIZATION_ID;
   const [state, setState] = useState<PublishedState>({ status: 'loading' });
   useEffect(() => {
     let live = true;
-    cache ??= load();
-    cache.then((business) => { if (live) setState({ status: 'ready', business }); })
-      .catch(() => { cache = null; if (live) setState({ status: 'error' }); });
+    setState({ status: 'loading' });
+    if (!cache.has(orgId)) cache.set(orgId, load(orgId));
+    cache.get(orgId)!.then((business) => { if (live) setState({ status: 'ready', business }); })
+      .catch(() => { cache.delete(orgId); if (live) setState({ status: 'error' }); });
     return () => { live = false; };
-  }, []);
+  }, [orgId]);
   return state;
 }
 

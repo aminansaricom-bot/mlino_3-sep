@@ -1,3 +1,4 @@
+import { usePack } from '../../industry/context';
 import { useWorkspace } from '../../workspace';
 import { useChatSession } from '../../chat/session';
 import { StorefrontPage } from '../catalog/CatalogPages';
@@ -15,12 +16,15 @@ const TABS = [['', 'ویترین'], ['offers', 'آفر اطراف'], ['chat', '�
 export default function StorefrontSection({ rest, published }: { rest: string[]; published: PublishedState }) {
   const ws = useWorkspace();
   const s = useChatSession();
-  const tab = rest[0] ?? '';
+  const { pack } = usePack();
+  // Sensitive trades keep customer chat off, like CRM (R8-a §3.10).
+  const tabs = TABS.filter(([id]) => id !== 'chat' || !pack.sensitive);
+  const tab = tabs.some(([id]) => id === rest[0]) ? rest[0] : '';
   const pending = s.summary?.pendingQuestions ?? 0;
   const unread = s.summary?.unreadMessages ?? 0;
   return <div className="stack">
     <nav className="segmented section-tabs" aria-label="بخش‌های ویترین مجازی">
-      {TABS.map(([id, label]) => <button key={id} type="button" className={tab === id ? 'on' : ''} onClick={() => ws.navigate(id ? `/storefront/${id}` : '/storefront')}>
+      {tabs.map(([id, label]) => <button key={id} type="button" className={tab === id ? 'on' : ''} onClick={() => ws.navigate(id ? `/storefront/${id}` : '/storefront')}>
         {label}{id === 'chat' && unread + pending > 0 && <i className="tab-count">{faNum(unread + pending)}</i>}
       </button>)}
     </nav>

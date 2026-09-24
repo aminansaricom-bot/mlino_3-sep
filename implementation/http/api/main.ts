@@ -27,7 +27,7 @@ import { seedDemoMembers } from './seed-demo-members';
  *   OTP_DELIVERY        only `test` today; anything else refuses to start
  *   API_HOSTS           e.g. explore.mlino.site=v2,business.mlino.site=business
  *   PUBLISHED_PATH      public-business.v1.json produced by the export
- *   CATALOG_PATH        public-catalog.v1.json (published menu for the chat auto-reply)
+ *   CATALOG_PATH        public-catalog.v1.json (published catalog for the chat auto-reply)
  *   API_PORT            default 8741, bound to 127.0.0.1
  *   COOKIE_SECURE       1 in production
  *

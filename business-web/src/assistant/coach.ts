@@ -2,6 +2,7 @@
 // never while they are typing, and it steps back when ignored. Tips come from the modules' real data first
 // (the same daily actions as «امروز»), then a one-time «how to use me here» hint per page. No tip invents a fact.
 
+import { PACKS } from '../industry/packs';
 import { dailyActions, type ModuleId, type Snapshot } from '../modules/registry';
 import { faNum } from '../format';
 
@@ -35,7 +36,6 @@ function pageModule(path: string): ModuleId | 'home' | null {
 const HOWTO: Partial<Record<ModuleId | 'home', Tip>> = {
   home: { id: 'howto:home', fromData: false, text: 'هر وقت خواستی بپرس، مثلاً «سود این ماه چقدره؟» — از همین داده‌های خودت جواب می‌دهم.', action: { label: 'بپرس', ask: 'سود این ماه چقدره؟' } },
   accounting: { id: 'howto:accounting', fromData: false, text: 'به‌جای پر کردن فرم می‌توانی بگویی «هزینه‌ی برق ۱۲ میلیون از بانک»؛ پیش‌نویس سند را آماده می‌کنم و ثبتش با تأیید خودت است.' },
-  inventory: { id: 'howto:inventory', fromData: false, text: 'ورود کالا را می‌توانی بگویی، مثلاً «۲۰ کیلو شیر وارد انبار شد به قیمت ۹ میلیون»؛ من فقط پیش‌نویسش را می‌سازم.' },
   crm: { id: 'howto:crm', fromData: false, text: 'عضو تازه فقط با رضایت خود مشتری ثبت می‌شود؛ از من هم فقط آمار کلی می‌شنوی، نه اطلاعات یک نفر.' },
   storefront: { id: 'howto:storefront', fromData: false, text: 'ویترین همان چیزی است که مشتری‌های نزدیک می‌بینند. یک آفر شعاع‌دار برای رهگذرها می‌تواند آن‌ها را به ویترینت بیاورد.', action: { label: 'آفر اطراف', to: '/storefront/offers' } },
   offers: { id: 'howto:offers', fromData: false, text: 'برای رهگذرها شعاع ۵۰۰ متر، برای اهل محله ۱ تا ۲ کیلومتر معمولاً بهتر جواب می‌دهد. آفر تا وقتی خودت منتشرش نکنی دیده نمی‌شود.' },
@@ -55,7 +55,9 @@ export function tipsFor(path: string, s: Snapshot): Tip[] {
   if (page === 'chat' && c && c.autoReplyAllowed && !c.autoReply) {
     fromData.push({ id: 'chat:auto-off', fromData: true, text: `پلنت پاسخ‌گوی خودکار دارد ولی خاموش است${c.conversations ? `؛ ${faNum(c.conversations)} گفتگو داری` : ''}. فقط با جواب‌های تأییدشده‌ی تو جواب می‌دهد و حدس نمی‌زند.` });
   }
-  const howto = HOWTO[page];
+  const howto: Tip | undefined = page === 'inventory'
+    ? { id: 'howto:inventory', fromData: false, text: `ورود کالا را می‌توانی بگویی، مثلاً «${s.pack?.stockExample ?? PACKS.general.stockExample}»؛ من فقط پیش‌نویسش را می‌سازم.` }
+    : HOWTO[page];
   return howto ? [...fromData, howto] : fromData;
 }
 

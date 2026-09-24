@@ -1,3 +1,4 @@
+import { usePack } from '../industry/context';
 import { useMemo, useState } from 'react';
 import { useWorkspace } from '../workspace';
 import { MODULES, ROLE_LABEL, dailyActions, type DailyAction, type Snapshot } from '../modules/registry';
@@ -30,10 +31,11 @@ function ActionCard({ a }: { a: DailyAction }) {
 }
 
 export default function Home({ published }: { published: PublishedBusiness | null | undefined }) {
+  const { pack } = usePack();
   const ws = useWorkspace();
   const cs = useChatSession();
-  const snapshot: Snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, crm: ws.crm, published, chat: { loggedIn: !!cs.me, summary: cs.summary } };
-  const actions = useMemo(() => dailyActions(snapshot), [ws.ledger, ws.inventory, ws.crm, published, ws.today, cs.me, cs.summary]); // eslint-disable-line react-hooks/exhaustive-deps
+  const snapshot: Snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, crm: ws.crm, published, chat: { loggedIn: !!cs.me, summary: cs.summary }, pack };
+  const actions = useMemo(() => dailyActions(snapshot), [ws.ledger, ws.inventory, ws.crm, published, ws.today, cs.me, cs.summary, pack]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <div className="stack">
     <section className="hero-today">

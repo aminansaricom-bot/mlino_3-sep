@@ -1,3 +1,4 @@
+import { usePack } from '../../industry/context';
 import { useState } from 'react';
 import type { Settings } from '../../book';
 import { faNum } from '../../format';
@@ -51,6 +52,7 @@ function SettingsForm({ settings, onSave }: { settings: Settings; onSave: (s: Se
   const [name, setName] = useState(settings.businessName);
   const [rate, setRate] = useState(String(settings.vatRateBp / 100));
   const [inclusive, setInclusive] = useState(settings.pricesIncludeVat ? 'yes' : 'no');
+  const catalog = usePack().pack.catalog;
   const pct = Number(rate.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))));
   const valid = Number.isFinite(pct) && pct >= 0 && pct <= 50 && Number.isInteger(pct * 100);
   return <form onSubmit={(e) => { e.preventDefault(); if (valid && name.trim()) onSave({ businessName: name.trim().slice(0, 60), vatRateBp: Math.round(pct * 100), pricesIncludeVat: inclusive === 'yes' }); }}>
@@ -58,7 +60,7 @@ function SettingsForm({ settings, onSave }: { settings: Settings; onSave: (s: Se
     <Field label="نرخ مالیات بر ارزش افزوده (درصد)" hint="پیش‌فرض ۱۰٪. روی سندهای بعدی اعمال می‌شود، سندهای قبلی عوض نمی‌شوند." error={valid ? null : 'نرخ باید عددی بین ۰ تا ۵۰ باشد.'}>
       {(id) => <input id={id} inputMode="decimal" dir="ltr" value={rate} onChange={(e) => setRate(e.target.value)} />}
     </Field>
-    <Field label="قیمت‌های منو">{() => <Segmented label="قیمت‌های منو" value={inclusive} onChange={setInclusive} options={[['yes', 'با ارزش افزوده'], ['no', 'بدون ارزش افزوده']]} />}</Field>
+    <Field label={`قیمت‌های ${catalog}`}>{() => <Segmented label={`قیمت‌های ${catalog}`} value={inclusive} onChange={setInclusive} options={[['yes', 'با ارزش افزوده'], ['no', 'بدون ارزش افزوده']]} />}</Field>
     <p className="note">نرخ فعلی: {faNum(settings.vatRateBp / 100)}٪</p>
     <div className="submit"><button type="submit" className="btn primary wide" disabled={!valid}>ذخیره</button></div>
   </form>;

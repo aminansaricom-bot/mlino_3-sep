@@ -13,7 +13,7 @@ type FormProps = { ledger: Ledger; settings: Settings; today: string; commit: Co
 
 export const FORMS = [
   ['daily', '💵', 'فروش روزانه', 'جمع فروش یک روز، نقد و کارت'],
-  ['invoice', '🧾', 'فاکتور فروش', 'از روی منو، نقد، کارت، چک یا نسیه'],
+  ['invoice', '🧾', 'فاکتور فروش', 'از روی فهرست فروش، نقد، کارت، چک یا نسیه'],
   ['expense', '🛒', 'هزینه و خرید', 'اجاره، حقوق، مواد اولیه، قبض…'],
   ['receipt', '📥', 'دریافت از مشتری', 'تسویه‌ی طلب، نقد، کارت یا چک'],
   ['payment', '📤', 'پرداخت به تأمین‌کننده', 'تسویه‌ی بدهی، نقد، بانک یا چک'],
@@ -136,7 +136,7 @@ function InvoiceForm({ ledger, settings, today, commit, done, attach }: FormProp
       <Field label="تاریخ">{(id) => <DateInput id={id} today={today} value={c.date} onChange={c.setDate} />}</Field>
       <Field label="مشتری" hint="برای نسیه یا چک لازم است">{(id) => <select id={id} value={customerId} onChange={(e) => setCustomerId(e.target.value)}><option value="">مشتری عمومی</option>{customers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select>}</Field>
     </div>
-    <div className="menu-pick" role="group" aria-label="اقلام منو">
+    <div className="menu-pick" role="group" aria-label="اقلام فروش">
       {DEMO_MENU.map((m) => <div key={m.id} className={`menu-row${qty[m.id] ? ' on' : ''}`}>
         <span><strong>{m.name}</strong><small><Money value={m.price} /></small></span>
         <span className="stepper">

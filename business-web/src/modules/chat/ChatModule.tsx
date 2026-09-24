@@ -194,7 +194,7 @@ function AutoReplyCard({ orgId }: { orgId: string }) {
   return <section className="card chat-status auto-card">
     <div><strong>پاسخ‌گوی خودکار {autoReply ? 'روشن است' : 'خاموش است'}</strong>
       <small>{autoReplyAllowed
-        ? 'فقط با جواب‌های تأییدشده‌ی شما یا اطلاعات منتشرشده (ساعت، نشانی، منو و قیمت، آفرها) جواب می‌دهد؛ ناشناخته‌ها را به شما می‌دهد و حدس نمی‌زند.'
+        ? 'فقط با جواب‌های تأییدشده‌ی شما یا اطلاعات منتشرشده (ساعت، نشانی، محصولات و قیمت، آفرها) جواب می‌دهد؛ ناشناخته‌ها را به شما می‌دهد و حدس نمی‌زند.'
         : 'این امکان در پلن‌های پرو و مکس است؛ در پلن رایگان همه‌ی پیام‌ها را خودتان جواب می‌دهید.'}</small></div>
     {autoReplyAllowed ? <button type="button" className="btn small ghost" onClick={() => void toggle()}>{autoReply ? 'خاموش کردن' : 'روشن کردن'}</button>
       : <button type="button" className="btn small" onClick={() => ws.navigate('/plan')}>دیدن پلن‌ها</button>}

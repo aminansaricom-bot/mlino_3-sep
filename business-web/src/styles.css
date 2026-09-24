@@ -537,3 +537,9 @@ b.pos { color: var(--pos); } b.neg { color: var(--neg); }
 .assist-tip-close:hover { background: var(--surface-2); color: var(--ink); }
 @keyframes tip-in { from { opacity: 0; transform: translateY(8px) scale(.96); } }
 .orb-eye { will-change: translate; }
+
+/* Business settings: trade pack choice */
+.pack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 12px; }
+.pack-card { display: grid; gap: 4px; text-align: start; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); }
+.pack-card small { color: var(--soft); font-size: 12px; line-height: 1.7; }
+.pack-card.on { border-color: var(--violet); box-shadow: 0 0 0 2px color-mix(in srgb, var(--violet) 30%, transparent); background: var(--surface); }

@@ -1,3 +1,4 @@
+import { usePack } from '../../industry/context';
 import { useState } from 'react';
 import { displayQty, lowStock, stockReport, stockValue, type BaseUnit, type Inventory, type StockItem } from '../../inventoryEngine';
 import { useWorkspace } from '../../workspace';
@@ -23,7 +24,10 @@ type Form = 'receive' | 'issue' | 'count' | 'item';
 
 export default function InventoryModule({ tab: raw }: { tab: string }) {
   const ws = useWorkspace();
-  const tab: Tab = (TABS.some(([k]) => k === raw) ? raw : 'stock') as Tab;
+  const { pack } = usePack();
+  // Recipes (each sold item consumes stock) exist only for trades that make what they sell.
+  const tabs = TABS.filter(([k]) => k !== 'recipes' || pack.recipes);
+  const tab: Tab = (tabs.some(([k]) => k === raw) ? raw : 'stock') as Tab;
   const [form, setForm] = useState<{ kind: Form; itemId?: string } | null>(null);
   const inv = ws.inventory;
   const go = (t: Tab) => ws.navigate(t === 'stock' ? '/inventory' : `/inventory/${t}`);
@@ -31,14 +35,14 @@ export default function InventoryModule({ tab: raw }: { tab: string }) {
   return <div className="module">
     <header className="page-head"><h1>موجودی مواد و کالا</h1><span className="badge ok">ماژول</span></header>
     <nav className="subnav scroll-x" aria-label="بخش‌های انبار">
-      {TABS.map(([key, icon, label]) => <button key={key} type="button" className={tab === key ? 'on' : ''} onClick={() => go(key)}><span aria-hidden="true">{icon}</span>{label}</button>)}
+      {tabs.map(([key, icon, label]) => <button key={key} type="button" className={tab === key ? 'on' : ''} onClick={() => go(key)}><span aria-hidden="true">{icon}</span>{label}</button>)}
     </nav>
     {tab === 'stock' && <StockTab inv={inv} onForm={(kind, itemId) => setForm({ kind, itemId })} />}
     {tab === 'record' && <div className="tiles">
       {([['receive', '📥', 'ورود کالا', 'خرید یا دریافت، با بهای تمام‌شده'], ['issue', '📤', 'مصرف یا ضایعات', 'برداشت از انبار با دلیل'], ['count', '🔢', 'شمارش انبار', 'ثبت موجودی واقعی؛ فقط اختلاف ثبت می‌شود'], ['item', '➕', 'کالای تازه', 'ماده‌ی اولیه یا کالای آماده']] as const).map(([k, icon, title, hint]) =>
         <button key={k} type="button" className="tile" onClick={() => setForm({ kind: k })}><span className="tile-icon" aria-hidden="true">{icon}</span><strong>{title}</strong><small>{hint}</small></button>)}
     </div>}
-    {tab === 'recipes' && <RecipesTab inv={inv} />}
+    {tab === 'recipes' && <RecipesTab inv={inv} item={pack.item} />}
     {tab === 'history' && <HistoryTab inv={inv} />}
     {form && <Sheet title={{ receive: 'ورود کالا', issue: 'مصرف یا ضایعات', count: 'شمارش انبار', item: 'کالای تازه' }[form.kind]} onClose={() => setForm(null)}>
       <InventoryForm kind={form.kind} itemId={form.itemId} done={() => setForm(null)} />
@@ -69,9 +73,9 @@ function StockTab({ inv, onForm }: { inv: Inventory; onForm: (kind: Form, itemId
   </div>;
 }
 
-function RecipesTab({ inv }: { inv: Inventory }) {
+function RecipesTab({ inv, item }: { inv: Inventory; item: string }) {
   const recipes = [...inv.listRecipes().entries()];
-  return <Card title="دستور مصرف هر قلم منو">
+  return <Card title={`دستور مصرف هر ${item}`}>
     <p className="muted">با ثبت فاکتور فروش در حسابداری، مواد همین دستورها خودکار از انبار کم می‌شود (جریان یک‌طرفه‌ی اعلام‌شده: حسابداری ← انبار). فروش یکجای روزانه قلم ندارد، پس مصرفش با شمارش هفتگی دیده می‌شود.</p>
     <ul className="rows">{recipes.map(([menuId, lines]) => <li key={menuId}>
       <span><strong>{DEMO_MENU.find((m) => m.id === menuId)?.name ?? menuId}</strong></span>

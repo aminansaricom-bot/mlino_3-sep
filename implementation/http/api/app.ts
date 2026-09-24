@@ -27,7 +27,7 @@ export interface ApiConfig {
   readonly hosts: ReadonlyMap<string, Audience>;
   readonly cookieSecure: boolean;
   readonly publishedPath: string;
-  /** public-catalog.v1.json — published menu and prices for the chat auto-reply. */
+  /** public-catalog.v1.json — published catalog and prices for the chat auto-reply. */
   readonly catalogPath?: string;
 }
 

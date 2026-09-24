@@ -16,7 +16,7 @@ import { clearCrm, eraseFromStore, generateCrmSample, loadCrm, replayCrm, runCrm
 import { invoiceTotals } from './engine';
 
 /** Who acts. In the real product this comes from the Core session + membership, never from the page. */
-export const DEMO_MEMBER = { id: 'member-owner', name: 'مالک کافه', grants: ['founding'] } as const;
+export const DEMO_MEMBER = { id: 'member-owner', name: 'مالک کسب‌وکار', grants: ['founding'] } as const;
 
 export type AuditEntry = Readonly<{ at: string; module: string; summary: string; authorizedBy: string; executedVia: 'manual' | 'assistant' }>;
 

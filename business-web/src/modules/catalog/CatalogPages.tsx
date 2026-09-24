@@ -1,3 +1,4 @@
+import { usePack } from '../../industry/context';
 import { mediaUrl, priceLabel, type PublishedBusiness, type PublishedState } from '../../published';
 import { faNum, jDate, toFaDigits } from '../../format';
 import { useWorkspace } from '../../workspace';
@@ -17,8 +18,9 @@ function PublishNote() {
 }
 
 export function ProductsPage({ state }: { state: PublishedState }) {
+  const { pack } = usePack();
   return <div className="stack">
-    <header className="page-head"><h1>محصولات و منو</h1><span className="badge info">هسته — کاتالوگ</span></header>
+    <header className="page-head"><h1>{pack.catalogTitle}</h1><span className="badge info">هسته — کاتالوگ</span></header>
     <Guard state={state}>{(b) => {
       const groups = new Map<string, typeof b.items[number][]>();
       for (const item of b.items) groups.set(item.grouping_label ?? 'سایر', [...(groups.get(item.grouping_label ?? 'سایر') ?? []), item]);

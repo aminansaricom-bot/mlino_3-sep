@@ -5,6 +5,7 @@
 //    manual form. Governance acts are never executed here — only prepared, with the reason why.
 // Understanding is local and deterministic (no external model: provider retention is unresolved).
 
+import { PACKS } from '../industry/packs';
 import {
   balanceSheet, chequeRegister, jalaliMonthRange, jalaliSeasonRange, partyBalances, profitAndLoss, toJalali, treasuryBalances, vatReport,
 } from '../engine';
@@ -107,14 +108,16 @@ const EXPENSE_KEYS: readonly [RegExp, string, string][] = [
   [/اجاره/, '6102', 'اجاره'], [/حقوق|دستمزد|پرسنل/, '6101', 'حقوق و دستمزد'], [/برق|آب|گاز|تلفن|اینترنت|قبض/, '6103', 'قبض'],
   [/تبلیغ|اینستاگرام|بنر/, '6104', 'تبلیغات'], [/پیک|حمل|ارسال/, '6105', 'حمل و ارسال'], [/کارمزد/, '6106', 'کارمزد بانکی'],
   [/تعمیر|سرویس دستگاه/, '6107', 'تعمیر و نگهداری'], [/بسته ?بندی|لیوان|دستمال/, '6108', 'بسته‌بندی و مصرفی'],
-  [/شیر|قهوه|مواد|نان|شیرینی|خرید کالا|میوه/, '5101', 'خرید مواد اولیه و کالا'],
 ];
+
+/** Buying goods or materials: generic words plus the chosen trade's own words (packs.ts). */
+const purchaseKey = (s: Snapshot): readonly [RegExp, string, string] => [new RegExp(`خرید کالا|خرید جنس|مواد اولیه|${s.pack?.purchaseWords ?? PACKS.general.purchaseWords}`), '5101', 'خرید مواد اولیه و کالا'];
 
 const ROUTES: readonly [RegExp, string, string][] = [
   [/چک/, '/accounting/cheques', 'چک‌ها'], [/ترازنامه/, '/accounting/reports:balance', 'ترازنامه'], [/تراز آزمایشی/, '/accounting/reports:trial', 'تراز آزمایشی'],
   [/سود|زیان|گزارش/, '/accounting/reports', 'گزارش‌ها'], [/سند|اسناد|دفتر/, '/accounting/journal', 'اسناد'], [/حسابداری/, '/accounting', 'حسابداری'],
   [/انبار|موجودی کالا|موجودی مواد/, '/inventory', 'انبار'], [/دستور مصرف|رسپی/, '/inventory/recipes', 'دستور مصرف'],
-  [/ویترین/, '/storefront', 'ویترین'], [/محصول|منو/, '/products', 'محصولات'], [/آفر|تخفیف/, '/storefront/offers', 'آفرها'],
+  [/ویترین/, '/storefront', 'ویترین'], [/محصول|منو|خدمات/, '/products', 'محصولات و خدمات'], [/آفر|تخفیف/, '/storefront/offers', 'آفرها'],
   [/محتوا|اینستاگرام|پست/, '/content', 'تولید محتوا'], [/پیام|گفتگو|چت/, '/storefront/chat', 'گفتگو با مشتری'], [/مشتری|crm/i, '/crm', 'مشتریان'], [/امروز|خانه|داشبورد/, '/', 'امروز'],
 ];
 
@@ -125,7 +128,7 @@ function hasWord(text: string, word: string): boolean {
   if (w.length < 2) return false;
   return text.split(' ').some((t) => t.startsWith(w) && SUFFIX.test(t.slice(w.length)));
 }
-const STOP = new Set(['و', 'ی', 'از', 'به', 'با', 'کافه', 'بانک', 'صندوق', 'شرکت', 'خانم', 'آقای']);
+const STOP = new Set(['و', 'ی', 'از', 'به', 'با', 'بانک', 'صندوق', 'شرکت', 'خانم', 'آقای']);
 const nameWords = (name: string) => normalize(name.replace(/[()]/g, ' ')).split(' ').filter((w) => w.length >= 2 && !STOP.has(w));
 
 function findParty(s: Snapshot, text: string, role: 'customer' | 'supplier'): string | undefined {
@@ -160,7 +163,7 @@ export function understand(raw: string, s: Snapshot): CommandResult {
   }
   // Governance: prepare, never execute.
   if (/منتشر|انتشار|پابلیش|آفر (بساز|بذار|فعال)|تخفیف (بذار|بده|فعال)|عکس (اضافه|بذار)|اجازه بده به|دسترسی بده/.test(text)) {
-    const to = /عکس|محصول|منو/.test(text) ? '/products' : /ویترین|پروفایل|ساعت/.test(text) ? '/storefront' : '/storefront/offers';
+    const to = /عکس|محصول|منو|خدمات/.test(text) ? '/products' : /ویترین|پروفایل|ساعت/.test(text) ? '/storefront' : '/storefront/offers';
     return { type: 'governance', to, linkLabel: 'رفتن به همان بخش',
       text: to === '/storefront/offers'
         ? 'آفر را خودت در «ویترین مجازی ← آفر اطراف» می‌سازی: عنوان، مدت و شعاعی که می‌خواهی. اول پیش‌نویس ساخته می‌شود و فقط با دکمه‌ی «انتشار» خودت در V2 دیده می‌شود؛ من به جای تو منتشر نمی‌کنم.'
@@ -285,7 +288,7 @@ export function understand(raw: string, s: Snapshot): CommandResult {
       const bank = !/نقد|صندوق/.test(text);
       return { type: 'proposal', title: 'پرداخت به تأمین‌کننده', proposal: { kind: 'payment', amount: money, partyId: supplier, pay: bank ? 'bank' : 'cash', bankId: bank ? findTreasury(s, text, 'bank') : undefined, date } };
     }
-    const cat = EXPENSE_KEYS.find(([re]) => re.test(text));
+    const cat = [...EXPENSE_KEYS, purchaseKey(s)].find(([re]) => re.test(text));
     if (cat || /هزینه|خرید|پرداخت|قبض/.test(text)) {
       const pay = /نسیه/.test(text) ? 'credit' : /بانک|کارت|حساب|ملت|سامان|واریز/.test(text) ? 'bank' : 'cash';
       return { type: 'proposal', title: 'ثبت هزینه', proposal: {
@@ -299,5 +302,5 @@ export function understand(raw: string, s: Snapshot): CommandResult {
   if (route && /برو|باز|نشون|نمایش|ببینم|کجا|صفحه/.test(text)) return { type: 'navigate', to: route[1], label: route[2] };
   if (route && !money) return { type: 'navigate', to: route[1], label: route[2] };
 
-  return { type: 'unknown', text: 'منظورت را مطمئن نفهمیدم و حدس نمی‌زنم. مثلاً بگو: «هزینه‌ی برق ۱۲ میلیون از بانک ملت»، «فروش امروز ۴۵ میلیون کارت»، «۲۰ کیلو شیر وارد انبار شد به قیمت ۹ میلیون»، «سود این ماه چقدره؟» یا «برو به چک‌ها».' };
+  return { type: 'unknown', text: `منظورت را مطمئن نفهمیدم و حدس نمی‌زنم. مثلاً بگو: «هزینه‌ی برق ۱۲ میلیون از بانک ملت»، «فروش امروز ۴۵ میلیون کارت»، «${s.pack?.stockExample ?? PACKS.general.stockExample}»، «سود این ماه چقدره؟» یا «برو به چک‌ها».` };
 }

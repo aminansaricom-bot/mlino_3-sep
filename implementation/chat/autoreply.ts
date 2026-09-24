@@ -4,7 +4,7 @@
  * It never invents an answer. A reply comes from exactly one of:
  *   1. an answer the business approved (its own knowledge — typed by the owner or learned from the owner's
  *      reply to an earlier question), or
- *   2. the business's own PUBLISHED facts (declared hours, address, public phone, published menu and prices,
+ *   2. the business's own PUBLISHED facts (declared hours, address, public phone, published catalog and prices,
  *      active offers) — the same facts V2 shows (D-52).
  * Anything else is escalated: the customer is told the question went to the business, and the owner's
  * answer can be saved as knowledge for next time.
@@ -112,7 +112,7 @@ export function answer(message: string, knowledge: readonly KnowledgeEntry[], fa
   const item = matchItem(message, facts.items);
   if (item && (asksPrice || asksHave)) {
     const price = item.price ? `قیمت منتشرشده: ${item.price}` : 'قیمتش منتشر نشده است';
-    return { kind: 'fact', text: `«${clean(item.name)}» در منوی منتشرشده‌ی ${clean(facts.name)} هست؛ ${price}. موجودی لحظه‌ای را نمی‌دانم.` };
+    return { kind: 'fact', text: `«${clean(item.name)}» در فهرست منتشرشده‌ی ${clean(facts.name)} هست؛ ${price}. موجودی لحظه‌ای را نمی‌دانم.` };
   }
   if (/ساعت|باز|تعطیل|تا کی|از کی|کی میبندی|کی می بندید|بسته/.test(text) && !item) {
     return facts.hours
