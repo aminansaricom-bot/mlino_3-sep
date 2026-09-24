@@ -1,11 +1,10 @@
-import { useEffect, useState, type MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import { useWorkspace } from '../workspace';
 
 // Mobile bottom bar. Pattern after the owner's reference reel (motion and shape only; icons drawn here):
 // – the active item rides a raised brand-gradient circle that overlaps the bar's top edge and springs sideways
 //   to the next item;
-// – a tap lifts a pastel bubble with the same icon out of the bar on a stretchy neck, while the bar takes
-//   that item's tint.
+// – the bar takes the active item's tint. (The rising tap bubble from the reel was removed at the owner's request.)
 // prefers-reduced-motion turns all of it off (global rule in styles.css).
 
 type Key = 'home' | 'accounting' | 'inventory' | 'storefront' | 'more';
@@ -32,17 +31,13 @@ const ITEMS: readonly { key: Key; to?: string; label: string; tint: string }[] =
 
 export default function BottomBar({ active, onMore }: { active: string; onMore: () => void }) {
   const { navigate } = useWorkspace();
-  const [pop, setPop] = useState<{ i: number; n: number } | null>(null);
-  // The bubble also clears on a timer: with reduced motion there is no animationend to wait for.
-  useEffect(() => { if (!pop) return undefined; const t = window.setTimeout(() => setPop(null), 900); return () => window.clearTimeout(t); }, [pop]);
   const index = ITEMS.findIndex((it) => it.key === active);
-  const tint = ITEMS[pop?.i ?? index]?.tint ?? 'transparent';
+  const tint = ITEMS[index]?.tint ?? 'transparent';
 
   const tap = (i: number, e: MouseEvent) => {
     const it = ITEMS[i];
     if (it.to && (e.metaKey || e.ctrlKey)) return;
     e.preventDefault();
-    setPop({ i, n: (pop?.n ?? 0) + 1 });
     if (it.to) navigate(it.to); else onMore();
   };
 
@@ -52,7 +47,6 @@ export default function BottomBar({ active, onMore }: { active: string; onMore: 
       const inner = <>
         <span className="bb-ico"><NavIcon name={it.key} /></span>
         <span className="bb-label">{it.label}</span>
-        {pop?.i === i && <span key={pop.n} className="bb-pop" style={{ ['--pop' as string]: it.tint }} aria-hidden="true"><NavIcon name={it.key} /></span>}
       </>;
       return it.to
         ? <a key={it.key} href={it.to} className={i === index ? 'on' : ''} aria-current={i === index ? 'page' : undefined} onClick={(e) => tap(i, e)}>{inner}</a>
