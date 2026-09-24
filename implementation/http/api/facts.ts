@@ -36,6 +36,12 @@ export function businessPlace(businessPath: string, organizationId: string): { n
   return { name: String(b.name ?? '').replace(/\s*\(آزمایشی\)/g, ''), lat: loc.latitude as number, lng: loc.longitude as number };
 }
 
+/** Is this product published by this business right now (signed public catalog)? Ratings accept only those. */
+export function catalogItemPublished(catalogPath: string, organizationId: string, catalogItemId: string): boolean {
+  const catalog = load(catalogPath, (r) => r.organization_id as string | undefined).get(organizationId);
+  return ((catalog?.items as Json[] | undefined) ?? []).some((i) => i.catalog_item_id === catalogItemId);
+}
+
 export function businessFacts(businessPath: string, catalogPath: string, organizationId: string, now = Date.now()): BusinessFacts | null {
   const record = load(businessPath, (r) => (r.business as Json | undefined)?.organization_id as string | undefined).get(organizationId);
   if (!record) return null;

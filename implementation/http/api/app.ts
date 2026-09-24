@@ -6,7 +6,8 @@ import { CoreDomainError } from '../../core/errors';
 import { type CoreDeps, RouteError, coreErrorStatus, handleCoreRoute } from './core-routes';
 import { type MemberDeps, handleMemberRoute } from './member-routes';
 import { type CatalogDeps, type FileReply, handleCatalogRoute } from './catalog-routes';
-import { businessFacts } from './facts';
+import { businessFacts, catalogItemPublished } from './facts';
+import { RatingError, type RatingsModule } from '../../ratings';
 import { PLAN_LIMITS, planOf } from '../../core/plan-service';
 import type { AutoResolver } from '../../chat';
 import { NotifyError, type NotifyModule } from '../../notify';
@@ -45,6 +46,8 @@ export interface ApiDeps {
   readonly catalog?: CatalogDeps;
   /** Nearby-offer notifications (D-77). Absent when VAPID keys are not configured. */
   readonly notify?: { module: NotifyModule; publicKey: string };
+  /** Product ratings (D-84). Absent = routes off. */
+  readonly ratings?: RatingsModule;
 }
 
 class HttpError extends Error {
@@ -217,6 +220,7 @@ export function createHandler(deps: ApiDeps) {
         const s = needSession();
         if ((await identity.memberships(s.personId)).length) throw new IdentityError('MEMBER_OF_ORGANIZATION', 'end organization memberships first');
         const conversations = await chat.eraseCustomer(s.personId);
+        if (deps.ratings) await deps.ratings.eraseCustomer(s.personId);
         await identity.erasePerson(s.personId);
         return send(res, 200, { erased: true, conversations }, { 'set-cookie': sessionCookie('', 0, config.cookieSecure) });
       }
@@ -246,6 +250,33 @@ export function createHandler(deps: ApiDeps) {
       }
 
       // ── nearby-offer notifications (V2, anonymous, opt-in — D-77) ──
+      // ── product ratings (D-84): averages are public; rating needs a signed-in person and a published product ──
+      if (path.startsWith('/api/ratings')) {
+        if (audience !== 'v2' || !deps.ratings || !config.catalogPath) throw new HttpError(404, 'NOT_FOUND');
+        if (path === '/api/ratings' && method === 'GET') {
+          const orgId = url.searchParams.get('organizationId') ?? '';
+          const biz = published().get(orgId);
+          if (!biz) throw new HttpError(404, 'NOT_FOUND');
+          if (biz.sensitive) return send(res, 200, { enabled: false, items: {} });
+          return send(res, 200, { enabled: true, items: await deps.ratings.summary(orgId, session?.personId) });
+        }
+        if ((path === '/api/ratings' || path === '/api/ratings/remove') && method === 'POST') {
+          const s = needSession();
+          limit(`rate:${s.personId}`, 60, 3600_000);
+          const body = await readJson(req);
+          const orgId = String(body.organizationId ?? '');
+          const itemId = String(body.catalogItemId ?? '');
+          const biz = published().get(orgId);
+          if (!biz || !catalogItemPublished(config.catalogPath, orgId, itemId)) throw new HttpError(404, 'NOT_FOUND');
+          if (biz.sensitive) throw new HttpError(409, 'RATINGS_OFF');
+          if (path === '/api/ratings/remove') await deps.ratings.remove(orgId, itemId, s.personId);
+          else await deps.ratings.rate({ organizationId: orgId, catalogItemId: itemId, personId: s.personId, testIdentity: s.testIdentity, stars: body.stars });
+          const items = await deps.ratings.summary(orgId, s.personId);
+          return send(res, 200, { item: items[itemId] ?? { avg: 0, count: 0, mine: null } });
+        }
+        throw new HttpError(404, 'NOT_FOUND');
+      }
+
       if (path.startsWith('/api/push/')) {
         if (audience !== 'v2' || !notify) throw new HttpError(404, 'NOT_FOUND');
         if (path === '/api/push/key' && method === 'GET') return send(res, 200, { publicKey: notify.publicKey });
@@ -403,6 +434,7 @@ export function createHandler(deps: ApiDeps) {
         const status = e.code === 'RATE_LIMITED' || e.code === 'TOO_MANY_ATTEMPTS' ? 429 : e.code === 'MEMBER_OF_ORGANIZATION' ? 409 : e.code === 'SMS_FAILED' ? 503 : 400;
         return send(res, status, { error: e.code, ...e.detail });
       }
+      if (e instanceof RatingError) return send(res, 400, { error: e.code });
       if (e instanceof ChatError) {
         const status = e.code === 'NOT_FOUND' || e.code === 'BUSINESS_UNKNOWN' ? 404 : e.code === 'INPUT_INVALID' ? 400 : 409;
         return send(res, status, { error: e.code });
