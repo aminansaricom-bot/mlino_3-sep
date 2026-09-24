@@ -12,7 +12,7 @@ import BottomSheet, { type SheetState } from '../components/BottomSheet';
 import PublicBusinessDetails from '../components/PublicBusinessDetails';
 import ExperiencePanel from '../experience/ExperiencePanel';
 import { useLocalExperience } from '../experience/useLocalExperience';
-import ArVitrineView from '../ar/ArVitrineView';
+import LiveVitrine from '../live/LiveVitrine';
 import { formatDistance } from '../uiFormat';
 import { CatalogConsumer, CatalogFetchTransport, type CatalogItem } from './catalog';
 import { displayName } from '../demo/demoSocial';
@@ -333,10 +333,11 @@ export default function RealPublicApp() {
       onSuggest={() => setSuggestionEmpty(!nearby.some((item) => item.record.offers.length > 0))} suggestionEmpty={suggestionEmpty}
       radiusLabel={formatDistance(5000)} pointLabel={pointLabel} filtersApplied={category !== null || openOnly}
       onChangePoint={() => setOverlay('none')} onUseLocation={useMyLocation} locating={locating} />}
-    {overlay === 'vitrine' && <div className="panel dark"><div className="panel-head"><h3>ویترین زنده</h3><button className="panel-close" onClick={() => setOverlay('none')}>✕</button></div><div className="panel-body">
-       <ArVitrineView records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point} searchPointLabel={pointLabel} preferredCategory={category} onSelectBusiness={openDetail}
-         locationPending={myPoint === null && locError === null} initialRadius={demoBuildEnabled && demoEnabled ? 100 : undefined} onOpenItem={openProduct} />
-    </div></div>}
+    {overlay === 'vitrine' && <LiveVitrine records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point}
+      locationPending={myPoint === null && locError === null} initialRadius={demoBuildEnabled && demoEnabled ? 100 : undefined}
+      offersOnly={offersOnly} onOffersOnly={setOffersOnly} query={query} onQuery={setQuery}
+      savedIds={experience.data.saved} onToggleSave={(id) => experience.toggle('saved', id)}
+      onOpenItem={openProduct} onOpenBusiness={openDetail} onClose={() => setOverlay('none')} demo={demoBuildEnabled && demoEnabled} />}
     {voiceInput.error && <div className="app-banner warn" role="status">{voiceInput.error}</div>}
     {assistant && <AssistantPanel query={assistant.query} answer={assistant.answer} results={assistantResults} loading={assistant.loading}
       onOpen={(id) => openDetail(id)} onClose={() => setAssistant(null)} />}

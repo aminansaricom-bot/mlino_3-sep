@@ -6,7 +6,7 @@ import { chatApi, chatErrorText, faDigits, type ChatConfig, type ChatMessage, ty
 
 export type ChatTarget = { organizationId: string; name: string };
 
-const NAME_KEY = 'mlino.v2.chatName';
+export const NAME_KEY = 'mlino.v2.chatName';
 const time = (iso: string) => faDigits(new Date(iso).toLocaleString('fa-IR-u-nu-latn', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }));
 const clean = (name: string) => name.replace(/\s*\(آزمایشی\)/g, '');
 
@@ -86,7 +86,7 @@ export default function ChatPanel({ target, onClose }: { target: ChatTarget | nu
   </section>;
 }
 
-function Login({ config, onDone }: { config: ChatConfig | null; onDone: () => void }) {
+export function Login({ config, onDone }: { config: ChatConfig | null; onDone: () => void }) {
   const [phone, setPhone] = useState('');
   const [challenge, setChallenge] = useState<{ id: string; testCode?: string } | null>(null);
   const [code, setCode] = useState('');
