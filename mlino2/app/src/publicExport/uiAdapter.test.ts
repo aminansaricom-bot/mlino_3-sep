@@ -12,7 +12,7 @@ describe('U2 accepted PublicRecord display adapter', () => {
       coordinates: { latitude: 35.775, longitude: 51.425 }, addressText: 'تهران',
       contactInformation: source.business.contact_information, links: source.business.links,
       businessHours: source.business.business_hours, capabilities: source.capabilities, offers: source.offers,
-      stale: false, publication: { publishedAt: '2026-09-20T10:00:00.000Z', publicationId: 'pub-profile', sourceRevision: 4 },
+      stale: false, promoted: false, publication: { publishedAt: '2026-09-20T10:00:00.000Z', publicationId: 'pub-profile', sourceRevision: 4 },
     });
     for (const absent of ['floor_level', 'building_id', 'products', 'discount_percent']) expect(actual).not.toHaveProperty(absent);
   });

@@ -15,6 +15,8 @@ export type PublicUiRecord = Readonly<{
   capabilities: readonly PublicCapability[];
   offers: readonly PublicOffer[];
   stale: boolean;
+  /** D-78: paid placement; shown with the label «ویژه», never as a fact about the business. */
+  promoted: boolean;
   publication: Readonly<{ publishedAt: string; publicationId: string; sourceRevision: number }>;
 }>;
 
@@ -35,6 +37,7 @@ export function toPublicUiRecord(record: PublicRecord): PublicUiRecord {
     capabilities: record.capabilities,
     offers: record.offers,
     stale: record.stale,
+    promoted: record.promoted === true,
     publication: {
       publishedAt: record.business.published_at,
       publicationId: record.business.publication_id,

@@ -8,7 +8,7 @@ function record(id: string, latitude: number | null, longitude: number | null): 
   return { id, name: id, description: null, category: { key: 'uncategorized', label: 'دسته‌بندی نشده', guessed: true },
     coordinates: latitude === null || longitude === null ? null : { latitude, longitude },
     addressText: null, contactInformation: null, links: null, businessHours: null,
-    capabilities: [], offers: [], stale: false,
+    capabilities: [], offers: [], stale: false, promoted: false,
     publication: { publishedAt: '2026-09-22T00:00:00.000Z', publicationId: id, sourceRevision: 1 } } as PublicUiRecord;
 }
 const toRad = (x: number) => x * Math.PI / 180;

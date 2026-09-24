@@ -14,8 +14,10 @@ const GLYPH: Record<string, string> = { cafe: '☕', restaurant: '🍽', retail_
  * ردیف فهرست اصلی: فقط چیزهایی که برای تصمیم کاربر مهم است — عکس، نام، امتیاز،
  * فاصله، باز/بسته و پیشنهاد فعال. کل ردیف یک دکمه است.
  */
-export default function PublicBusinessRow({ record, catalog, distanceMeters, now, selected, onOpen }: {
-  record: PublicUiRecord; catalog?: CatalogRecord; distanceMeters?: number; now: number; selected?: boolean; onOpen: () => void;
+export default function PublicBusinessRow({ record, catalog, distanceMeters, now, selected, featured, onOpen }: {
+  record: PublicUiRecord; catalog?: CatalogRecord; distanceMeters?: number; now: number; selected?: boolean;
+  /** D-78: paid placement while searching — always labelled, never hidden. */
+  featured?: boolean; onOpen: () => void;
 }) {
   const ref = useRef<HTMLButtonElement | null>(null);
   const [near, setNear] = useState(typeof IntersectionObserver === 'undefined');
@@ -36,7 +38,7 @@ export default function PublicBusinessRow({ record, catalog, distanceMeters, now
       {offer && <span className="biz-row-offer">پیشنهاد</span>}
     </span>
     <span className="biz-row-copy">
-      <strong>{displayName(record.name)}</strong>
+      <strong>{displayName(record.name)}{featured && <span className="biz-row-featured" title="جایگاه ویژه‌ی پولی">ویژه</span>}</strong>
       <span className="biz-row-meta">
         {rating && <Stars rating={rating} compact />}
         {record.category.key !== 'uncategorized' && <span>{record.category.label}</span>}

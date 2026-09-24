@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PublicExportConsumer, FETCH_INTERVAL_MS } from './consumer';
 import { trustBundleFromBuildJson } from './trustBundle';
 import { FetchTransport } from './transport';
@@ -24,6 +24,8 @@ import AssistantPanel, { AssistantConsent } from '../assistant/AssistantPanel';
 import { speakPersian, useVoiceInput } from '../assistant/voice';
 import { CHAT_ENABLED } from '../chat/chatApi';
 import ChatPanel, { ChatInboxButton, type ChatTarget } from '../chat/ChatPanel';
+import { hiddenForLackOfPosition, promoteMatches, toDataFrame, withNearbyOffers } from '../offers/nearbyOffers';
+import NearbyAlerts, { alertsOn, refreshAlertLocation } from '../offers/NearbyAlerts';
 import { demoBanner, nextDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, validPoint, visibleDemoRecords, type Point } from '../demo/demoRelocation';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
@@ -37,6 +39,12 @@ function configuredConsumer(): PublicExportConsumer | null {
 }
 
 type Overlay = 'none' | 'detail' | 'experience' | 'vitrine' | 'chat';
+
+/** D-78 in the assistant list: among results that match the words themselves, PRO/MAX first; the rest unchanged. */
+function promoteDirect<T extends { direct: boolean; record: { promoted: boolean } }>(results: readonly T[]): T[] {
+  const first = results.filter((r) => r.direct && r.record.promoted);
+  return [...first, ...results.filter((r) => !first.includes(r))];
+}
 
 export default function RealPublicApp() {
   const demoBuildEnabled = import.meta.env.VITE_DEMO_RELOCATE === '1';
@@ -64,6 +72,7 @@ export default function RealPublicApp() {
   const [flyTo, setFlyTo] = useState<[number, number] | null>(null);
   const [nearbyOnly, setNearbyOnly] = useState(false);
   const [openOnly, setOpenOnly] = useState(false);
+  const [offersOnly, setOffersOnly] = useState(false);
   const [category, setCategory] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [tileStatus, setTileStatus] = useState<TileStatus>('loading');
@@ -106,16 +115,21 @@ export default function RealPublicApp() {
 
   const accepted = useMemo(() => consumer?.read(now) ?? [], [consumer, now]);
   const catalogByOrg = useMemo(() => new Map((catalog && consumer ? catalog.read(consumer, now) : []).map((record) => [record.organization_id, record])), [catalog, consumer, now]);
-  const allRecords = useMemo(() => {
+  const baseRecords = useMemo(() => {
     const ui = toPublicUiRecords(accepted);
     if (!demoBuildEnabled) return ui;
     if (!demoEnabled || !demoAnchor) return visibleDemoRecords(ui, null);
     return presentationRecords(ui, true, demoAnchor, demoTarget);
   }, [accepted, demoBuildEnabled, demoEnabled, demoAnchor, demoTarget]);
+  // D-77: radius-limited offers exist only for a viewer inside the radius, measured on this phone.
+  const allRecords = useMemo(() => withNearbyOffers(baseRecords, myPoint), [baseRecords, myPoint]);
+  const hiddenOffers = useMemo(() => hiddenForLackOfPosition(baseRecords, myPoint), [baseRecords, myPoint]);
+  const alertPoint = useMemo(() => (myPoint ? toDataFrame(myPoint, demoBuildEnabled && demoEnabled ? demoAnchor : null, demoBuildEnabled && demoEnabled ? demoTarget : null) : null), [myPoint, demoBuildEnabled, demoEnabled, demoAnchor, demoTarget]);
   const categories = useMemo(() => [...new Map(allRecords.map((record) => [record.category.key, record.category])).values()], [allRecords]);
   const candidates = useMemo(() => {
     let records = allRecords.filter((record) => !experience.data.hidden.includes(record.id));
     if (openOnly) records = keepOpen(records, now);
+    if (offersOnly) records = records.filter((record) => record.offers.length > 0);
     if (category) records = records.filter((record) => record.category.key === category);
     const normalized = query.trim().toLocaleLowerCase('fa-IR');
     // جست‌وجو اقلام منو را هم می‌بیند: «پیتزا» کافه یا رستورانی را پیدا می‌کند که پیتزا دارد.
@@ -123,9 +137,11 @@ export default function RealPublicApp() {
       ...(catalogByOrg.get(record.id)?.items.map((item) => item.name) ?? [])]
       .join(' ').toLocaleLowerCase('fa-IR').includes(normalized));
     return records;
-  }, [allRecords, catalogByOrg, category, experience.data.hidden, now, openOnly, query]);
+  }, [allRecords, catalogByOrg, category, experience.data.hidden, now, openOnly, offersOnly, query]);
   const nearby = useMemo(() => nearbyPublicUiRecords(candidates, point[0], point[1], 5000), [candidates, point]);
-  const shown = nearbyOnly ? nearby.map((item) => item.record) : candidates;
+  // D-78: while searching, matching PRO/MAX businesses come first (labelled «ویژه»); nothing is added to the matches.
+  const searching = query.trim().length > 0;
+  const shown = promoteMatches(nearbyOnly ? nearby.map((item) => item.record) : candidates, searching);
   const distanceById = useMemo(() => new Map(nearby.map((item) => [item.record.id, item.distanceMeters])), [nearby]);
   const selected = selectedId ? allRecords.find((item) => item.id === selectedId) ?? null : null;
   const valid = consumer?.hasValidSnapshot(now) ?? false;
@@ -153,6 +169,20 @@ export default function RealPublicApp() {
     return () => navigator.geolocation.clearWatch(watch);
   }, [overlay, demoBuildEnabled, demoEnabled, demoAnchor]);
   const openDetail = (id: string) => { setSelectedId(id); experience.viewed(id); setOverlay('detail'); };
+  // A tapped notification opens /?org=…&offer=…: show that business once its record is here.
+  const [deepLink, setDeepLink] = useState(() => { try { return new URLSearchParams(window.location.search).get('org'); } catch { return null; } });
+  useEffect(() => {
+    if (!deepLink || !allRecords.some((r) => r.id === deepLink)) return;
+    openDetail(deepLink); setDeepLink(null);
+    try { window.history.replaceState(null, '', '/'); } catch { /* */ }
+  }, [deepLink, allRecords]); // eslint-disable-line react-hooks/exhaustive-deps
+  // While alerts are on, keep the (coarse) position fresh — at most every 10 minutes.
+  const lastAlertSync = useRef(0);
+  useEffect(() => {
+    if (!alertPoint || !alertsOn() || Date.now() - lastAlertSync.current < 10 * 60_000) return;
+    lastAlertSync.current = Date.now();
+    void refreshAlertLocation(alertPoint);
+  }, [alertPoint]);
   // دستیار: متن (یا گفتار تبدیل‌شده) فقط برای فهم منظور به دروازه می‌رود؛ انتخاب کسب‌وکار محلی است.
   const runAssistant = (text: string, voice: boolean, granted: ConsentState = consent) => {
     const q = text.trim();
@@ -172,7 +202,7 @@ export default function RealPublicApp() {
   const voiceInput = useVoiceInput((text) => setQuery(text), (text) => { setQuery(text); runAssistant(text, true); });
   const assistantDistances = useMemo(() => new Map(nearbyPublicUiRecords(allRecords, point[0], point[1], 20000).map((item) => [item.record.id, item.distanceMeters])), [allRecords, point]);
   const assistantResults = useMemo(() => assistant?.answer
-    ? rankRecords({ records: allRecords, catalogByOrg, distances: assistantDistances, intent: assistant.answer.intent, now })
+    ? promoteDirect(rankRecords({ records: allRecords, catalogByOrg, distances: assistantDistances, intent: assistant.answer.intent, now }))
     : [], [assistant, allRecords, catalogByOrg, assistantDistances, now]);
   const openProduct = (organizationId: string, item: CatalogItem) => {
     const owner = allRecords.find((record) => record.id === organizationId);
@@ -210,6 +240,7 @@ export default function RealPublicApp() {
       <div className="chips" aria-label="فیلترهای واقعی">
         <button className={`chip${category === null ? ' active' : ''}`} onClick={() => setCategory(null)}>همه</button>
         {categories.filter((item) => item.key !== 'uncategorized').map((item) => <button key={item.key} className={`chip${category === item.key ? ' active' : ''}`} onClick={() => setCategory(item.key)}>{item.label}</button>)}
+        <button className={`chip chip-offers${offersOnly ? ' active' : ''}`} onClick={() => setOffersOnly((value) => !value)} aria-pressed={offersOnly}>تخفیف‌ها{allRecords.some((r) => r.offers.length > 0) ? ` (${allRecords.filter((r) => r.offers.length > 0).length.toLocaleString('fa-IR')})` : ''}</button>
         <button className={`chip${openOnly ? ' active' : ''}`} onClick={() => setOpenOnly((value) => !value)}>الان باز است</button>
         <button className={`chip${nearbyOnly ? ' active' : ''}`} onClick={() => setNearbyOnly((value) => !value)}>نزدیک من</button>
       </div>
@@ -218,10 +249,12 @@ export default function RealPublicApp() {
     <div className="map-fabs"><button className={`fab-locate${locating ? ' busy' : ''}`} onClick={useMyLocation} aria-label="موقعیت من">◎</button></div>
     <div className="primary-actions"><button className="action-fab vitrine" onClick={() => setOverlay('vitrine')} aria-label="ویترین زنده" title="ویترین زنده"><img className="action-fab-img" src="/icons/vitrine.png" alt="" width={64} height={64} /></button></div>
 
-    <BottomSheet state={sheet} onStateChange={setSheet} title="اطراف شما" subtitle={`${shown.length.toLocaleString('fa-IR')} مورد`}>
+    <BottomSheet state={sheet} onStateChange={setSheet} title={offersOnly ? 'تخفیف‌های اطراف' : 'اطراف شما'} subtitle={`${shown.length.toLocaleString('fa-IR')} مورد`}>
+      {offersOnly && CHAT_ENABLED && <NearbyAlerts point={alertPoint} onNeedLocation={useMyLocation} />}
+      {offersOnly && hiddenOffers > 0 && <p className="offers-hint" role="status">بعضی تخفیف‌ها فقط برای کسانی است که نزدیک کسب‌وکارند؛ برای دیدنشان دکمه‌ی ◎ را بزن.</p>}
       {shown.length === 0 ? <div className="empty">موردی مطابق فیلترهای فعلی نیست.</div> : shown.map((record) =>
         <PublicBusinessRow key={record.id} record={record} catalog={catalogByOrg.get(record.id)} now={now} distanceMeters={distanceById.get(record.id)}
-          selected={record.id === selectedId} onOpen={() => openDetail(record.id)} />)}
+          selected={record.id === selectedId} featured={searching && record.promoted} onOpen={() => openDetail(record.id)} />)}
     </BottomSheet>
 
     {overlay === 'detail' && selected && <PublicBusinessDetails record={selected} catalog={catalogByOrg.get(selected.id)} now={now} distanceMeters={distanceById.get(selected.id)} experience={experience.data}

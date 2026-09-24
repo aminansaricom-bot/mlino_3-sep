@@ -1769,3 +1769,23 @@ body, button, input, textarea, select { font-family: Vazirmatn, "Segoe UI", Taho
 .chat-msg.theirs { align-self: flex-end; background: var(--surface-2); color: var(--ink); border-bottom-left-radius: 4px; }
 .chat-compose { position: sticky; bottom: 0; display: flex; gap: 8px; align-items: flex-end; padding-top: 6px; background: var(--surface); }
 .chat-compose textarea { flex: 1; min-height: 44px; }
+
+/* ═══════════ تخفیف‌های اطراف (D-77) و جایگاه ویژه (D-78) ═══════════ */
+.chip-offers { border-color: rgba(255, 90, 54, .45); }
+.chip-offers.active { background: var(--food); border-color: var(--food); color: #fff; }
+.offers-hint { margin: 0 0 10px; padding: 10px 12px; border-radius: 14px; background: var(--food-soft, #fff1ec); color: var(--ink); font-size: 13px; line-height: 1.8; }
+.nearby-alerts { margin: 0 0 12px; padding: 12px; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--sh-1); }
+.nearby-alerts-row { display: flex; align-items: center; gap: 10px; }
+.nearby-alerts-row > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.nearby-alerts-row small { color: var(--ink-soft); font-size: 12px; line-height: 1.7; }
+.nearby-alerts button { border: 1px solid var(--border); background: var(--surface); color: var(--ink); border-radius: 12px; padding: 7px 12px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.nearby-alerts button.on { color: var(--danger); }
+.nearby-alerts button.primary { border: 0; color: #fff; background: linear-gradient(135deg, var(--accent), var(--violet)); }
+.nearby-alerts-consent { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.nearby-alerts-consent p { margin: 0; font-size: 12.5px; line-height: 1.9; color: var(--ink); }
+.nearby-alerts-consent div { display: flex; gap: 8px; }
+.nearby-alerts-ios { color: #8a5a00 !important; background: #fff4df; padding: 8px 10px; border-radius: 10px; }
+.nearby-alerts-note { margin: 8px 0 0; font-size: 12.5px; color: var(--danger); }
+.biz-row-featured { display: inline-block; margin-inline-start: 6px; padding: 1px 7px; border-radius: 99px; font-size: 10.5px; font-weight: 800; vertical-align: 2px; color: #7a4b00; background: #ffe7a8; }
+.chat-msg.auto small { font-weight: 700; }
+.chat-auto-note { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--accent-soft); color: var(--ink); font-size: 12.5px; line-height: 1.9; }

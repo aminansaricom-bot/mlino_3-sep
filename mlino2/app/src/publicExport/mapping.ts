@@ -11,6 +11,8 @@ export type PublicOffer = Readonly<{
   valid_from: string; valid_until: string | null;
   capability_links: readonly Readonly<{ capability_id: string; capability_key: string; name: string }>[];
   published_at: string; publication_id: string;
+  /** D-77: shown only to viewers within this many meters of the business; absent = everyone. */
+  visibility_radius_meters?: number;
 }>;
 export type PublicBusiness = Readonly<{
   organization_id: string; name: string; description: string | null;
@@ -22,6 +24,8 @@ export type PublicBusiness = Readonly<{
 export type PublicRecord = Readonly<{
   business: PublicBusiness; capabilities: readonly PublicCapability[]; offers: readonly PublicOffer[];
   stale: boolean; ordering: Readonly<{ primary: 'publication.occurred_at'; tie_breaker: 'publication.id' }>;
+  /** D-78: paid placement (PRO/MAX). Not a fact about the business; the UI labels it «ویژه». */
+  promoted?: true;
 }>;
 
 function obj(value: unknown): Record<string, unknown> {
@@ -109,7 +113,7 @@ function capability(value: unknown): PublicCapability {
 }
 function offer(value: unknown): PublicOffer {
   const o = obj(value);
-  onlyKeys(o, ['offer_id', 'offer_version_id', 'version_number', 'name', 'short_description', 'offer_shape', 'terms', 'price_amount', 'price_currency', 'on_request', 'valid_from', 'valid_until', 'capability_links', 'published_at', 'publication_id']);
+  onlyKeys(o, ['offer_id', 'offer_version_id', 'version_number', 'name', 'short_description', 'offer_shape', 'terms', 'price_amount', 'price_currency', 'on_request', 'valid_from', 'valid_until', 'capability_links', 'published_at', 'publication_id', 'visibility_radius_meters']);
   instant(o.valid_from); nullableInstant(o.valid_until); instant(o.published_at);
   if (!Array.isArray(o.capability_links) || typeof o.on_request !== 'boolean') throw new Error('PUBLIC_EXPORT_OFFER_SHAPE');
   const capability_links = o.capability_links.map((value: unknown) => {
@@ -121,14 +125,20 @@ function offer(value: unknown): PublicOffer {
     name: string(o.name), short_description: nullableString(o.short_description), offer_shape: string(o.offer_shape),
     terms: terms(o.terms), price_amount: nullableString(o.price_amount), price_currency: nullableString(o.price_currency),
     on_request: o.on_request, valid_from: o.valid_from as string, valid_until: o.valid_until as string | null,
-    capability_links, published_at: o.published_at as string, publication_id: string(o.publication_id) };
+    capability_links, published_at: o.published_at as string, publication_id: string(o.publication_id),
+    ...(o.visibility_radius_meters === undefined ? {} : { visibility_radius_meters: radius(o.visibility_radius_meters) }) };
+}
+function radius(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 100 || value > 20000) throw new Error('PUBLIC_EXPORT_OFFER_RADIUS');
+  return value;
 }
 export function mapRecords(value: unknown): readonly PublicRecord[] {
   if (!Array.isArray(value)) throw new Error('PUBLIC_EXPORT_RECORDS');
   const ids = new Set<string>();
   return value.map((raw) => {
     const record = obj(raw);
-    onlyKeys(record, ['business', 'capabilities', 'offers', 'stale', 'ordering']);
+    onlyKeys(record, ['business', 'capabilities', 'offers', 'stale', 'ordering', 'promoted']);
+    if (record.promoted !== undefined && record.promoted !== true) throw new Error('PUBLIC_EXPORT_RECORD_SHAPE');
     if (!Array.isArray(record.capabilities) || !Array.isArray(record.offers) || typeof record.stale !== 'boolean') throw new Error('PUBLIC_EXPORT_RECORD_SHAPE');
     const ordering = obj(record.ordering);
     if (ordering.primary !== 'publication.occurred_at' || ordering.tie_breaker !== 'publication.id') throw new Error('PUBLIC_EXPORT_ORDERING');
@@ -144,7 +154,8 @@ export function mapRecords(value: unknown): readonly PublicRecord[] {
       if (!target || target.capability_key !== link.capability_key || target.name !== link.name) throw new Error('PUBLIC_EXPORT_INVALID_CAPABILITY_LINK');
     }
     return { business: mappedBusiness, capabilities, offers, stale: record.stale,
-      ordering: { primary: 'publication.occurred_at' as const, tie_breaker: 'publication.id' as const } };
+      ordering: { primary: 'publication.occurred_at' as const, tie_breaker: 'publication.id' as const },
+      ...(record.promoted === true ? { promoted: true as const } : {}) };
   });
 }
 

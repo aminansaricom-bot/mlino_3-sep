@@ -52,5 +52,5 @@ export function chatErrorText(e: unknown): string {
 export type ChatConfig = { delivery: 'test' | 'sms'; testNumbers: { from: string; to: string } | null };
 export type ChatPerson = { phoneHint: string; test: boolean } | null;
 export type CustomerThread = { id: string; organizationId: string; businessName: string; name: string; blockedBy: 'customer' | 'business' | null; lastMessageAt: string; expiresAt: string; lastBody: string; lastSender: 'customer' | 'business'; unread: number; test: boolean };
-export type ChatMessage = { id: string; seq: number; sender: 'customer' | 'business'; body: string; createdAt: string };
+export type ChatMessage = { id: string; seq: number; sender: 'customer' | 'business'; body: string; createdAt: string; auto?: boolean };
 export { fa as faDigits };

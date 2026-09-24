@@ -119,14 +119,14 @@ function Login({ config, onDone }: { config: ChatConfig | null; onDone: () => vo
 }
 
 function NewMessage({ target, test, onSent }: { target: ChatTarget; test: boolean; onSent: (threadId: string) => void }) {
-  const [available, setAvailable] = useState<{ ok: boolean; sensitive: boolean } | null>(null);
+  const [available, setAvailable] = useState<{ ok: boolean; sensitive: boolean; auto: boolean } | null>(null);
   const [name, setName] = useState(() => { try { return localStorage.getItem(NAME_KEY) ?? ''; } catch { return ''; } });
   const [body, setBody] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
-    chatApi<{ available: boolean; sensitive: boolean }>('GET', `/chat/business?organizationId=${encodeURIComponent(target.organizationId)}`)
-      .then((r) => setAvailable({ ok: r.available, sensitive: r.sensitive }), (e) => setError(chatErrorText(e)));
+    chatApi<{ available: boolean; sensitive: boolean; autoReply?: boolean }>('GET', `/chat/business?organizationId=${encodeURIComponent(target.organizationId)}`)
+      .then((r) => setAvailable({ ok: r.available, sensitive: r.sensitive, auto: r.autoReply === true }), (e) => setError(chatErrorText(e)));
   }, [target.organizationId]);
   const send = async () => {
     setBusy(true); setError(null);
@@ -140,6 +140,7 @@ function NewMessage({ target, test, onSent }: { target: ChatTarget; test: boolea
   return <form className="chat-new" onSubmit={(e) => { e.preventDefault(); void send(); }}>
     <label>نامی که کسب‌وکار می‌بیند<input value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder="مثلاً سارا" /></label>
     <label>پیام<textarea value={body} maxLength={1000} rows={4} onChange={(e) => setBody(e.target.value)} placeholder="مثلاً «امروز تا چه ساعتی باز هستید؟»" /></label>
+    {available?.auto && <p className="chat-auto-note">این کسب‌وکار پاسخ‌گوی خودکار دارد: فقط با جواب‌هایی که خود کسب‌وکار تأیید کرده یا اطلاعات منتشرشده‌اش پاسخ می‌دهد، پاسخ‌هایش علامت «پاسخ خودکار» دارند، و سؤالی را که نمی‌داند به خود کسب‌وکار می‌دهد و حدس نمی‌زند.</p>}
     <p className="chat-muted">شماره‌ات نشان داده نمی‌شود. این گفتگو {test ? '(آزمایشی) ۲۴ ساعت' : '۹۰ روز'} پس از آخرین پیام خودکار پاک می‌شود و هر وقت بخواهی خودت می‌توانی پاکش کنی.</p>
     <button type="submit" className="chat-primary" disabled={busy || !available || name.trim().length < 2 || !body.trim()}>{busy ? 'در حال ارسال…' : 'فرستادن'}</button>
     {error && <p className="chat-error" role="alert">{error}</p>}
@@ -183,7 +184,7 @@ function Thread({ id, thread, onChanged, onGone }: { id: string; thread: Custome
       <button className="danger" onClick={() => { if (window.confirm('این گفتگو برای هر دو طرف پاک شود؟ برگشت ندارد.')) void act('DELETE', '', true); }}>حذف</button>
     </div>
     <div className="chat-messages" aria-live="polite">
-      {messages.map((m) => <div key={m.id} className={`chat-msg ${m.sender === 'customer' ? 'mine' : 'theirs'}`}><p>{m.body}</p><small>{time(m.createdAt)}</small></div>)}
+      {messages.map((m) => <div key={m.id} className={`chat-msg ${m.sender === 'customer' ? 'mine' : 'theirs'}${m.auto ? ' auto' : ''}`}><p>{m.body}</p><small>{m.auto ? 'پاسخ خودکار — ' : ''}{time(m.createdAt)}</small></div>)}
       <div ref={end} />
     </div>
     {blocked ? <p className="chat-muted">{blocked === 'customer' ? 'تو این گفتگو را مسدود کرده‌ای.' : 'کسب‌وکار این گفتگو را مسدود کرده است.'}</p> :
