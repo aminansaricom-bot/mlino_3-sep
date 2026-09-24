@@ -11,6 +11,7 @@ import LockedModule from './LockedModule';
 import CrmModule from '../modules/crm/CrmModule';
 import Assistant from '../assistant/Assistant';
 import ChatModule from '../modules/chat/ChatModule';
+import BottomBar from './BottomBar';
 
 const STATUS_DOT: Record<string, string> = { demo: 'demo', 'published-view': 'live', live: 'live', design: 'design', blocked: 'blocked' };
 
@@ -78,11 +79,7 @@ export default function Shell() {
       {page}
     </main>
 
-    <nav className="bottom-bar" aria-label="میان‌بر">
-      {([['/', '🏠', 'امروز', 'home'], ['/accounting', '📒', 'حسابداری', 'accounting'], ['/inventory', '📦', 'انبار', 'inventory'], ['/storefront', '🪟', 'ویترین', 'storefront']] as const).map(([to, icon, label, id]) =>
-        <Link key={to} to={to} className={active === id ? 'on' : ''}><span aria-hidden="true">{icon}</span>{label}</Link>)}
-      <button type="button" onClick={() => setDrawer(true)}><span aria-hidden="true">⋯</span>همه</button>
-    </nav>
+    <BottomBar active={active} onMore={() => setDrawer(true)} />
 
     <Assistant published={pub} />
     {ws.toast && <div className="toast" role="status">{ws.toast}</div>}
