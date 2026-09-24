@@ -5,16 +5,17 @@ import type { PublicUiRecord } from '../publicExport/uiAdapter';
 import type { CatalogItem, CatalogRecord } from '../publicExport/catalog';
 import type { PublicOffer } from '../publicExport/mapping';
 import { activeOffersFor } from '../ar/ArGlassCard';
+import { tr, numberLocale, num, msg } from '../i18n';
 
 export type CategoryGroup = 'all' | 'food' | 'shop' | 'services' | 'health' | 'other';
 
 export const CATEGORY_GROUPS: readonly { id: CategoryGroup; label: string; icon: 'grid' | 'food' | 'shop' | 'service' | 'health' | 'more' }[] = [
-  { id: 'all', label: 'همه', icon: 'grid' },
-  { id: 'food', label: 'غذا و نوشیدنی', icon: 'food' },
-  { id: 'services', label: 'خدمات', icon: 'service' },
-  { id: 'shop', label: 'فروشگاه', icon: 'shop' },
-  { id: 'health', label: 'سلامت', icon: 'health' },
-  { id: 'other', label: 'سایر', icon: 'more' },
+  { id: 'all', label: msg('همه'), icon: 'grid' },
+  { id: 'food', label: msg('غذا و نوشیدنی'), icon: 'food' },
+  { id: 'services', label: msg('خدمات'), icon: 'service' },
+  { id: 'shop', label: msg('فروشگاه'), icon: 'shop' },
+  { id: 'health', label: msg('سلامت'), icon: 'health' },
+  { id: 'other', label: msg('سایر'), icon: 'more' },
 ];
 
 /** The app's display categories mapped onto the menu's groups; no new schema. */
@@ -27,9 +28,9 @@ export function groupOf(categoryKey: string): Exclude<CategoryGroup, 'all'> {
 }
 
 export const clean = (name: string) => name.replace(/\s*\(آزمایشی\)/g, '').trim();
-const fa = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 });
-export const rial = (amount: number) => `${fa.format(amount)} ریال`;
-export const faNum = (n: number) => fa.format(n);
+const fa = (n: number) => num(n, { maximumFractionDigits: 0 });
+export const rial = (amount: number) => tr('{0} ریال', fa(amount));
+export const faNum = (n: number) => fa(n);
 
 /** An active offer that the business linked to this very product (offer_version_links). Never a shop-wide one. */
 export function offerForItem(item: CatalogItem, offers: readonly PublicOffer[]): PublicOffer | null {
@@ -58,7 +59,7 @@ export function itemPrice(item: CatalogItem, offers: readonly PublicOffer[]): It
 /** «تا ۵ مهر» from the offer's real end; nothing when it has none. */
 export function untilLabel(iso: string | null): string | null {
   if (!iso) return null;
-  try { return `تا ${new Date(iso).toLocaleDateString('fa-IR-u-ca-persian', { day: 'numeric', month: 'long' })}`; } catch { return null; }
+  try { return tr('تا {0}', new Date(iso).toLocaleDateString(numberLocale(), { day: 'numeric', month: 'long' })); } catch { return null; }
 }
 
 /** First real photo the business published, for its round thumbnail. */

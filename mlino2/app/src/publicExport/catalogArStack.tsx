@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CatalogItem, CatalogRecord } from './catalog';
 import { CatalogImage, catalogPrice } from './catalogCards';
+import { numberLocale } from '../i18n';
 
 export function swipeIndex(current: number, direction: number, length: number): number {
   return length < 1 ? 0 : Math.max(0, Math.min(length - 1, current + Math.sign(direction)));
@@ -31,7 +32,7 @@ export default function CatalogArStack({ record, onOpenItem }: { record?: Catalo
     <button type="button" className="catalog-ar-open" onClick={() => onOpenItem?.(item)} disabled={!onOpenItem} aria-label={`مشاهدهٔ ${item.name}`}>
     <div className="catalog-ar-copy"><strong>{item.name.replace('(آزمایشی)', '').trim()}</strong>
       <span>{catalogPrice(item)}</span>
-      <small>{(active + 1).toLocaleString('fa-IR')} از {items.length.toLocaleString('fa-IR')} · برای جزئیات بزن</small>
+      <small>{(active + 1).toLocaleString(numberLocale())} از {items.length.toLocaleString(numberLocale())} · برای جزئیات بزن</small>
     </div>
     </button>
     <div className="catalog-ar-controls">

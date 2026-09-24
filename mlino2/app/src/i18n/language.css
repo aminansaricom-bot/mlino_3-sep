@@ -1,0 +1,25 @@
+.lang-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+.lang-picker button { min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border, #d7dde0);
+  background: var(--surface, #fff); color: var(--ink, #172B2A); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.lang-picker button.on { background: var(--brand, #0F766E); border-color: transparent; color: #fff; }
+.lang-picker.compact button { min-height: 32px; padding: 3px 11px; font-size: 13px; }
+
+.lang-notice { position: fixed; inset-inline: 12px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 2000;
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 16px;
+  background: rgba(23, 43, 42, .94); color: #fff; font-size: 13.5px; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); }
+.lang-notice span { flex: 1; line-height: 1.6; }
+.lang-notice button { min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .5);
+  background: transparent; color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+.lang-notice button.ok { background: #fff; color: #172B2A; border-color: #fff; }
+
+/* Vazirmatn draws Latin digits as Persian ones; in English a Latin font comes first and Persian business names fall back to Vazirmatn. */
+html[lang=en] body, html[lang=en] button, html[lang=en] input, html[lang=en] textarea, html[lang=en] select, html[lang=en] .lv-root {
+  font-family: Roboto, "Segoe UI", system-ui, Vazirmatn, sans-serif;
+  font-feature-settings: normal;
+}
+
+/* In English, business content stays Persian: each text takes its own direction (like <bdi>), so «۲۰٪ تخفیف ماچا لاته» is not reordered. */
+html[dir=ltr] :is(p, h1, h2, h3, h4, strong, small, b, span, li, figcaption) { unicode-bidi: plaintext; }
+
+/* Arrows drawn for right-to-left reading point the other way in English. */
+html[dir=ltr] .lv-dir { transform: scaleX(-1); display: inline-block; }

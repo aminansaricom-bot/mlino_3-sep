@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { formatPrice } from '../uiFormat';
 import type { CatalogItem, CatalogMedia, CatalogRecord } from './catalog';
 import { loadCatalogMedia } from './catalogMedia';
+import { tr } from '../i18n';
 
 export function visiblePlusNext(visible: readonly number[], total: number): number[] {
   const selected = new Set<number>();
@@ -33,18 +34,18 @@ export function CatalogImage({ media, load }: { media?: CatalogMedia; load: bool
     return () => { alive = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
   }, [mediaKey, load]);
   const src = loaded && loaded.path === media?.path ? loaded.url : null;
-  if (!src) return <div className={`catalog-image-placeholder${media ? ' loading' : ''}`} role="img" aria-label={media?.alt_text ?? 'بدون عکس'}>
-    {!media && <small>بدون عکس</small>}
+  if (!src) return <div className={`catalog-image-placeholder${media ? ' loading' : ''}`} role="img" aria-label={media?.alt_text ?? tr('بدون عکس')}>
+    {!media && <small>{tr('بدون عکس')}</small>}
   </div>;
   return <img className="catalog-image" src={src} alt={media?.alt_text ?? ''} />;
 }
 
 export function catalogPrice(item: CatalogItem): string {
-  if (item.on_request) return 'قیمت با درخواست';
-  if (item.price_amount === null) return 'قیمت عمومی ثبت نشده';
+  if (item.on_request) return tr('قیمت با درخواست');
+  if (item.price_amount === null) return tr('قیمت عمومی ثبت نشده');
   const amount = Number(item.price_amount);
   return Number.isFinite(amount) ? formatPrice(amount, item.price_currency) +
-    (item.price_currency && item.price_currency !== 'IRR' ? ` ${item.price_currency}` : '') : 'قیمت عمومی ثبت نشده';
+    (item.price_currency && item.price_currency !== 'IRR' ? ` ${item.price_currency}` : '') : tr('قیمت عمومی ثبت نشده');
 }
 
 function CatalogCard({ item, index, shouldLoad }: { item: CatalogItem; index: number; shouldLoad: (index: number) => boolean }) {
@@ -89,8 +90,8 @@ export function CatalogSection({ record }: { record?: CatalogRecord }) {
   if (!items.length) return null;
   const loads = visiblePlusNext(typeof IntersectionObserver === 'undefined' ? [0] : seen, items.length);
   let previous: string | null | undefined;
-  return <section className="catalog-section" aria-label="کاتالوگ کسب‌وکار">
-    <h3 className="section-title">کاتالوگ</h3>
+  return <section className="catalog-section" aria-label={tr('کاتالوگ کسب‌وکار')}>
+    <h3 className="section-title">{tr('کاتالوگ')}</h3>
     {items.map((item, index) => {
       const label = item.grouping_label;
       const heading = label !== previous;

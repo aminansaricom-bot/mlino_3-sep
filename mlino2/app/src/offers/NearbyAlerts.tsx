@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CHAT_ENABLED } from '../chat/chatApi';
 import { NEARBY_LABEL, RUNNER, callNative, inApp } from '../native/bridge';
+import { tr } from '../i18n';
 
 // اعلان تخفیف‌های اطراف (D-77). فقط با زدن خود کاربر روشن می‌شود.
 // • در مرورگر: اعلان وب؛ ناشناس، موقعیت تقریبی (حدود ۱۰۰ متر) فقط وقتی ملینو باز است، ۲۴ ساعت اعتبار.
@@ -68,23 +69,23 @@ export default function NearbyAlerts({ point, demoFrame, demoBuild, onNeedLocati
   if (!ALERTS_SUPPORTED) return null;
 
   const enableApp = async () => {
-    if (demoBuild && !demoFrame) { setNote('اول دکمه‌ی ◎ را بزن تا کسب‌وکارهای نمایشی کنار تو چیده شوند.'); onNeedLocation(); return; }
+    if (demoBuild && !demoFrame) { setNote(tr('اول دکمه‌ی ◎ را بزن تا کسب‌وکارهای نمایشی کنار تو چیده شوند.')); onNeedLocation(); return; }
     setBusy(true); setNote(null);
     try {
       const p = await callNative<Perms>('MlinoLocation', 'request');
-      if (!p.notifications) { setNote('اجازه‌ی اعلان داده نشد.'); return; }
-      if (!p.location) { setNote('بدون اجازه‌ی موقعیت، گوشی نمی‌تواند نزدیکی را بسنجد.'); return; }
+      if (!p.notifications) { setNote(tr('اجازه‌ی اعلان داده نشد.')); return; }
+      if (!p.location) { setNote(tr('بدون اجازه‌ی موقعیت، گوشی نمی‌تواند نزدیکی را بسنجد.')); return; }
       await configureAppCheck(true, demoFrame);
       try { localStorage.setItem(KEY, 'on'); } catch { /* فقط برای راحتی */ }
       setOn(true); setAsking(false); setNeedsAlways(!p.background);
-    } catch { setNote('روشن کردن اعلان انجام نشد؛ دوباره امتحان کن.'); } finally { setBusy(false); }
+    } catch { setNote(tr('روشن کردن اعلان انجام نشد؛ دوباره امتحان کن.')); } finally { setBusy(false); }
   };
 
   const enableWeb = async () => {
-    if (!point) { setNote('اول موقعیتت را روشن کن (دکمه‌ی ◎)؛ اعلان‌ها بر اساس فاصله‌ی تو از کسب‌وکارهاست.'); onNeedLocation(); return; }
+    if (!point) { setNote(tr('اول موقعیتت را روشن کن (دکمه‌ی ◎)؛ اعلان‌ها بر اساس فاصله‌ی تو از کسب‌وکارهاست.')); onNeedLocation(); return; }
     setBusy(true); setNote(null);
     try {
-      if ((await Notification.requestPermission()) !== 'granted') { setNote('اجازه‌ی اعلان داده نشد.'); return; }
+      if ((await Notification.requestPermission()) !== 'granted') { setNote(tr('اجازه‌ی اعلان داده نشد.')); return; }
       const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
       await navigator.serviceWorker.ready;
       const { publicKey } = await fetch('/api/push/key', { credentials: 'same-origin' }).then((r) => r.json()) as { publicKey: string };
@@ -92,7 +93,7 @@ export default function NearbyAlerts({ point, demoFrame, demoBuild, onNeedLocati
       await post('subscribe', { subscription: sub.toJSON(), lat: point[0], lng: point[1] });
       try { localStorage.setItem(KEY, 'on'); } catch { /* فقط برای راحتی */ }
       setOn(true); setAsking(false);
-    } catch { setNote('روشن کردن اعلان انجام نشد؛ دوباره امتحان کن.'); } finally { setBusy(false); }
+    } catch { setNote(tr('روشن کردن اعلان انجام نشد؛ دوباره امتحان کن.')); } finally { setBusy(false); }
   };
 
   const disable = async () => {
@@ -109,21 +110,21 @@ export default function NearbyAlerts({ point, demoFrame, demoBuild, onNeedLocati
     }
   };
 
-  return <section className="nearby-alerts" aria-label="اعلان تخفیف‌های اطراف">
+  return <section className="nearby-alerts" aria-label={tr('اعلان تخفیف‌های اطراف')}>
     <div className="nearby-alerts-row">
-      <span><strong>اعلان تخفیف‌های اطراف</strong><small>{on ? 'روشن است؛ وقتی نزدیک کسب‌وکاری باشی که تخفیف تازه دارد خبرت می‌کنیم.' : 'وقتی نزدیک کسب‌وکاری هستی که تخفیف تازه گذاشته، خبرت کنیم؟'}</small></span>
-      <button className={on ? 'on' : ''} disabled={busy} onClick={() => (on ? void disable() : setAsking(true))} aria-pressed={on}>{on ? 'خاموش کن' : 'روشن کن'}</button>
+      <span><strong>{tr('اعلان تخفیف‌های اطراف')}</strong><small>{on ? tr('روشن است؛ وقتی نزدیک کسب‌وکاری باشی که تخفیف تازه دارد خبرت می‌کنیم.') : tr('وقتی نزدیک کسب‌وکاری هستی که تخفیف تازه گذاشته، خبرت کنیم؟')}</small></span>
+      <button className={on ? 'on' : ''} disabled={busy} onClick={() => (on ? void disable() : setAsking(true))} aria-pressed={on}>{on ? tr('خاموش کن') : tr('روشن کن')}</button>
     </div>
     {asking && !on && <div className="nearby-alerts-consent">
       {APP
-        ? <p>این بررسی روی همین گوشی انجام می‌شود: هر حدود ۱۵ دقیقه گوشی فهرست عمومی آفرها را می‌خواند و با موقعیت خودش مقایسه می‌کند. <b>موقعیتت از گوشی بیرون نمی‌رود</b> و به هیچ سروری فرستاده نمی‌شود. حداکثر ۳ اعلان در روز، هیچ اعلانی بین ۲۲ تا ۸. برای کار وقتی اپ بسته است، اندروید اجازه‌ی موقعیت «همیشه» را جدا می‌پرسد.</p>
-        : <p>برای این کار موقعیت تقریبی‌ات (حدود ۱۰۰ متر) فقط وقتی ملینو باز است به سرور فرستاده می‌شود و پس از ۲۴ ساعت بی‌اثر است. این اشتراک به هیچ شماره یا حسابی وصل نیست. حداکثر ۳ اعلان در روز، هیچ اعلانی بین ۲۲ تا ۸، و با «خاموش کن» همه‌چیز از سرور پاک می‌شود.</p>}
-      {iosBrowser && <p className="nearby-alerts-ios">در آیفون اعلان فقط وقتی کار می‌کند که ملینو را با «Add to Home Screen» به صفحه‌ی اصلی اضافه کرده باشی و از همان‌جا بازش کنی.</p>}
-      <div><button className="primary" disabled={busy} onClick={() => void (APP ? enableApp() : enableWeb())}>{busy ? 'در حال روشن کردن…' : 'موافقم، روشن کن'}</button><button onClick={() => setAsking(false)}>نه</button></div>
+        ? <p>{tr('این بررسی روی همین گوشی انجام می‌شود: هر حدود ۱۵ دقیقه گوشی فهرست عمومی آفرها را می‌خواند و با موقعیت خودش مقایسه می‌کند.')} <b>{tr('موقعیتت از گوشی بیرون نمی‌رود')}</b> {tr('و به هیچ سروری فرستاده نمی‌شود. حداکثر ۳ اعلان در روز، هیچ اعلانی بین ۲۲ تا ۸. برای کار وقتی اپ بسته است، اندروید اجازه‌ی موقعیت «همیشه» را جدا می‌پرسد.')}</p>
+        : <p>{tr('برای این کار موقعیت تقریبی‌ات (حدود ۱۰۰ متر) فقط وقتی ملینو باز است به سرور فرستاده می‌شود و پس از ۲۴ ساعت بی‌اثر است. این اشتراک به هیچ شماره یا حسابی وصل نیست. حداکثر ۳ اعلان در روز، هیچ اعلانی بین ۲۲ تا ۸، و با «خاموش کن» همه‌چیز از سرور پاک می‌شود.')}</p>}
+      {iosBrowser && <p className="nearby-alerts-ios">{tr('در آیفون اعلان فقط وقتی کار می‌کند که ملینو را با «Add to Home Screen» به صفحه‌ی اصلی اضافه کرده باشی و از همان‌جا بازش کنی.')}</p>}
+      <div><button className="primary" disabled={busy} onClick={() => void (APP ? enableApp() : enableWeb())}>{busy ? tr('در حال روشن کردن…') : tr('موافقم، روشن کن')}</button><button onClick={() => setAsking(false)}>{tr('نه')}</button></div>
     </div>}
     {on && APP && needsAlways && <p className="nearby-alerts-note" role="status">
-      فعلاً فقط وقتی اپ باز است بررسی می‌شود. برای خبر گرفتن وقتی اپ بسته است، در تنظیمات اجازه‌ی موقعیت را روی «همیشه» بگذار.{' '}
-      <button onClick={() => void callNative('MlinoLocation', 'openSettings').catch(() => undefined)}>تنظیمات</button>
+      {tr('فعلاً فقط وقتی اپ باز است بررسی می‌شود. برای خبر گرفتن وقتی اپ بسته است، در تنظیمات اجازه‌ی موقعیت را روی «همیشه» بگذار.')}{' '}
+      <button onClick={() => void callNative('MlinoLocation', 'openSettings').catch(() => undefined)}>{tr('تنظیمات')}</button>
     </p>}
     {note && <p className="nearby-alerts-note" role="status">{note}</p>}
   </section>;

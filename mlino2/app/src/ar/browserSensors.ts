@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import { headingFromCompassEvent } from './arOrientation';
+import { tr } from '../i18n';
 
 export type CameraState =
   | { kind: 'idle' }
@@ -37,7 +38,7 @@ export function useCameraStream(): {
     if (!('mediaDevices' in navigator) || navigator.mediaDevices.getUserMedia === undefined) {
       setState({
         kind: 'unavailable',
-        message: 'این مرورگر دوربین ندارد؛ ویترین بدون تصویر دوربین نشان داده می‌شود',
+        message: tr('این مرورگر دوربین ندارد؛ ویترین بدون تصویر دوربین نشان داده می‌شود'),
       });
       return;
     }
@@ -59,8 +60,8 @@ export function useCameraStream(): {
         kind: name === 'NotAllowedError' ? 'denied' : 'unavailable',
         message:
           name === 'NotAllowedError'
-            ? 'دوربین خاموش است؛ ویترین بدون تصویر دوربین نشان داده می‌شود'
-            : 'دوربین در دسترس نیست؛ ویترین بدون تصویر دوربین نشان داده می‌شود',
+            ? tr('دوربین خاموش است؛ ویترین بدون تصویر دوربین نشان داده می‌شود')
+            : tr('دوربین در دسترس نیست؛ ویترین بدون تصویر دوربین نشان داده می‌شود'),
       });
     }
   }, []);

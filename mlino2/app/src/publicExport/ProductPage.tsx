@@ -4,6 +4,7 @@ import { CatalogImage, catalogPrice } from './catalogCards';
 import { demoProductReviews, displayName } from '../demo/demoSocial';
 import { RateProduct, RatingBadge, useRatings } from '../ratings/ratings';
 import { Icon } from '../design/Icon';
+import { tr, numberLocale } from '../i18n';
 
 /**
  * صفحه‌ی محصول: عکس بزرگ، نام، قیمت، توضیح، و زیر آن نظرهای کاربران
@@ -21,7 +22,7 @@ export default function ProductPage({ item, businessName, organizationId, onClos
   return <section className="product-page" role="dialog" aria-modal="true" aria-label={displayName(item.name)}>
     <div className="product-hero">
       <CatalogImage key={item.catalog_item_id} media={item.media[0]} load />
-      <button className="product-back" onClick={onClose} aria-label="بازگشت"><Icon name="close" /></button>
+      <button className="product-back" onClick={onClose} aria-label={tr('بازگشت')}><Icon name="close" /></button>
       <RatingBadge summary={ratings.items[item.catalog_item_id]} className="on-hero" />
     </div>
     <div className="product-body">
@@ -34,20 +35,20 @@ export default function ProductPage({ item, businessName, organizationId, onClos
       {organizationId && <RateProduct orgId={organizationId} itemId={item.catalog_item_id} />}
       {item.short_description && <p className="product-desc">{item.short_description}</p>}
 
-      <h3 className="product-section">نظرها</h3>
-      {reviews.length === 0 ? <p className="product-empty">هنوز نظری ثبت نشده است.</p> : <>
+      <h3 className="product-section">{tr('نظرها')}</h3>
+      {reviews.length === 0 ? <p className="product-empty">{tr('هنوز نظری ثبت نشده است.')}</p> : <>
         <ul className="review-list">
           {reviews.map((review) => <li key={`${review.author}|${review.text}`} className="review">
             <span className="review-avatar" aria-hidden="true">{review.author.charAt(0)}</span>
             <div className="review-main">
               <div className="review-head"><strong>{review.author}</strong>
-                <span className="review-stars" aria-label={`${review.stars.toLocaleString('fa-IR')} ستاره`}>{'★'.repeat(review.stars)}<i>{'★'.repeat(5 - review.stars)}</i></span>
+                <span className="review-stars" aria-label={tr('{0} ستاره', review.stars.toLocaleString(numberLocale()))}>{'★'.repeat(review.stars)}<i>{'★'.repeat(5 - review.stars)}</i></span>
               </div>
               <p>{review.text}</p>
             </div>
           </li>)}
         </ul>
-        <p className="review-note">این نظرها نمونهٔ آزمایشی‌اند و از مشتری واقعی نیستند.</p>
+        <p className="review-note">{tr('این نظرها نمونهٔ آزمایشی‌اند و از مشتری واقعی نیستند.')}</p>
       </>}
     </div>
   </section>;

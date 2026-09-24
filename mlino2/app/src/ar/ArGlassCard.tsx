@@ -8,6 +8,7 @@ import type { PublicUiRecord } from '../publicExport/uiAdapter';
 import type { ArSceneItem } from './ArOverlayService';
 import { demoBusinessRating } from '../demo/demoSocial';
 import Stars from '../components/Stars';
+import { tr, numberLocale } from '../i18n';
 
 export const GLASS_OFFER_LIMIT = 3;
 
@@ -23,11 +24,11 @@ export function activeOffersFor(record: PublicUiRecord | undefined, now: number,
 
 /** قیمت پیشنهاد به ریال با رقم فارسی، یا «با درخواست». */
 export function offerPriceLabel(offer: Pick<PublicOffer, 'price_amount' | 'price_currency' | 'on_request'>): string {
-  if (offer.on_request || offer.price_amount === null) return 'با درخواست';
+  if (offer.on_request || offer.price_amount === null) return tr('با درخواست');
   const amount = Number(offer.price_amount);
-  if (!Number.isFinite(amount)) return 'با درخواست';
-  const digits = amount.toLocaleString('fa-IR', { maximumFractionDigits: 0 });
-  return offer.price_currency === 'IRR' ? `${digits} ریال` : digits;
+  if (!Number.isFinite(amount)) return tr('با درخواست');
+  const digits = amount.toLocaleString(numberLocale(), { maximumFractionDigits: 0 });
+  return offer.price_currency === 'IRR' ? tr('{0} ریال', digits) : digits;
 }
 
 /** نام پیشنهاد بدون پسوند «(آزمایشی)»؛ نشانهٔ آزمایشی جداگانه روی کارت نمایش داده می‌شود. */
@@ -51,7 +52,7 @@ export default function ArGlassCard({
   const rating = demoBusinessRating(item.businessId);
   return (
     <button className={`glass-card${offers.length ? ' has-offer' : ''}`} style={{ left: `${leftPercent}%` }}
-      onClick={() => onSelect(item.businessId)} aria-label={`${business.title} — ${offers.length.toLocaleString('fa-IR')} پیشنهاد فعال`}>
+      onClick={() => onSelect(item.businessId)} aria-label={tr('{0} — {1} پیشنهاد فعال', business.title, offers.length.toLocaleString(numberLocale()))}>
       <span className="glass-sheen" aria-hidden="true" />
       <span className="glass-head">
         <span className={`glass-coin ar-coin-${item.category}`} aria-hidden="true">{glyph}</span>
@@ -76,9 +77,9 @@ export default function ArGlassCard({
           })}
         </span>
       ) : (
-        <span className="glass-empty">فعلاً پیشنهاد فعالی ندارد</span>
+        <span className="glass-empty">{tr('فعلاً پیشنهاد فعالی ندارد')}</span>
       )}
-      <span className="glass-cta">مشاهدهٔ جزئیات</span>
+      <span className="glass-cta">{tr('مشاهدهٔ جزئیات')}</span>
     </button>
   );
 }

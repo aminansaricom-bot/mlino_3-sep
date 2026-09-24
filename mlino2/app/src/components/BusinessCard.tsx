@@ -4,6 +4,7 @@ import {
   businessActiveProductCount, businessCapabilityCount, businessCategory, businessCategoryGuessed,
   businessCategoryLabel, businessName, businessOffers, isPublicUiRecord, type RichUiRecord,
 } from './businessView';
+import { numberLocale } from '../i18n';
 
 /**
  * کارت کسب‌وکار — نمای مصرف‌کننده.
@@ -87,10 +88,10 @@ export default function BusinessCard({
         <div className="biz-meta">
           {offer && <span className="tag offer">پیشنهاد ویژه</span>}
           {activeProducts !== null && activeProducts > 0 && (
-            <span className="tag">{activeProducts.toLocaleString('fa-IR')} محصول</span>
+            <span className="tag">{activeProducts.toLocaleString(numberLocale())} محصول</span>
           )}
           {capabilityCount !== null && capabilityCount > 0 && (
-            <span className="tag">{capabilityCount.toLocaleString('fa-IR')} خدمت</span>
+            <span className="tag">{capabilityCount.toLocaleString(numberLocale())} خدمت</span>
           )}
         </div>
 

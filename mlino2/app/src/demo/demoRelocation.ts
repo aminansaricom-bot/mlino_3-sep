@@ -1,4 +1,5 @@
 import type { PublicUiRecord } from '../publicExport/uiAdapter';
+import { msg } from '../i18n';
 
 export type Point = readonly [latitude: number, longitude: number];
 export const DEFAULT_DEMO_ANCHOR: Point = [35.7575, 51.4098];
@@ -69,7 +70,7 @@ export function reanchorDemoTarget(fix: Point | null): Point | null {
   return fix && validPoint(fix) ? fix : null;
 }
 
-export const DEMO_BANNER = 'نسخه‌ی نمایشی · کسب‌وکارها ساختگی‌اند';
+export const DEMO_BANNER = msg('نسخه‌ی نمایشی · کسب‌وکارها ساختگی‌اند');
 export function demoBanner(enabled: boolean): string | null {
   return enabled ? DEMO_BANNER : null;
 }

@@ -16,6 +16,7 @@ import ChatSheet, { type ChatContext } from './ChatSheet';
 import { activeOffers, businessThumb, clean, faNum, itemPrice, rial, untilLabel, visibleItems, type CategoryGroup, groupOf } from './liveData';
 import { RatingBadge, useRatings } from '../ratings/ratings';
 import './live.css';
+import { tr, dir } from '../i18n';
 
 // «ویترین زنده»: full-screen camera with HTML on top. Businesses are placed by the phone's direction and GPS, so
 // their spot on the picture is approximate — the dotted link to a point is drawn only when the compass is real.
@@ -157,110 +158,110 @@ export default function LiveVitrine(p: Props) {
   const unreadHere = selectedId ? unread.get(selectedId) ?? 0 : 0;
 
   const noCompass = heading.source !== 'compass';
-  return <div className={`lv-root${noCompass ? ' no-compass' : ''}`} dir="rtl" style={{ ['--lv-below' as string]: `${below}px` }}>
+  return <div className={`lv-root${noCompass ? ' no-compass' : ''}`} dir={dir()} style={{ ['--lv-below' as string]: `${below}px` }}>
     <video ref={video} className="lv-video" playsInline muted autoPlay style={{ display: camera.state.kind === 'active' ? 'block' : 'none' }} />
     {camera.state.kind !== 'active' && <div className="lv-video lv-video-sim" aria-hidden="true" />}
     <div className="lv-shade" aria-hidden="true" />
 
     <header className="lv-top">
-      <button type="button" className="lv-iconbtn" onClick={() => setDrawer(true)} aria-label="جست‌وجو و دسته‌بندی"><LiveIcon name="menu" /></button>
-      <h1 className="lv-title">ویترین زنده</h1>
-      <button type="button" className="lv-iconbtn" onClick={p.onClose} aria-label="بستن ویترین زنده"><LiveIcon name="close" /></button>
+      <button type="button" className="lv-iconbtn" onClick={() => setDrawer(true)} aria-label={tr('جست‌وجو و دسته‌بندی')}><LiveIcon name="menu" /></button>
+      <h1 className="lv-title">{tr('ویترین زنده')}</h1>
+      <button type="button" className="lv-iconbtn" onClick={p.onClose} aria-label={tr('بستن ویترین زنده')}><LiveIcon name="close" /></button>
     </header>
     <div className="lv-topstack" ref={topStack}>
     <div className="lv-chips">
-      {p.demo && <span className="lv-chip static">نمونه‌ها ساختگی‌اند</span>}
-      {cameraOff && <button type="button" className="lv-chip warn" onClick={p.onClose}><LiveIcon name="camera" size={16} />دوربین خاموش · رفتن به نقشه</button>}
-      <button type="button" className={`lv-chip${p.offersOnly ? ' on' : ''}`} aria-pressed={p.offersOnly} onClick={() => p.onOffersOnly(!p.offersOnly)}><LiveIcon name="offer" size={16} />فقط آفرها</button>
-      {paused && <span className="lv-chip static" role="status">تصویر ثابت</span>}
-      {(q || group !== 'all') && <button type="button" className="lv-chip" onClick={() => { p.onQuery(''); setGroup('all'); }} aria-label="پاک کردن جست‌وجو">{q ? `«${p.query.trim()}»` : 'دسته‌ی انتخابی'} <LiveIcon name="close" size={14} /></button>}
+      {p.demo && <span className="lv-chip static">{tr('نمونه‌ها ساختگی‌اند')}</span>}
+      {cameraOff && <button type="button" className="lv-chip warn" onClick={p.onClose}><LiveIcon name="camera" size={16} />{tr('دوربین خاموش · رفتن به نقشه')}</button>}
+      <button type="button" className={`lv-chip${p.offersOnly ? ' on' : ''}`} aria-pressed={p.offersOnly} onClick={() => p.onOffersOnly(!p.offersOnly)}><LiveIcon name="offer" size={16} />{tr('فقط آفرها')}</button>
+      {paused && <span className="lv-chip static" role="status">{tr('تصویر ثابت')}</span>}
+      {(q || group !== 'all') && <button type="button" className="lv-chip" onClick={() => { p.onQuery(''); setGroup('all'); }} aria-label={tr('پاک کردن جست‌وجو')}>{q ? `«${p.query.trim()}»` : tr('دسته‌ی انتخابی')} <LiveIcon name="close" size={14} /></button>}
     </div>
     {noCompass && <label className="lv-heading">
-      <span>جهت</span>
-      <input type="range" min={0} max={359} value={manual} onChange={(e) => { const v = Number(e.target.value); setManual(v); heading.setSimulatedHeading(v); }} aria-label="چرخاندن دستی جهت" />
+      <span>{tr('جهت')}</span>
+      <input type="range" min={0} max={359} value={manual} onChange={(e) => { const v = Number(e.target.value); setManual(v); heading.setSimulatedHeading(v); }} aria-label={tr('چرخاندن دستی جهت')} />
     </label>}
     </div>
 
     {/* Other businesses in view: small pills at their direction. */}
     {inView.filter((x) => x.businessId !== selectedId).slice(0, 3).map((x) => <button key={x.businessId} type="button" className={`lv-pin lane-${x.laneIndex}`}
-      style={{ left: `${Math.min(75, Math.max(25, x.screenXPercent))}%` }} onClick={() => setPicked(x.businessId)} aria-label={`${clean(x.name)}، ${formatDistance(x.distanceMeters)}`}>
-      {clean(x.name)}<small>{formatDistance(x.distanceMeters)}</small>{x.activeOffer && <i className="lv-pin-dot" aria-label="آفر فعال" />}
+      style={{ left: `${Math.min(75, Math.max(25, x.screenXPercent))}%` }} onClick={() => setPicked(x.businessId)} aria-label={tr('{0}، {1}', clean(x.name), formatDistance(x.distanceMeters))}>
+      {clean(x.name)}<small>{formatDistance(x.distanceMeters)}</small>{x.activeOffer && <i className="lv-pin-dot" aria-label={tr('آفر فعال')} />}
     </button>)}
 
     {/* The chosen business. */}
     {selected && <div className="lv-marker-wrap" style={{ left: `${markerLeft}%` }}>
-      <button type="button" className="lv-marker" onClick={() => p.onOpenBusiness(selected.id)} aria-label={`دیدن ویترین ${name}`}>
+      <button type="button" className="lv-marker" onClick={() => p.onOpenBusiness(selected.id)} aria-label={tr('دیدن ویترین {0}', name)}>
         <span className="lv-marker-img">{thumb ? <CatalogImage media={thumb} load /> : <img src="/icons/placeholder-business.svg" alt="" />}</span>
         <span className="lv-marker-copy"><strong>{name}</strong>
-          <small className={hours === 'open' ? 'open' : hours === 'closed' ? 'closed' : ''}>{hours === 'open' ? 'باز است' : hours === 'closed' ? 'بسته است' : 'ساعت نامشخص'}{selectedInView ? ` · ${formatDistance(selectedInView.distanceMeters)}` : ''}</small></span>
+          <small className={hours === 'open' ? 'open' : hours === 'closed' ? 'closed' : ''}>{hours === 'open' ? tr('باز است') : hours === 'closed' ? tr('بسته است') : tr('ساعت نامشخص')}{selectedInView ? ` · ${formatDistance(selectedInView.distanceMeters)}` : ''}</small></span>
         <LiveIcon name="chevron-left" size={18} />
       </button>
       {bizOffer && <span className="lv-offer"><LiveIcon name="offer" size={15} />{clean(bizOffer.name)}</span>}
       {selectedInView && reliable && <span className="lv-link" aria-hidden="true" />}
-      {!selectedInView && <span className="lv-hint">دور از دید دوربین؛ گوشی را بچرخان</span>}
-      {selectedInView && !reliable && <span className="lv-hint">موقعیت تقریبی</span>}
+      {!selectedInView && <span className="lv-hint">{tr('دور از دید دوربین؛ گوشی را بچرخان')}</span>}
+      {selectedInView && !reliable && <span className="lv-hint">{tr('موقعیت تقریبی')}</span>}
     </div>}
 
     {/* Radius (vertical) and pause. */}
     <div className="lv-side">
-      <label className="lv-radius" title="تا چه فاصله‌ای">
-        <input type="range" min={30} max={500} step={10} value={radius} onChange={(e) => setRadius(clampRadius(Number(e.target.value)))} aria-label="شعاع نمایش (متر)" />
-        <span>{faNum(radius)}م</span>
+      <label className="lv-radius" title={tr('تا چه فاصله‌ای')}>
+        <input type="range" min={30} max={500} step={10} value={radius} onChange={(e) => setRadius(clampRadius(Number(e.target.value)))} aria-label={tr('شعاع نمایش (متر)')} />
+        <span>{tr('{0}م', faNum(radius))}</span>
       </label>
-      {camera.state.kind === 'active' && <button type="button" className="lv-iconbtn" onClick={togglePause} aria-label={paused ? 'ادامه‌ی تصویر زنده' : 'ثابت کردن تصویر'}><LiveIcon name={paused ? 'play' : 'pause'} /></button>}
+      {camera.state.kind === 'active' && <button type="button" className="lv-iconbtn" onClick={togglePause} aria-label={paused ? tr('ادامه‌ی تصویر زنده') : tr('ثابت کردن تصویر')}><LiveIcon name={paused ? 'play' : 'pause'} /></button>}
     </div>
 
     {/* Notices, never hiding a way out. */}
     {!selected && (p.locationPending || scene !== null || headingDeg === null) && <div className="lv-notice" role="status">
-      {p.locationPending ? <><LiveIcon name="my-location" /><span>در حال گرفتن موقعیت گوشی…</span></>
-        : headingDeg === null ? <><LiveIcon name="my-location" /><span>{noCompass ? 'گوشی جهت را نمی‌دهد؛ با نوار «جهت» بالای صفحه بچرخان.' : 'در حال گرفتن جهت…'}</span></>
-        : <><LiveIcon name="search" /><span>{pool.length === 0 ? 'با این فیلتر چیزی پیدا نشد.' : 'در این جهت کسب‌وکاری نیست؛ گوشی را بچرخان یا شعاع را بیشتر کن.'}</span></>}
+      {p.locationPending ? <><LiveIcon name="my-location" /><span>{tr('در حال گرفتن موقعیت گوشی…')}</span></>
+        : headingDeg === null ? <><LiveIcon name="my-location" /><span>{noCompass ? tr('گوشی جهت را نمی‌دهد؛ با نوار «جهت» بالای صفحه بچرخان.') : tr('در حال گرفتن جهت…')}</span></>
+        : <><LiveIcon name="search" /><span>{pool.length === 0 ? tr('با این فیلتر چیزی پیدا نشد.') : tr('در این جهت کسب‌وکاری نیست؛ گوشی را بچرخان یا شعاع را بیشتر کن.')}</span></>}
     </div>}
 
     <div className="lv-bottom">
       {selected && items.length > 0 && <>
-        <div className="lv-track" ref={track} onScroll={onScroll} role="region" aria-roledescription="اسلاید محصولات" aria-label={`محصولات ${name}`}>
+        <div className="lv-track" ref={track} onScroll={onScroll} role="region" aria-roledescription={tr('اسلاید محصولات')} aria-label={tr('محصولات {0}', name)}>
           {items.map((it, i) => {
             const pr = itemPrice(it, offers);
             const until = pr.offer ? untilLabel(pr.offer.valid_until) : null;
-            return <article key={it.catalog_item_id} className={`lv-card${i === index ? ' on' : ''}`} aria-label={`${clean(it.name)}${pr.final ? `، ${rial(pr.final)}` : pr.price ? `، ${rial(pr.price)}` : ''}`}>
+            return <article key={it.catalog_item_id} className={`lv-card${i === index ? ' on' : ''}`} aria-label={`${clean(it.name)}${pr.final ? tr('، {0}', rial(pr.final)) : pr.price ? tr('، {0}', rial(pr.price)) : ''}`}>
               <div className="lv-card-img">
                 {it.media[0] ? <CatalogImage media={it.media[0]} load={Math.abs(i - index) <= 1} /> : <img src="/icons/placeholder-product.svg" alt="" />}
-                {pr.percent && <span className="lv-offer on-img"><LiveIcon name="offer" size={14} />{faNum(pr.percent)}٪ تخفیف</span>}
+                {pr.percent && <span className="lv-offer on-img"><LiveIcon name="offer" size={14} />{faNum(pr.percent)}{tr('٪ تخفیف')}</span>}
                 {until && <span className="lv-until">{until}</span>}
                 <RatingBadge summary={ratings.items[it.catalog_item_id]} className="on-card" />
               </div>
               <div className="lv-card-body">
-                <button type="button" className={`lv-save${p.savedIds.includes(selected.id) ? ' on' : ''}`} onClick={() => p.onToggleSave(selected.id)} aria-pressed={p.savedIds.includes(selected.id)} aria-label={`ذخیره‌ی ${name}`}><LiveIcon name="bookmark" size={20} /></button>
+                <button type="button" className={`lv-save${p.savedIds.includes(selected.id) ? ' on' : ''}`} onClick={() => p.onToggleSave(selected.id)} aria-pressed={p.savedIds.includes(selected.id)} aria-label={tr('ذخیره‌ی {0}', name)}><LiveIcon name="bookmark" size={20} /></button>
                 <h3>{clean(it.name)}</h3>
                 {pr.final ? <p className="lv-price"><del>{rial(pr.price!)}</del><strong>{rial(pr.final)}</strong></p>
-                  : <p className="lv-price"><strong>{pr.price ? rial(pr.price) : 'قیمت با پرسش'}</strong></p>}
+                  : <p className="lv-price"><strong>{pr.price ? rial(pr.price) : tr('قیمت با پرسش')}</strong></p>}
               </div>
             </article>;
           })}
         </div>
         {items.length > 1 && <div className="lv-dots">
-          <button type="button" className="lv-iconbtn small" onClick={() => goTo(Math.max(0, index - 1))} disabled={index === 0} aria-label="محصول قبلی"><LiveIcon name="chevron-right" size={18} /></button>
-          <span aria-live="polite">{faNum(index + 1)} از {faNum(items.length)}</span>
-          <button type="button" className="lv-iconbtn small" onClick={() => goTo(Math.min(items.length - 1, index + 1))} disabled={index >= items.length - 1} aria-label="محصول بعدی"><LiveIcon name="chevron-left" size={18} /></button>
+          <button type="button" className="lv-iconbtn small" onClick={() => goTo(Math.max(0, index - 1))} disabled={index === 0} aria-label={tr('محصول قبلی')}><LiveIcon name="chevron-right" size={18} /></button>
+          <span aria-live="polite">{tr('{0} از {1}', faNum(index + 1), faNum(items.length))}</span>
+          <button type="button" className="lv-iconbtn small" onClick={() => goTo(Math.min(items.length - 1, index + 1))} disabled={index >= items.length - 1} aria-label={tr('محصول بعدی')}><LiveIcon name="chevron-left" size={18} /></button>
         </div>}
       </>}
 
       {selected && items.length === 0 && <div className="lv-bizcard">
         <span className="lv-bizcard-img">{thumb ? <CatalogImage media={thumb} load /> : <img src="/icons/placeholder-business.svg" alt="" />}</span>
-        <div><strong>{name}</strong><small><LiveIcon name="location" size={14} />{selectedInView ? formatDistance(selectedInView.distanceMeters) : 'فاصله نامشخص'} · موقعیت تقریبی</small>
-          {p.offersOnly && <small>این کسب‌وکار آفرِ مخصوصِ محصولی ندارد.</small>}</div>
+        <div><strong>{name}</strong><small><LiveIcon name="location" size={14} />{selectedInView ? formatDistance(selectedInView.distanceMeters) : tr('فاصله نامشخص')} {tr('· موقعیت تقریبی')}</small>
+          {p.offersOnly && <small>{tr('این کسب‌وکار آفرِ مخصوصِ محصولی ندارد.')}</small>}</div>
       </div>}
 
       {selected && <div className="lv-actions">
-        {CHAT_ENABLED && <button type="button" className="lv-primary" onClick={openChat}><LiveIcon name="chat" />گفتگو با {name}</button>}
+        {CHAT_ENABLED && <button type="button" className="lv-primary" onClick={openChat}><LiveIcon name="chat" />{tr('گفتگو با')} {name}</button>}
         {items.length > 0
-          ? <button type="button" className="lv-secondary" onClick={() => current && p.onOpenItem(selected.id, current)}>دیدن محصول</button>
-          : <button type="button" className="lv-secondary" onClick={() => p.onOpenBusiness(selected.id)}><LiveIcon name="store" size={18} />دیدن ویترین</button>}
+          ? <button type="button" className="lv-secondary" onClick={() => current && p.onOpenItem(selected.id, current)}>{tr('دیدن محصول')}</button>
+          : <button type="button" className="lv-secondary" onClick={() => p.onOpenBusiness(selected.id)}><LiveIcon name="store" size={18} />{tr('دیدن ویترین')}</button>}
       </div>}
     </div>
 
-    {selected && unreadHere > 0 && !chat && <button type="button" className="lv-chatbubble" onClick={openChat} aria-label={`${faNum(unreadHere)} پیام خوانده‌نشده از ${name}`}>
+    {selected && unreadHere > 0 && !chat && <button type="button" className="lv-chatbubble" onClick={openChat} aria-label={tr('{0} پیام خوانده‌نشده از {1}', faNum(unreadHere), name)}>
       {thumb ? <CatalogImage media={thumb} load /> : <img src="/icons/placeholder-business.svg" alt="" />}<b>{faNum(unreadHere)}</b>
     </button>}
 

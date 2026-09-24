@@ -4,6 +4,7 @@ import '@neshan-maps-platform/leaflet/dist/leaflet.css';
 import { clusterByScreenCell } from './clusterMarkers';
 import { categoryIcon, iconMarkup } from '../design/Icon';
 import { businessCategory, businessCoordinates, businessId, type RichUiRecord } from './businessView';
+import { numberLocale } from '../i18n';
 
 /**
  * لایه‌ی نقشه — روی SDK نشان.
@@ -43,7 +44,7 @@ function clusterIcon(count: number, hasMatch: boolean): L.DivIcon {
   const size = count >= 10 ? 46 : count >= 5 ? 40 : 34;
   return L.divIcon({
     className: `cluster-wrap${hasMatch ? ' is-match' : ''}`,
-    html: `<div class="cluster" style="width:${size}px;height:${size}px"><span>${count.toLocaleString('fa-IR')}</span></div>`,
+    html: `<div class="cluster" style="width:${size}px;height:${size}px"><span>${count.toLocaleString(numberLocale())}</span></div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });

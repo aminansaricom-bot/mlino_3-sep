@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SPEECH, callNative, inApp, onNative } from '../native/bridge';
+import { tr, speechLang } from '../i18n';
 
 type RecognitionLike = {
   lang: string; interimResults: boolean; continuous: boolean; maxAlternatives: number;
@@ -20,7 +21,7 @@ type RecognitionCtor = new () => RecognitionLike;
  * recogniser) is wrapped in the same shape, so everything above it stays the same.
  */
 class NativeRecognition implements RecognitionLike {
-  lang = 'fa-IR'; interimResults = true; continuous = false; maxAlternatives = 1;
+  lang = speechLang(); interimResults = true; continuous = false; maxAlternatives = 1;
   onresult: RecognitionLike['onresult'] = null;
   onerror: RecognitionLike['onerror'] = null;
   onend: RecognitionLike['onend'] = null;
@@ -56,11 +57,11 @@ export function recognitionCtor(scope: unknown = globalThis): RecognitionCtor | 
 
 /** پیام فارسی برای خطاهای رایج تشخیص گفتار. */
 export function voiceErrorMessage(code: string): string {
-  if (code === 'not-allowed' || code === 'service-not-allowed') return 'اجازه‌ی میکروفون داده نشد.';
-  if (code === 'no-speech') return 'صدایی شنیده نشد؛ دوباره امتحان کن.';
-  if (code === 'network') return 'تبدیل صدا به متن به اینترنت نیاز دارد.';
-  if (code === 'language-not-supported') return 'تشخیص گفتار فارسی روی این مرورگر در دسترس نیست.';
-  return 'تشخیص گفتار انجام نشد.';
+  if (code === 'not-allowed' || code === 'service-not-allowed') return tr('اجازه‌ی میکروفون داده نشد.');
+  if (code === 'no-speech') return tr('صدایی شنیده نشد؛ دوباره امتحان کن.');
+  if (code === 'network') return tr('تبدیل صدا به متن به اینترنت نیاز دارد.');
+  if (code === 'language-not-supported') return tr('تشخیص گفتار فارسی روی این مرورگر در دسترس نیست.');
+  return tr('تشخیص گفتار انجام نشد.');
 }
 
 export function useVoiceInput(onInterim: (text: string) => void, onFinal: (text: string) => void) {
@@ -75,7 +76,7 @@ export function useVoiceInput(onInterim: (text: string) => void, onFinal: (text:
     setError(null);
     finalText.current = '';
     const r = new Ctor();
-    r.lang = 'fa-IR'; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+    r.lang = speechLang(); r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
     r.onresult = (event) => {
       let text = '';
       let done = false;
@@ -86,7 +87,7 @@ export function useVoiceInput(onInterim: (text: string) => void, onFinal: (text:
     r.onerror = (event) => { if (event.error !== 'aborted') setError(voiceErrorMessage(event.error)); };
     r.onend = () => { setListening(false); rec.current = null; if (finalText.current.trim()) onFinal(finalText.current.trim()); };
     rec.current = r;
-    try { r.start(); setListening(true); } catch { setError('تشخیص گفتار شروع نشد.'); }
+    try { r.start(); setListening(true); } catch { setError(tr('تشخیص گفتار شروع نشد.')); }
   }, [Ctor, listening, onFinal, onInterim]);
   const stop = useCallback(() => rec.current?.stop(), []);
   return { supported: Ctor !== null, listening, error, start, stop };

@@ -38,5 +38,7 @@ const P: Record<LiveIconName, ReactNode> = {
 };
 
 export default function LiveIcon({ name, size = 22, className = '' }: { name: LiveIconName; size?: number; className?: string }) {
-  return <svg className={`lv-icon ${className}`} viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{P[name]}</svg>;
+  // Left/right chevrons mean «back/forward» in reading order, so they are mirrored in English (see language.css).
+  const directional = name === 'chevron-left' || name === 'chevron-right';
+  return <svg className={`lv-icon${directional ? ' lv-dir' : ''} ${className}`} viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{P[name]}</svg>;
 }

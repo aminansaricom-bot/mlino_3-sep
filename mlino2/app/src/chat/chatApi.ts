@@ -1,3 +1,4 @@
+import { tr, digits, msg } from '../i18n';
 // گفتگوی مشتری با کسب‌وکار (D-73) — فقط با `VITE_CHAT=1` روشن می‌شود و فقط با /api همین دامنه حرف می‌زند.
 // Session یک کوکی HttpOnly است که صفحه هرگز آن را نمی‌بیند (D-74).
 
@@ -22,31 +23,32 @@ export async function chatApi<T>(method: 'GET' | 'POST' | 'DELETE', path: string
   return data as T;
 }
 
-const fa = (n: unknown) => String(n).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
+// Digits in the current language (Persian, Arabic-Indic or Latin).
+const fa = (n: unknown) => digits(String(n));
 
 const TEXT: Record<string, string> = {
-  NETWORK: 'به سرور نرسیدیم؛ اینترنت را بررسی کن.',
-  PHONE_INVALID: 'شمارهٔ موبایل را به شکل ۰۹xxxxxxxxx بنویس.',
-  SMS_FAILED: 'پیامک کد فرستاده نشد؛ یک دقیقه‌ی دیگر دوباره امتحان کن.',
-  REAL_NUMBER_NEEDS_SMS: 'سرویس پیامک هنوز وصل نشده؛ فعلاً فقط شماره‌های آزمایشی پذیرفته می‌شوند.',
-  RATE_LIMITED: 'کمی صبر کن و دوباره امتحان کن.',
-  CHALLENGE_INVALID: 'کد منقضی شده؛ کد تازه بگیر.',
-  CODE_WRONG: 'کد درست نیست.',
-  TOO_MANY_ATTEMPTS: 'تلاش زیاد شد؛ کد تازه بگیر.',
-  LOGIN_REQUIRED: 'اول وارد شو.',
-  BLOCKED: 'این گفتگو مسدود است.',
-  NOT_FOUND: 'این گفتگو دیگر وجود ندارد.',
-  INPUT_INVALID: 'نام ۲ تا ۴۰ نویسه و پیام حداکثر ۱۰۰۰ نویسه باشد.',
-  SENSITIVE_BUSINESS: 'برای کسب‌وکارهای حوزهٔ سلامت و مانند آن، گفتگو خاموش است.',
-  CHAT_UNAVAILABLE: 'این کسب‌وکار فعلاً پیام نمی‌پذیرد.',
-  BUSINESS_UNKNOWN: 'این کسب‌وکار منتشر نشده است.',
+  NETWORK: msg('به سرور نرسیدیم؛ اینترنت را بررسی کن.'),
+  PHONE_INVALID: msg('شمارهٔ موبایل را به شکل ۰۹xxxxxxxxx بنویس.'),
+  SMS_FAILED: msg('پیامک کد فرستاده نشد؛ یک دقیقه‌ی دیگر دوباره امتحان کن.'),
+  REAL_NUMBER_NEEDS_SMS: msg('سرویس پیامک هنوز وصل نشده؛ فعلاً فقط شماره‌های آزمایشی پذیرفته می‌شوند.'),
+  RATE_LIMITED: msg('کمی صبر کن و دوباره امتحان کن.'),
+  CHALLENGE_INVALID: msg('کد منقضی شده؛ کد تازه بگیر.'),
+  CODE_WRONG: msg('کد درست نیست.'),
+  TOO_MANY_ATTEMPTS: msg('تلاش زیاد شد؛ کد تازه بگیر.'),
+  LOGIN_REQUIRED: msg('اول وارد شو.'),
+  BLOCKED: msg('این گفتگو مسدود است.'),
+  NOT_FOUND: msg('این گفتگو دیگر وجود ندارد.'),
+  INPUT_INVALID: msg('نام ۲ تا ۴۰ نویسه و پیام حداکثر ۱۰۰۰ نویسه باشد.'),
+  SENSITIVE_BUSINESS: msg('برای کسب‌وکارهای حوزهٔ سلامت و مانند آن، گفتگو خاموش است.'),
+  CHAT_UNAVAILABLE: msg('این کسب‌وکار فعلاً پیام نمی‌پذیرد.'),
+  BUSINESS_UNKNOWN: msg('این کسب‌وکار منتشر نشده است.'),
 };
 
 export function chatErrorText(e: unknown): string {
-  if (!(e instanceof ChatApiError)) return 'کار انجام نشد؛ دوباره امتحان کن.';
-  const base = TEXT[e.code] ?? 'کار انجام نشد؛ دوباره امتحان کن.';
-  if (e.code === 'CODE_WRONG' && typeof e.detail.remainingAttempts === 'number') return `${base} ${fa(e.detail.remainingAttempts)} تلاش دیگر مانده.`;
-  if (e.code === 'RATE_LIMITED' && typeof e.detail.retryAfterSeconds === 'number') return `${base} (${fa(e.detail.retryAfterSeconds)} ثانیه)`;
+  if (!(e instanceof ChatApiError)) return tr('کار انجام نشد؛ دوباره امتحان کن.');
+  const base = TEXT[e.code] ? tr(TEXT[e.code]) : tr('کار انجام نشد؛ دوباره امتحان کن.');
+  if (e.code === 'CODE_WRONG' && typeof e.detail.remainingAttempts === 'number') return tr('{0} {1} تلاش دیگر مانده.', base, fa(e.detail.remainingAttempts));
+  if (e.code === 'RATE_LIMITED' && typeof e.detail.retryAfterSeconds === 'number') return tr('{0} ({1} ثانیه)', base, fa(e.detail.retryAfterSeconds));
   return base;
 }
 

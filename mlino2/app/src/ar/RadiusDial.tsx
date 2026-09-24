@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { tr, numberLocale } from '../i18n';
 
 export const RADIUS_MIN = 15;
 export const RADIUS_MAX = 200;
@@ -17,7 +18,7 @@ export function clampRadius(value: number): number {
   return Math.min(RADIUS_MAX, Math.max(RADIUS_MIN, Math.round(value / RADIUS_STEP) * RADIUS_STEP || RADIUS_MIN));
 }
 
-const fa = (n: number) => n.toLocaleString('fa-IR');
+const fa = (n: number) => n.toLocaleString(numberLocale());
 
 /**
  * دکمه‌ی گرد شیشه‌ای شعاع. با لمس، با انیمیشن نرم از وسط به بالا و پایین باز می‌شود و
@@ -47,9 +48,9 @@ export default function RadiusDial({ value, onChange }: { value: number; onChang
 
   return <div ref={rootRef} className={`radius-dial${open ? ' open' : ''}`}>
     <div className="radius-panel" aria-hidden={!open}>
-      <div className="radius-value">{fa(value)}<small>متر</small></div>
+      <div className="radius-value">{fa(value)}<small>{tr('متر')}</small></div>
       <div ref={trackRef} className="radius-track" role="slider" tabIndex={open ? 0 : -1}
-        aria-label="شعاع نمایش" aria-valuemin={RADIUS_MIN} aria-valuemax={RADIUS_MAX} aria-valuenow={value} aria-valuetext={`${fa(value)} متر`}
+        aria-label={tr('شعاع نمایش')} aria-valuemin={RADIUS_MIN} aria-valuemax={RADIUS_MAX} aria-valuenow={value} aria-valuetext={tr('{0} متر', fa(value))}
         onPointerDown={(event) => { dragging.current = true; event.currentTarget.setPointerCapture(event.pointerId); pick(event.clientY); }}
         onPointerMove={(event) => { if (dragging.current) pick(event.clientY); }}
         onPointerUp={() => { dragging.current = false; }}
@@ -63,9 +64,9 @@ export default function RadiusDial({ value, onChange }: { value: number; onChang
         {TICKS.map((tick) => <span key={tick} className="radius-tick" style={{ bottom: `${((tick - RADIUS_MIN) / (RADIUS_MAX - RADIUS_MIN)) * 100}%` }}>{fa(tick)}</span>)}
       </div>
     </div>
-    <button type="button" className="radius-button" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label={`شعاع نمایش ${fa(value)} متر`}>
+    <button type="button" className="radius-button" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label={tr('شعاع نمایش {0} متر', fa(value))}>
       <span className="radius-button-icon" aria-hidden="true">◎</span>
-      <span className="radius-button-text">{fa(value)}<small>م</small></span>
+      <span className="radius-button-text">{fa(value)}<small>{tr('م')}</small></span>
     </button>
   </div>;
 }

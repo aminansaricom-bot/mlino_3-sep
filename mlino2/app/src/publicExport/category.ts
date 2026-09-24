@@ -1,4 +1,5 @@
 import type { PublicRecord } from './mapping';
+import { msg } from '../i18n';
 
 export type DisplayCategory =
   | 'dental_clinic'
@@ -17,11 +18,11 @@ export type DerivedCategory = Readonly<{
 type CategoryRule = Readonly<{ key: Exclude<DisplayCategory, 'uncategorized'>; label: string; tokens: readonly string[] }>;
 
 export const CATEGORY_RULES: readonly CategoryRule[] = [
-  { key: 'dental_clinic', label: 'درمان و دندان', tokens: ['dental', 'dentist', 'دندان', 'دندانپزشک', 'دندانپزشکی', 'ایمپلنت', 'ارتودنسی', 'جرم گیری', 'عصب کشی'] },
-  { key: 'beauty_clinic', label: 'زیبایی و مراقبت', tokens: ['beauty', 'skin', 'laser', 'زیبایی', 'پوست', 'لیزر', 'بوتاکس', 'فیلر', 'مو'] },
-  { key: 'cafe', label: 'کافه', tokens: ['cafe', 'coffee', 'کافه', 'قهوه', 'اسپرسو', 'لاته'] },
-  { key: 'restaurant', label: 'رستوران و غذا', tokens: ['restaurant', 'food', 'رستوران', 'غذا', 'کباب', 'پیتزا', 'برگر'] },
-  { key: 'retail_shop', label: 'فروشگاه', tokens: ['retail', 'shop', 'store', 'فروشگاه', 'خرید', 'محصول'] },
+  { key: 'dental_clinic', label: msg('درمان و دندان'), tokens: ['dental', 'dentist', 'دندان', 'دندانپزشک', 'دندانپزشکی', 'ایمپلنت', 'ارتودنسی', 'جرم گیری', 'عصب کشی'] },
+  { key: 'beauty_clinic', label: msg('زیبایی و مراقبت'), tokens: ['beauty', 'skin', 'laser', 'زیبایی', 'پوست', 'لیزر', 'بوتاکس', 'فیلر', 'مو'] },
+  { key: 'cafe', label: msg('کافه'), tokens: ['cafe', 'coffee', 'کافه', 'قهوه', 'اسپرسو', 'لاته'] },
+  { key: 'restaurant', label: msg('رستوران و غذا'), tokens: ['restaurant', 'food', 'رستوران', 'غذا', 'کباب', 'پیتزا', 'برگر'] },
+  { key: 'retail_shop', label: msg('فروشگاه'), tokens: ['retail', 'shop', 'store', 'فروشگاه', 'خرید', 'محصول'] },
 ] as const;
 
 export function normalizeCategoryText(value: string): string {
@@ -58,5 +59,5 @@ export function deriveDisplayCategory(record: Pick<PublicRecord, 'business' | 'c
   const rule = classify(capabilityText) ?? classify(`${record.business.name} ${record.business.description ?? ''}`);
   return rule
     ? { key: rule.key, label: rule.label, guessed: true }
-    : { key: 'uncategorized', label: 'بدون دسته', guessed: true };
+    : { key: 'uncategorized', label: msg('بدون دسته'), guessed: true };
 }

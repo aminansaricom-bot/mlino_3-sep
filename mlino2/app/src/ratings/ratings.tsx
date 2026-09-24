@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ChatApiError, chatApi, chatErrorText, faDigits, type ChatConfig } from '../chat/chatApi';
 import { Login } from '../chat/ChatPanel';
+import { tr, numberLocale } from '../i18n';
 
 // Product ratings (D-84): averages and counts come from the server, one rating per signed-in person per product.
 // Nothing is estimated on the phone; with no ratings the badge is simply not shown.
@@ -49,12 +50,12 @@ export function useRatings(orgId: string | null | undefined) {
   return { enabled: board?.enabled ?? false, items: board?.items ?? {}, rate };
 }
 
-const avgText = (n: number) => n.toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const avgText = (n: number) => n.toLocaleString(numberLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 /** «★ ۴٫۳ (۱۲)» on a product image; nothing when nobody has rated it. */
 export function RatingBadge({ summary, className = '' }: { summary?: RatingSummary; className?: string }) {
   if (!summary || summary.count === 0) return null;
-  return <span className={`rating-badge ${className}`} aria-label={`امتیاز ${avgText(summary.avg)} از ۵، ${faDigits(String(summary.count))} رأی`}>
+  return <span className={`rating-badge ${className}`} aria-label={tr('امتیاز {0} از ۵، {1} رأی', avgText(summary.avg), faDigits(String(summary.count)))}>
     <b aria-hidden="true">★</b>{avgText(summary.avg)}<small>({faDigits(String(summary.count))})</small>
   </span>;
 }
@@ -79,15 +80,15 @@ export function RateProduct({ orgId, itemId }: { orgId: string; itemId: string }
   };
   return <div className="rate-product">
     <div className="rate-head">
-      <strong>امتیاز تو به این محصول</strong>
-      {summary && summary.count > 0 && <span className="rate-summary"><bdi>{avgText(summary.avg)}</bdi> از ۵، <bdi>{faDigits(String(summary.count))}</bdi> رأی</span>}
+      <strong>{tr('امتیاز تو به این محصول')}</strong>
+      {summary && summary.count > 0 && <span className="rate-summary"><bdi>{avgText(summary.avg)}</bdi> {tr('از ۵،')} <bdi>{faDigits(String(summary.count))}</bdi> {tr('رأی')}</span>}
     </div>
-    <div className="rate-stars" role="radiogroup" aria-label="امتیاز از ۱ تا ۵">
+    <div className="rate-stars" role="radiogroup" aria-label={tr('امتیاز از ۱ تا ۵')}>
       {[1, 2, 3, 4, 5].map((s) => <button key={s} type="button" role="radio" aria-checked={mine === s} disabled={busy}
-        className={mine !== null && s <= mine ? 'on' : ''} onClick={() => void choose(s)} aria-label={`${faDigits(String(s))} ستاره`}>★</button>)}
+        className={mine !== null && s <= mine ? 'on' : ''} onClick={() => void choose(s)} aria-label={tr('{0} ستاره', faDigits(String(s)))}>★</button>)}
     </div>
-    {mine !== null && <small className="rate-note">امتیازت ثبت شد؛ برای برداشتن، همان ستاره را دوباره بزن.</small>}
-    {needLogin && <div className="rate-login"><small className="rate-note">برای امتیاز دادن اول با شماره‌ی موبایل وارد شو؛ هر نفر فقط یک امتیاز به هر محصول می‌دهد.</small>
+    {mine !== null && <small className="rate-note">{tr('امتیازت ثبت شد؛ برای برداشتن، همان ستاره را دوباره بزن.')}</small>}
+    {needLogin && <div className="rate-login"><small className="rate-note">{tr('برای امتیاز دادن اول با شماره‌ی موبایل وارد شو؛ هر نفر فقط یک امتیاز به هر محصول می‌دهد.')}</small>
       <Login config={config} onDone={() => { setNeedLogin(false); void loadRatings(orgId, true); }} /></div>}
     {error && <small className="rate-error" role="alert">{error}</small>}
   </div>;

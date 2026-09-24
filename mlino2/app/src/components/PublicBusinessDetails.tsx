@@ -12,6 +12,7 @@ import { formatDistance } from '../uiFormat';
 import Stars from './Stars';
 import { ChatBubbleIcon } from '../chat/ChatPanel';
 import { RatingBadge, useRatings, type RatingSummary } from '../ratings/ratings';
+import { tr, numberLocale } from '../i18n';
 
 interface Props {
   record: PublicUiRecord;
@@ -34,8 +35,8 @@ export function directionsUrl(lat: number, lng: number, label: string): string {
 
 /** «تا ۱۱ دی» — فقط روز و ماه؛ ساعت برای کاربر اهمیتی ندارد. */
 export function offerUntil(iso: string | null): string {
-  if (!iso) return 'بدون تاریخ پایان';
-  try { return `تا ${new Date(iso).toLocaleDateString('fa-IR', { day: 'numeric', month: 'long' })}`; }
+  if (!iso) return tr('بدون تاریخ پایان');
+  try { return tr('تا {0}', new Date(iso).toLocaleDateString(numberLocale(), { day: 'numeric', month: 'long' })); }
   catch { return ''; }
 }
 
@@ -67,7 +68,7 @@ export default function PublicBusinessDetails({ record, catalog, now, distanceMe
   const items = catalog?.items ?? [];
   const groups: { label: string; items: CatalogItem[] }[] = [];
   for (const item of items) {
-    const label = item.grouping_label ?? 'محصولات';
+    const label = item.grouping_label ?? tr('محصولات');
     const last = groups[groups.length - 1];
     if (last && last.label === label) last.items.push(item); else groups.push({ label, items: [item] });
   }
@@ -75,28 +76,28 @@ export default function PublicBusinessDetails({ record, catalog, now, distanceMe
   const ratings = useRatings(record.id);
   return <section className="panel biz-page" aria-label={displayName(record.name)}>
     <header className="biz-hero">
-      <button className="hero-btn" onClick={onClose} aria-label="بستن"><Icon name="close" /></button>
+      <button className="hero-btn" onClick={onClose} aria-label={tr('بستن')}><Icon name="close" /></button>
       <div className="hero-actions">
-        <button className={`hero-btn${saved ? ' on' : ''}`} onClick={() => onToggle('saved', record.id)} aria-label={saved ? 'ذخیره شد' : 'ذخیره'} aria-pressed={saved}><Icon name="bookmark" /></button>
+        <button className={`hero-btn${saved ? ' on' : ''}`} onClick={() => onToggle('saved', record.id)} aria-label={saved ? tr('ذخیره شد') : tr('ذخیره')} aria-pressed={saved}><Icon name="bookmark" /></button>
         <ShareBusinessAction record={record} />
       </div>
       <span className={`hero-coin coin-${record.category.key}`} aria-hidden="true">{displayName(record.name).trim().charAt(0)}</span>
       <h2>{displayName(record.name)}</h2>
       <div className="hero-meta">
         {rating && <Stars rating={rating} compact />}
-        {record.category.key !== 'uncategorized' && <span>{record.category.label}</span>}
+        {record.category.key !== 'uncategorized' && <span>{tr(record.category.label)}</span>}
         {distanceMeters !== undefined && <span>{formatDistance(distanceMeters)}</span>}
-        <span className={hours === 'open' ? 'open' : hours === 'closed' ? 'closed' : ''}>{hours === 'open' ? 'باز است' : hours === 'closed' ? 'بسته است' : 'ساعت نامشخص'}</span>
+        <span className={hours === 'open' ? 'open' : hours === 'closed' ? 'closed' : ''}>{hours === 'open' ? tr('باز است') : hours === 'closed' ? tr('بسته است') : tr('ساعت نامشخص')}</span>
       </div>
       <div className="biz-cta">
-        {onMessage && <button className="biz-message-btn" onClick={onMessage}><ChatBubbleIcon />پیام به کسب‌وکار</button>}
-        {record.coordinates && <a className="biz-action" href={directionsUrl(record.coordinates.latitude, record.coordinates.longitude, displayName(record.name))} target="_blank" rel="noopener noreferrer"><Icon name="route" />مسیریابی</a>}
-        {record.contactInformation?.public_phone && <a className="biz-action" href={`tel:${record.contactInformation.public_phone}`}>تماس</a>}
+        {onMessage && <button className="biz-message-btn" onClick={onMessage}><ChatBubbleIcon />{tr('پیام به کسب‌وکار')}</button>}
+        {record.coordinates && <a className="biz-action" href={directionsUrl(record.coordinates.latitude, record.coordinates.longitude, displayName(record.name))} target="_blank" rel="noopener noreferrer"><Icon name="route" />{tr('مسیریابی')}</a>}
+        {record.contactInformation?.public_phone && <a className="biz-action" href={`tel:${record.contactInformation.public_phone}`}>{tr('تماس')}</a>}
       </div>
     </header>
 
     <div className="panel-body biz-page-body">
-      {offers.length > 0 && <section className="offer-strip" aria-label="پیشنهادها">
+      {offers.length > 0 && <section className="offer-strip" aria-label={tr('پیشنهادها')}>
         {offers.map((offer) => <div className="offer-pill" key={offer.offer_version_id}>
           <span className="offer-pill-badge"><Icon name="gift" /></span>
           <span className="offer-pill-copy"><strong>{displayName(offer.name)}</strong>
@@ -116,7 +117,7 @@ export default function PublicBusinessDetails({ record, catalog, now, distanceMe
         {record.addressText && <p><Icon name="route" /> {record.addressText}</p>}
         {record.contactInformation?.public_phone && <p><a href={`tel:${record.contactInformation.public_phone}`}>{record.contactInformation.public_phone}</a></p>}
       </section>}
-      {record.stale && <p className="biz-stale" role="status">این اطلاعات از آخرین نسخهٔ معتبر نمایش داده می‌شود.</p>}
+      {record.stale && <p className="biz-stale" role="status">{tr('این اطلاعات از آخرین نسخهٔ معتبر نمایش داده می‌شود.')}</p>}
     </div>
   </section>;
 }

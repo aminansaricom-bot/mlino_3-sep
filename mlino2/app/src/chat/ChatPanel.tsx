@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { chatApi, chatErrorText, faDigits, type ChatConfig, type ChatMessage, type ChatPerson, type CustomerThread } from './chatApi';
+import { tr, numberLocale, latinDigits } from '../i18n';
 
 // گفتگوی مشتری با کسب‌وکار (D-73). گفتگو را فقط مشتری شروع می‌کند؛ کسب‌وکار فقط نامی را می‌بیند که خودت می‌نویسی،
 // نه شماره‌ات را. هیچ هوش مصنوعی پیام‌ها را نمی‌خواند. هر گفتگو ۹۰ روز پس از آخرین پیام واقعاً پاک می‌شود.
@@ -7,7 +8,7 @@ import { chatApi, chatErrorText, faDigits, type ChatConfig, type ChatMessage, ty
 export type ChatTarget = { organizationId: string; name: string };
 
 export const NAME_KEY = 'mlino.v2.chatName';
-const time = (iso: string) => faDigits(new Date(iso).toLocaleString('fa-IR-u-nu-latn', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }));
+const time = (iso: string) => new Date(iso).toLocaleString(numberLocale(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 const clean = (name: string) => name.replace(/\s*\(آزمایشی\)/g, '');
 
 export function ChatBubbleIcon() {
@@ -54,31 +55,31 @@ export default function ChatPanel({ target, onClose }: { target: ChatTarget | nu
 
   const logout = async () => { try { await chatApi('POST', '/auth/logout'); } catch { /* کوکی در سرور پاک می‌شود */ } setPerson(null); setThreads(null); setView({ kind: 'list' }); };
   const deleteAccount = async () => {
-    if (!window.confirm('حساب و همهٔ گفتگوهایت برای همیشه پاک شود؟ کسب‌وکارها هم دیگر آن‌ها را نمی‌بینند.')) return;
+    if (!window.confirm(tr('حساب و همهٔ گفتگوهایت برای همیشه پاک شود؟ کسب‌وکارها هم دیگر آن‌ها را نمی‌بینند.'))) return;
     try { await chatApi('DELETE', '/auth/account'); setPerson(null); setThreads(null); setView({ kind: 'list' }); } catch (e) { setError(chatErrorText(e)); }
   };
 
-  const title = view.kind === 'new' ? `پیام به ${clean(view.target.name)}` : view.kind === 'thread' ? clean(threads?.find((t) => t.id === view.id)?.businessName ?? 'گفتگو') : !person && target ? `پیام به ${clean(target.name)}` : 'پیام‌های من';
+  const title = view.kind === 'new' ? tr('پیام به {0}', clean(view.target.name)) : view.kind === 'thread' ? clean(threads?.find((t) => t.id === view.id)?.businessName ?? tr('گفتگو')) : !person && target ? tr('پیام به {0}', clean(target.name)) : tr('پیام‌های من');
   return <section className="panel chat-panel" aria-label={title}>
     <div className="panel-head">
-      {view.kind !== 'list' && person && <button className="panel-close" onClick={() => { setView({ kind: 'list' }); void loadThreads(); }} aria-label="بازگشت">→</button>}
+      {view.kind !== 'list' && person && <button className="panel-close" onClick={() => { setView({ kind: 'list' }); void loadThreads(); }} aria-label={tr('بازگشت')}><span className="lv-dir" aria-hidden="true">→</span></button>}
       <h3>{title}</h3>
-      <button className="panel-close" onClick={onClose} aria-label="بستن">✕</button>
+      <button className="panel-close" onClick={onClose} aria-label={tr('بستن')}>✕</button>
     </div>
     <div className="panel-body chat-body">
-      {!ready ? <p className="chat-muted">در حال بررسی…</p>
+      {!ready ? <p className="chat-muted">{tr('در حال بررسی…')}</p>
         : !person ? <Login config={config} onDone={() => void boot()} />
         : view.kind === 'new' ? <NewMessage target={view.target} test={person.test} onSent={async (threadId) => { await loadThreads(); setView({ kind: 'thread', id: threadId }); }} />
         : view.kind === 'thread' ? <Thread id={view.id} thread={threads?.find((t) => t.id === view.id) ?? null} onChanged={() => void loadThreads()} onGone={() => { setView({ kind: 'list' }); void loadThreads(); }} />
         : <>
-          {threads === null ? <p className="chat-muted">در حال خواندن…</p> : threads.length === 0 ? <p className="chat-muted">هنوز گفتگویی نداری. در صفحهٔ هر کسب‌وکار دکمهٔ «پیام» را بزن.</p> :
+          {threads === null ? <p className="chat-muted">{tr('در حال خواندن…')}</p> : threads.length === 0 ? <p className="chat-muted">{tr('هنوز گفتگویی نداری. در صفحهٔ هر کسب‌وکار دکمهٔ «پیام» را بزن.')}</p> :
             <ul className="chat-threads">{threads.map((t) => <li key={t.id}><button onClick={() => setView({ kind: 'thread', id: t.id })}>
-              <span className="chat-thread-copy"><strong>{clean(t.businessName)}</strong><small>{t.lastSender === 'customer' ? 'تو: ' : ''}{t.lastBody}</small></span>
+              <span className="chat-thread-copy"><strong>{clean(t.businessName)}</strong><small>{t.lastSender === 'customer' ? tr('تو: ') : ''}{t.lastBody}</small></span>
               <span className="chat-thread-side"><small>{time(t.lastMessageAt)}</small>{t.unread > 0 && <b className="chat-unread">{faDigits(t.unread)}</b>}</span>
             </button></li>)}</ul>}
           <div className="chat-account">
-            <small>واردشده با …{faDigits(person.phoneHint)}{person.test ? ' (آزمایشی)' : ''}. شماره‌ات به هیچ کسب‌وکاری نشان داده نمی‌شود.</small>
-            <div><button onClick={() => void logout()}>خروج</button><button className="danger" onClick={() => void deleteAccount()}>حذف حساب و گفتگوها</button></div>
+            <small>{tr('واردشده با …')}{faDigits(person.phoneHint)}{person.test ? tr(' (آزمایشی)') : ''}{tr('. شماره‌ات به هیچ کسب‌وکاری نشان داده نمی‌شود.')}</small>
+            <div><button onClick={() => void logout()}>{tr('خروج')}</button><button className="danger" onClick={() => void deleteAccount()}>{tr('حذف حساب و گفتگوها')}</button></div>
           </div>
         </>}
       {error && <p className="chat-error" role="alert">{error}</p>}
@@ -103,18 +104,18 @@ export function Login({ config, onDone }: { config: ChatConfig | null; onDone: (
     try { await chatApi('POST', '/auth/otp/verify', { challengeId: challenge.id, code }); onDone(); } catch (e) { setError(chatErrorText(e)); } finally { setBusy(false); }
   };
   return <div className="chat-login">
-    <p>برای پیام دادن به کسب‌وکارها با شمارهٔ موبایل وارد شو. کسب‌وکار فقط نامی را می‌بیند که خودت می‌نویسی، نه شماره‌ات را.</p>
-    {config?.delivery === 'test' && config.testNumbers && <p className="chat-test-note">حالت آزمایشی: پیامکی فرستاده نمی‌شود. فقط شماره‌های {faDigits(config.testNumbers.from)} تا {faDigits(config.testNumbers.to)} پذیرفته می‌شوند و کد همین‌جا نشان داده می‌شود. پیام‌های آزمایشی ۲۴ ساعت پس از آخرین پیام پاک می‌شوند؛ اطلاعات واقعی ننویس.</p>}
-    {config?.delivery === 'sms' && <p className="chat-test-note">کد ورود با پیامک به شماره‌ات فرستاده می‌شود. شماره‌ات به هیچ کسب‌وکاری نشان داده نمی‌شود.</p>}
+    <p>{tr('برای پیام دادن به کسب‌وکارها با شمارهٔ موبایل وارد شو. کسب‌وکار فقط نامی را می‌بیند که خودت می‌نویسی، نه شماره‌ات را.')}</p>
+    {config?.delivery === 'test' && config.testNumbers && <p className="chat-test-note">{tr('حالت آزمایشی: پیامکی فرستاده نمی‌شود. فقط شماره‌های {0} تا {1} پذیرفته می‌شوند و کد همین‌جا نشان داده می‌شود. پیام‌های آزمایشی ۲۴ ساعت پس از آخرین پیام پاک می‌شوند؛ اطلاعات واقعی ننویس.', faDigits(config.testNumbers.from), faDigits(config.testNumbers.to))}</p>}
+    {config?.delivery === 'sms' && <p className="chat-test-note">{tr('کد ورود با پیامک به شماره‌ات فرستاده می‌شود. شماره‌ات به هیچ کسب‌وکاری نشان داده نمی‌شود.')}</p>}
     {!challenge ? <form onSubmit={(e) => { e.preventDefault(); void start(); }}>
-      <label>شمارهٔ موبایل<input dir="ltr" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="09…" /></label>
-      <button type="submit" className="chat-primary" disabled={busy || phone.trim().length < 10}>{busy ? 'در حال ارسال…' : 'گرفتن کد'}</button>
+      <label>{tr('شمارهٔ موبایل')}<input dir="ltr" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(latinDigits(e.target.value))} placeholder="09…" /></label>
+      <button type="submit" className="chat-primary" disabled={busy || phone.trim().length < 10}>{busy ? tr('در حال ارسال…') : tr('گرفتن کد')}</button>
     </form> : <form onSubmit={(e) => { e.preventDefault(); void verify(); }}>
-      {!challenge.testCode && <p className="chat-muted" role="status">کد ۶ رقمی به {faDigits(phone)} پیامک شد. تا ۲ دقیقه معتبر است.</p>}
-      {challenge.testCode && <p className="chat-test-code">کد آزمایشی: <b dir="ltr">{faDigits(challenge.testCode)}</b></p>}
-      <label>کد ۶ رقمی<input dir="ltr" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value)} /></label>
-      <button type="submit" className="chat-primary" disabled={busy || code.trim().length < 6}>{busy ? 'در حال بررسی…' : 'ورود'}</button>
-      <button type="button" className="chat-link" onClick={() => setChallenge(null)}>تغییر شماره</button>
+      {!challenge.testCode && <p className="chat-muted" role="status">{tr('کد ۶ رقمی به {0} پیامک شد. تا ۲ دقیقه معتبر است.', faDigits(phone))}</p>}
+      {challenge.testCode && <p className="chat-test-code">{tr('کد آزمایشی:')} <b dir="ltr">{faDigits(challenge.testCode)}</b></p>}
+      <label>{tr('کد ۶ رقمی')}<input dir="ltr" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(latinDigits(e.target.value))} /></label>
+      <button type="submit" className="chat-primary" disabled={busy || code.trim().length < 6}>{busy ? tr('در حال بررسی…') : tr('ورود')}</button>
+      <button type="button" className="chat-link" onClick={() => setChallenge(null)}>{tr('تغییر شماره')}</button>
     </form>}
     {error && <p className="chat-error" role="alert">{error}</p>}
   </div>;
@@ -138,13 +139,13 @@ function NewMessage({ target, test, onSent }: { target: ChatTarget; test: boolea
       onSent(r.threadId);
     } catch (e) { setError(chatErrorText(e)); } finally { setBusy(false); }
   };
-  if (available && !available.ok) return <p className="chat-muted">{available.sensitive ? 'برای کسب‌وکارهای حوزهٔ سلامت و مانند آن، گفتگو خاموش است تا اطلاعات حساس کسی جایی نماند.' : 'این کسب‌وکار فعلاً پیام نمی‌پذیرد.'}</p>;
+  if (available && !available.ok) return <p className="chat-muted">{available.sensitive ? tr('برای کسب‌وکارهای حوزهٔ سلامت و مانند آن، گفتگو خاموش است تا اطلاعات حساس کسی جایی نماند.') : tr('این کسب‌وکار فعلاً پیام نمی‌پذیرد.')}</p>;
   return <form className="chat-new" onSubmit={(e) => { e.preventDefault(); void send(); }}>
-    <label>نامی که کسب‌وکار می‌بیند<input value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder="مثلاً سارا" /></label>
-    <label>پیام<textarea value={body} maxLength={1000} rows={4} onChange={(e) => setBody(e.target.value)} placeholder="مثلاً «امروز تا چه ساعتی باز هستید؟»" /></label>
-    {available?.auto && <p className="chat-auto-note">این کسب‌وکار پاسخ‌گوی خودکار دارد: فقط با جواب‌هایی که خود کسب‌وکار تأیید کرده یا اطلاعات منتشرشده‌اش پاسخ می‌دهد، پاسخ‌هایش علامت «پاسخ خودکار» دارند، و سؤالی را که نمی‌داند به خود کسب‌وکار می‌دهد و حدس نمی‌زند.</p>}
-    <p className="chat-muted">شماره‌ات نشان داده نمی‌شود. این گفتگو {test ? '(آزمایشی) ۲۴ ساعت' : '۹۰ روز'} پس از آخرین پیام خودکار پاک می‌شود و هر وقت بخواهی خودت می‌توانی پاکش کنی.</p>
-    <button type="submit" className="chat-primary" disabled={busy || !available || name.trim().length < 2 || !body.trim()}>{busy ? 'در حال ارسال…' : 'فرستادن'}</button>
+    <label>{tr('نامی که کسب‌وکار می‌بیند')}<input value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={tr('مثلاً سارا')} /></label>
+    <label>{tr('پیام')}<textarea value={body} maxLength={1000} rows={4} onChange={(e) => setBody(e.target.value)} placeholder={tr('مثلاً «امروز تا چه ساعتی باز هستید؟»')} /></label>
+    {available?.auto && <p className="chat-auto-note">{tr('این کسب‌وکار پاسخ‌گوی خودکار دارد: فقط با جواب‌هایی که خود کسب‌وکار تأیید کرده یا اطلاعات منتشرشده‌اش پاسخ می‌دهد، پاسخ‌هایش علامت «پاسخ خودکار» دارند، و سؤالی را که نمی‌داند به خود کسب‌وکار می‌دهد و حدس نمی‌زند.')}</p>}
+    <p className="chat-muted">{tr('شماره‌ات نشان داده نمی‌شود. این گفتگو')} {test ? tr('(آزمایشی) ۲۴ ساعت') : tr('۹۰ روز')} {tr('پس از آخرین پیام خودکار پاک می‌شود و هر وقت بخواهی خودت می‌توانی پاکش کنی.')}</p>
+    <button type="submit" className="chat-primary" disabled={busy || !available || name.trim().length < 2 || !body.trim()}>{busy ? tr('در حال ارسال…') : tr('فرستادن')}</button>
     {error && <p className="chat-error" role="alert">{error}</p>}
   </form>;
 }
@@ -180,19 +181,19 @@ function Thread({ id, thread, onChanged, onGone }: { id: string; thread: Custome
   const blocked = thread?.blockedBy ?? null;
   return <div className="chat-thread">
     <div className="chat-thread-tools">
-      <small>{thread?.test ? 'آزمایشی: ۲۴ ساعت پس از آخرین پیام پاک می‌شود' : 'پاک شدن خودکار: ۹۰ روز پس از آخرین پیام'}</small>
-      {blocked === 'customer' ? <button onClick={() => void act('POST', '/unblock')}>رفع مسدودی</button>
-        : !blocked && <button onClick={() => { if (window.confirm('این گفتگو مسدود شود؟')) void act('POST', '/block'); }}>مسدود</button>}
-      <button className="danger" onClick={() => { if (window.confirm('این گفتگو برای هر دو طرف پاک شود؟ برگشت ندارد.')) void act('DELETE', '', true); }}>حذف</button>
+      <small>{thread?.test ? tr('آزمایشی: ۲۴ ساعت پس از آخرین پیام پاک می‌شود') : tr('پاک شدن خودکار: ۹۰ روز پس از آخرین پیام')}</small>
+      {blocked === 'customer' ? <button onClick={() => void act('POST', '/unblock')}>{tr('رفع مسدودی')}</button>
+        : !blocked && <button onClick={() => { if (window.confirm(tr('این گفتگو مسدود شود؟'))) void act('POST', '/block'); }}>{tr('مسدود')}</button>}
+      <button className="danger" onClick={() => { if (window.confirm(tr('این گفتگو برای هر دو طرف پاک شود؟ برگشت ندارد.'))) void act('DELETE', '', true); }}>{tr('حذف')}</button>
     </div>
     <div className="chat-messages" aria-live="polite">
-      {messages.map((m) => <div key={m.id} className={`chat-msg ${m.sender === 'customer' ? 'mine' : 'theirs'}${m.auto ? ' auto' : ''}`}><p>{m.body}</p><small>{m.auto ? 'پاسخ خودکار — ' : ''}{time(m.createdAt)}</small></div>)}
+      {messages.map((m) => <div key={m.id} className={`chat-msg ${m.sender === 'customer' ? 'mine' : 'theirs'}${m.auto ? ' auto' : ''}`}><p>{m.body}</p><small>{m.auto ? tr('پاسخ خودکار — ') : ''}{time(m.createdAt)}</small></div>)}
       <div ref={end} />
     </div>
-    {blocked ? <p className="chat-muted">{blocked === 'customer' ? 'تو این گفتگو را مسدود کرده‌ای.' : 'کسب‌وکار این گفتگو را مسدود کرده است.'}</p> :
+    {blocked ? <p className="chat-muted">{blocked === 'customer' ? tr('تو این گفتگو را مسدود کرده‌ای.') : tr('کسب‌وکار این گفتگو را مسدود کرده است.')}</p> :
       <form className="chat-compose" onSubmit={(e) => { e.preventDefault(); void send(); }}>
-        <textarea value={text} maxLength={1000} rows={2} onChange={(e) => setText(e.target.value)} placeholder="پیام…" aria-label="متن پیام" />
-        <button type="submit" className="chat-primary" disabled={busy || !text.trim()}>ارسال</button>
+        <textarea value={text} maxLength={1000} rows={2} onChange={(e) => setText(e.target.value)} placeholder={tr('پیام…')} aria-label={tr('متن پیام')} />
+        <button type="submit" className="chat-primary" disabled={busy || !text.trim()}>{tr('ارسال')}</button>
       </form>}
     {error && <p className="chat-error" role="alert">{error}</p>}
   </div>;
@@ -216,7 +217,7 @@ export function ChatInboxButton({ onOpen, refreshKey }: { onOpen: () => void; re
     timer = window.setInterval(() => { if (document.visibilityState === 'visible') void poll(); }, 30_000);
     return () => { active = false; window.clearInterval(timer); };
   }, [refreshKey]);
-  return <button className="profile-btn chat-inbox-btn" onClick={onOpen} aria-label={unread ? `پیام‌های من، ${faDigits(unread)} خوانده‌نشده` : 'پیام‌های من'}>
+  return <button className="profile-btn chat-inbox-btn" onClick={onOpen} aria-label={unread ? tr('پیام‌های من، {0} خوانده‌نشده', faDigits(unread)) : tr('پیام‌های من')}>
     <ChatBubbleIcon />{unread > 0 && <b className="chat-unread badge-dot">{faDigits(unread)}</b>}
   </button>;
 }

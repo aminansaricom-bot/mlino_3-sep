@@ -29,6 +29,7 @@ import NearbyAlerts, { alertsOn, refreshAlertLocation } from '../offers/NearbyAl
 import { NEARBY_LABEL, RUNNER, callNative, inApp, onBackButton, onNative } from '../native/bridge';
 import Welcome, { shouldWelcome } from '../onboarding/Welcome';
 import { demoBanner, nextDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, validPoint, visibleDemoRecords, type Point } from '../demo/demoRelocation';
+import { tr, numberLocale, msg, dir, noteLocation } from '../i18n';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
 
@@ -69,7 +70,7 @@ export default function RealPublicApp() {
   const [overlay, setOverlay] = useState<Overlay>('none');
   const [sheet, setSheet] = useState<SheetState>('peek');
   const [point, setPoint] = useState<[number, number]>(TEHRAN_CENTER);
-  const [pointLabel, setPointLabel] = useState('مرکز تهران (پیش‌فرض)');
+  const [pointLabel, setPointLabel] = useState(msg('مرکز تهران (پیش‌فرض)'));
   const [myPoint, setMyPoint] = useState<[number, number] | null>(null);
   const [flyTo, setFlyTo] = useState<[number, number] | null>(null);
   const [nearbyOnly, setNearbyOnly] = useState(false);
@@ -157,12 +158,12 @@ export default function RealPublicApp() {
     setLocating(true);
     // A quick network position first (a second or two), then GPS refines it; waiting for GPS alone took ~20 s.
     const refine = () => navigator.geolocation.getCurrentPosition(({ coords }) => {
-      const next: Point = [coords.latitude, coords.longitude];
+      const next: Point = [coords.latitude, coords.longitude]; noteLocation(next[0], next[1]);
       if (demoBuildEnabled && !validPoint(next)) return;
       setMyPoint([next[0], next[1]]); setPoint([next[0], next[1]]);
     }, () => undefined, { enableHighAccuracy: true, timeout: 30_000, maximumAge: 0 });
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => { refine(); const next: Point = [coords.latitude, coords.longitude]; if (demoBuildEnabled && !validPoint(next)) { setLocating(false); setLocError('outside'); return; }
+      ({ coords }) => { refine(); const next: Point = [coords.latitude, coords.longitude]; noteLocation(next[0], next[1]); if (demoBuildEnabled && !validPoint(next)) { setLocating(false); setLocError('outside'); return; }
         setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setFlyTo([next[0], next[1]]); setPointLabel('موقعیت من'); setNearbyOnly(true); setLocating(false); setLocError(null);
         if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => nextDemoTarget(current, next)); },
       (error) => { setLocating(false); setLocError(error?.code === 1 ? 'denied' : 'unavailable'); },
@@ -205,7 +206,7 @@ export default function RealPublicApp() {
   useEffect(() => {
     if (overlay !== 'vitrine' || !navigator.geolocation) return;
     const watch = navigator.geolocation.watchPosition(({ coords }) => {
-      const next: Point = [coords.latitude, coords.longitude];
+      const next: Point = [coords.latitude, coords.longitude]; noteLocation(next[0], next[1]);
       if (!validPoint(next)) return;
       setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setPointLabel('موقعیت زندهٔ من');
       if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => nextDemoTarget(current, next));
@@ -263,63 +264,63 @@ export default function RealPublicApp() {
     setProduct({ item, businessName: owner ? displayName(owner.name) : '', organizationId });
   };
 
-  return <div className={`app-shell${demoBuildEnabled && demoEnabled ? ' demo-on' : ''}`} dir="rtl">
-    {demoBuildEnabled && demoEnabled && <div className="demo-banner" role="status"><span>{demoBanner(true)}</span>
-      {demoAnchor && demoTarget && myPoint && <button onClick={() => setDemoTarget(reanchorDemoTarget(myPoint))} title="کسب‌وکارهای نمونه دوباره دور موقعیت فعلی‌ات چیده شوند">کنار من بچین</button>}
-      <button onClick={() => { setDemoEnabled(false); setDemoTarget(null); }} aria-label="بستن نسخه‌ی نمایشی">بستن نمونه‌ها</button></div>}
+  return <div className={`app-shell${demoBuildEnabled && demoEnabled ? ' demo-on' : ''}`} dir={dir()}>
+    {demoBuildEnabled && demoEnabled && <div className="demo-banner" role="status"><span>{tr(demoBanner(true) ?? '')}</span>
+      {demoAnchor && demoTarget && myPoint && <button onClick={() => setDemoTarget(reanchorDemoTarget(myPoint))} title={tr('کسب‌وکارهای نمونه دوباره دور موقعیت فعلی‌ات چیده شوند')}>{tr('کنار من بچین')}</button>}
+      <button onClick={() => { setDemoEnabled(false); setDemoTarget(null); }} aria-label={tr('بستن نسخه‌ی نمایشی')}>{tr('بستن نمونه‌ها')}</button></div>}
     <MapView records={shown} matchIds={new Set()} selectedId={selectedId} center={TEHRAN_CENTER} myPoint={myPoint}
       flyTarget={selected?.coordinates ? [selected.coordinates.latitude, selected.coordinates.longitude] : flyTo}
       tileRetryKey={tileRetryKey} onSelect={openDetail}
       onPickPoint={(lat, lng) => { setPoint([lat, lng]); setPointLabel('نقطهٔ انتخابی روی نقشه'); setNearbyOnly(true); }}
       onMapReady={() => undefined} onTileStatus={setTileStatus} />
 
-    {!valid && <div className="app-banner warn" role="status">اطلاعات واقعی فعلاً در دسترس نیست. دادهٔ آزمایشی جای آن نمایش داده نمی‌شود.</div>}
-    {valid && refreshFailed && <div className="app-banner warn" role="status">دریافت تازه انجام نشد؛ نسخهٔ معتبر پیشین فقط تا پایان اعتبارش نمایش داده می‌شود.</div>}
-    {tileStatus === 'error' && <div className="map-state"><p>نقشه در دسترس نیست؛ فهرست دادهٔ امضاشده همچنان قابل استفاده است.</p><button onClick={() => setTileRetryKey((value) => value + 1)}>تلاش دوباره</button></div>}
-    {demoBuildEnabled && !demoEnabled && <button className="demo-reenable" onClick={() => setDemoEnabled(true)}>روشن کردن حالت نمایشی</button>}
+    {!valid && <div className="app-banner warn" role="status">{tr('اطلاعات واقعی فعلاً در دسترس نیست. دادهٔ آزمایشی جای آن نمایش داده نمی‌شود.')}</div>}
+    {valid && refreshFailed && <div className="app-banner warn" role="status">{tr('دریافت تازه انجام نشد؛ نسخهٔ معتبر پیشین فقط تا پایان اعتبارش نمایش داده می‌شود.')}</div>}
+    {tileStatus === 'error' && <div className="map-state"><p>{tr('نقشه در دسترس نیست؛ فهرست دادهٔ امضاشده همچنان قابل استفاده است.')}</p><button onClick={() => setTileRetryKey((value) => value + 1)}>{tr('تلاش دوباره')}</button></div>}
+    {demoBuildEnabled && !demoEnabled && <button className="demo-reenable" onClick={() => setDemoEnabled(true)}>{tr('روشن کردن حالت نمایشی')}</button>}
 
     <div className="top-bar"><div className="search-row"><form className="search-bar" role="search" onSubmit={(event) => { event.preventDefault(); runAssistant(query, false); }}>
       <span className="search-icon">🔍</span>
-      <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="چی می‌خوای؟" aria-label="جست‌وجو یا پرسش از دستیار" enterKeyHint="search" />
+      <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={tr('چی می‌خوای؟')} aria-label={tr('جست‌وجو یا پرسش از دستیار')} enterKeyHint="search" />
       {voiceInput.supported && <button type="button" className={`search-mic${voiceInput.listening ? ' on' : ''}`} aria-pressed={voiceInput.listening}
-        aria-label={voiceInput.listening ? 'توقف شنیدن' : 'پرسیدن با صدا'} onClick={() => {
+        aria-label={voiceInput.listening ? tr('توقف شنیدن') : tr('پرسیدن با صدا')} onClick={() => {
           if (voiceInput.listening) { voiceInput.stop(); return; }
           // بدون سرویس بیرونی، رضایت فقط برای گفتار است؛ «نه» یعنی میکروفون تا موافقت بعدی خاموش می‌ماند.
           if (ASSISTANT_REMOTE ? consent === 'unknown' : consent !== 'granted') { setPendingAsk({ query: '', voice: true }); return; }
           voiceInput.start();
         }}><img className="search-mic-img" src="/icons/voice.png" alt="" aria-hidden="true" draggable={false} /></button>}
-      <button type="submit" className="search-ask" aria-label="پرسیدن از دستیار" disabled={query.trim().length < 2}>✦</button>
-    </form>{CHAT_ENABLED && <ChatInboxButton refreshKey={chatRefresh} onOpen={() => openChat(null)} />}<button className="profile-btn" onClick={() => setOverlay('experience')} aria-label="ذخیره‌های من"><Icon name="bookmark" /></button></div>
-      <div className="chips" aria-label="فیلترهای واقعی">
-        <button className={`chip${category === null ? ' active' : ''}`} onClick={() => setCategory(null)}>همه</button>
-        {categories.filter((item) => item.key !== 'uncategorized').map((item) => <button key={item.key} className={`chip${category === item.key ? ' active' : ''}`} onClick={() => setCategory(item.key)}>{item.label}</button>)}
-        <button className={`chip chip-offers${offersOnly ? ' active' : ''}`} onClick={() => setOffersOnly((value) => !value)} aria-pressed={offersOnly}>تخفیف‌ها{allRecords.some((r) => r.offers.length > 0) ? ` (${allRecords.filter((r) => r.offers.length > 0).length.toLocaleString('fa-IR')})` : ''}</button>
-        <button className={`chip${openOnly ? ' active' : ''}`} onClick={() => setOpenOnly((value) => !value)}>الان باز است</button>
-        <button className={`chip${nearbyOnly ? ' active' : ''}`} onClick={() => setNearbyOnly((value) => !value)}>نزدیک من</button>
+      <button type="submit" className="search-ask" aria-label={tr('پرسیدن از دستیار')} disabled={query.trim().length < 2}>✦</button>
+    </form>{CHAT_ENABLED && <ChatInboxButton refreshKey={chatRefresh} onOpen={() => openChat(null)} />}<button className="profile-btn" onClick={() => setOverlay('experience')} aria-label={tr('ذخیره‌های من')}><Icon name="bookmark" /></button></div>
+      <div className="chips" aria-label={tr('فیلترهای واقعی')}>
+        <button className={`chip${category === null ? ' active' : ''}`} onClick={() => setCategory(null)}>{tr('همه')}</button>
+        {categories.filter((item) => item.key !== 'uncategorized').map((item) => <button key={item.key} className={`chip${category === item.key ? ' active' : ''}`} onClick={() => setCategory(item.key)}>{tr(item.label)}</button>)}
+        <button className={`chip chip-offers${offersOnly ? ' active' : ''}`} onClick={() => setOffersOnly((value) => !value)} aria-pressed={offersOnly}>{tr('تخفیف‌ها{0}', allRecords.some((r) => r.offers.length > 0) ? ` (${allRecords.filter((r) => r.offers.length > 0).length.toLocaleString(numberLocale())})` : '')}</button>
+        <button className={`chip${openOnly ? ' active' : ''}`} onClick={() => setOpenOnly((value) => !value)}>{tr('الان باز است')}</button>
+        <button className={`chip${nearbyOnly ? ' active' : ''}`} onClick={() => setNearbyOnly((value) => !value)}>{tr('نزدیک من')}</button>
       </div>
     </div>
 
-    <div className="map-fabs"><button className={`fab-locate${locating ? ' busy' : ''}`} onClick={useMyLocation} aria-label="موقعیت من">◎</button></div>
-    <div className="primary-actions"><button className="action-fab vitrine" onClick={() => setOverlay('vitrine')} aria-label="ویترین زنده" title="ویترین زنده"><img className="action-fab-img" src="/icons/vitrine.png" alt="" width={64} height={64} /></button></div>
+    <div className="map-fabs"><button className={`fab-locate${locating ? ' busy' : ''}`} onClick={useMyLocation} aria-label={tr('موقعیت من')}>◎</button></div>
+    <div className="primary-actions"><button className="action-fab vitrine" onClick={() => setOverlay('vitrine')} aria-label={tr('ویترین زنده')} title={tr('ویترین زنده')}><img className="action-fab-img" src="/icons/vitrine.png" alt="" width={64} height={64} /></button></div>
 
-    <BottomSheet state={sheet} onStateChange={setSheet} title={offersOnly ? 'تخفیف‌های اطراف' : 'اطراف شما'} subtitle={demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget ? 'موقعیتت را بده' : `${shown.length.toLocaleString('fa-IR')} مورد`}>
+    <BottomSheet state={sheet} onStateChange={setSheet} title={offersOnly ? tr('تخفیف‌های اطراف') : tr('اطراف شما')} subtitle={demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget ? tr('موقعیتت را بده') : tr('{0} مورد', shown.length.toLocaleString(numberLocale()))}>
       {offersOnly && CHAT_ENABLED && <NearbyAlerts point={alertPoint} demoFrame={demoFrame} demoBuild={demoBuildEnabled && demoEnabled} onNeedLocation={useMyLocation} />}
-      {offersOnly && hiddenOffers > 0 && <p className="offers-hint" role="status">بعضی تخفیف‌ها فقط برای کسانی است که نزدیک کسب‌وکارند؛ برای دیدنشان دکمه‌ی ◎ را بزن.</p>}
+      {offersOnly && hiddenOffers > 0 && <p className="offers-hint" role="status">{tr('بعضی تخفیف‌ها فقط برای کسانی است که نزدیک کسب‌وکارند؛ برای دیدنشان دکمه‌ی ◎ را بزن.')}</p>}
       {demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget && <div className="start-card" role="status">
-        <strong>{locError === 'denied' ? 'اجازه‌ی موقعیت بسته است' : locError === 'outside' ? 'این نسخه فقط در تهران نمونه نشان می‌دهد' : locError === 'unavailable' ? 'موقعیتت پیدا نشد' : 'کسب‌وکارهای اطرافت را ببین'}</strong>
-        <p>{locError === 'denied' ? 'می‌توانی از تنظیمات مرورگر، موقعیت را برای این سایت روشن کنی؛ یا فعلاً کسب‌وکارهای نمونه را در محدوده‌ی خودشان ببین.'
-          : locError === 'outside' ? 'کسب‌وکارهای نمونه را در محدوده‌ی خودشان ببین.'
-          : locError === 'unavailable' ? 'گوشی موقعیت را نداد. دوباره امتحان کن یا نمونه‌ها را در محدوده‌ی خودشان ببین.'
-          : 'با موقعیتت، فاصله و تخفیف‌های نزدیک را نشان می‌دهیم. موقعیت فقط روی همین گوشی حساب می‌شود.'}</p>
+        <strong>{locError === 'denied' ? tr('اجازه‌ی موقعیت بسته است') : locError === 'outside' ? tr('این نسخه فقط در تهران نمونه نشان می‌دهد') : locError === 'unavailable' ? tr('موقعیتت پیدا نشد') : tr('کسب‌وکارهای اطرافت را ببین')}</strong>
+        <p>{locError === 'denied' ? tr('می‌توانی از تنظیمات مرورگر، موقعیت را برای این سایت روشن کنی؛ یا فعلاً کسب‌وکارهای نمونه را در محدوده‌ی خودشان ببین.')
+          : locError === 'outside' ? tr('کسب‌وکارهای نمونه را در محدوده‌ی خودشان ببین.')
+          : locError === 'unavailable' ? tr('گوشی موقعیت را نداد. دوباره امتحان کن یا نمونه‌ها را در محدوده‌ی خودشان ببین.')
+          : tr('با موقعیتت، فاصله و تخفیف‌های نزدیک را نشان می‌دهیم. موقعیت فقط روی همین گوشی حساب می‌شود.')}</p>
         <div className="start-card-actions">
-          {locError !== 'denied' && locError !== 'outside' && <button className="primary" onClick={useMyLocation} disabled={locating}>{locating ? 'در حال پیدا کردن…' : '◎ استفاده از موقعیت من'}</button>}
-          <button onClick={showSampleArea}>دیدن محدوده‌ی نمونه</button>
+          {locError !== 'denied' && locError !== 'outside' && <button className="primary" onClick={useMyLocation} disabled={locating}>{locating ? tr('در حال پیدا کردن…') : tr('◎ استفاده از موقعیت من')}</button>}
+          <button onClick={showSampleArea}>{tr('دیدن محدوده‌ی نمونه')}</button>
         </div>
       </div>}
-      {!(demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget) && locError === 'denied' && !myPoint && <p className="offers-hint" role="status">اجازه‌ی موقعیت بسته است؛ فاصله‌ها از نقطه‌ی انتخابی روی نقشه حساب می‌شود.</p>}
+      {!(demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget) && locError === 'denied' && !myPoint && <p className="offers-hint" role="status">{tr('اجازه‌ی موقعیت بسته است؛ فاصله‌ها از نقطه‌ی انتخابی روی نقشه حساب می‌شود.')}</p>}
       {shown.length === 0 && !(demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget) ? <div className="empty">{filtersOn
-        ? <>با این جست‌وجو یا فیلترها چیزی پیدا نشد.<br /><button className="link-btn" onClick={clearFilters}>پاک کردن فیلترها</button></>
-        : 'هنوز کسب‌وکاری در این اطراف روی ملینو نیست.'}</div> : shown.map((record) =>
+        ? <>{tr('با این جست‌وجو یا فیلترها چیزی پیدا نشد.')}<br /><button className="link-btn" onClick={clearFilters}>{tr('پاک کردن فیلترها')}</button></>
+        : tr('هنوز کسب‌وکاری در این اطراف روی ملینو نیست.')}</div> : shown.map((record) =>
         <PublicBusinessRow key={record.id} record={record} catalog={catalogByOrg.get(record.id)} now={now} distanceMeters={distanceById.get(record.id)}
           selected={record.id === selectedId} featured={searching && record.promoted} onOpen={() => openDetail(record.id)} />)}
     </BottomSheet>
@@ -331,7 +332,7 @@ export default function RealPublicApp() {
     {overlay === 'experience' && <ExperiencePanel data={experience.data} records={allRecords} storageFailed={experience.storageFailed} onClose={() => setOverlay('none')} onOpen={openDetail}
       onChange={experience.setData} onToggle={experience.toggle} onDiagnostics={() => setOverlay('none')}
       onSuggest={() => setSuggestionEmpty(!nearby.some((item) => item.record.offers.length > 0))} suggestionEmpty={suggestionEmpty}
-      radiusLabel={formatDistance(5000)} pointLabel={pointLabel} filtersApplied={category !== null || openOnly}
+      radiusLabel={formatDistance(5000)} pointLabel={tr(pointLabel)} filtersApplied={category !== null || openOnly}
       onChangePoint={() => setOverlay('none')} onUseLocation={useMyLocation} locating={locating} />}
     {overlay === 'vitrine' && <LiveVitrine records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point}
       locationPending={myPoint === null && locError === null} initialRadius={demoBuildEnabled && demoEnabled ? 100 : undefined}

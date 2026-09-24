@@ -3,10 +3,18 @@ import { createRoot } from 'react-dom/client'
 import 'leaflet/dist/leaflet.css'
 import './index.css'
 import App from './App.tsx'
+import { useLocale } from './i18n'
+import { AutoSwitchNotice } from './i18n/LanguageUi'
+
+// The whole app re-renders in the new language when it changes (by the person, or by location).
+function Root() {
+  useLocale()
+  return <><App /><AutoSwitchNotice /></>
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <Root />
   </StrictMode>,
 )
 

@@ -7,11 +7,12 @@ import { activeOffersFor } from '../ar/ArGlassCard';
 import { demoBusinessRating, displayName } from '../demo/demoSocial';
 import { formatDistance } from '../uiFormat';
 import Stars from './Stars';
+import { tr, digits, latinDigits } from '../i18n';
 
 /** «۳۰٪» when the offer names a percentage, otherwise «آفر». */
 export function offerBadge(name: string): string {
   const m = name.match(/([0-9۰-۹]{1,2})\s*[٪%]/);
-  return m ? `${m[1]}٪` : 'آفر';
+  return m ? tr('{0}٪', digits(latinDigits(m[1]))) : tr('آفر');
 }
 
 const GLYPH: Record<string, string> = { cafe: '☕', restaurant: '🍽', retail_shop: '🛍', dental_clinic: '🦷', beauty_clinic: '💠' };
@@ -44,14 +45,14 @@ export default function PublicBusinessRow({ record, catalog, distanceMeters, now
       {offer && <span className="biz-row-offer">{offerBadge(offer.name)}</span>}
     </span>
     <span className="biz-row-copy">
-      <strong>{displayName(record.name)}{featured && <span className="biz-row-featured" title="جایگاه ویژه‌ی پولی">ویژه</span>}</strong>
+      <strong>{displayName(record.name)}{featured && <span className="biz-row-featured" title={tr('جایگاه ویژه‌ی پولی')}>{tr('ویژه')}</span>}</strong>
       <span className="biz-row-meta">
         {rating && <Stars rating={rating} compact />}
-        {record.category.key !== 'uncategorized' && <span>{record.category.label}</span>}
+        {record.category.key !== 'uncategorized' && <span>{tr(record.category.label)}</span>}
         {distanceMeters !== undefined && <span>{formatDistance(distanceMeters)}</span>}
       </span>
       <span className="biz-row-meta">
-        <span className={hours === 'open' ? 'open' : hours === 'closed' ? 'closed' : ''}>{hours === 'open' ? 'باز است' : hours === 'closed' ? 'بسته است' : 'ساعت نامشخص'}</span>
+        <span className={hours === 'open' ? 'open' : hours === 'closed' ? 'closed' : ''}>{hours === 'open' ? tr('باز است') : hours === 'closed' ? tr('بسته است') : tr('ساعت نامشخص')}</span>
         {offer && <span className="biz-row-deal">{displayName(offer.name)}</span>}
       </span>
     </span>

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { tr } from '../i18n';
 
 /**
  * Bottom Sheet سه‌حالته — بسته / نیمه / باز.
@@ -38,7 +39,7 @@ export default function BottomSheet({
         className="sheet-grab"
         onClick={() => onStateChange(NEXT[state])}
         aria-label={
-          state === 'full' ? 'بستن فهرست نتایج' : 'باز کردن بیشترِ فهرست نتایج'
+          state === 'full' ? tr('بستن فهرست نتایج') : tr('باز کردن بیشترِ فهرست نتایج')
         }
       >
         <div className="bar" />

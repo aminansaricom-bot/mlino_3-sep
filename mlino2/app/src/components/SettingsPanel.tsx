@@ -1,4 +1,5 @@
 import { formatIso } from '../uiFormat';
+import { numberLocale } from '../i18n';
 
 /**
  * تنظیمات / Diagnostics — جایی که جزئیات فنی زندگی می‌کنند.
@@ -43,7 +44,7 @@ export default function SettingsPanel({
         </div>
         <div className="diag-row">
           <span className="k">تعداد کسب‌وکار</span>
-          <span className="v">{recordCount.toLocaleString('fa-IR')}</span>
+          <span className="v">{recordCount.toLocaleString(numberLocale())}</span>
         </div>
         <div className="diag-row">
           <span className="k">آخرین به‌روزرسانی</span>

@@ -6,6 +6,7 @@
 // می‌شوند) تا با هر بار باز کردن برنامه عوض نشوند، و همه‌جا برچسب «نمونه» دارند.
 
 import { DEMO_REVIEW_TEXTS } from './demoReviewTexts';
+import { numberLocale } from '../i18n';
 
 export const DEMO_SOCIAL_ENABLED = import.meta.env.VITE_DEMO_RELOCATE === '1';
 
@@ -58,7 +59,7 @@ export function demoProductReviews(name: string, enabled = DEMO_SOCIAL_ENABLED):
   return { reviews, rating: { average, count: reviews.length } };
 }
 
-/** «۴٫۶» با رقم فارسی. */
+/** «۴٫۶» with the current language's digits. */
 export function formatRating(value: number): string {
-  return value.toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return value.toLocaleString(numberLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
