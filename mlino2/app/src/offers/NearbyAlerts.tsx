@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
 import { CHAT_ENABLED } from '../chat/chatApi';
+import { NEARBY_LABEL, RUNNER, callNative, inApp } from '../native/bridge';
 
-// اعلان تخفیف‌های اطراف (D-77). فقط با زدن خود کاربر روشن می‌شود؛ ناشناس است (به هیچ شماره یا حسابی وصل نیست)؛
-// موقعیت فقط تقریبی (حدود ۱۰۰ متر) و فقط وقتی ملینو باز است فرستاده می‌شود و پس از ۲۴ ساعت بی‌اثر است؛ خاموش کردن
-// اشتراک را از سرور پاک می‌کند.
+// اعلان تخفیف‌های اطراف (D-77). فقط با زدن خود کاربر روشن می‌شود.
+// • در مرورگر: اعلان وب؛ ناشناس، موقعیت تقریبی (حدود ۱۰۰ متر) فقط وقتی ملینو باز است، ۲۴ ساعت اعتبار.
+// • در اپ اندروید «ملینو» (D-79): بررسی روی خود گوشی. گوشی فایل عمومی آفرها را می‌خواند و با موقعیت خودش مقایسه
+//   می‌کند؛ موقعیت هرگز از گوشی بیرون نمی‌رود و سرور چیزی از آن نمی‌داند.
 
 const KEY = 'mlino.v2.nearbyAlerts';
-export const ALERTS_SUPPORTED = CHAT_ENABLED && typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const APP = inApp();
+const WEB_PUSH = typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+export const ALERTS_SUPPORTED = CHAT_ENABLED && (APP || WEB_PUSH);
+export type DemoFrame = { anchor: readonly [number, number]; target: readonly [number, number] } | null;
 
 async function post(path: string, body: unknown) {
   const res = await fetch(`/api/push/${path}`, { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json', 'x-mlino-csrf': '1' }, body: JSON.stringify(body) });
@@ -29,25 +34,53 @@ async function currentSubscription(): Promise<PushSubscription | null> {
 
 export function alertsOn(): boolean { try { return localStorage.getItem(KEY) === 'on'; } catch { return false; } }
 
-/** Called when the viewer's position changes while alerts are on (throttled by the caller). */
+/** Web: keep the coarse position fresh (throttled by the caller). App: nothing to send — the phone checks itself. */
 export async function refreshAlertLocation(point: readonly [number, number]): Promise<void> {
-  if (!ALERTS_SUPPORTED || !alertsOn()) return;
+  if (APP || !ALERTS_SUPPORTED || !alertsOn()) return;
   const sub = await currentSubscription();
   if (sub) await post('location', { endpoint: sub.endpoint, lat: point[0], lng: point[1] }).catch(() => undefined);
 }
 
-export default function NearbyAlerts({ point, onNeedLocation }: { point: readonly [number, number] | null; onNeedLocation: () => void }) {
+/** App: tell the on-phone check where the demo businesses are drawn (demo relocation), or switch it off. */
+export async function configureAppCheck(enabled: boolean, frame: DemoFrame): Promise<void> {
+  if (!APP) return;
+  await callNative(RUNNER, 'dispatchEvent', { label: NEARBY_LABEL, event: 'configure', details: { enabled, anchor: frame?.anchor ?? null, target: frame?.target ?? null } });
+}
+
+type Perms = { location: boolean; background: boolean; notifications: boolean };
+
+export default function NearbyAlerts({ point, demoFrame, demoBuild, onNeedLocation }: { point: readonly [number, number] | null; demoFrame: DemoFrame; demoBuild: boolean; onNeedLocation: () => void }) {
   const [on, setOn] = useState(alertsOn);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
-  const iosBrowser = /iphone|ipad/i.test(navigator.userAgent) && !(navigator as unknown as { standalone?: boolean }).standalone && !matchMedia('(display-mode: standalone)').matches;
+  const [needsAlways, setNeedsAlways] = useState(false);
+  const iosBrowser = !APP && /iphone|ipad/i.test(navigator.userAgent) && !(navigator as unknown as { standalone?: boolean }).standalone && !matchMedia('(display-mode: standalone)').matches;
 
-  useEffect(() => { if (on && point) void refreshAlertLocation(point); }, [on, point]);
+  useEffect(() => { if (on && point && !APP) void refreshAlertLocation(point); }, [on, point]);
+  // In the app, keep the phone's check in the same frame the map is drawn in.
+  useEffect(() => { if (on && APP) void configureAppCheck(true, demoFrame).catch(() => undefined); }, [on, demoFrame]);
+  useEffect(() => {
+    if (!APP || !on) return;
+    void callNative<Perms>('MlinoLocation', 'status').then((p) => setNeedsAlways(!p.background)).catch(() => undefined);
+  }, [on]);
 
   if (!ALERTS_SUPPORTED) return null;
 
-  const enable = async () => {
+  const enableApp = async () => {
+    if (demoBuild && !demoFrame) { setNote('اول دکمه‌ی ◎ را بزن تا کسب‌وکارهای نمایشی کنار تو چیده شوند.'); onNeedLocation(); return; }
+    setBusy(true); setNote(null);
+    try {
+      const p = await callNative<Perms>('MlinoLocation', 'request');
+      if (!p.notifications) { setNote('اجازه‌ی اعلان داده نشد.'); return; }
+      if (!p.location) { setNote('بدون اجازه‌ی موقعیت، گوشی نمی‌تواند نزدیکی را بسنجد.'); return; }
+      await configureAppCheck(true, demoFrame);
+      try { localStorage.setItem(KEY, 'on'); } catch { /* فقط برای راحتی */ }
+      setOn(true); setAsking(false); setNeedsAlways(!p.background);
+    } catch { setNote('روشن کردن اعلان انجام نشد؛ دوباره امتحان کن.'); } finally { setBusy(false); }
+  };
+
+  const enableWeb = async () => {
     if (!point) { setNote('اول موقعیتت را روشن کن (دکمه‌ی ◎)؛ اعلان‌ها بر اساس فاصله‌ی تو از کسب‌وکارهاست.'); onNeedLocation(); return; }
     setBusy(true); setNote(null);
     try {
@@ -61,27 +94,37 @@ export default function NearbyAlerts({ point, onNeedLocation }: { point: readonl
       setOn(true); setAsking(false);
     } catch { setNote('روشن کردن اعلان انجام نشد؛ دوباره امتحان کن.'); } finally { setBusy(false); }
   };
+
   const disable = async () => {
     setBusy(true);
     try {
-      const sub = await currentSubscription();
-      if (sub) { await post('unsubscribe', { endpoint: sub.endpoint }).catch(() => undefined); await sub.unsubscribe(); }
+      if (APP) await configureAppCheck(false, null).catch(() => undefined);
+      else {
+        const sub = await currentSubscription();
+        if (sub) { await post('unsubscribe', { endpoint: sub.endpoint }).catch(() => undefined); await sub.unsubscribe(); }
+      }
     } finally {
       try { localStorage.removeItem(KEY); } catch { /* */ }
-      setOn(false); setBusy(false);
+      setOn(false); setBusy(false); setNeedsAlways(false);
     }
   };
 
   return <section className="nearby-alerts" aria-label="اعلان تخفیف‌های اطراف">
     <div className="nearby-alerts-row">
-      <span><strong>اعلان تخفیف‌های اطراف</strong><small>{on ? 'روشن است؛ وقتی کسب‌وکاری نزدیکت تخفیف بدهد خبرت می‌کنیم.' : 'وقتی نزدیک کسب‌وکاری هستی که تخفیف تازه گذاشته، خبرت کنیم؟'}</small></span>
+      <span><strong>اعلان تخفیف‌های اطراف</strong><small>{on ? 'روشن است؛ وقتی نزدیک کسب‌وکاری باشی که تخفیف تازه دارد خبرت می‌کنیم.' : 'وقتی نزدیک کسب‌وکاری هستی که تخفیف تازه گذاشته، خبرت کنیم؟'}</small></span>
       <button className={on ? 'on' : ''} disabled={busy} onClick={() => (on ? void disable() : setAsking(true))} aria-pressed={on}>{on ? 'خاموش کن' : 'روشن کن'}</button>
     </div>
     {asking && !on && <div className="nearby-alerts-consent">
-      <p>برای این کار موقعیت تقریبی‌ات (حدود ۱۰۰ متر) فقط وقتی ملینو باز است به سرور فرستاده می‌شود و پس از ۲۴ ساعت بی‌اثر است. این اشتراک به هیچ شماره یا حسابی وصل نیست. حداکثر ۳ اعلان در روز، هیچ اعلانی بین ۲۲ تا ۸، و با «خاموش کن» همه‌چیز از سرور پاک می‌شود.</p>
+      {APP
+        ? <p>این بررسی روی همین گوشی انجام می‌شود: هر حدود ۱۵ دقیقه گوشی فهرست عمومی آفرها را می‌خواند و با موقعیت خودش مقایسه می‌کند. <b>موقعیتت از گوشی بیرون نمی‌رود</b> و به هیچ سروری فرستاده نمی‌شود. حداکثر ۳ اعلان در روز، هیچ اعلانی بین ۲۲ تا ۸. برای کار وقتی اپ بسته است، اندروید اجازه‌ی موقعیت «همیشه» را جدا می‌پرسد.</p>
+        : <p>برای این کار موقعیت تقریبی‌ات (حدود ۱۰۰ متر) فقط وقتی ملینو باز است به سرور فرستاده می‌شود و پس از ۲۴ ساعت بی‌اثر است. این اشتراک به هیچ شماره یا حسابی وصل نیست. حداکثر ۳ اعلان در روز، هیچ اعلانی بین ۲۲ تا ۸، و با «خاموش کن» همه‌چیز از سرور پاک می‌شود.</p>}
       {iosBrowser && <p className="nearby-alerts-ios">در آیفون اعلان فقط وقتی کار می‌کند که ملینو را با «Add to Home Screen» به صفحه‌ی اصلی اضافه کرده باشی و از همان‌جا بازش کنی.</p>}
-      <div><button className="primary" disabled={busy} onClick={() => void enable()}>{busy ? 'در حال روشن کردن…' : 'موافقم، روشن کن'}</button><button onClick={() => setAsking(false)}>نه</button></div>
+      <div><button className="primary" disabled={busy} onClick={() => void (APP ? enableApp() : enableWeb())}>{busy ? 'در حال روشن کردن…' : 'موافقم، روشن کن'}</button><button onClick={() => setAsking(false)}>نه</button></div>
     </div>}
+    {on && APP && needsAlways && <p className="nearby-alerts-note" role="status">
+      فعلاً فقط وقتی اپ باز است بررسی می‌شود. برای خبر گرفتن وقتی اپ بسته است، در تنظیمات اجازه‌ی موقعیت را روی «همیشه» بگذار.{' '}
+      <button onClick={() => void callNative('MlinoLocation', 'openSettings').catch(() => undefined)}>تنظیمات</button>
+    </p>}
     {note && <p className="nearby-alerts-note" role="status">{note}</p>}
   </section>;
 }

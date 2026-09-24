@@ -26,6 +26,7 @@ import { CHAT_ENABLED } from '../chat/chatApi';
 import ChatPanel, { ChatInboxButton, type ChatTarget } from '../chat/ChatPanel';
 import { hiddenForLackOfPosition, promoteMatches, toDataFrame, withNearbyOffers } from '../offers/nearbyOffers';
 import NearbyAlerts, { alertsOn, refreshAlertLocation } from '../offers/NearbyAlerts';
+import { NEARBY_LABEL, RUNNER, callNative, inApp, onNative } from '../native/bridge';
 import { demoBanner, nextDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, validPoint, visibleDemoRecords, type Point } from '../demo/demoRelocation';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
@@ -125,6 +126,7 @@ export default function RealPublicApp() {
   const allRecords = useMemo(() => withNearbyOffers(baseRecords, myPoint), [baseRecords, myPoint]);
   const hiddenOffers = useMemo(() => hiddenForLackOfPosition(baseRecords, myPoint), [baseRecords, myPoint]);
   const alertPoint = useMemo(() => (myPoint ? toDataFrame(myPoint, demoBuildEnabled && demoEnabled ? demoAnchor : null, demoBuildEnabled && demoEnabled ? demoTarget : null) : null), [myPoint, demoBuildEnabled, demoEnabled, demoAnchor, demoTarget]);
+  const demoFrame = useMemo(() => (demoBuildEnabled && demoEnabled && demoAnchor && demoTarget ? { anchor: demoAnchor, target: demoTarget } : null), [demoBuildEnabled, demoEnabled, demoAnchor, demoTarget]);
   const categories = useMemo(() => [...new Map(allRecords.map((record) => [record.category.key, record.category])).values()], [allRecords]);
   const candidates = useMemo(() => {
     let records = allRecords.filter((record) => !experience.data.hidden.includes(record.id));
@@ -176,6 +178,16 @@ export default function RealPublicApp() {
     openDetail(deepLink); setDeepLink(null);
     try { window.history.replaceState(null, '', '/'); } catch { /* */ }
   }, [deepLink, allRecords]); // eslint-disable-line react-hooks/exhaustive-deps
+  // In the Android app, a tapped nearby-offer notification opens that business (the runner keeps id → link).
+  useEffect(() => {
+    if (!inApp()) return undefined;
+    return onNative(RUNNER, 'backgroundRunnerNotificationReceived', (event) => {
+      const id = (event as { notificationId?: number }).notificationId;
+      void callNative<{ url?: string }>(RUNNER, 'dispatchEvent', { label: NEARBY_LABEL, event: 'tapTarget', details: { id } })
+        .then((r) => { try { const org = new URL(r?.url ?? '/', window.location.origin).searchParams.get('org'); if (org) setDeepLink(org); } catch { /* */ } })
+        .catch(() => undefined);
+    });
+  }, []);
   // While alerts are on, keep the (coarse) position fresh — at most every 10 minutes.
   const lastAlertSync = useRef(0);
   useEffect(() => {
@@ -250,7 +262,7 @@ export default function RealPublicApp() {
     <div className="primary-actions"><button className="action-fab vitrine" onClick={() => setOverlay('vitrine')} aria-label="ویترین زنده" title="ویترین زنده"><img className="action-fab-img" src="/icons/vitrine.png" alt="" width={64} height={64} /></button></div>
 
     <BottomSheet state={sheet} onStateChange={setSheet} title={offersOnly ? 'تخفیف‌های اطراف' : 'اطراف شما'} subtitle={`${shown.length.toLocaleString('fa-IR')} مورد`}>
-      {offersOnly && CHAT_ENABLED && <NearbyAlerts point={alertPoint} onNeedLocation={useMyLocation} />}
+      {offersOnly && CHAT_ENABLED && <NearbyAlerts point={alertPoint} demoFrame={demoFrame} demoBuild={demoBuildEnabled && demoEnabled} onNeedLocation={useMyLocation} />}
       {offersOnly && hiddenOffers > 0 && <p className="offers-hint" role="status">بعضی تخفیف‌ها فقط برای کسانی است که نزدیک کسب‌وکارند؛ برای دیدنشان دکمه‌ی ◎ را بزن.</p>}
       {shown.length === 0 ? <div className="empty">موردی مطابق فیلترهای فعلی نیست.</div> : shown.map((record) =>
         <PublicBusinessRow key={record.id} record={record} catalog={catalogByOrg.get(record.id)} now={now} distanceMeters={distanceById.get(record.id)}
