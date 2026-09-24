@@ -18,6 +18,7 @@ import Assistant from '../assistant/Assistant';
 import StorefrontSection from '../modules/storefront/StorefrontSection';
 import PlanPage from '../modules/plan/PlanPage';
 import BottomBar from './BottomBar';
+import MenuIcon, { MODULE_ICON, type MenuIconName } from './MenuIcon';
 import { RUNNER, inApp, onNative } from '../native/bridge';
 
 export function Link({ to, className, children, onNavigate }: { to: string; className?: string; children: ReactNode; onNavigate?: () => void }) {
@@ -38,15 +39,21 @@ function currentModule(path: string): Place {
 
 function NavList({ active, onNavigate }: { active: Place; onNavigate?: () => void }) {
   const s = useChatSession();
-  return <nav className="side-nav" aria-label="ماژول‌ها">
-    <Link to="/" className={`nav-item${active === 'home' ? ' on' : ''}`} onNavigate={onNavigate}><span aria-hidden="true">🏠</span>امروز</Link>
+  const item = (to: string, on: boolean, icon: MenuIconName, label: string, extra?: ReactNode) =>
+    <Link key={to} to={to} className={`nav-item${on ? ' on' : ''}`} onNavigate={onNavigate}><span className="nav-ico"><MenuIcon name={icon} /></span><span className="nav-label">{label}</span>{extra}</Link>;
+  return <nav className="side-nav" aria-label="بخش‌های پنل">
+    {item('/', active === 'home', 'today', 'امروز')}
     <p className="nav-group">بخش‌ها</p>
-    {MODULES.filter((m) => m.nav !== false).map((m) => <Link key={m.id} to={m.route} className={`nav-item${active === m.id ? ' on' : ''}`} onNavigate={onNavigate}>
-      <span aria-hidden="true">{m.icon}</span>{m.title}{(m.status === 'design' || m.status === 'blocked') && <small className="nav-soon">به‌زودی</small>}
-    </Link>)}
+    {MODULES.filter((m) => m.nav !== false).map((m) => item(m.route, active === m.id, MODULE_ICON[m.id] ?? 'storefront', m.title,
+      (m.status === 'design' || m.status === 'blocked') ? <small className="nav-soon">به‌زودی</small> : undefined))}
     <p className="nav-group">کسب‌وکار</p>
-    <Link to="/settings" className={`nav-item${active === 'settings' ? ' on' : ''}`} onNavigate={onNavigate}><span aria-hidden="true">⚙️</span>تنظیمات و نوع کسب‌وکار</Link>
-    {ADMIN_KEYS.some((k) => s.can(k)) && <Link to="/members" className={`nav-item${active === 'members' ? ' on' : ''}`} onNavigate={onNavigate}><span aria-hidden="true">🔑</span>اعضا و دسترسی‌ها</Link>}
+    {item('/settings', active === 'settings', 'settings', 'تنظیمات و نوع کسب‌وکار')}
+    {ADMIN_KEYS.some((k) => s.can(k)) && item('/members', active === 'members', 'members', 'اعضا و دسترسی‌ها')}
+    <div className="nav-foot">
+      <a className="nav-item" href="https://explore.mlino.site/"><span className="nav-ico"><MenuIcon name="customer-view" /></span><span className="nav-label">دیدن نسخه‌ی مشتری</span></a>
+      <a className="nav-item" href="https://app.mlino.site/"><span className="nav-ico"><MenuIcon name="start" /></span><span className="nav-label">صفحه‌ی شروع ملینو</span></a>
+      {s.me && <button type="button" className="nav-item nav-logout" onClick={() => { onNavigate?.(); void s.logout(); }}><span className="nav-ico"><MenuIcon name="logout" /></span><span className="nav-label">خروج از حساب</span></button>}
+    </div>
   </nav>;
 }
 
@@ -92,9 +99,6 @@ export default function Shell() {
       <div className="drawer" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="ماژول‌ها">
         <div className="drawer-head"><strong>ملینو · کسب‌وکار</strong><button type="button" className="icon-btn" onClick={() => setDrawer(false)} aria-label="بستن">✕</button></div>
         <NavList active={active} onNavigate={() => setDrawer(false)} />
-        <a className="nav-item" href="https://explore.mlino.site/"><span aria-hidden="true">🗺️</span>دیدن نسخه‌ی مشتری</a>
-        <a className="nav-item" href="https://app.mlino.site/"><span aria-hidden="true">↩️</span>صفحه‌ی شروع ملینو</a>
-        {session.me && <button type="button" className="nav-item nav-logout" onClick={() => { setDrawer(false); void session.logout(); }}><span aria-hidden="true">🚪</span>خروج از حساب</button>}
       </div>
     </div>}
 
