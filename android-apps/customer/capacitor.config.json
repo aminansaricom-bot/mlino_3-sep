@@ -14,7 +14,7 @@
   "android": {
     "backgroundColor": "#0b1a33",
     "allowMixedContent": false,
-    "webContentsDebuggingEnabled": false
+    "webContentsDebuggingEnabled": true
   },
   "plugins": {
     "SplashScreen": {
