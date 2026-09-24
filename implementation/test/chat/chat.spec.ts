@@ -28,7 +28,7 @@ describe('chat module (D-73)', () => {
     expect(list).toHaveLength(1);
     expect(list[0]).toMatchObject({ customerName: 'سارا', unread: 2, lastSender: 'customer' });
     expect(JSON.stringify(list)).not.toContain(customer.ref);
-    expect(await chat.summary(cafe.organizationId)).toEqual({ conversations: 1, unreadConversations: 1, unreadMessages: 2 });
+    expect(await chat.summary(cafe.organizationId)).toEqual({ conversations: 1, unreadConversations: 1, unreadMessages: 2, pendingQuestions: 0 });
     clock.advance(60_000);
     const reply = await chat.businessReply(cafe.organizationId, member, first.threadId, 'بله، تا ۲۳:۳۰');
     expect(reply.sender).toBe('business');

@@ -2,6 +2,12 @@ import fs from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { CoreIdentity, IdentityError, type Audience, type SessionIdentity } from '../../identity';
 import { CHAT_PERMISSION, ChatError, ChatModule, isSensitiveBusiness, type PublishedBusinessRef } from '../../chat';
+import { CoreDomainError } from '../../core/errors';
+import { type CoreDeps, RouteError, coreErrorStatus, handleCoreRoute } from './core-routes';
+import { businessFacts } from './facts';
+import { PLAN_LIMITS, planOf } from '../../core/plan-service';
+import type { AutoResolver } from '../../chat';
+import { NotifyError, type NotifyModule } from '../../notify';
 
 /**
  * MLINO API — Core identity routes (/api/auth/*) and the chat module's routes
@@ -21,12 +27,18 @@ export interface ApiConfig {
   readonly hosts: ReadonlyMap<string, Audience>;
   readonly cookieSecure: boolean;
   readonly publishedPath: string;
+  /** public-catalog.v1.json — published menu and prices for the chat auto-reply. */
+  readonly catalogPath?: string;
 }
 
 export interface ApiDeps {
   readonly identity: CoreIdentity;
   readonly chat: ChatModule;
   readonly config: ApiConfig;
+  /** Core write routes (plans, offers). Absent in tests that exercise only identity and chat. */
+  readonly core?: CoreDeps;
+  /** Nearby-offer notifications (D-77). Absent when VAPID keys are not configured. */
+  readonly notify?: { module: NotifyModule; publicKey: string };
 }
 
 class HttpError extends Error {
@@ -114,7 +126,7 @@ function clientAddress(req: IncomingMessage): string {
 // ───────────── handler ─────────────
 
 export function createHandler(deps: ApiDeps) {
-  const { identity, chat, config } = deps;
+  const { identity, chat, config, core, notify } = deps;
 
   return async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     try {
@@ -134,6 +146,13 @@ export function createHandler(deps: ApiDeps) {
       const session = await identity.resolveSession(cookie(req, SESSION_COOKIE), audience);
       const needSession = (): SessionIdentity => { if (!session) throw new HttpError(401, 'LOGIN_REQUIRED'); return session; };
       const published = () => publishedBusinesses(config.publishedPath);
+      // D-75: auto-reply only when the business switched it on AND its plan includes it (PRO/MAX, D-76).
+      const planAllowsAuto = async (orgId: string) => !!core && PLAN_LIMITS[await planOf(core.prisma, orgId)].chatAutoReply;
+      const autoFor: AutoResolver = async (orgId) => {
+        if (!config.catalogPath || !(await chat.autoReplyOn(orgId)) || !(await planAllowsAuto(orgId))) return undefined;
+        const facts = businessFacts(config.publishedPath, config.catalogPath, orgId);
+        return facts ? { facts } : undefined;
+      };
 
       // ── Core identity ──
       if (path === '/api/auth/config' && method === 'GET') {
@@ -182,13 +201,25 @@ export function createHandler(deps: ApiDeps) {
         return send(res, 200, { erased: true, conversations }, { 'set-cookie': sessionCookie('', 0, config.cookieSecure) });
       }
 
+      // ── nearby-offer notifications (V2, anonymous, opt-in — D-77) ──
+      if (path.startsWith('/api/push/')) {
+        if (audience !== 'v2' || !notify) throw new HttpError(404, 'NOT_FOUND');
+        if (path === '/api/push/key' && method === 'GET') return send(res, 200, { publicKey: notify.publicKey });
+        limit(`push:${clientAddress(req)}`, 30, 10 * 60_000);
+        const body = await readJson(req);
+        if (path === '/api/push/subscribe' && method === 'POST') { await notify.module.subscribe({ subscription: body.subscription, lat: body.lat, lng: body.lng }); return send(res, 200, { ok: true }); }
+        if (path === '/api/push/location' && method === 'POST') return send(res, 200, { known: await notify.module.updateLocation(body.endpoint, body.lat, body.lng) });
+        if (path === '/api/push/unsubscribe' && method === 'POST') { await notify.module.unsubscribe(body.endpoint); return send(res, 200, { ok: true }); }
+        throw new HttpError(404, 'NOT_FOUND');
+      }
+
       // ── chat: customer side (V2) ──
       if (path.startsWith('/api/chat')) {
         if (audience !== 'v2') throw new HttpError(404, 'NOT_FOUND');
         if (path === '/api/chat/business' && method === 'GET') {
           const b = published().get(url.searchParams.get('organizationId') ?? '');
           if (!b) throw new ChatError('BUSINESS_UNKNOWN', 'not a published business');
-          return send(res, 200, { organizationId: b.organizationId, name: b.name, available: await chat.isEnabled(b), sensitive: b.sensitive });
+          return send(res, 200, { organizationId: b.organizationId, name: b.name, available: await chat.isEnabled(b), sensitive: b.sensitive, autoReply: (await autoFor(b.organizationId)) !== undefined });
         }
         const s = needSession();
         const me = { ref: s.personId, test: s.testIdentity };
@@ -202,7 +233,7 @@ export function createHandler(deps: ApiDeps) {
           const body = await readJson(req);
           const b = published().get(String(body.organizationId ?? ''));
           if (!b) throw new ChatError('BUSINESS_UNKNOWN', 'not a published business');
-          return send(res, 200, await chat.customerSend(b, me, { name: String(body.name ?? ''), body: body.body }));
+          return send(res, 200, await chat.customerSend(b, me, { name: String(body.name ?? ''), body: body.body }, autoFor));
         }
         const m = path.match(/^\/api\/chat\/threads\/([^/]+)(\/messages|\/block|\/unblock)?$/);
         if (m) {
@@ -214,13 +245,25 @@ export function createHandler(deps: ApiDeps) {
           if (tail === '/messages' && method === 'POST') {
             limit(`send:${s.personId}`, 20, 60_000);
             const body = await readJson(req);
-            return send(res, 200, { message: await chat.customerReply(me, id, body.body) });
+            return send(res, 200, { message: await chat.customerReply(me, id, body.body, autoFor) });
           }
           if (tail === '/block' && method === 'POST') { await chat.block('customer', s.personId, id, s.personId, true); return send(res, 200, { ok: true }); }
           if (tail === '/unblock' && method === 'POST') { await chat.block('customer', s.personId, id, s.personId, false); return send(res, 200, { ok: true }); }
           if (!tail && method === 'DELETE') { await chat.erase('customer', s.personId, id, s.personId); return send(res, 200, { erased: true }); }
         }
         throw new HttpError(404, 'NOT_FOUND');
+      }
+
+      // ── Core routes for the panel: plan and offers. Any active member may call; each service checks its own grant.
+      const coreMatch = path.match(/^\/api\/biz\/([A-Za-z0-9_-]{1,64})(\/plan|\/offers(?:\/.*)?)$/);
+      if (coreMatch && core) {
+        if (audience !== 'business') throw new HttpError(404, 'NOT_FOUND');
+        const s = needSession();
+        const orgId = coreMatch[1];
+        if (!(await identity.memberships(s.personId)).some((m) => m.organizationId === orgId)) throw new HttpError(403, 'MEMBERSHIP_REQUIRED');
+        const out = await handleCoreRoute(core, s.personId, orgId, coreMatch[2], method, () => readJson(req));
+        if (out === undefined) throw new HttpError(404, 'NOT_FOUND');
+        return send(res, 200, out);
       }
 
       // ── chat: business side (V1 panel) — membership + chat.reply checked on every request ──
@@ -234,7 +277,26 @@ export function createHandler(deps: ApiDeps) {
         const b = published().get(orgId);
         if (!b) throw new ChatError('BUSINESS_UNKNOWN', 'business is not published');
 
-        if (rest === '/summary' && method === 'GET') return send(res, 200, { ...(await chat.summary(orgId)), enabled: await chat.isEnabled(b), sensitive: b.sensitive });
+        if (rest === '/summary' && method === 'GET') return send(res, 200, { ...(await chat.summary(orgId)), enabled: await chat.isEnabled(b), sensitive: b.sensitive, autoReply: await chat.autoReplyOn(orgId), autoReplyAllowed: await planAllowsAuto(orgId) });
+        if (rest === '/auto-reply' && method === 'POST') {
+          const body = await readJson(req);
+          const on = body.on === true;
+          if (on && !(await planAllowsAuto(orgId))) throw new HttpError(409, 'PLAN_LIMIT', 'auto-reply is part of the PRO and MAX plans');
+          return send(res, 200, { autoReply: await chat.setAutoReply(b, s.personId, on) });
+        }
+        if (rest === '/knowledge' && method === 'GET') return send(res, 200, { entries: await chat.knowledge(orgId) });
+        if (rest === '/knowledge' && method === 'POST') {
+          const body = await readJson(req);
+          return send(res, 200, { id: await chat.saveKnowledge(orgId, s.personId, { id: typeof body.id === 'string' ? body.id : undefined, question: body.question, answer: body.answer }) });
+        }
+        const km = rest.match(/^\/knowledge\/([^/]+)$/);
+        if (km && method === 'DELETE') { await chat.deleteKnowledge(orgId, s.personId, km[1]); return send(res, 200, { deleted: true }); }
+        if (rest === '/pending' && method === 'GET') return send(res, 200, { questions: await chat.pending(orgId) });
+        const pm = rest.match(/^\/pending\/([^/]+)\/answer$/);
+        if (pm && method === 'POST') {
+          const body = await readJson(req);
+          return send(res, 200, await chat.answerPending(orgId, s.personId, pm[1], { answer: body.answer, learn: body.learn === true, question: typeof body.question === 'string' ? body.question : undefined }));
+        }
         if (rest === '/settings' && method === 'POST') {
           const body = await readJson(req);
           return send(res, 200, { enabled: await chat.setEnabled(b, s.personId, body.enabled === true) });
@@ -260,6 +322,9 @@ export function createHandler(deps: ApiDeps) {
       throw new HttpError(404, 'NOT_FOUND');
     } catch (e) {
       if (e instanceof HttpError) return send(res, e.status, { error: e.code, ...e.detail });
+      if (e instanceof RouteError) return send(res, e.status, { error: e.code, ...e.detail });
+      if (e instanceof NotifyError) return send(res, 400, { error: e.code });
+      if (e instanceof CoreDomainError) return send(res, coreErrorStatus(e), { error: e.code, message: e.code === 'PLAN_LIMIT' ? e.message : undefined });
       if (e instanceof IdentityError) {
         const status = e.code === 'RATE_LIMITED' || e.code === 'TOO_MANY_ATTEMPTS' ? 429 : e.code === 'MEMBER_OF_ORGANIZATION' ? 409 : 400;
         return send(res, status, { error: e.code, ...e.detail });

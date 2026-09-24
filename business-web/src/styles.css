@@ -506,3 +506,24 @@ b.pos { color: var(--pos); } b.neg { color: var(--neg); }
 }
 .voice-consent { margin: 0 12px 8px; }
 .assist-voice-error { margin: 0 14px 6px; font-size: 12.5px; color: var(--neg); }
+
+/* ═══════════ Storefront section, offers, plans, auto-reply (D-75..D-78) ═══════════ */
+.section-tabs { margin-bottom: 2px; }
+.tab-count { display: inline-flex; min-width: 18px; height: 18px; margin-inline-start: 6px; padding: 0 5px; border-radius: 99px; align-items: center; justify-content: center; font-style: normal; font-size: 11px; font-weight: 900; color: #fff; background: var(--neg); }
+.section-title { margin: 0; font-size: 17px; font-weight: 900; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }
+.offer-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.plan-card.current { border-color: color-mix(in srgb, var(--violet) 55%, var(--line)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--violet) 25%, transparent), var(--shadow); }
+.auto-card { flex-wrap: wrap; }
+.qa-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.qa-list li { display: flex; flex-direction: column; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.qa-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+.qa-list textarea, .qa-list input, .card > input, .card > textarea { font: inherit; }
+.qa-q { margin: 0; font-size: 14px; line-height: 1.8; }
+.qa-q small { color: var(--muted); font-size: 11.5px; margin-inline-start: 6px; }
+.qa-a { margin: 0; font-size: 13.5px; line-height: 1.9; color: var(--soft); white-space: pre-wrap; }
+.card > input, .card > textarea { width: 100%; margin-bottom: 8px; }
+.bubble.mine.auto { background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 70%, #fff), color-mix(in srgb, var(--violet) 70%, #fff)); }
+.bubble.auto small { font-weight: 800; opacity: .9; }

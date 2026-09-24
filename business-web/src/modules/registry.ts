@@ -19,7 +19,7 @@ export const ROLE_LABEL = {
 export type RoleKey = keyof typeof ROLE_LABEL;
 
 /** Chat reaches the shell only as aggregates from the server (D-73); null when no member is logged in. */
-export type ChatSnap = Readonly<{ loggedIn: boolean; summary: Readonly<{ conversations: number; unreadConversations: number; unreadMessages: number; enabled: boolean; sensitive: boolean }> | null }>;
+export type ChatSnap = Readonly<{ loggedIn: boolean; summary: Readonly<{ conversations: number; unreadConversations: number; unreadMessages: number; pendingQuestions: number; enabled: boolean; sensitive: boolean }> | null }>;
 
 export type Snapshot = Readonly<{ today: string; book: BookData; ledger: Ledger; inventory: Inventory; crm: Crm; published: PublishedBusiness | null | undefined; chat?: ChatSnap | null }>;
 
@@ -39,7 +39,7 @@ export type DailyAction = Readonly<{
 
 export type Stat = Readonly<{ label: string; value: string; tone?: 'good' | 'bad' }>;
 
-export type ModuleId = 'accounting' | 'inventory' | 'products' | 'storefront' | 'offers' | 'content' | 'crm' | 'chat';
+export type ModuleId = 'accounting' | 'inventory' | 'products' | 'storefront' | 'offers' | 'content' | 'crm' | 'chat' | 'plan';
 
 export type ModuleManifest = Readonly<{
   id: ModuleId;
@@ -50,6 +50,8 @@ export type ModuleManifest = Readonly<{
   status: 'demo' | 'published-view' | 'live' | 'design' | 'blocked';
   statusNote: string;
   blockedBy?: string;
+  /** false = reached inside another section (e.g. «ویترین مجازی»), not listed in the side menu. */
+  nav?: false;
   summary: (s: Snapshot) => readonly Stat[];
   actions: (s: Snapshot) => readonly DailyAction[];
 }>;
@@ -149,8 +151,8 @@ export const MODULES: readonly ModuleManifest[] = [
     },
   },
   {
-    id: 'storefront', title: 'ویترین مجازی در V2', icon: '🪟', route: '/storefront', layer: 'core', status: 'published-view',
-    statusNote: 'همان چیزی که مشتری در نقشه و ویترین زنده می‌بیند',
+    id: 'storefront', title: 'ویترین مجازی', icon: '🪟', route: '/storefront', layer: 'core', status: 'published-view',
+    statusNote: 'ویترین، آفر اطراف و گفتگو با مشتری‌های نزدیک',
     summary: ({ published }) => published ? [
       { label: 'وضعیت', value: 'منتشرشده', tone: 'good' },
       { label: 'توانمندی‌ها', value: `${faNum(published.capabilities.length)} مورد` },
@@ -158,8 +160,8 @@ export const MODULES: readonly ModuleManifest[] = [
     actions: () => [],
   },
   {
-    id: 'offers', title: 'آفر و تخفیف', icon: '🏷️', route: '/offers', layer: 'core', status: 'published-view',
-    statusNote: 'آفرهای منتشرشده؛ V2 آن‌ها را کنار نتیجه‌های نزدیک کاربر نشان می‌دهد',
+    id: 'offers', title: 'آفر اطراف', icon: '🏷️', route: '/storefront/offers', layer: 'core', status: 'live', nav: false,
+    statusNote: 'آفر با شعاع انتخابی (D-77)؛ ساخت پیش‌نویس و انتشار با دکمه‌ی خودتان',
     summary: ({ published, today }) => {
       if (!published) return [{ label: 'آفر', value: '—' }];
       const active = published.offers.filter((o) => (!o.valid_from || o.valid_from.slice(0, 10) <= today) && (!o.valid_until || o.valid_until.slice(0, 10) >= today));
@@ -209,23 +211,37 @@ export const MODULES: readonly ModuleManifest[] = [
     },
   },
   {
-    id: 'chat', title: 'گفتگو با مشتری', icon: '💬', route: '/chat', layer: 'module', status: 'live',
+    id: 'chat', title: 'گفتگو با مشتری', icon: '💬', route: '/storefront/chat', layer: 'module', status: 'live', nav: false,
     statusNote: 'زنده روی سرور (D-73) — ورود عضو با شماره، حالت آزمایشی پیامک',
     summary: ({ chat }) => {
       if (!chat?.loggedIn) return [{ label: 'ورود عضو', value: 'لازم است' }];
       if (!chat.summary) return [{ label: 'گفتگوها', value: '—' }];
       if (chat.summary.sensitive) return [{ label: 'وضعیت', value: 'خاموش (حساس)' }];
-      return [{ label: 'گفتگوها', value: faNum(chat.summary.conversations) }, { label: 'خوانده‌نشده', value: faNum(chat.summary.unreadMessages), tone: chat.summary.unreadMessages ? 'bad' : undefined }];
+      return [{ label: 'خوانده‌نشده', value: faNum(chat.summary.unreadMessages), tone: chat.summary.unreadMessages ? 'bad' : undefined }, { label: 'سؤال بی‌جواب', value: faNum(chat.summary.pendingQuestions), tone: chat.summary.pendingQuestions ? 'bad' : undefined }];
     },
     actions: ({ chat }) => {
       const u = chat?.summary;
-      if (!u || !u.unreadConversations) return [];
-      return [{
+      if (!u) return [];
+      const out: DailyAction[] = [];
+      if (u.pendingQuestions) out.push({
+        id: 'chat-pending', module: 'chat', urgency: 'now', title: 'جواب به سؤال‌هایی که پاسخ‌گو نمی‌دانست',
+        reason: `${faNum(u.pendingQuestions)} سؤال مشتری منتظر جواب شماست`, owner: 'customer_service',
+        impact: 'جواب درست به‌جای حدس، و پاسخ‌گوی خودکار دانا‌تر برای دفعه‌ی بعد', kpi: 'سؤال بی‌جواب کمتر از یک روز',
+        outcome: 'جواب در همان گفتگو و در صورت تمایل ذخیره برای دفعه‌های بعد', to: '/storefront/chat/questions',
+      });
+      if (!u.unreadConversations) return out;
+      return [...out, {
         id: 'chat-unread', module: 'chat', urgency: 'now', title: 'پاسخ به پیام مشتری‌ها',
         reason: `${faNum(u.unreadConversations)} گفتگو ${faNum(u.unreadMessages)} پیام خوانده‌نشده دارد`, owner: 'customer_service',
-        impact: 'پاسخ به‌موقع و بازگشت مشتری', kpi: 'زمان پاسخ‌گویی به پیام', outcome: 'پاسخ در همان گفتگو، تا امروز', to: '/chat',
+        impact: 'پاسخ به‌موقع و بازگشت مشتری', kpi: 'زمان پاسخ‌گویی به پیام', outcome: 'پاسخ در همان گفتگو، تا امروز', to: '/storefront/chat',
       }];
     },
+  },
+  {
+    id: 'plan', title: 'پلن و اشتراک', icon: '💎', route: '/plan', layer: 'core', status: 'live',
+    statusNote: 'رایگان، پرو، مکس (D-76) — تغییر در این نسخه نمایشی و بدون پرداخت',
+    summary: () => [{ label: 'پلن', value: 'در صفحه‌ی پلن' }],
+    actions: () => [],
   },
 ];
 

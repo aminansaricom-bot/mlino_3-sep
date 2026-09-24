@@ -4,12 +4,14 @@ import { CoreIdentity, IDENTITY_PROVIDER } from '../../identity';
 import { CHAT_PERMISSION } from '../../chat';
 
 /**
- * Demo only. Makes one fictional test identity a member of every fictional
- * `test-demo-*` organization, with the module permission `chat.reply`, granted
- * by that organization's existing founding membership (basis `member_grant`,
- * D-57). Refuses any organization outside the test-demo range and any number
- * outside the test range. Idempotent.
+ * Demo only. Makes one fictional test identity a member of every fictional `test-demo-*` organization with
+ * `chat.reply` (chat module), `offer.manage` + `publication.manage` (so the panel can create and publish offers —
+ * publishing stays a person's tap) and `plan.manage` (demo plan switch), each granted by that organization's
+ * existing founding membership (basis `member_grant`, D-57). Refuses any organization outside the test-demo
+ * range and any number outside the test range. Idempotent.
  */
+const DEMO_GRANTS = [CHAT_PERMISSION, 'offer.manage', 'publication.manage', 'plan.manage'] as const;
+
 export async function seedDemoMembers(core: Pool, identity: CoreIdentity, phone: string): Promise<{ added: number; existing: number }> {
   const personId = await identity.ensureTestPerson(phone);
   const orgs = await core.query<{ id: string }>(`SELECT id FROM organizations WHERE id LIKE 'test-demo-%' AND lifecycle_status = 'ACTIVE' ORDER BY id`);
@@ -32,13 +34,15 @@ export async function seedDemoMembers(core: Pool, identity: CoreIdentity, phone:
           `INSERT INTO memberships (id, organization_id, identity_provider, external_subject, membership_status) VALUES ($1, $2, $3, $4, 'ACTIVE') RETURNING id`,
           [crypto.randomUUID(), orgId, IDENTITY_PROVIDER, personId]);
       }
-      const grant = await db.query(
-        `INSERT INTO permission_grants (id, organization_id, membership_id, permission_key, grant_status, basis_key, granted_by_membership_id, granted_by_organization_id, reason)
-         VALUES ($1, $2, $3, $4, 'ACTIVE', 'member_grant', $5, $2, 'demo: fictional test identity answers demo chats')
-         ON CONFLICT DO NOTHING`,
-        [crypto.randomUUID(), orgId, member.rows[0].id, CHAT_PERMISSION, founder.rows[0].id]);
+      for (const key of DEMO_GRANTS) {
+        const grant = await db.query(
+          `INSERT INTO permission_grants (id, organization_id, membership_id, permission_key, grant_status, basis_key, granted_by_membership_id, granted_by_organization_id, reason)
+           VALUES ($1, $2, $3, $4, 'ACTIVE', 'member_grant', $5, $2, 'demo: fictional test identity runs the demo business panel')
+           ON CONFLICT DO NOTHING`,
+          [crypto.randomUUID(), orgId, member.rows[0].id, key, founder.rows[0].id]);
+        if (grant.rowCount) added += 1; else existing += 1;
+      }
       await db.query('COMMIT');
-      if (grant.rowCount) added += 1; else existing += 1;
     } catch (e) {
       await db.query('ROLLBACK').catch(() => undefined);
       throw e;

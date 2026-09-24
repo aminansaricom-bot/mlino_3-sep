@@ -49,7 +49,9 @@ describe('K3 catalog Core database contracts (disposable 5499 only)', () => {
   afterAll(async () => prisma.$disconnect());
 
   test('k3 founding bootstrap appends catalog_item.manage without changing existing key order', async () => {
-    expect(CORE_PERMISSION_KEYS.at(-1)).toBe('catalog_item.manage');
+    // K3 appended catalog_item.manage; D-76 appended plan.manage after it. Earlier order is unchanged.
+    expect(CORE_PERMISSION_KEYS.indexOf('catalog_item.manage')).toBe(CORE_PERMISSION_KEYS.length - 2);
+    expect(CORE_PERMISSION_KEYS.at(-1)).toBe('plan.manage');
     const owner = await organization('bootstrap');
     const grants = await prisma.permissionGrant.findMany({ where: { organizationId: owner.organizationId, membershipId: owner.member.id, grantStatus: 'ACTIVE' } });
     expect(grants.map((grant) => grant.permissionKey)).toContain('catalog_item.manage');

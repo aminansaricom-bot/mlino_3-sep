@@ -21,6 +21,8 @@ export interface CreateOfferVersionInput {
   onRequest?: boolean;
   validFrom: Date;
   validUntil?: Date | null;
+  /** D-77: shown only to viewers within this many meters (100–20000); null or absent = everyone. */
+  visibilityRadiusMeters?: number | null;
 }
 
 export interface OfferCapabilityLinkInput {
@@ -54,7 +56,9 @@ export class OfferService {
     validateAuthContext(context);
     requireNonEmpty(input.offerId, 'offerId');
     requireNonEmpty(input.name, 'name');
-    this.assertAllowedKeys(input, ['offerId', 'name', 'shortDescription', 'offerShape', 'terms', 'priceAmount', 'priceCurrency', 'onRequest', 'validFrom', 'validUntil']);
+    this.assertAllowedKeys(input, ['offerId', 'name', 'shortDescription', 'offerShape', 'terms', 'priceAmount', 'priceCurrency', 'onRequest', 'validFrom', 'validUntil', 'visibilityRadiusMeters']);
+    const radius = input.visibilityRadiusMeters ?? null;
+    if (radius !== null && (!Number.isInteger(radius) || radius < 100 || radius > 20000)) throw validationFailed('visibilityRadiusMeters must be an integer from 100 to 20000');
     return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId);
       await requireMembershipPermission(tx, context, 'offer.manage');
@@ -75,6 +79,7 @@ export class OfferService {
           onRequest: input.onRequest ?? false,
           validFrom: input.validFrom,
           validUntil: input.validUntil,
+          visibilityRadiusMeters: radius,
         },
       });
     }).catch((error: unknown) => {

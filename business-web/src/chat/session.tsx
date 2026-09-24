@@ -34,7 +34,7 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
       const [cfg, who] = await Promise.all([api<AuthConfig>('GET', '/auth/config'), api<Me>('GET', '/auth/me')]);
       setConfig(cfg);
       setMe(who.person);
-      const orgs = (who.organizations ?? []).filter((o) => o.published && o.canChat);
+      const orgs = (who.organizations ?? []).filter((o) => o.published);
       setOrganizations(orgs);
       setOrgIdState((cur) => (cur && orgs.some((o) => o.organizationId === cur) ? cur : (orgs.find((o) => /نیلوفر/.test(o.name)) ?? orgs[0])?.organizationId ?? null));
     } catch {

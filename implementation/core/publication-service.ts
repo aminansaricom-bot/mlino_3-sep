@@ -4,6 +4,7 @@ import { AuthContext, requireActiveMembership, requireNonEmpty, validateAuthCont
 import { mapCoreDatabaseError } from './error-adapter';
 import { CoreDomainError, conflict, validationFailed } from './errors';
 import { lockOrganization } from './repositories';
+import { assertPublishQuota } from './plan-service';
 
 export type PublicationTarget = 'BUSINESS_PROFILE' | 'CAPABILITY' | 'OFFER_VERSION' | 'CATALOG_ITEM';
 
@@ -12,7 +13,7 @@ type LockedProfile = { kind: 'BUSINESS_PROFILE'; id: string; publication_status:
 type LockedCapability = { kind: 'CAPABILITY'; id: string; publication_status: string; content_revision: number; published_content_revision: number | null; capability_key: string; name: string; short_description: string | null; audience: string };
 type LockedCatalogItem = { kind: 'CATALOG_ITEM'; id: string; publication_status: string; content_revision: number; published_content_revision: number | null; lifecycle_status: string; item_key: string; name: string; short_description: string | null; price_amount: Prisma.Decimal | null; price_currency: string | null; on_request: boolean; grouping_label: string | null; display_order: number; available_from: Date | null; available_until: Date | null };
 type LockedTarget = LockedProfile | LockedCapability | LockedCatalogItem;
-type LockedOfferVersion = { id: string; offer_id: string; version_number: number; name: string; short_description: string | null; offer_shape: string; terms: Prisma.JsonValue | null; price_amount: Prisma.Decimal | null; price_currency: string | null; on_request: boolean; valid_from: Date; valid_until: Date | null; publication_status: string };
+type LockedOfferVersion = { id: string; offer_id: string; version_number: number; name: string; short_description: string | null; offer_shape: string; terms: Prisma.JsonValue | null; price_amount: Prisma.Decimal | null; price_currency: string | null; on_request: boolean; valid_from: Date; valid_until: Date | null; publication_status: string; visibility_radius_meters: number | null };
 type PublishedContent = Prisma.InputJsonObject;
 
 export class PublicationService {
@@ -50,6 +51,8 @@ export class PublicationService {
         throw conflict('target is not published');
       }
       if (eventKind === 'PUBLISHED' && row.kind === 'CATALOG_ITEM' && row.lifecycle_status !== 'ACTIVE') throw conflict('catalog item is not active');
+      // D-76: a new public product counts against the plan; a new revision of one already public does not.
+      if (eventKind === 'PUBLISHED' && row.kind === 'CATALOG_ITEM' && status !== 'PUBLISHED') await assertPublishQuota(tx, context.organizationId, 'CATALOG_ITEM', new Date());
       const publishedContent = eventKind === 'PUBLISHED' ? await this.snapshotForTarget(tx, row, context.organizationId) : null;
       const data = this.publicationData(target, targetId, context.organizationId, eventKind, eventKind === 'PUBLISHED' ? revision : publishedRevision!, membership.id, grant.id, reason, publishedContent);
       const publication = await tx.publication.create({ data });
@@ -62,7 +65,7 @@ export class PublicationService {
   private async changeOfferVersion(tx: Prisma.TransactionClient, organizationId: string, versionId: string, reason: string, eventKind: PublicationEvent, membershipId: string, grantId: string) {
     const offerRows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`SELECT o.id FROM offers o JOIN offer_versions v ON v.offer_id = o.id AND v.organization_id = o.organization_id WHERE v.id = ${versionId} AND v.organization_id = ${organizationId} FOR UPDATE`);
     if (offerRows.length !== 1) throw validationFailed('offer version not found in organization');
-    const versionRows = await tx.$queryRaw<LockedOfferVersion[]>(Prisma.sql`SELECT id, offer_id, version_number, name, short_description, offer_shape, terms, price_amount, price_currency, on_request, valid_from, valid_until, publication_status FROM offer_versions WHERE id = ${versionId} AND organization_id = ${organizationId} FOR UPDATE`);
+    const versionRows = await tx.$queryRaw<LockedOfferVersion[]>(Prisma.sql`SELECT id, offer_id, version_number, name, short_description, offer_shape, terms, price_amount, price_currency, on_request, valid_from, valid_until, publication_status, visibility_radius_meters FROM offer_versions WHERE id = ${versionId} AND organization_id = ${organizationId} FOR UPDATE`);
     if (versionRows.length !== 1) throw validationFailed('offer version not found in organization');
     const version = versionRows[0];
     if (eventKind === 'WITHDRAWN') {
@@ -71,6 +74,7 @@ export class PublicationService {
       return { outcome: 'WITHDRAWN' as const, publication };
     }
     if (version.publication_status === 'PUBLISHED') return { outcome: 'ALREADY_PUBLISHED' as const, revision: null };
+    await assertPublishQuota(tx, organizationId, 'OFFER_VERSION', new Date(), version.offer_id);
     const oldRows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`SELECT id FROM offer_versions WHERE offer_id = ${version.offer_id} AND organization_id = ${organizationId} AND id <> ${versionId} AND publication_status = 'PUBLISHED' FOR UPDATE`);
     if (oldRows.length > 1) throw conflict('multiple published offer versions found');
     const capabilityRows = await tx.offerVersionCapability.findMany({ where: { organizationId, offerVersionId: versionId }, select: { capabilityId: true }, orderBy: { capabilityId: 'asc' } });
@@ -170,6 +174,7 @@ export class PublicationService {
         on_request: version.on_request,
         valid_from: version.valid_from.toISOString(),
         valid_until: version.valid_until?.toISOString() ?? null,
+        ...(version.visibility_radius_meters !== null ? { visibility_radius_meters: version.visibility_radius_meters } : {}),
         capability_link_ids: [...new Set(capabilityIds)].sort(),
       },
     } as Prisma.InputJsonObject;

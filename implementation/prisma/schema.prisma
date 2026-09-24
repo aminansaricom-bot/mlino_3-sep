@@ -295,6 +295,13 @@ enum ConfirmationStatus {
   HUMAN_CONFIRMED
 }
 
+/// D-76: commercial tier of an organization. Entitlement only — never authority (D-57).
+enum PlanTier {
+  FREE
+  PRO
+  MAX
+}
+
 enum OfferLifecycle {
   ACTIVE
   RETIRED
@@ -363,6 +370,7 @@ model Organization {
   publications         Publication[]             @relation("OrganizationPublications")
   catalogItems         CatalogItem[]             @relation("OrganizationCatalogItems")
   catalogItemMedia     CatalogItemMedia[]        @relation("OrganizationCatalogItemMedia")
+  plan                 OrganizationPlan?         @relation("OrganizationPlan")
   offerCatalogLinks    OfferVersionCatalogItem[] @relation("OrganizationOfferCatalogLinks")
 
   @@index([lifecycleStatus, createdAt], map: "organization_lifecycle_created_idx")
@@ -562,6 +570,19 @@ model Offer {
   @@map("offers")
 }
 
+/// D-76: one row per organization; absent row = FREE. Changing it is a billing act, recorded with its basis.
+model OrganizationPlan {
+  organizationId         String       @id @map("organization_id") @db.Text
+  planTier               PlanTier     @default(FREE) @map("plan_tier")
+  changeBasis            String       @map("change_basis") @db.VarChar(40)
+  changedByMembershipId  String?      @map("changed_by_membership_id") @db.Text
+  changedAt              DateTime     @default(now()) @map("changed_at") @db.Timestamptz(3)
+
+  organization Organization @relation("OrganizationPlan", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "organization_plan_organization_fk")
+
+  @@map("organization_plans")
+}
+
 model OfferVersion {
   id                   String            @id @default(uuid()) @db.Text
   organizationId       String            @map("organization_id") @db.Text
@@ -579,6 +600,8 @@ model OfferVersion {
   publicationStatus     PublicationStatus @default(UNPUBLISHED) @map("publication_status")
   createdAt             DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   publishedAt           DateTime?         @map("published_at") @db.Timestamptz(3)
+  /// D-77: the business's chosen visibility radius; null = everyone. V2 filters on the viewer's own device.
+  visibilityRadiusMeters Int?             @map("visibility_radius_meters")
 
   organization      Organization             @relation("OrganizationOfferVersions", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "offer_version_organization_fk")
   offer             Offer                    @relation("OfferVersions", fields: [offerId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "offer_version_offer_fk")

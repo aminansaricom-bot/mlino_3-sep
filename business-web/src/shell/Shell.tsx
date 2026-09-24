@@ -6,11 +6,12 @@ import { jDateLong } from '../format';
 import Home from './Home';
 import AccountingModule from '../modules/accounting/AccountingApp';
 import InventoryModule from '../modules/inventory/InventoryModule';
-import { OffersPage, ProductsPage, StorefrontPage } from '../modules/catalog/CatalogPages';
+import { ProductsPage } from '../modules/catalog/CatalogPages';
 import LockedModule from './LockedModule';
 import CrmModule from '../modules/crm/CrmModule';
 import Assistant from '../assistant/Assistant';
-import ChatModule from '../modules/chat/ChatModule';
+import StorefrontSection from '../modules/storefront/StorefrontSection';
+import PlanPage from '../modules/plan/PlanPage';
 import BottomBar from './BottomBar';
 
 const STATUS_DOT: Record<string, string> = { demo: 'demo', 'published-view': 'live', live: 'live', design: 'design', blocked: 'blocked' };
@@ -21,7 +22,10 @@ export function Link({ to, className, children, onNavigate }: { to: string; clas
 }
 
 function currentModule(path: string): ModuleId | 'home' {
+  // Old addresses from before «ویترین مجازی» held offers and chat.
+  const legacy: Record<string, ModuleId> = { offers: 'storefront', chat: 'storefront' };
   const first = path.split('/')[1] ?? '';
+  if (legacy[first]) return legacy[first];
   return (MODULES.find((m) => m.route === `/${first}`)?.id ?? 'home') as ModuleId | 'home';
 }
 
@@ -29,7 +33,7 @@ function NavList({ active, onNavigate }: { active: ModuleId | 'home'; onNavigate
   return <nav className="side-nav" aria-label="ماژول‌ها">
     <Link to="/" className={`nav-item${active === 'home' ? ' on' : ''}`} onNavigate={onNavigate}><span aria-hidden="true">🏠</span>امروز</Link>
     <p className="nav-group">ماژول‌ها</p>
-    {MODULES.map((m) => <Link key={m.id} to={m.route} className={`nav-item${active === m.id ? ' on' : ''}`} onNavigate={onNavigate}>
+    {MODULES.filter((m) => m.nav !== false).map((m) => <Link key={m.id} to={m.route} className={`nav-item${active === m.id ? ' on' : ''}`} onNavigate={onNavigate}>
       <span aria-hidden="true">{m.icon}</span>{m.title}<i className={`dot ${STATUS_DOT[m.status]}`} title={m.statusNote} />
     </Link>)}
   </nav>;
@@ -48,10 +52,9 @@ export default function Shell() {
     case 'accounting': page = <AccountingModule tab={sub} />; break;
     case 'inventory': page = <InventoryModule tab={sub} />; break;
     case 'products': page = <ProductsPage state={published} />; break;
-    case 'storefront': page = <StorefrontPage state={published} />; break;
-    case 'offers': page = <OffersPage state={published} />; break;
+    case 'storefront': page = <StorefrontSection rest={ws.path.split('/').slice(2).filter(Boolean)} published={published} />; break;
+    case 'plan': page = <PlanPage />; break;
     case 'crm': page = <CrmModule tab={sub} />; break;
-    case 'chat': page = <ChatModule tab={sub} />; break;
     case 'content': page = <LockedModule id={active} />; break;
     default: page = <Home published={pub} />;
   }

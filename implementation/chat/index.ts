@@ -1,5 +1,8 @@
 import crypto from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
+import { ESCALATION_TEXT, answer, type BusinessFacts, type KnowledgeEntry } from './autoreply';
+
+export type { BusinessFacts } from './autoreply';
 
 /**
  * Chat module — customer ⇄ business conversations (owner decision D-73).
@@ -10,7 +13,8 @@ import type { Pool, PoolClient } from 'pg';
  * - Only the customer starts a conversation. The business replies inside it.
  * - The business sees the name the customer chose, never the phone number.
  * - Text only, at most 1000 characters.
- * - Nothing here is read by any AI, and nothing flows into CRM.
+ * - Nothing flows into CRM. The only automatic reader is the business's own auto-reply (D-75, PRO/MAX plans,
+ *   switched on by the business): answers only from approved knowledge or published facts, escalates the rest.
  * - Retention: a conversation is deleted for real 90 days after its last
  *   message (24 hours for test identities). Either side can delete earlier,
  *   which removes it for both sides; only an opaque erasure record remains.
@@ -23,6 +27,8 @@ export const RETENTION_DAYS = 90;
 export const TEST_RETENTION_HOURS = 24;
 export const MAX_BODY = 1000;
 export const CHAT_PERMISSION = 'chat.reply';
+/** Sender ref of automatic replies: not a person, never a member. */
+export const ASSISTANT_REF = '00000000-0000-0000-0000-000000000000';
 const READ_LOG_WINDOW_MS = 10 * 60_000;
 
 export type ChatErrorCode = 'CHAT_UNAVAILABLE' | 'BUSINESS_UNKNOWN' | 'NOT_FOUND' | 'BLOCKED' | 'INPUT_INVALID' | 'SENSITIVE_BUSINESS';
@@ -66,7 +72,16 @@ export interface ChatMessage {
   readonly sender: 'customer' | 'business';
   readonly body: string;
   readonly createdAt: string;
+  /** Sent by the auto-reply, not typed by a person. Shown with a label on both sides. */
+  readonly auto: boolean;
 }
+
+/** Passed by the caller when auto-reply is allowed by the plan (the chat module does not read Core). */
+export interface AutoReplyInput { readonly facts: BusinessFacts }
+/** Returns the facts when auto-reply is on and the plan allows it, otherwise undefined. */
+export type AutoResolver = (organizationId: string) => Promise<AutoReplyInput | undefined>;
+
+export interface PendingQuestion { readonly id: string; readonly threadId: string; readonly customerName: string; readonly question: string; readonly askedAt: string }
 
 function cleanBody(body: unknown): string {
   const text = String(body ?? '').replace(/\r\n/g, '\n').replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, '').trim();
@@ -104,7 +119,7 @@ export class ChatModule {
   // ───────────── customer side ─────────────
 
   /** Starts the conversation if needed and sends the customer's message. */
-  async customerSend(business: PublishedBusinessRef, customer: Party, input: { name?: string; body: unknown }): Promise<{ threadId: string; message: ChatMessage }> {
+  async customerSend(business: PublishedBusinessRef, customer: Party, input: { name?: string; body: unknown }, auto?: AutoResolver): Promise<{ threadId: string; message: ChatMessage }> {
     if (!(await this.isEnabled(business))) throw new ChatError(business.sensitive ? 'SENSITIVE_BUSINESS' : 'CHAT_UNAVAILABLE', 'this business does not take messages');
     const body = cleanBody(input.body);
     return this.tx(async (db) => {
@@ -123,6 +138,8 @@ export class ChatModule {
       }
       const message = await this.insertMessage(db, threadId, 'customer', customer.ref, body, now, customer.test);
       await db.query('UPDATE chat_conversations SET customer_read_at = $2 WHERE id = $1', [threadId, now]);
+      const a = auto ? await auto(business.organizationId) : undefined;
+      if (a) await this.autoRespond(db, business.organizationId, threadId, message, a.facts, customer.test);
       return { threadId, message };
     });
   }
@@ -138,7 +155,7 @@ export class ChatModule {
     return { thread, messages };
   }
 
-  async customerReply(customer: Party, threadId: string, body: unknown): Promise<ChatMessage> {
+  async customerReply(customer: Party, threadId: string, body: unknown, auto?: AutoResolver): Promise<ChatMessage> {
     const text = cleanBody(body);
     return this.tx(async (db) => {
       const t = await this.lockThread(db, 'customer', customer.ref, threadId);
@@ -146,6 +163,8 @@ export class ChatModule {
       const now = this.now();
       const m = await this.insertMessage(db, threadId, 'customer', customer.ref, text, now, t.test_mode);
       await db.query('UPDATE chat_conversations SET customer_read_at = $2 WHERE id = $1', [threadId, now]);
+      const a = auto ? await auto(t.organization_id) : undefined;
+      if (a) await this.autoRespond(db, t.organization_id, threadId, m, a.facts, t.test_mode);
       return m;
     });
   }
@@ -173,6 +192,7 @@ export class ChatModule {
       const now = this.now();
       const m = await this.insertMessage(db, threadId, 'business', actorRef, text, now, t.test_mode);
       await db.query('UPDATE chat_conversations SET business_read_at = $2 WHERE id = $1', [threadId, now]);
+      await db.query('UPDATE chat_pending SET answered_at = $2 WHERE conversation_id = $1 AND answered_at IS NULL', [threadId, now]);
       await this.log(organizationId, threadId, actorRef, 'reply', db);
       return m;
     });
@@ -189,7 +209,7 @@ export class ChatModule {
   }
 
   /** Aggregate only: this is all the assistant and the Today page may see. */
-  async summary(organizationId: string): Promise<{ conversations: number; unreadConversations: number; unreadMessages: number }> {
+  async summary(organizationId: string): Promise<{ conversations: number; unreadConversations: number; unreadMessages: number; pendingQuestions: number }> {
     const r = await this.pool.query<{ conversations: string; unread_conversations: string; unread_messages: string }>(
       `SELECT count(DISTINCT c.id) AS conversations,
               count(DISTINCT m.conversation_id) AS unread_conversations,
@@ -199,7 +219,8 @@ export class ChatModule {
               AND (c.business_read_at IS NULL OR m.created_at > c.business_read_at)
         WHERE c.organization_id = $1`, [organizationId]);
     const x = r.rows[0];
-    return { conversations: Number(x.conversations), unreadConversations: Number(x.unread_conversations), unreadMessages: Number(x.unread_messages) };
+    const p = await this.pool.query<{ n: string }>('SELECT count(*) AS n FROM chat_pending WHERE organization_id = $1 AND answered_at IS NULL', [organizationId]);
+    return { conversations: Number(x.conversations), unreadConversations: Number(x.unread_conversations), unreadMessages: Number(x.unread_messages), pendingQuestions: Number(p.rows[0].n) };
   }
 
   async accessLog(organizationId: string, limit = 50): Promise<Array<{ at: string; action: string; actorRef: string; threadId: string | null }>> {
@@ -251,14 +272,102 @@ export class ChatModule {
     });
   }
 
+  // ───────────── auto-reply and learned knowledge (D-75) ─────────────
+
+  async autoReplyOn(organizationId: string): Promise<boolean> {
+    const r = await this.pool.query<{ auto_reply: boolean }>('SELECT auto_reply FROM chat_settings WHERE organization_id = $1', [organizationId]);
+    return r.rows[0]?.auto_reply ?? false;
+  }
+
+  /** The business switches its auto-reply on or off. The caller has checked the plan allows it. */
+  async setAutoReply(business: PublishedBusinessRef, actorRef: string, on: boolean): Promise<boolean> {
+    await this.pool.query(
+      `INSERT INTO chat_settings (organization_id, enabled, auto_reply, changed_by, changed_at) VALUES ($1, true, $2, $3, $4)
+       ON CONFLICT (organization_id) DO UPDATE SET auto_reply = EXCLUDED.auto_reply, changed_by = EXCLUDED.changed_by, changed_at = EXCLUDED.changed_at`,
+      [business.organizationId, on, actorRef, this.now()]);
+    await this.log(business.organizationId, null, actorRef, on ? 'auto_on' : 'auto_off');
+    return on;
+  }
+
+  async knowledge(organizationId: string): Promise<Array<KnowledgeEntry & { uses: number; learned: boolean; updatedAt: string }>> {
+    const r = await this.pool.query<{ id: string; question: string; answer: string; uses: number; learned: boolean; updated_at: Date }>(
+      'SELECT id, question, answer, uses, learned, updated_at FROM chat_knowledge WHERE organization_id = $1 ORDER BY updated_at DESC', [organizationId]);
+    return r.rows.map((x) => ({ id: x.id, question: x.question, answer: x.answer, uses: x.uses, learned: x.learned, updatedAt: new Date(x.updated_at).toISOString() }));
+  }
+
+  /** An answer the business approves: written by the owner, or the owner's own reply saved for next time. */
+  async saveKnowledge(organizationId: string, actorRef: string, input: { id?: string; question: unknown; answer: unknown; learned?: boolean }): Promise<string> {
+    const question = cleanBody(input.question).slice(0, 300);
+    const answerText = cleanBody(input.answer);
+    const isEdit = !!input.id;
+    if (isEdit && !UUID.test(input.id!)) throw new ChatError('NOT_FOUND', 'no such answer');
+    const id = isEdit ? input.id! : crypto.randomUUID();
+    const r = isEdit
+      ? await this.pool.query('UPDATE chat_knowledge SET question = $3, answer = $4, updated_at = $5 WHERE id = $1 AND organization_id = $2', [id, organizationId, question, answerText, this.now()])
+      : await this.pool.query('INSERT INTO chat_knowledge (id, organization_id, question, answer, learned, created_by, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $7)',
+        [id, organizationId, question, answerText, input.learned ?? false, actorRef, this.now()]);
+    if (!r.rowCount) throw new ChatError('NOT_FOUND', 'no such answer');
+    await this.log(organizationId, null, actorRef, 'knowledge');
+    return id;
+  }
+
+  async deleteKnowledge(organizationId: string, actorRef: string, id: string): Promise<void> {
+    if (!UUID.test(id)) throw new ChatError('NOT_FOUND', 'no such answer');
+    const r = await this.pool.query('DELETE FROM chat_knowledge WHERE id = $1 AND organization_id = $2', [id, organizationId]);
+    if (!r.rowCount) throw new ChatError('NOT_FOUND', 'no such answer');
+    await this.log(organizationId, null, actorRef, 'knowledge');
+  }
+
+  async pending(organizationId: string): Promise<PendingQuestion[]> {
+    const r = await this.pool.query<{ id: string; conversation_id: string; customer_name: string; question: string; created_at: Date }>(
+      `SELECT p.id, p.conversation_id, c.customer_name, p.question, p.created_at FROM chat_pending p JOIN chat_conversations c ON c.id = p.conversation_id
+        WHERE p.organization_id = $1 AND p.answered_at IS NULL ORDER BY p.created_at`, [organizationId]);
+    return r.rows.map((x) => ({ id: x.id, threadId: x.conversation_id, customerName: x.customer_name, question: x.question, askedAt: new Date(x.created_at).toISOString() }));
+  }
+
+  /**
+   * The owner answers an escalated question: the answer goes to the customer as the business's own message,
+   * and — only if the owner asks — is saved as knowledge under a question text the owner can edit first.
+   */
+  async answerPending(organizationId: string, actorRef: string, pendingId: string, input: { answer: unknown; learn: boolean; question?: unknown }): Promise<{ message: ChatMessage; knowledgeId: string | null }> {
+    if (!UUID.test(pendingId)) throw new ChatError('NOT_FOUND', 'no such question');
+    const text = cleanBody(input.answer);
+    const p = await this.pool.query<{ conversation_id: string; question: string }>('SELECT conversation_id, question FROM chat_pending WHERE id = $1 AND organization_id = $2 AND answered_at IS NULL', [pendingId, organizationId]);
+    if (!p.rows[0]) throw new ChatError('NOT_FOUND', 'no such question');
+    const message = await this.businessReply(organizationId, actorRef, p.rows[0].conversation_id, text);
+    const knowledgeId = input.learn ? await this.saveKnowledge(organizationId, actorRef, { question: input.question || p.rows[0].question, answer: text, learned: true }) : null;
+    return { message, knowledgeId };
+  }
+
+  private async autoRespond(db: PoolClient, organizationId: string, threadId: string, question: ChatMessage, facts: BusinessFacts, test: boolean): Promise<void> {
+    const k = await db.query<{ id: string; question: string; answer: string }>('SELECT id, question, answer FROM chat_knowledge WHERE organization_id = $1', [organizationId]);
+    const result = answer(question.body, k.rows, facts);
+    const now = new Date(this.now().getTime() + 1);
+    if (result.kind === 'knowledge') {
+      await db.query('UPDATE chat_knowledge SET uses = uses + 1 WHERE id = $1', [result.entryId]);
+      await this.insertMessage(db, threadId, 'business', ASSISTANT_REF, result.text, now, test);
+      return;
+    }
+    if (result.kind === 'fact' || result.kind === 'greeting') {
+      await this.insertMessage(db, threadId, 'business', ASSISTANT_REF, result.text, now, test);
+      return;
+    }
+    // Unknown: never guess. One escalation notice per open question; the owner sees it in «سؤال‌های بی‌جواب».
+    const open = await db.query('SELECT 1 FROM chat_pending WHERE conversation_id = $1 AND answered_at IS NULL LIMIT 1', [threadId]);
+    await db.query('INSERT INTO chat_pending (id, organization_id, conversation_id, message_id, question, created_at) VALUES ($1, $2, $3, $4, $5, $6)',
+      [crypto.randomUUID(), organizationId, threadId, question.id, question.body.slice(0, 1000), this.now()]);
+    if (!open.rowCount) await this.insertMessage(db, threadId, 'business', ASSISTANT_REF, ESCALATION_TEXT(facts.name), now, test);
+  }
+
   // ───────────── internals ─────────────
 
   private async insertMessage(db: PoolClient, threadId: string, sender: 'customer' | 'business', senderRef: string, body: string, now: Date, test: boolean): Promise<ChatMessage> {
+    const auto = senderRef === ASSISTANT_REF;
     const r = await db.query<{ id: string; seq: string; created_at: Date }>(
-      'INSERT INTO chat_messages (id, conversation_id, sender, sender_ref, body, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, seq, created_at',
-      [crypto.randomUUID(), threadId, sender, senderRef, body, now]);
+      'INSERT INTO chat_messages (id, conversation_id, sender, sender_ref, body, created_at, auto) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, seq, created_at',
+      [crypto.randomUUID(), threadId, sender, senderRef, body, now, auto]);
     await db.query('UPDATE chat_conversations SET last_message_at = $2, expires_at = $3 WHERE id = $1', [threadId, now, this.expiry(test, now)]);
-    return { id: r.rows[0].id, seq: Number(r.rows[0].seq), sender, body, createdAt: new Date(r.rows[0].created_at).toISOString() };
+    return { id: r.rows[0].id, seq: Number(r.rows[0].seq), sender, body, createdAt: new Date(r.rows[0].created_at).toISOString(), auto };
   }
 
   private async threads(where: string, params: unknown[], viewer: 'customer' | 'business'): Promise<ThreadSummary[]> {
@@ -296,10 +405,10 @@ export class ChatModule {
   }
 
   private async messages(threadId: string, afterSeq: number): Promise<ChatMessage[]> {
-    const r = await this.pool.query<{ id: string; seq: string; sender: 'customer' | 'business'; body: string; created_at: Date }>(
-      'SELECT id, seq, sender, body, created_at FROM chat_messages WHERE conversation_id = $1 AND seq > $2 ORDER BY seq LIMIT 500',
+    const r = await this.pool.query<{ id: string; seq: string; sender: 'customer' | 'business'; body: string; created_at: Date; auto: boolean }>(
+      'SELECT id, seq, sender, body, created_at, auto FROM chat_messages WHERE conversation_id = $1 AND seq > $2 ORDER BY seq LIMIT 500',
       [threadId, Number.isFinite(afterSeq) && afterSeq > 0 ? Math.floor(afterSeq) : 0]);
-    return r.rows.map((x) => ({ id: x.id, seq: Number(x.seq), sender: x.sender, body: x.body, createdAt: new Date(x.created_at).toISOString() }));
+    return r.rows.map((x) => ({ id: x.id, seq: Number(x.seq), sender: x.sender, body: x.body, createdAt: new Date(x.created_at).toISOString(), auto: x.auto }));
   }
 
   /** Polling must not flood the log: the same look by the same member is recorded once per ten minutes. */
@@ -372,6 +481,30 @@ CREATE TABLE IF NOT EXISTS chat_access_log (
   at              timestamptz NOT NULL
 );
 CREATE INDEX IF NOT EXISTS chat_access_log_org_idx ON chat_access_log (organization_id, at);
+ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS auto boolean NOT NULL DEFAULT false;
+ALTER TABLE chat_settings ADD COLUMN IF NOT EXISTS auto_reply boolean NOT NULL DEFAULT false;
+CREATE TABLE IF NOT EXISTS chat_knowledge (
+  id              uuid PRIMARY KEY,
+  organization_id text NOT NULL,
+  question        varchar(300) NOT NULL,
+  answer          text NOT NULL CHECK (char_length(answer) BETWEEN 1 AND ${MAX_BODY}),
+  learned         boolean NOT NULL DEFAULT false,
+  uses            integer NOT NULL DEFAULT 0,
+  created_by      uuid NOT NULL,
+  created_at      timestamptz NOT NULL,
+  updated_at      timestamptz NOT NULL
+);
+CREATE INDEX IF NOT EXISTS chat_knowledge_org_idx ON chat_knowledge (organization_id);
+CREATE TABLE IF NOT EXISTS chat_pending (
+  id              uuid PRIMARY KEY,
+  organization_id text NOT NULL,
+  conversation_id uuid NOT NULL REFERENCES chat_conversations(id) ON DELETE CASCADE,
+  message_id      uuid NOT NULL,
+  question        text NOT NULL,
+  created_at      timestamptz NOT NULL,
+  answered_at     timestamptz
+);
+CREATE INDEX IF NOT EXISTS chat_pending_open_idx ON chat_pending (organization_id) WHERE answered_at IS NULL;
 CREATE TABLE IF NOT EXISTS chat_erasure_log (
   ref             uuid PRIMARY KEY,
   organization_id text NOT NULL,

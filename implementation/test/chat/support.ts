@@ -4,7 +4,8 @@ import { IDENTITY_SCHEMA_SQL } from '../../identity';
 import { CHAT_SCHEMA_SQL } from '../../chat';
 
 /** Disposable test DB only (guarded by setup-env). Chat lives in its own schema here, as its own database in production. */
-export const TEST_ORG = 'test-demo-chat-spec';
+// Unique per run: Core's publication log is append-only, so an organization that published can never be deleted.
+export const TEST_ORG = `test-demo-chat-spec-${Date.now()}`;
 
 export function pools(): { core: Pool; chat: Pool } {
   const url = process.env.DATABASE_URL;
@@ -20,9 +21,12 @@ export async function resetSchemas(core: Pool, chat: Pool): Promise<void> {
   await dropTestOrg(core);
 }
 
+/** Removes what the specs added, except rows the append-only publication log still references. */
 export async function dropTestOrg(core: Pool): Promise<void> {
-  await core.query(`DELETE FROM permission_grants WHERE membership_id IN (SELECT id FROM memberships WHERE identity_provider = 'mlino-phone')`);
-  await core.query(`DELETE FROM memberships WHERE identity_provider = 'mlino-phone'`);
+  const free = `SELECT m.id FROM memberships m WHERE m.identity_provider = 'mlino-phone' AND NOT EXISTS (SELECT 1 FROM publications p WHERE p.performed_by_membership_id = m.id)`;
+  await core.query(`DELETE FROM permission_grants WHERE membership_id IN (${free})`);
+  await core.query(`DELETE FROM memberships WHERE id IN (${free})`);
+  if ((await core.query('SELECT 1 FROM publications WHERE organization_id = $1 LIMIT 1', [TEST_ORG])).rowCount) return;
   await core.query('DELETE FROM permission_grants WHERE organization_id = $1', [TEST_ORG]);
   await core.query('DELETE FROM memberships WHERE organization_id = $1', [TEST_ORG]);
   await core.query('DELETE FROM organizations WHERE id = $1', [TEST_ORG]);

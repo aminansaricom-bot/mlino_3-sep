@@ -3,6 +3,8 @@ export const CORE_PERMISSION_KEYS = [
   'membership.revoke', 'permission_grant.revoke', 'identity_claim.review', 'identity_verification.decide', 'membership.create',
   'permission_grant.issue', 'identity_claim.submit', 'identity_verification.start', 'capability.confirm', 'evidence.confirm',
   'catalog_item.manage',
+  // D-76: changing the organization's plan is a billing act of the organization.
+  'plan.manage',
 ] as const;
 export type CorePermissionKey = (typeof CORE_PERMISSION_KEYS)[number];
 export const GRANT_ADMIN_PERMISSION = 'permission_grant.issue' as const;

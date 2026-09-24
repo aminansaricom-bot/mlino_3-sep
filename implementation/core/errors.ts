@@ -1,4 +1,4 @@
-export type CoreErrorCode = 'AUTHENTICATION_REQUIRED' | 'AUTHORIZATION_DENIED' | 'TENANT_MISMATCH' | 'VALIDATION_FAILED' | 'CONFLICT' | 'DATABASE_INTEGRITY' | 'TRANSACTION_RETRYABLE' | 'INTERNAL_ERROR';
+export type CoreErrorCode = 'AUTHENTICATION_REQUIRED' | 'AUTHORIZATION_DENIED' | 'TENANT_MISMATCH' | 'VALIDATION_FAILED' | 'CONFLICT' | 'DATABASE_INTEGRITY' | 'TRANSACTION_RETRYABLE' | 'INTERNAL_ERROR' | 'PLAN_LIMIT';
 
 export class CoreDomainError extends Error {
   constructor(public readonly code: CoreErrorCode, message: string, public readonly details?: Readonly<Record<string, string>>) {

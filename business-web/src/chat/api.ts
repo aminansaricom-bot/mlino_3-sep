@@ -40,6 +40,10 @@ const TEXT: Record<string, string> = {
   BUSINESS_UNKNOWN: 'این کسب‌وکار منتشر نشده است.',
   MEMBER_OF_ORGANIZATION: 'تا وقتی عضو یک کسب‌وکار هستی، حذف حساب از اینجا ممکن نیست.',
   CSRF: 'درخواست از جای نامعتبر آمد.',
+  PLAN_LIMIT: 'این امکان در پلن فعلی نیست؛ از «پلن و اشتراک» ارتقا بده.',
+  MEMBERSHIP_REQUIRED: 'این شماره عضو این کسب‌وکار نیست.',
+  AUTHORIZATION_DENIED: 'این کار اجازه‌ای می‌خواهد که این عضو ندارد.',
+  VALIDATION_FAILED: 'مقدارها درست نیست.',
 };
 
 export function apiErrorText(e: unknown): string {
@@ -55,6 +59,8 @@ export function apiErrorText(e: unknown): string {
 export type AuthConfig = { delivery: 'test' | 'sms'; testNumbers: { from: string; to: string } | null };
 export type Organization = { organizationId: string; name: string; published: boolean; canChat: boolean };
 export type Me = { person: { phoneHint: string; test: boolean } | null; organizations?: Organization[] };
-export type ChatSummary = { conversations: number; unreadConversations: number; unreadMessages: number; enabled: boolean; sensitive: boolean };
+export type ChatSummary = { conversations: number; unreadConversations: number; unreadMessages: number; pendingQuestions: number; enabled: boolean; sensitive: boolean; autoReply: boolean; autoReplyAllowed: boolean };
 export type Thread = { id: string; organizationId: string; customerName: string; blockedBy: 'customer' | 'business' | null; lastMessageAt: string; expiresAt: string; lastBody: string; lastSender: 'customer' | 'business'; unread: number; test: boolean };
-export type Message = { id: string; seq: number; sender: 'customer' | 'business'; body: string; createdAt: string };
+export type Message = { id: string; seq: number; sender: 'customer' | 'business'; body: string; createdAt: string; auto?: boolean };
+export type Pending = { id: string; threadId: string; customerName: string; question: string; askedAt: string };
+export type Knowledge = { id: string; question: string; answer: string; uses: number; learned: boolean; updatedAt: string };

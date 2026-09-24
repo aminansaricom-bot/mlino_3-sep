@@ -14,8 +14,10 @@ export type PublicBusinessRecordV1 = {
     business_hours: unknown | null; published_at: string; publication_id: string; source_revision: number;
   };
   capabilities: Array<{ capability_id: string; capability_key: string; name: string; short_description: string | null; fresh_until: string | null; source_revision: number }>;
-  offers: Array<{ offer_id: string; offer_version_id: string; version_number: number; name: string; short_description: string | null; offer_shape: string; terms: unknown | null; price_amount: string | null; price_currency: string | null; on_request: boolean; valid_from: string; valid_until: string | null; capability_links: Array<{ capability_id: string; capability_key: string; name: string }>; published_at: string; publication_id: string }>;
+  offers: Array<{ offer_id: string; offer_version_id: string; version_number: number; name: string; short_description: string | null; offer_shape: string; terms: unknown | null; price_amount: string | null; price_currency: string | null; on_request: boolean; valid_from: string; valid_until: string | null; capability_links: Array<{ capability_id: string; capability_key: string; name: string }>; published_at: string; publication_id: string; visibility_radius_meters?: number }>;
   stale: boolean;
+  /** D-78: present (true) only for PRO/MAX plans. Placement, not a fact about the business; V2 labels it «ویژه». */
+  promoted?: true;
   ordering: { primary: 'publication.occurred_at'; tie_breaker: 'publication.id' };
 };
 
@@ -26,6 +28,11 @@ export type PublicBusinessExportV1 = {
   signature: { algorithm: 'Ed25519'; key_id: string; value: string };
   records: PublicBusinessRecordV1[];
 };
+
+/** D-77: only a whole number of meters in the allowed range is exported; anything else means «everyone». */
+function radiusOf(value: unknown): { visibility_radius_meters?: number } {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 100 && value <= 20000 ? { visibility_radius_meters: value } : {};
+}
 
 export type Issue = { code: string; organization_id?: string; publication_id?: string };
 export type BuildOptions = { asOf: Date | string; keyId: string; signingKeyProvider: SigningKeyProvider; onIssue?: (issue: Issue) => void };
@@ -154,14 +161,17 @@ export async function buildPublicExport(db: PrismaClient, options: BuildOptions)
   };
   const records = await db.$transaction(async (tx) => {
     await tx.$executeRawUnsafe('SET TRANSACTION READ ONLY');
-    const [events, organizations, profiles, claims, capabilities, versions] = await Promise.all([
+    const [events, organizations, profiles, claims, capabilities, versions, plans] = await Promise.all([
       tx.publication.findMany({ where: { occurredAt: { lte: asOf } }, select: { id: true, organizationId: true, businessProfileId: true, capabilityId: true, offerVersionId: true, eventKind: true, contentRevision: true, publishedContent: true, occurredAt: true } }),
       tx.organization.findMany({ select: { id: true, lifecycleStatus: true } }),
       tx.businessProfile.findMany({ select: { id: true, organizationId: true, lifecycleStatus: true, businessIdentityClaimId: true } }),
       tx.businessIdentityClaim.findMany({ select: { id: true, organizationId: true, claimStatus: true, validUntil: true } }),
       tx.capability.findMany({ select: { id: true, organizationId: true, capabilityStatus: true, audience: true, confirmationStatus: true, freshUntil: true } }),
       tx.offerVersion.findMany({ select: { id: true, organizationId: true, offerId: true, offer: { select: { organizationId: true, lifecycleStatus: true } } } }),
+      // Absent in databases (and fakes) that predate plans: nobody is promoted.
+      tx.organizationPlan ? tx.organizationPlan.findMany({ where: { planTier: { in: ['PRO', 'MAX'] } }, select: { organizationId: true } }) : Promise.resolve([] as Array<{ organizationId: string }>),
     ]);
+    const promotedOrgs = new Set(plans.map((row) => row.organizationId));
     const byProfile = new Map(profiles.map((row) => [row.id, row]));
     const byClaim = new Map(claims.map((row) => [row.id, row]));
     const byCapability = new Map(capabilities.map((row) => [row.id, row]));
@@ -209,12 +219,13 @@ export async function buildPublicExport(db: PrismaClient, options: BuildOptions)
           const cap = visibleCapabilities.get(id);
           return cap ? [{ capability_id: id, capability_key: cap.capability_key, name: cap.name }] : [];
         });
-        return [{ offer_id: version.offerId, offer_version_id: version.id, version_number: snapshot.version_number as number, name: snapshot.name as string, short_description: snapshot.short_description as string | null, offer_shape: snapshot.offer_shape as string, terms: snapshot.terms, price_amount: snapshot.price_amount as string | null, price_currency: snapshot.price_currency as string | null, on_request: snapshot.on_request as boolean, valid_from: from, valid_until: until, capability_links: links, published_at: utcTimestamp(event.occurredAt), publication_id: event.id }];
+        return [{ offer_id: version.offerId, offer_version_id: version.id, version_number: snapshot.version_number as number, name: snapshot.name as string, short_description: snapshot.short_description as string | null, offer_shape: snapshot.offer_shape as string, terms: snapshot.terms, price_amount: snapshot.price_amount as string | null, price_currency: snapshot.price_currency as string | null, on_request: snapshot.on_request as boolean, valid_from: from, valid_until: until, capability_links: links, published_at: utcTimestamp(event.occurredAt), publication_id: event.id, ...radiusOf(snapshot.visibility_radius_meters) }];
       });
       result.push({
         business: { organization_id: organization.id, name, description, location, contact_information: allowContact(profileContent.contact_information ?? null), links: allowLinks(profileContent.links ?? null), business_hours: hours, published_at: utcTimestamp(profileEvent.occurredAt), publication_id: profileEvent.id, source_revision: profileEvent.contentRevision },
         capabilities: capabilityEntries.map(({ dto }) => dto), offers, stale: false,
         ordering: { primary: 'publication.occurred_at', tie_breaker: 'publication.id' },
+        ...(promotedOrgs.has(organization.id) ? { promoted: true as const } : {}),
       });
     }
     return result.sort((a, b) => a.business.published_at.localeCompare(b.business.published_at) || a.business.publication_id.localeCompare(b.business.publication_id) || a.business.organization_id.localeCompare(b.business.organization_id));

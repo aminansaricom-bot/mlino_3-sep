@@ -41,7 +41,7 @@ export function ProductsPage({ state }: { state: PublishedState }) {
 
 export function StorefrontPage({ state }: { state: PublishedState }) {
   return <div className="stack">
-    <header className="page-head"><h1>ویترین مجازی در V2</h1><span className="badge info">هسته — پروفایل و انتشار</span></header>
+    <header className="page-head"><h1>ویترین مجازی</h1><span className="badge info">هسته — پروفایل و انتشار</span></header>
     <Guard state={state}>{(b) => <>
       <section className="card storefront">
         <div className="sf-cover">{b.items.find((i) => i.media.length) ? <img src={mediaUrl(b.items.find((i) => i.media.length)!.media[0].path)} alt="" /> : null}<span className="badge ok">منتشرشده</span></div>
