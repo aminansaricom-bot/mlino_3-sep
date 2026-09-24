@@ -202,7 +202,7 @@ export default function ArVitrineView({
         {!locationPending && scene === null && (
           <div className="ar-empty">
             {heading.source === 'none'
-              ? 'قطب‌نمای این دستگاه در دسترس نیست — با اسلایدر پایین جهت را دستی بچرخان تا ویترین ساخته شود.'
+              ? 'گوشی جهت را نمی‌دهد؛ نوار پایین را بچرخان تا کسب‌وکارهای آن سمت را ببینی.'
               : 'در حال گرفتن جهت از قطب‌نما…'}
           </div>
         )}
@@ -226,21 +226,18 @@ export default function ArVitrineView({
         {/* نوار وضعیت صادقانه */}
         <div className="ar-status">
           {canAskCompass && heading.source === 'none' && (
-            <button type="button" className="ar-badge action" onClick={() => heading.request()}>فعال کردن قطب‌نما</button>
+            <button type="button" className="ar-badge action" onClick={() => heading.request()}>روشن کردن جهت‌یاب گوشی</button>
           )}
           {cameraErrorMessage(camera.state) && (
             <span className="ar-badge warn">{cameraErrorMessage(camera.state)}</span>
           )}
           {heading.source === 'notAbsolute' && (
-            <span className="ar-badge warn">
-              قطب‌نمای دستگاه مرجع شمال ندارد (رویداد غیر-absolute) — جهت دستی زیر را بچرخان
-            </span>
+            <span className="ar-badge warn">جهت را با نوار پایین تنظیم کن</span>
           )}
           {heading.source === 'none' && (
-            <span className="ar-badge warn">قطب‌نما در دسترس نیست — اسلایدر زیر را بچرخان</span>
+            <span className="ar-badge warn">جهت را با نوار پایین تنظیم کن</span>
           )}
 
-          {heading.source === 'manual' && <span className="ar-badge warn">جهت دستی (شبیه‌سازی)</span>}
           {(() => {
             const df = scene?.declaredFloor ?? null;
             const db = scene?.declaredBuildingId ?? null;
@@ -255,7 +252,7 @@ export default function ArVitrineView({
       <div className="ar-controls">
         {/* وقتی قطب‌نمای واقعی کار می‌کند، اسلایدر جهت دستی فقط شلوغی است؛ فقط در نبود قطب‌نما دیده می‌شود */}
         {heading.source !== 'compass' && <div className="sp-row">
-          <span className="sp-label">چرخاندن دستی جهت:</span>
+          <span className="sp-label">جهت:</span>
           <input
             type="range"
             min={0}

@@ -86,7 +86,7 @@ describe('K6D demo relocation', () => {
   });
 
   it('renders a persistent banner only in enabled mode', () => {
-    expect(demoBanner(true)).toBe('حالت نمایشی — دادهٔ آزمایشی');
+    expect(demoBanner(true)).toBe('نسخه‌ی نمایشی · کسب‌وکارها ساختگی‌اند');
     expect(demoBanner(false)).toBeNull();
   });
 });

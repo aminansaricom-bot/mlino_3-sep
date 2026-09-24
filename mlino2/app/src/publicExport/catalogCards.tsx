@@ -33,8 +33,8 @@ export function CatalogImage({ media, load }: { media?: CatalogMedia; load: bool
     return () => { alive = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
   }, [mediaKey, load]);
   const src = loaded && loaded.path === media?.path ? loaded.url : null;
-  if (!src) return <div className="catalog-image-placeholder" role="img" aria-label={media?.alt_text ?? 'تصویر ثبت نشده'}>
-    <span aria-hidden="true">◇</span><small>{media?.alt_text ?? 'تصویر ثبت نشده'}</small>
+  if (!src) return <div className={`catalog-image-placeholder${media ? ' loading' : ''}`} role="img" aria-label={media?.alt_text ?? 'بدون عکس'}>
+    {!media && <small>بدون عکس</small>}
   </div>;
   return <img className="catalog-image" src={src} alt={media?.alt_text ?? ''} />;
 }

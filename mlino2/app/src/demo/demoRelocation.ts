@@ -69,7 +69,7 @@ export function reanchorDemoTarget(fix: Point | null): Point | null {
   return fix && validPoint(fix) ? fix : null;
 }
 
-export const DEMO_BANNER = 'حالت نمایشی — دادهٔ آزمایشی';
+export const DEMO_BANNER = 'نسخه‌ی نمایشی · کسب‌وکارها ساختگی‌اند';
 export function demoBanner(enabled: boolean): string | null {
   return enabled ? DEMO_BANNER : null;
 }

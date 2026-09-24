@@ -8,6 +8,12 @@ import { demoBusinessRating, displayName } from '../demo/demoSocial';
 import { formatDistance } from '../uiFormat';
 import Stars from './Stars';
 
+/** «۳۰٪» when the offer names a percentage, otherwise «آفر». */
+export function offerBadge(name: string): string {
+  const m = name.match(/([0-9۰-۹]{1,2})\s*[٪%]/);
+  return m ? `${m[1]}٪` : 'آفر';
+}
+
 const GLYPH: Record<string, string> = { cafe: '☕', restaurant: '🍽', retail_shop: '🛍', dental_clinic: '🦷', beauty_clinic: '💠' };
 
 /**
@@ -35,7 +41,7 @@ export default function PublicBusinessRow({ record, catalog, distanceMeters, now
   return <button ref={ref} className={`biz-row${selected ? ' selected' : ''}`} onClick={onOpen}>
     <span className="biz-row-media">
       {cover ? <CatalogImage media={cover} load={near} /> : <span className={`biz-row-glyph coin-${record.category.key}`} aria-hidden="true">{GLYPH[record.category.key] ?? '📍'}</span>}
-      {offer && <span className="biz-row-offer">پیشنهاد</span>}
+      {offer && <span className="biz-row-offer">{offerBadge(offer.name)}</span>}
     </span>
     <span className="biz-row-copy">
       <strong>{displayName(record.name)}{featured && <span className="biz-row-featured" title="جایگاه ویژه‌ی پولی">ویژه</span>}</strong>

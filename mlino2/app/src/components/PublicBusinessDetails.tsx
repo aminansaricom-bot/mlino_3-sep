@@ -25,6 +25,12 @@ interface Props {
   onMessage?: () => void;
 }
 
+/** Directions in the phone's own map app (Neshan, Balad, Google…) on Android; a web map elsewhere. */
+export function directionsUrl(lat: number, lng: number, label: string): string {
+  const android = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+  return android ? `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(label)})` : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+}
+
 /** «تا ۱۱ دی» — فقط روز و ماه؛ ساعت برای کاربر اهمیتی ندارد. */
 export function offerUntil(iso: string | null): string {
   if (!iso) return 'بدون تاریخ پایان';
@@ -60,7 +66,7 @@ export default function PublicBusinessDetails({ record, catalog, now, distanceMe
   const items = catalog?.items ?? [];
   const groups: { label: string; items: CatalogItem[] }[] = [];
   for (const item of items) {
-    const label = item.grouping_label ?? 'منو';
+    const label = item.grouping_label ?? 'محصولات';
     const last = groups[groups.length - 1];
     if (last && last.label === label) last.items.push(item); else groups.push({ label, items: [item] });
   }
@@ -72,7 +78,7 @@ export default function PublicBusinessDetails({ record, catalog, now, distanceMe
         <button className={`hero-btn${saved ? ' on' : ''}`} onClick={() => onToggle('saved', record.id)} aria-label={saved ? 'ذخیره شد' : 'ذخیره'} aria-pressed={saved}><Icon name="bookmark" /></button>
         <ShareBusinessAction record={record} />
       </div>
-      <span className={`hero-coin coin-${record.category.key}`} aria-hidden="true" />
+      <span className={`hero-coin coin-${record.category.key}`} aria-hidden="true">{displayName(record.name).trim().charAt(0)}</span>
       <h2>{displayName(record.name)}</h2>
       <div className="hero-meta">
         {rating && <Stars rating={rating} compact />}
@@ -80,7 +86,11 @@ export default function PublicBusinessDetails({ record, catalog, now, distanceMe
         {distanceMeters !== undefined && <span>{formatDistance(distanceMeters)}</span>}
         <span className={hours === 'open' ? 'open' : hours === 'closed' ? 'closed' : ''}>{hours === 'open' ? 'باز است' : hours === 'closed' ? 'بسته است' : 'ساعت نامشخص'}</span>
       </div>
-      {onMessage && <button className="biz-message-btn" onClick={onMessage}><ChatBubbleIcon />پیام به کسب‌وکار</button>}
+      <div className="biz-cta">
+        {onMessage && <button className="biz-message-btn" onClick={onMessage}><ChatBubbleIcon />پیام به کسب‌وکار</button>}
+        {record.coordinates && <a className="biz-action" href={directionsUrl(record.coordinates.latitude, record.coordinates.longitude, displayName(record.name))} target="_blank" rel="noopener noreferrer"><Icon name="route" />مسیریابی</a>}
+        {record.contactInformation?.public_phone && <a className="biz-action" href={`tel:${record.contactInformation.public_phone}`}>تماس</a>}
+      </div>
     </header>
 
     <div className="panel-body biz-page-body">

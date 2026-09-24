@@ -79,6 +79,8 @@ export default function RealPublicApp() {
   const [tileStatus, setTileStatus] = useState<TileStatus>('loading');
   const [tileRetryKey, setTileRetryKey] = useState(0);
   const [locating, setLocating] = useState(false);
+  // Why there is no position: the user said no, the device could not tell, or (demo) the phone is outside the demo area.
+  const [locError, setLocError] = useState<null | 'denied' | 'unavailable' | 'outside'>(null);
   const [suggestionEmpty, setSuggestionEmpty] = useState(false);
   const [product, setProduct] = useState<{ item: CatalogItem; businessName: string } | null>(null);
   const [assistant, setAssistant] = useState<{ query: string; answer: AssistantAnswer | null; loading: boolean; voice: boolean } | null>(null);
@@ -149,14 +151,33 @@ export default function RealPublicApp() {
   const valid = consumer?.hasValidSnapshot(now) ?? false;
 
   const useMyLocation = () => {
+    if (!navigator.geolocation) { setLocError('unavailable'); return; }
     setLocating(true);
-    navigator.geolocation?.getCurrentPosition(
-      ({ coords }) => { const next: Point = [coords.latitude, coords.longitude]; if (demoBuildEnabled && !validPoint(next)) { setLocating(false); return; }
-        setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setFlyTo([next[0], next[1]]); setPointLabel('موقعیت من'); setNearbyOnly(true); setLocating(false);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => { const next: Point = [coords.latitude, coords.longitude]; if (demoBuildEnabled && !validPoint(next)) { setLocating(false); setLocError('outside'); return; }
+        setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setFlyTo([next[0], next[1]]); setPointLabel('موقعیت من'); setNearbyOnly(true); setLocating(false); setLocError(null);
         if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => nextDemoTarget(current, next)); },
-      () => setLocating(false),
+      (error) => { setLocating(false); setLocError(error?.code === 1 ? 'denied' : 'unavailable'); },
+      { timeout: 15_000, maximumAge: 60_000 },
     );
   };
+  // Without a position the demo businesses can still be shown where they really are (the demo area).
+  const showSampleArea = () => {
+    if (!demoAnchor) return;
+    setDemoTarget(demoAnchor); setPoint([demoAnchor[0], demoAnchor[1]]); setFlyTo([demoAnchor[0], demoAnchor[1]]);
+    setPointLabel('محدوده‌ی نمونه'); setNearbyOnly(false); setSheet('half');
+  };
+  // Already allowed on an earlier visit: locate straight away instead of showing an empty city.
+  useEffect(() => {
+    let alive = true;
+    navigator.permissions?.query({ name: 'geolocation' as PermissionName }).then((p) => {
+      if (!alive) return;
+      if (p.state === 'granted') useMyLocation(); else if (p.state === 'denied') setLocError('denied');
+    }).catch(() => undefined);
+    return () => { alive = false; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const filtersOn = category !== null || openOnly || offersOnly || query.trim().length > 0;
+  const clearFilters = () => { setCategory(null); setOpenOnly(false); setOffersOnly(false); setQuery(''); };
   // ویترین زنده باید از موقعیت واقعی گوشی کار کند، نه نقطهٔ پیش‌فرض تهران. در آزمون
   // روی گوشی، ویترین با «مرکز تهران (پیش‌فرض)» باز می‌شد و هیچ کسب‌وکاری در شعاعش نبود.
   // تا وقتی ویترین باز است موقعیت دنبال می‌شود؛ دستهٔ نمایشی فقط با نخستین موقعیت لنگر می‌گیرد.
@@ -223,9 +244,8 @@ export default function RealPublicApp() {
 
   return <div className={`app-shell${demoBuildEnabled && demoEnabled ? ' demo-on' : ''}`} dir="rtl">
     {demoBuildEnabled && demoEnabled && <div className="demo-banner" role="status"><span>{demoBanner(true)}</span>
-      {demoAnchor && demoTarget && myPoint && <button onClick={() => setDemoTarget(reanchorDemoTarget(myPoint))}>آوردن به اینجا</button>}
-      <button onClick={() => { setDemoEnabled(false); setDemoTarget(null); }} aria-label="خاموش کردن حالت نمایشی">خاموش</button></div>}
-    {demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget && <div className="demo-hint" role="status">برای دیدن کسب‌وکارهای نمایشی کنار خودت، دکمهٔ ◎ را بزن.</div>}
+      {demoAnchor && demoTarget && myPoint && <button onClick={() => setDemoTarget(reanchorDemoTarget(myPoint))} title="کسب‌وکارهای نمونه دوباره دور موقعیت فعلی‌ات چیده شوند">کنار من بچین</button>}
+      <button onClick={() => { setDemoEnabled(false); setDemoTarget(null); }} aria-label="بستن نسخه‌ی نمایشی">بستن نمونه‌ها</button></div>}
     <MapView records={shown} matchIds={new Set()} selectedId={selectedId} center={TEHRAN_CENTER} myPoint={myPoint}
       flyTarget={selected?.coordinates ? [selected.coordinates.latitude, selected.coordinates.longitude] : flyTo}
       tileRetryKey={tileRetryKey} onSelect={openDetail}
@@ -239,7 +259,7 @@ export default function RealPublicApp() {
 
     <div className="top-bar"><div className="search-row"><form className="search-bar" role="search" onSubmit={(event) => { event.preventDefault(); runAssistant(query, false); }}>
       <span className="search-icon">🔍</span>
-      <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="چی می‌خوای؟ مثلاً «یه نوشیدنی خنک»" aria-label="جست‌وجو یا پرسش از دستیار" enterKeyHint="search" />
+      <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="چی می‌خوای؟" aria-label="جست‌وجو یا پرسش از دستیار" enterKeyHint="search" />
       {voiceInput.supported && <button type="button" className={`search-mic${voiceInput.listening ? ' on' : ''}`} aria-pressed={voiceInput.listening}
         aria-label={voiceInput.listening ? 'توقف شنیدن' : 'پرسیدن با صدا'} onClick={() => {
           if (voiceInput.listening) { voiceInput.stop(); return; }
@@ -261,10 +281,24 @@ export default function RealPublicApp() {
     <div className="map-fabs"><button className={`fab-locate${locating ? ' busy' : ''}`} onClick={useMyLocation} aria-label="موقعیت من">◎</button></div>
     <div className="primary-actions"><button className="action-fab vitrine" onClick={() => setOverlay('vitrine')} aria-label="ویترین زنده" title="ویترین زنده"><img className="action-fab-img" src="/icons/vitrine.png" alt="" width={64} height={64} /></button></div>
 
-    <BottomSheet state={sheet} onStateChange={setSheet} title={offersOnly ? 'تخفیف‌های اطراف' : 'اطراف شما'} subtitle={`${shown.length.toLocaleString('fa-IR')} مورد`}>
+    <BottomSheet state={sheet} onStateChange={setSheet} title={offersOnly ? 'تخفیف‌های اطراف' : 'اطراف شما'} subtitle={demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget ? 'موقعیتت را بده' : `${shown.length.toLocaleString('fa-IR')} مورد`}>
       {offersOnly && CHAT_ENABLED && <NearbyAlerts point={alertPoint} demoFrame={demoFrame} demoBuild={demoBuildEnabled && demoEnabled} onNeedLocation={useMyLocation} />}
       {offersOnly && hiddenOffers > 0 && <p className="offers-hint" role="status">بعضی تخفیف‌ها فقط برای کسانی است که نزدیک کسب‌وکارند؛ برای دیدنشان دکمه‌ی ◎ را بزن.</p>}
-      {shown.length === 0 ? <div className="empty">موردی مطابق فیلترهای فعلی نیست.</div> : shown.map((record) =>
+      {demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget && <div className="start-card" role="status">
+        <strong>{locError === 'denied' ? 'اجازه‌ی موقعیت بسته است' : locError === 'outside' ? 'این نسخه فقط در تهران نمونه نشان می‌دهد' : locError === 'unavailable' ? 'موقعیتت پیدا نشد' : 'کسب‌وکارهای اطرافت را ببین'}</strong>
+        <p>{locError === 'denied' ? 'می‌توانی از تنظیمات مرورگر، موقعیت را برای این سایت روشن کنی؛ یا فعلاً کسب‌وکارهای نمونه را در محدوده‌ی خودشان ببین.'
+          : locError === 'outside' ? 'کسب‌وکارهای نمونه را در محدوده‌ی خودشان ببین.'
+          : locError === 'unavailable' ? 'گوشی موقعیت را نداد. دوباره امتحان کن یا نمونه‌ها را در محدوده‌ی خودشان ببین.'
+          : 'با موقعیتت، فاصله و تخفیف‌های نزدیک را نشان می‌دهیم. موقعیت فقط روی همین گوشی حساب می‌شود.'}</p>
+        <div className="start-card-actions">
+          {locError !== 'denied' && locError !== 'outside' && <button className="primary" onClick={useMyLocation} disabled={locating}>{locating ? 'در حال پیدا کردن…' : '◎ استفاده از موقعیت من'}</button>}
+          <button onClick={showSampleArea}>دیدن محدوده‌ی نمونه</button>
+        </div>
+      </div>}
+      {!(demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget) && locError === 'denied' && !myPoint && <p className="offers-hint" role="status">اجازه‌ی موقعیت بسته است؛ فاصله‌ها از نقطه‌ی انتخابی روی نقشه حساب می‌شود.</p>}
+      {shown.length === 0 && !(demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget) ? <div className="empty">{filtersOn
+        ? <>با این جست‌وجو یا فیلترها چیزی پیدا نشد.<br /><button className="link-btn" onClick={clearFilters}>پاک کردن فیلترها</button></>
+        : 'هنوز کسب‌وکاری در این اطراف روی ملینو نیست.'}</div> : shown.map((record) =>
         <PublicBusinessRow key={record.id} record={record} catalog={catalogByOrg.get(record.id)} now={now} distanceMeters={distanceById.get(record.id)}
           selected={record.id === selectedId} featured={searching && record.promoted} onOpen={() => openDetail(record.id)} />)}
     </BottomSheet>
@@ -280,7 +314,7 @@ export default function RealPublicApp() {
       onChangePoint={() => setOverlay('none')} onUseLocation={useMyLocation} locating={locating} />}
     {overlay === 'vitrine' && <div className="panel dark"><div className="panel-head"><h3>ویترین زنده</h3><button className="panel-close" onClick={() => setOverlay('none')}>✕</button></div><div className="panel-body">
        <ArVitrineView records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point} searchPointLabel={pointLabel} preferredCategory={category} onSelectBusiness={openDetail}
-         locationPending={myPoint === null} initialRadius={demoBuildEnabled && demoEnabled ? 100 : undefined} onOpenItem={openProduct} />
+         locationPending={myPoint === null && locError === null} initialRadius={demoBuildEnabled && demoEnabled ? 100 : undefined} onOpenItem={openProduct} />
     </div></div>}
     {voiceInput.error && <div className="app-banner warn" role="status">{voiceInput.error}</div>}
     {assistant && <AssistantPanel query={assistant.query} answer={assistant.answer} results={assistantResults} loading={assistant.loading}

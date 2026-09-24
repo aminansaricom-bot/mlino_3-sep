@@ -37,7 +37,7 @@ export function useCameraStream(): {
     if (!('mediaDevices' in navigator) || navigator.mediaDevices.getUserMedia === undefined) {
       setState({
         kind: 'unavailable',
-        message: 'مرورگر از دوربین پشتیبانی نمی‌کند — حالت شبیه‌سازی فعال شد',
+        message: 'این مرورگر دوربین ندارد؛ ویترین بدون تصویر دوربین نشان داده می‌شود',
       });
       return;
     }
@@ -59,8 +59,8 @@ export function useCameraStream(): {
         kind: name === 'NotAllowedError' ? 'denied' : 'unavailable',
         message:
           name === 'NotAllowedError'
-            ? 'مجوز دوربین رد شد — حالت شبیه‌سازی فعال شد'
-            : 'دوربین در دسترس نیست (روی HTTP غیر localhost معمولاً غیرفعال است) — حالت شبیه‌سازی فعال شد',
+            ? 'دوربین خاموش است؛ ویترین بدون تصویر دوربین نشان داده می‌شود'
+            : 'دوربین در دسترس نیست؛ ویترین بدون تصویر دوربین نشان داده می‌شود',
       });
     }
   }, []);
