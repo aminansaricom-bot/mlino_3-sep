@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ملینو کسب‌وکار</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0d0c1c; color: #eef; font: 15px/1.9 system-ui, Tahoma, sans-serif; text-align: center; padding: 24px; box-sizing: border-box; }
+  main { max-width: 340px; }
+  h1 { font-size: 19px; margin: 0 0 8px; }
+  p { margin: 0 0 18px; color: #b9bfe0; }
+  button { border: 0; border-radius: 14px; padding: 12px 22px; font: inherit; font-weight: 800; color: #fff; background: #7a5cff; }
+</style>
+</head>
+<body>
+<main>
+  <h1>به اینترنت وصل نیستی</h1>
+  <p>ملینو کسب‌وکار نسخه‌ی تازه را از اینترنت می‌خواند تا همیشه به‌روز باشد. وقتی دوباره وصل شدی، خودش باز می‌شود.</p>
+  <button type="button" onclick="location.replace("https://business.mlino.site")">دوباره امتحان کن</button>
+</main>
+<script>
+  window.addEventListener('online', function () { location.replace("https://business.mlino.site"); });
+  setInterval(function () { if (navigator.onLine) fetch("https://business.mlino.site/version.json", { cache: 'no-store' }).then(function (r) { if (r.ok) location.replace("https://business.mlino.site"); }).catch(function () {}); }, 15000);
+</script>
+</body>
+</html>

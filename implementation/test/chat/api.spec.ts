@@ -34,6 +34,7 @@ describe('MLINO API — audiences, CSRF, permission per request', () => {
     const identity = new CoreIdentity(core, { pepper: crypto.randomBytes(32), delivery: testDelivery });
     await seedDemoMembers(core, identity, '09000000090');
     await seedDemoMembers(core, identity, '09000000093');
+    await seedDemoMembers(core, identity, '09000000095');
     fs.writeFileSync(catalog, JSON.stringify({ records: [{ organization_id: TEST_ORG, items: [{ name: 'لاته', price_amount: '145000', on_request: false }] }] }));
     const core2 = { prisma, plans: new PlanService(prisma), offers: new OfferService(prisma), publications: new PublicationService(prisma) };
     const handler = createHandler({ identity, chat: new ChatModule(chatDb), core: core2, config: { hosts: new Map([[V2, 'v2'], [BIZ, 'business']]), cookieSecure: false, publishedPath: published, catalogPath: catalog } });
@@ -142,5 +143,29 @@ describe('MLINO API — audiences, CSRF, permission per request', () => {
     const outsider = await login(BIZ, '09000000092');
     expect((await call(BIZ, 'GET', `/api/biz/${TEST_ORG}/plan`, undefined, outsider)).status).toBe(403);
     expect((await call(BIZ, 'POST', `/api/biz/${TEST_ORG}/plan`, { tier: 'MAX' }, outsider)).status).toBe(403);
+  });
+
+  it('device key (D-79): only the aggregate chat summary of one organization, checked on every use, ended by logout-all', async () => {
+    const member = await login(BIZ, '09000000095');
+    const outsider = await login(BIZ, '09000000096');
+    expect((await call(BIZ, 'POST', '/api/auth/device', { organizationId: TEST_ORG, label: 'pixel' }, outsider)).status).toBe(403);
+    expect((await call(V2, 'POST', '/api/auth/device', { organizationId: TEST_ORG }, member)).status).toBe(404);
+    const issued = await call(BIZ, 'POST', '/api/auth/device', { organizationId: TEST_ORG, label: 'pixel' }, member);
+    expect(issued.json.key).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    const summary = (key: string, host = BIZ) => fetch(`${base}/api/device/chat-summary`, { headers: { 'x-forwarded-host': host, authorization: `Bearer ${key}` } }).then(async (r) => ({ status: r.status, json: await r.json() as Record<string, unknown> }));
+    const ok = await summary(issued.json.key);
+    expect(ok.status).toBe(200);
+    expect(Object.keys(ok.json).sort()).toEqual(['organizationName', 'pendingQuestions', 'unreadConversations', 'unreadMessages']);
+    expect((await summary(issued.json.key, V2)).status).toBe(404);
+    expect((await summary('nope')).status).toBe(401);
+    // The key is not a session: it opens nothing else.
+    const asCookie = await fetch(`${base}/api/biz/${TEST_ORG}/chat/threads`, { headers: { 'x-forwarded-host': BIZ, authorization: `Bearer ${issued.json.key}` } });
+    expect(asCookie.status).toBe(401);
+    // Re-issuing for the same device replaces the old key; logout-all ends every key.
+    const again = await call(BIZ, 'POST', '/api/auth/device', { organizationId: TEST_ORG, label: 'pixel' }, member);
+    expect((await summary(issued.json.key)).status).toBe(401);
+    expect((await summary(again.json.key)).status).toBe(200);
+    await call(BIZ, 'POST', '/api/auth/logout-all', {}, member);
+    expect((await summary(again.json.key)).status).toBe(401);
   });
 });

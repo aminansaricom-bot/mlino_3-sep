@@ -201,6 +201,30 @@ export function createHandler(deps: ApiDeps) {
         return send(res, 200, { erased: true, conversations }, { 'set-cookie': sessionCookie('', 0, config.cookieSecure) });
       }
 
+      // ── device key for the business app's background check (D-79): chat summary of one organization only ──
+      if (path === '/api/auth/device' && (method === 'POST' || method === 'DELETE')) {
+        if (audience !== 'business') throw new HttpError(404, 'NOT_FOUND');
+        const s = needSession();
+        const body = await readJson(req);
+        const orgId = String(body.organizationId ?? '');
+        const label = String(body.label ?? 'android').replace(/[^A-Za-z0-9 _.-]/g, '').slice(0, 60) || 'android';
+        if (method === 'DELETE') return send(res, 200, { revoked: await identity.revokeDeviceKeys(s.personId, orgId, label) });
+        if (!(await identity.hasPermission(s.personId, orgId, CHAT_PERMISSION))) throw new HttpError(403, 'PERMISSION_REQUIRED');
+        return send(res, 200, await identity.issueDeviceKey(s.personId, orgId, label));
+      }
+      if (path === '/api/device/chat-summary' && method === 'GET') {
+        if (audience !== 'business') throw new HttpError(404, 'NOT_FOUND');
+        limit(`device:${clientAddress(req)}`, 60, 10 * 60_000);
+        const auth = String(req.headers.authorization ?? '');
+        const dev = await identity.resolveDeviceKey(auth.startsWith('Bearer ') ? auth.slice(7).trim() : undefined);
+        if (!dev || dev.scope !== 'chat_summary') throw new HttpError(401, 'DEVICE_KEY_INVALID');
+        // Authority is checked now, not when the key was issued (D-57): a revoked grant silences the device at once.
+        if (!(await identity.hasPermission(dev.personId, dev.organizationId, CHAT_PERMISSION))) throw new HttpError(403, 'PERMISSION_REQUIRED');
+        const sum = await chat.summary(dev.organizationId);
+        const name = published().get(dev.organizationId)?.name ?? '';
+        return send(res, 200, { organizationName: name.replace(/\s*\(آزمایشی\)/g, ''), unreadMessages: sum.unreadMessages, unreadConversations: sum.unreadConversations, pendingQuestions: sum.pendingQuestions });
+      }
+
       // ── nearby-offer notifications (V2, anonymous, opt-in — D-77) ──
       if (path.startsWith('/api/push/')) {
         if (audience !== 'v2' || !notify) throw new HttpError(404, 'NOT_FOUND');

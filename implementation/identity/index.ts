@@ -199,6 +199,38 @@ export class CoreIdentity {
   /** D-70: closing sessions never touches membership or grants. */
   async closeAllSessions(personId: string, reason = 'logout_all'): Promise<number> {
     const r = await this.pool.query('UPDATE core_identity.sessions SET closed_at = $2, close_reason = $3 WHERE person_id = $1 AND closed_at IS NULL', [personId, this.now(), reason]);
+    // A device key belongs to the person's sessions: «خروج از همه‌ی دستگاه‌ها» ends it too (D-70, D-79).
+    await this.pool.query('UPDATE core_identity.device_keys SET revoked_at = $2 WHERE person_id = $1 AND revoked_at IS NULL', [personId, this.now()]);
+    return r.rowCount ?? 0;
+  }
+
+  /**
+   * Device key (D-79): lets the business app's background task read ONE thing — the aggregate chat summary of
+   * ONE organization — while the app is closed. It carries identity + scope only; membership and grant are still
+   * checked on every use (D-57, D-66). Only its SHA-256 is stored; one live key per person, organization and device
+   * label; revoked by turning the notifications off or by «خروج از همه‌ی دستگاه‌ها».
+   */
+  async issueDeviceKey(personId: string, organizationId: string, label: string): Promise<{ key: string }> {
+    const key = crypto.randomBytes(32).toString('base64url');
+    const now = this.now();
+    await this.pool.query('UPDATE core_identity.device_keys SET revoked_at = $4 WHERE person_id = $1 AND organization_id = $2 AND label = $3 AND revoked_at IS NULL', [personId, organizationId, label, now]);
+    await this.pool.query('INSERT INTO core_identity.device_keys (id, key_digest, person_id, organization_id, scope, label, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [crypto.randomUUID(), sha256(key), personId, organizationId, 'chat_summary', label.slice(0, 60), now]);
+    return { key };
+  }
+
+  async resolveDeviceKey(key: string | undefined): Promise<{ personId: string; organizationId: string; scope: string } | null> {
+    if (!key || key.length > 100) return null;
+    const r = await this.pool.query<{ person_id: string; organization_id: string; scope: string; id: string }>(
+      'SELECT id, person_id, organization_id, scope FROM core_identity.device_keys WHERE key_digest = $1 AND revoked_at IS NULL', [sha256(key)]);
+    const row = r.rows[0];
+    if (!row) return null;
+    await this.pool.query('UPDATE core_identity.device_keys SET last_used_at = $2 WHERE id = $1', [row.id, this.now()]);
+    return { personId: row.person_id, organizationId: row.organization_id, scope: row.scope };
+  }
+
+  async revokeDeviceKeys(personId: string, organizationId: string, label: string): Promise<number> {
+    const r = await this.pool.query('UPDATE core_identity.device_keys SET revoked_at = $4 WHERE person_id = $1 AND organization_id = $2 AND label = $3 AND revoked_at IS NULL', [personId, organizationId, label, this.now()]);
     return r.rowCount ?? 0;
   }
 
@@ -315,6 +347,18 @@ CREATE TABLE IF NOT EXISTS core_identity.sessions (
   close_reason  varchar(40)
 );
 CREATE INDEX IF NOT EXISTS session_person_idx ON core_identity.sessions (person_id);
+CREATE TABLE IF NOT EXISTS core_identity.device_keys (
+  id              uuid PRIMARY KEY,
+  key_digest      bytea NOT NULL UNIQUE,
+  person_id       uuid NOT NULL REFERENCES core_identity.persons(id) ON DELETE CASCADE,
+  organization_id text NOT NULL,
+  scope           varchar(40) NOT NULL CHECK (scope IN ('chat_summary')),
+  label           varchar(60) NOT NULL,
+  created_at      timestamptz NOT NULL,
+  last_used_at    timestamptz,
+  revoked_at      timestamptz
+);
+CREATE INDEX IF NOT EXISTS device_key_person_idx ON core_identity.device_keys (person_id, organization_id);
 CREATE TABLE IF NOT EXISTS core_identity.erasure_log (
   ref       uuid PRIMARY KEY,
   erased_at timestamptz NOT NULL,

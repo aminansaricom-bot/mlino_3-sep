@@ -1,0 +1,25 @@
+// Google's Maven (dl.google.com) answers 404 to Iranian IPs, so the build resolves Android artifacts through
+// mirrors first. Passed with --init-script only for these builds; nothing global is changed.
+def mirrors = { handler ->
+    handler.maven { url 'https://maven.myket.ir' }
+    handler.maven { url 'https://maven.aliyun.com/repository/google' }
+    handler.mavenCentral()
+}
+
+beforeSettings { settings ->
+    settings.pluginManagement.repositories { mirrors(delegate) }
+}
+
+allprojects {
+    buildscript { repositories { mirrors(delegate) } }
+    repositories { mirrors(delegate) }
+}
+
+// This machine has Build Tools 36 and SDK platform 37 installed, and Google's SDK downloads are blocked from
+// Iran; use the installed Build Tools for every Android module (libraries otherwise default to 35.0.0).
+allprojects {
+    afterEvaluate { p ->
+        def android = p.extensions.findByName('android')
+        if (android != null) android.buildToolsVersion = '36.0.0'
+    }
+}

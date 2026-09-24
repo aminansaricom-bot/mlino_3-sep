@@ -1,0 +1,35 @@
+{
+  "appId": "site.mlino.business",
+  "appName": "ملینو کسب‌وکار",
+  "webDir": "www",
+  "server": {
+    "url": "https://business.mlino.site",
+    "cleartext": false,
+    "androidScheme": "https",
+    "errorPath": "offline.html",
+    "allowNavigation": [
+      "business.mlino.site"
+    ]
+  },
+  "android": {
+    "backgroundColor": "#0d0c1c",
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 900,
+      "backgroundColor": "#0d0c1c",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_INSIDE"
+    },
+    "BackgroundRunner": {
+      "label": "site.mlino.inbox",
+      "src": "runners/inbox.js",
+      "event": "checkInbox",
+      "repeat": true,
+      "interval": 15,
+      "autoStart": true
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { useState, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
 import { useWorkspace, DEMO_MEMBER } from '../workspace';
 import { usePublished } from '../published';
 import { MODULES, type ModuleId } from '../modules/registry';
@@ -13,6 +13,7 @@ import Assistant from '../assistant/Assistant';
 import StorefrontSection from '../modules/storefront/StorefrontSection';
 import PlanPage from '../modules/plan/PlanPage';
 import BottomBar from './BottomBar';
+import { RUNNER, inApp, onNative } from '../native/bridge';
 
 const STATUS_DOT: Record<string, string> = { demo: 'demo', 'published-view': 'live', live: 'live', design: 'design', blocked: 'blocked' };
 
@@ -44,6 +45,8 @@ export default function Shell() {
   const published = usePublished();
   const [drawer, setDrawer] = useState(false);
   const active = currentModule(ws.path);
+  // In the business app, a tapped «new messages» notification opens the conversations.
+  useEffect(() => (inApp() ? onNative(RUNNER, 'backgroundRunnerNotificationReceived', () => ws.navigate('/storefront/chat')) : undefined), []); // eslint-disable-line react-hooks/exhaustive-deps
   const sub = ws.path.split('/')[2] ?? '';
   const pub = published.status === 'ready' ? published.business : published.status === 'loading' ? undefined : null;
 

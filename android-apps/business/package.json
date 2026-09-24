@@ -1,0 +1,12 @@
+{
+  "name": "mlino-android-business",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/background-runner": "3.0.0",
+    "@capacitor/cli": "8.5.2",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/splash-screen": "8.0.2"
+  }
+}

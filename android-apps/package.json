@@ -1,0 +1,13 @@
+{
+  "name": "mlino-android-apps",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Two Android shells over the live MLINO web apps (D-79): «ملینو» (customer, explore.mlino.site) and «ملینو کسب‌وکار» (business.mlino.site).",
+  "dependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/background-runner": "3.0.0",
+    "@capacitor/cli": "8.5.2",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/splash-screen": "8.0.2"
+  }
+}

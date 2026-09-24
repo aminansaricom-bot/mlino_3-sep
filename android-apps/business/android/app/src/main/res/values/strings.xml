@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ملینو کسب‌وکار</string>
+    <string name="title_activity_main">ملینو کسب‌وکار</string>
+    <string name="package_name">site.mlino.business</string>
+    <string name="custom_url_scheme">site.mlino.business</string>
+</resources>

@@ -1,0 +1,35 @@
+{
+  "appId": "site.mlino.explore",
+  "appName": "ملینو",
+  "webDir": "www",
+  "server": {
+    "url": "https://explore.mlino.site",
+    "cleartext": false,
+    "androidScheme": "https",
+    "errorPath": "offline.html",
+    "allowNavigation": [
+      "explore.mlino.site"
+    ]
+  },
+  "android": {
+    "backgroundColor": "#0b1a33",
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 900,
+      "backgroundColor": "#0b1a33",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_INSIDE"
+    },
+    "BackgroundRunner": {
+      "label": "site.mlino.nearby",
+      "src": "runners/nearby.js",
+      "event": "checkNearby",
+      "repeat": true,
+      "interval": 15,
+      "autoStart": true
+    }
+  }
+}

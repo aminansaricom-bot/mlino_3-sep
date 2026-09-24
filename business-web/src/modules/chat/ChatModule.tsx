@@ -4,6 +4,7 @@ import { useChatSession } from '../../chat/session';
 import LoginCard from '../../chat/LoginCard';
 import { api, apiErrorText, type Knowledge, type Message, type Pending, type Thread } from '../../chat/api';
 import { faNum, toFaDigits } from '../../format';
+import DeviceAlerts from '../../chat/DeviceAlerts';
 
 // Customer ⇄ business chat (D-73), business side. A module with its own storage; every request is checked on the
 // server against membership and the `chat.reply` grant. The panel assistant never reads these messages; the only
@@ -73,6 +74,7 @@ function Inbox({ orgId }: { orgId: string }) {
       {!s.summary.sensitive && <button type="button" className="btn small ghost" onClick={() => void toggle()}>{s.summary.enabled ? 'خاموش کردن' : 'روشن کردن'}</button>}
     </section>}
     {s.summary && !s.summary.sensitive && <AutoReplyCard orgId={orgId} />}
+    <DeviceAlerts orgId={orgId} />
     {error && <p className="note bad" role="alert">{error}</p>}
     <div className={`chat-layout${open ? ' has-open' : ''}`}>
       <section className="card chat-list">
