@@ -27,6 +27,7 @@ const fa = (n: unknown) => String(n).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹
 const TEXT: Record<string, string> = {
   NETWORK: 'به سرور نرسیدیم؛ اینترنت را بررسی کن.',
   PHONE_INVALID: 'شمارهٔ موبایل را به شکل ۰۹xxxxxxxxx بنویس.',
+  SMS_FAILED: 'پیامک کد فرستاده نشد؛ یک دقیقه‌ی دیگر دوباره امتحان کن.',
   REAL_NUMBER_NEEDS_SMS: 'سرویس پیامک هنوز وصل نشده؛ فعلاً فقط شماره‌های آزمایشی پذیرفته می‌شوند.',
   RATE_LIMITED: 'کمی صبر کن و دوباره امتحان کن.',
   CHALLENGE_INVALID: 'کد منقضی شده؛ کد تازه بگیر.',

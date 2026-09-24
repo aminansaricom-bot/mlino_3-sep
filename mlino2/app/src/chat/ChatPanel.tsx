@@ -105,10 +105,12 @@ function Login({ config, onDone }: { config: ChatConfig | null; onDone: () => vo
   return <div className="chat-login">
     <p>برای پیام دادن به کسب‌وکارها با شمارهٔ موبایل وارد شو. کسب‌وکار فقط نامی را می‌بیند که خودت می‌نویسی، نه شماره‌ات را.</p>
     {config?.delivery === 'test' && config.testNumbers && <p className="chat-test-note">حالت آزمایشی: پیامکی فرستاده نمی‌شود. فقط شماره‌های {faDigits(config.testNumbers.from)} تا {faDigits(config.testNumbers.to)} پذیرفته می‌شوند و کد همین‌جا نشان داده می‌شود. پیام‌های آزمایشی ۲۴ ساعت پس از آخرین پیام پاک می‌شوند؛ اطلاعات واقعی ننویس.</p>}
+    {config?.delivery === 'sms' && <p className="chat-test-note">کد ورود با پیامک به شماره‌ات فرستاده می‌شود. شماره‌ات به هیچ کسب‌وکاری نشان داده نمی‌شود.</p>}
     {!challenge ? <form onSubmit={(e) => { e.preventDefault(); void start(); }}>
       <label>شمارهٔ موبایل<input dir="ltr" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="09…" /></label>
       <button type="submit" className="chat-primary" disabled={busy || phone.trim().length < 10}>{busy ? 'در حال ارسال…' : 'گرفتن کد'}</button>
     </form> : <form onSubmit={(e) => { e.preventDefault(); void verify(); }}>
+      {!challenge.testCode && <p className="chat-muted" role="status">کد ۶ رقمی به {faDigits(phone)} پیامک شد. تا ۲ دقیقه معتبر است.</p>}
       {challenge.testCode && <p className="chat-test-code">کد آزمایشی: <b dir="ltr">{faDigits(challenge.testCode)}</b></p>}
       <label>کد ۶ رقمی<input dir="ltr" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value)} /></label>
       <button type="submit" className="chat-primary" disabled={busy || code.trim().length < 6}>{busy ? 'در حال بررسی…' : 'ورود'}</button>
