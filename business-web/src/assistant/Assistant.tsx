@@ -5,7 +5,8 @@ import { docId, type Op } from '../book';
 import { compactRial, jDate, toFaDigits } from '../format';
 import { AmountInput, DateInput, Field, Segmented } from '../ui';
 import { vatOnNet } from '../engine';
-import Orb from './Orb';
+import Orb, { type Glance } from './Orb';
+import { DWELL_MS, SHOW_MS, loadMemory, outcome, pickTip, reengaged, saveMemory, shown, tipsFor, type CoachMemory, type Tip } from './coach';
 import { useChatSession } from '../chat/session';
 import { speakPersian, useVoiceInput } from './voice';
 import { evaluate, understand, type CommandResult, type Money, type Proposal } from './brain';
@@ -23,7 +24,6 @@ export default function Assistant({ published }: { published: PublishedBusiness 
   const snapshot = { today: ws.today, book: ws.book, ledger: ws.ledger, inventory: ws.inventory, crm: ws.crm, published, chat: { loggedIn: !!cs.me, summary: cs.summary } };
   const ev = useMemo(() => { try { return evaluate(snapshot, surface); } catch { return null; } }, [ws.ledger, ws.inventory, ws.crm, published, surface, cs.me, cs.summary]); // eslint-disable-line react-hooks/exhaustive-deps
   const [open, setOpen] = useState(false);
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [text, setText] = useState('');
   const [result, setResult] = useState<CommandResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -31,9 +31,49 @@ export default function Assistant({ published }: { published: PublishedBusiness 
   const [voiceOk, setVoiceOk] = useState(() => { try { return localStorage.getItem('mlino.panel.voice') === 'ok'; } catch { return false; } });
   const inputRef = useRef<HTMLInputElement>(null);
   const state = busy ? 'processing' : result?.type === 'proposal' ? 'suggesting' : ev?.state ?? 'idle';
-  const bubbleId = ev?.suggestions[0]?.id ?? ev?.message ?? '';
-  // The bubble speaks on «امروز», or anywhere when something is urgent; otherwise the orb's dot is enough.
-  const showBubble = !open && ev && ev.state !== 'idle' && !dismissed.has(bubbleId) && (surface === 'home' || ev.priority === 'high' || ev.priority === 'critical');
+  // ── gentle coaching: one tip per page, only after the member settles, gone if ignored (coach.ts) ──
+  const [tip, setTip] = useState<Tip | null>(null);
+  const [glance, setGlance] = useState<Glance>(null);
+  const memory = useRef<CoachMemory>(loadMemory());
+  const bubbleRef = useRef<HTMLDivElement>(null);
+  const remember = (next: CoachMemory) => { memory.current = next; saveMemory(next); };
+  const tips = useMemo(() => { try { return tipsFor(ws.path, snapshot); } catch { return []; } }, [ws.path, ws.ledger, ws.inventory, ws.crm, published, cs.me, cs.summary]); // eslint-disable-line react-hooks/exhaustive-deps
+  const closeTip = (kind: 'used' | 'ignored' | 'closed') => { remember(outcome(memory.current, kind, Date.now())); setTip(null); setGlance(null); };
+
+  // A new page: wait until the member settles (no typing, no open form or sheet), then offer one tip at most.
+  useEffect(() => {
+    setTip(null); setGlance(null);
+    if (open) return undefined;
+    const t = window.setTimeout(() => {
+      const busyNow = document.activeElement?.matches('input, textarea, select, [contenteditable]') || document.querySelector('[role="dialog"], .sheet, .drawer');
+      if (busyNow || document.visibilityState !== 'visible') return;
+      const next = pickTip(tips, memory.current, Date.now());
+      if (!next) return;
+      remember(shown(memory.current, next, Date.now()));
+      setTip(next);
+    }, DWELL_MS);
+    return () => window.clearTimeout(t);
+  }, [ws.path, open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // An untouched tip fades by itself and counts as «not now»; the eyes look at it while it is there.
+  useEffect(() => {
+    if (!tip) return undefined;
+    const r = bubbleRef.current?.getBoundingClientRect();
+    if (r) setGlance({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+    const t = window.setTimeout(() => closeTip('ignored'), SHOW_MS);
+    return () => window.clearTimeout(t);
+  }, [tip]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const followTip = (t: Tip) => {
+    closeTip('used');
+    if (t.action?.to) ws.navigate(t.action.to);
+    else if (t.action?.ask) { setOpen(true); setText(t.action.ask); ask(t.action.ask); }
+  };
+  const toggleOpen = () => {
+    if (!open) remember(reengaged(memory.current)); // the member came to us: attention is welcome again
+    if (tip) { setTip(null); setGlance(null); }
+    setOpen(!open);
+  };
 
   useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 50); }, [open]);
 
@@ -64,10 +104,10 @@ export default function Assistant({ published }: { published: PublishedBusiness 
   };
 
   return <div className="assistant">
-    {showBubble && <div className="assist-bubble" role="status">
-      <p>{ev!.message}</p>
-      <div className="assist-bubble-actions"><button type="button" className="link" onClick={() => setOpen(true)}>جزئیات</button>
-        <button type="button" className="link muted" onClick={() => setDismissed(new Set(dismissed).add(bubbleId))} aria-label="بستن پیام">بستن</button></div>
+    {tip && !open && <div ref={bubbleRef} className="assist-bubble assist-tip" role="status" aria-live="polite">
+      <button type="button" className="assist-tip-close" onClick={() => closeTip('closed')} aria-label="نه، ممنون">×</button>
+      <p>{tip.text}</p>
+      {tip.action && <div className="assist-bubble-actions"><button type="button" className="link" onClick={() => followTip(tip)}>{tip.action.label}</button></div>}
     </div>}
 
     {open && <section className="assist-panel" aria-label="دستیار ملینو">
@@ -98,8 +138,8 @@ export default function Assistant({ published }: { published: PublishedBusiness 
       <p className="assist-foot">هر ثبت فقط با تأیید تو انجام می‌شود. انتشار و دسترسی را خودت روی همان مورد تأیید می‌کنی.</p>
     </section>}
 
-    <button type="button" className={`assist-fab${open ? ' open' : ''}`} onClick={() => setOpen(!open)} aria-label="دستیار ملینو" aria-expanded={open}>
-      <Orb state={state} size={58} />
+    <button type="button" className={`assist-fab${open ? ' open' : ''}`} onClick={toggleOpen} aria-label="دستیار ملینو" aria-expanded={open}>
+      <Orb state={tip ? 'suggesting' : state} size={58} glance={glance} />
       {ev && ev.priority !== 'low' && !open && <i className={`assist-dot ${ev.priority}`} aria-hidden="true" />}
     </button>
   </div>;

@@ -19,7 +19,7 @@ export const ROLE_LABEL = {
 export type RoleKey = keyof typeof ROLE_LABEL;
 
 /** Chat reaches the shell only as aggregates from the server (D-73); null when no member is logged in. */
-export type ChatSnap = Readonly<{ loggedIn: boolean; summary: Readonly<{ conversations: number; unreadConversations: number; unreadMessages: number; pendingQuestions: number; enabled: boolean; sensitive: boolean }> | null }>;
+export type ChatSnap = Readonly<{ loggedIn: boolean; summary: Readonly<{ conversations: number; unreadConversations: number; unreadMessages: number; pendingQuestions: number; enabled: boolean; sensitive: boolean; autoReply?: boolean; autoReplyAllowed?: boolean }> | null }>;
 
 export type Snapshot = Readonly<{ today: string; book: BookData; ledger: Ledger; inventory: Inventory; crm: Crm; published: PublishedBusiness | null | undefined; chat?: ChatSnap | null }>;
 
