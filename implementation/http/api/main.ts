@@ -2,6 +2,7 @@ import http from 'node:http';
 import { Pool } from 'pg';
 import webpush from 'web-push';
 import { CoreIdentity, IDENTITY_SCHEMA_SQL, testDelivery, type Audience } from '../../identity';
+import { smsIrDelivery } from '../../identity/smsir';
 import { CHAT_PERMISSION, CHAT_SCHEMA_SQL, ChatModule } from '../../chat';
 import { NOTIFY_SCHEMA_SQL, NotifyModule, type Sender } from '../../notify';
 import { prisma } from '../../foundation/prisma-client';
@@ -26,7 +27,11 @@ import { seedDemoMembers } from './seed-demo-members';
  *   NOTIFY_DATABASE_URL nearby-offer notification database (optional; with VAPID_* enables notifications)
  *   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT
  *   IDENTITY_PEPPER     base64, at least 32 bytes
- *   OTP_DELIVERY        only `test` today; anything else refuses to start
+ *   OTP_DELIVERY        `test` (codes on screen, test numbers only) or `sms` (sms.ir, D-82)
+ *   SMSIR_API_KEY       with sms: the sms.ir key (environment only, never logged)
+ *   SMSIR_TEMPLATE_ID   with sms: the approved quick-send template; SMSIR_PARAMETER its code parameter (CODE)
+ *   OTP_ALLOW_TEST_NUMBERS=1  with sms: keep the fictional test range working (demo)
+ *   SMS_DAILY_LIMIT     with sms: real sends per 24 hours, all numbers together (100)
  *   API_HOSTS           e.g. explore.mlino.site=v2,business.mlino.site=business
  *   PUBLISHED_PATH      public-business.v1.json produced by the export
  *   CATALOG_PATH        public-catalog.v1.json (published catalog for the chat auto-reply)
@@ -46,14 +51,18 @@ function required(name: string): string {
 async function main(): Promise<void> {
   const pepper = Buffer.from(required('IDENTITY_PEPPER'), 'base64');
   const delivery = process.env.OTP_DELIVERY ?? 'test';
-  if (delivery !== 'test') { console.error('[mlino-api] only OTP_DELIVERY=test is implemented until an SMS provider is chosen'); process.exit(1); }
+  if (delivery !== 'test' && delivery !== 'sms') { console.error('[mlino-api] OTP_DELIVERY must be test or sms'); process.exit(1); }
+  // sms.ir quick send (D-82): key only from the environment, template approved in the account holder's panel.
+  const otpDelivery = delivery === 'sms'
+    ? smsIrDelivery({ apiKey: required('SMSIR_API_KEY'), templateId: Number(required('SMSIR_TEMPLATE_ID')), parameter: process.env.SMSIR_PARAMETER || 'CODE' })
+    : testDelivery;
 
   const core = new Pool({ connectionString: required('CORE_DATABASE_URL'), max: 5 });
   const chatDb = new Pool({ connectionString: required('CHAT_DATABASE_URL'), max: 5 });
   await core.query(IDENTITY_SCHEMA_SQL);
   await chatDb.query(CHAT_SCHEMA_SQL);
 
-  const identity = new CoreIdentity(core, { pepper, delivery: testDelivery });
+  const identity = new CoreIdentity(core, { pepper, delivery: otpDelivery, allowTestNumbers: process.env.OTP_ALLOW_TEST_NUMBERS === '1', realDailyLimit: Number(process.env.SMS_DAILY_LIMIT) || 100 });
   const chat = new ChatModule(chatDb);
 
   if (process.argv[2] === 'seed-demo-members') {

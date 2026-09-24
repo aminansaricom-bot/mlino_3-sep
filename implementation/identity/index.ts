@@ -13,6 +13,9 @@ import type { Pool, PoolClient } from 'pg';
  *   and the last four digits as a hint.
  * - Until an SMS provider is connected, delivery is `test`: only the fictional
  *   test range is accepted and the code is returned to the caller for display.
+ * - With `sms` delivery real numbers get the code by SMS. The fictional test range
+ *   keeps working (code on screen) only when `allowTestNumbers` is set — the demo —
+ *   and a daily cap on real sends protects the account's credit.
  */
 
 export const IDENTITY_PROVIDER = 'mlino-phone';
@@ -28,7 +31,7 @@ export const SESSION_TTL_DAYS = 30;
 export type IdentityErrorCode =
   | 'PHONE_INVALID' | 'REAL_NUMBER_NEEDS_SMS' | 'TEST_NUMBER_NOT_ALLOWED' | 'RATE_LIMITED'
   | 'CHALLENGE_INVALID' | 'CODE_WRONG' | 'TOO_MANY_ATTEMPTS' | 'AUDIENCE_INVALID'
-  | 'SESSION_INVALID' | 'MEMBER_OF_ORGANIZATION';
+  | 'SESSION_INVALID' | 'MEMBER_OF_ORGANIZATION' | 'SMS_FAILED';
 
 export class IdentityError extends Error {
   constructor(readonly code: IdentityErrorCode, message: string, readonly detail: Record<string, unknown> = {}) {
@@ -78,6 +81,10 @@ export interface VerifiedLogin extends SessionIdentity {
 export interface CoreIdentityOptions {
   readonly pepper: Buffer;
   readonly delivery: OtpDelivery;
+  /** With `sms` delivery: keep accepting the fictional test range, code shown on screen (demo). */
+  readonly allowTestNumbers?: boolean;
+  /** With `sms` delivery: at most this many codes sent to real numbers in 24 hours (all numbers together). */
+  readonly realDailyLimit?: number;
   readonly now?: () => Date;
 }
 
@@ -93,6 +100,15 @@ export class CoreIdentity {
 
   get deliveryMode(): 'test' | 'sms' { return this.options.delivery.mode; }
 
+  /** Whether the fictional test range may log in (always in test delivery; with SMS only if allowed). */
+  get testNumbersAllowed(): boolean { return this.deliveryMode === 'test' || !!this.options.allowTestNumbers; }
+
+  /** Same rule for logging in and for being added as a member: only someone who can actually log in. */
+  private checkNumberAllowed(test: boolean): void {
+    if (this.deliveryMode === 'test' && !test) throw new IdentityError('REAL_NUMBER_NEEDS_SMS', 'real numbers are accepted once an SMS provider is connected');
+    if (test && !this.testNumbersAllowed) throw new IdentityError('TEST_NUMBER_NOT_ALLOWED', 'test numbers are not accepted with real SMS delivery');
+  }
+
   private hmac(value: string): Buffer { return crypto.createHmac('sha256', this.options.pepper).update(value).digest(); }
 
   private checkAudience(audience: string): Audience {
@@ -104,8 +120,7 @@ export class CoreIdentity {
     const audience = this.checkAudience(input.audience);
     const phone = normalizePhone(input.phone);
     const test = isTestNumber(phone);
-    if (this.deliveryMode === 'test' && !test) throw new IdentityError('REAL_NUMBER_NEEDS_SMS', 'real numbers are accepted once an SMS provider is connected');
-    if (this.deliveryMode === 'sms' && test) throw new IdentityError('TEST_NUMBER_NOT_ALLOWED', 'test numbers are not accepted with real SMS delivery');
+    this.checkNumberAllowed(test);
 
     const digest = this.hmac(`phone:${phone}`);
     const now = this.now();
@@ -119,6 +134,10 @@ export class CoreIdentity {
       throw new IdentityError('RATE_LIMITED', 'wait before asking for another code', { retryAfterSeconds: Math.ceil(OTP_MIN_INTERVAL_SECONDS - (now.getTime() - last.getTime()) / 1000) });
     }
     if (Number(recent.rows[0]?.hour ?? 0) >= OTP_MAX_PER_HOUR) throw new IdentityError('RATE_LIMITED', 'too many codes this hour', { retryAfterSeconds: 3600 });
+    if (!test && this.deliveryMode === 'sms') {
+      const day = await this.pool.query<{ n: string }>('SELECT count(*) AS n FROM core_identity.otp_challenges WHERE test_identity = false AND created_at > $1', [new Date(now.getTime() - 86400_000)]);
+      if (Number(day.rows[0]?.n ?? 0) >= (this.options.realDailyLimit ?? 100)) throw new IdentityError('RATE_LIMITED', 'daily SMS budget reached', { retryAfterSeconds: 3600 });
+    }
 
     const challengeId = crypto.randomUUID();
     const code = String(crypto.randomInt(100000, 1000000));
@@ -127,7 +146,8 @@ export class CoreIdentity {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [challengeId, digest, phone.slice(-4), test, this.hmac(`otp:${challengeId}:${code}`), audience, now, new Date(now.getTime() + OTP_TTL_SECONDS * 1000)],
     );
-    const delivered = await this.options.delivery.send(phone, code);
+    // Test numbers never reach the SMS provider: their code is shown on screen.
+    const delivered = await (test ? testDelivery : this.options.delivery).send(phone, code);
     return { challengeId, expiresInSeconds: OTP_TTL_SECONDS, ...(delivered.displayCode ? { testCode: delivered.displayCode } : {}) };
   }
 
@@ -292,9 +312,7 @@ export class CoreIdentity {
   async personForPhone(phoneInput: string): Promise<{ personId: string; phoneHint: string }> {
     const phone = normalizePhone(phoneInput);
     const test = isTestNumber(phone);
-    // Same rule as login: a member must be someone who can actually log in.
-    if (this.deliveryMode === 'test' && !test) throw new IdentityError('REAL_NUMBER_NEEDS_SMS', 'real numbers are accepted once an SMS provider is connected');
-    if (this.deliveryMode === 'sms' && test) throw new IdentityError('TEST_NUMBER_NOT_ALLOWED', 'test numbers are not accepted with real SMS delivery');
+    this.checkNumberAllowed(test);
     const r = await this.pool.query<{ id: string }>(
       `INSERT INTO core_identity.persons (id, phone_digest, phone_hint, test_identity) VALUES ($1, $2, $3, $4)
        ON CONFLICT (phone_digest) DO UPDATE SET phone_hint = EXCLUDED.phone_hint RETURNING id`,

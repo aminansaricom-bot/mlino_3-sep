@@ -159,7 +159,7 @@ export function createHandler(deps: ApiDeps) {
 
       // ── Core identity ──
       if (path === '/api/auth/config' && method === 'GET') {
-        return send(res, 200, { delivery: identity.deliveryMode, testNumbers: identity.deliveryMode === 'test' ? { from: '09000000001', to: '09000000099' } : null, audience });
+        return send(res, 200, { delivery: identity.deliveryMode, testNumbers: identity.testNumbersAllowed ? { from: '09000000001', to: '09000000099' } : null, audience });
       }
       if (path === '/api/auth/otp/start' && method === 'POST') {
         limit(`otp:${clientAddress(req)}`, 10, 10 * 60_000);
@@ -367,7 +367,7 @@ export function createHandler(deps: ApiDeps) {
       if (e instanceof NotifyError) return send(res, 400, { error: e.code });
       if (e instanceof CoreDomainError) return send(res, coreErrorStatus(e), { error: e.code, message: e.code === 'PLAN_LIMIT' ? e.message : undefined });
       if (e instanceof IdentityError) {
-        const status = e.code === 'RATE_LIMITED' || e.code === 'TOO_MANY_ATTEMPTS' ? 429 : e.code === 'MEMBER_OF_ORGANIZATION' ? 409 : 400;
+        const status = e.code === 'RATE_LIMITED' || e.code === 'TOO_MANY_ATTEMPTS' ? 429 : e.code === 'MEMBER_OF_ORGANIZATION' ? 409 : e.code === 'SMS_FAILED' ? 503 : 400;
         return send(res, status, { error: e.code, ...e.detail });
       }
       if (e instanceof ChatError) {

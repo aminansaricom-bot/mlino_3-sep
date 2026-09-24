@@ -30,11 +30,13 @@ export default function LoginCard({ config, onDone, hint }: { config: AuthConfig
   return <section className="card login-card">
     <header className="card-head"><h3>ورود عضو با شماره‌ی موبایل</h3>{test && <span className="badge warn">حالت آزمایشی</span>}</header>
     {test && <p className="policy-note">سرویس پیامک هنوز وصل نشده. فقط شماره‌های آزمایشی {toFaDigits(config!.testNumbers!.from)} تا {toFaDigits(config!.testNumbers!.to)} پذیرفته می‌شوند و کد همین‌جا نشان داده می‌شود. پیام‌های حالت آزمایشی ۲۴ ساعت پس از آخرین پیام پاک می‌شوند؛ اطلاعات واقعی ننویس.{hint ? ` ${hint}` : ''}</p>}
+    {!test && config?.delivery === 'sms' && <p className="policy-note">کد ورود با پیامک به همین شماره فرستاده می‌شود.{config.testNumbers ? ` شماره‌های آزمایشی ${toFaDigits(config.testNumbers.from)} تا ${toFaDigits(config.testNumbers.to)} هم برای نمایش کار می‌کنند و کدشان همین‌جا دیده می‌شود.` : ''}{hint ? ` ${hint}` : ''}</p>}
     {!challenge ? <form onSubmit={(e) => { e.preventDefault(); void start(); }}>
       <div className="field"><label htmlFor="login-phone">شماره‌ی موبایل</label>
         <input id="login-phone" dir="ltr" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="09…" /></div>
       <button type="submit" className="btn primary wide" disabled={busy || phone.trim().length < 10}>{busy ? 'در حال ارسال…' : 'گرفتن کد'}</button>
     </form> : <form onSubmit={(e) => { e.preventDefault(); void verify(); }}>
+      {!challenge.testCode && <p className="note" role="status">کد ۶ رقمی به {toFaDigits(phone)} پیامک شد. تا ۲ دقیقه معتبر است.</p>}
       {challenge.testCode && <p className="test-code">کد آزمایشی: <b dir="ltr">{toFaDigits(challenge.testCode)}</b></p>}
       <div className="field"><label htmlFor="login-code">کد ۶ رقمی</label>
         <input id="login-code" dir="ltr" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value)} /></div>
