@@ -7,6 +7,7 @@ import { AmountInput, DateInput, Field, Segmented } from '../ui';
 import { vatOnNet } from '../engine';
 import Orb from './Orb';
 import { useChatSession } from '../chat/session';
+import { speakPersian, useVoiceInput } from './voice';
 import { evaluate, understand, type CommandResult, type Money, type Proposal } from './brain';
 import { qtyText } from '../modules/inventory/InventoryModule';
 import type { InvOp } from '../modules/inventory/data';
@@ -14,7 +15,6 @@ import type { InvOp } from '../modules/inventory/data';
 const STATE_LABEL = { idle: 'آماده', thinking: 'در حال بررسی', happy: 'وضعیت خوب', concerned: 'نیاز به توجه', warning: 'هشدار', suggesting: 'یک پیشنهاد دارم', celebrating: 'خبر خوب!', processing: 'در حال انجام' } as const;
 const EXAMPLES = ['سود این ماه چقدره؟', 'هزینه‌ی برق ۱۲ میلیون از بانک ملت', '۲۰ کیلو شیر وارد انبار شد به قیمت ۹ میلیون', 'چک‌های این هفته چیه؟'];
 
-type SpeechCtor = new () => { lang: string; interimResults: boolean; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null; start(): void; stop(): void };
 
 export default function Assistant({ published }: { published: PublishedBusiness | null | undefined }) {
   const ws = useWorkspace();
@@ -27,7 +27,7 @@ export default function Assistant({ published }: { published: PublishedBusiness 
   const [text, setText] = useState('');
   const [result, setResult] = useState<CommandResult | null>(null);
   const [busy, setBusy] = useState(false);
-  const [listening, setListening] = useState(false);
+  const [voiceConsent, setVoiceConsent] = useState(false);
   const [voiceOk, setVoiceOk] = useState(() => { try { return localStorage.getItem('mlino.panel.voice') === 'ok'; } catch { return false; } });
   const inputRef = useRef<HTMLInputElement>(null);
   const state = busy ? 'processing' : result?.type === 'proposal' ? 'suggesting' : ev?.state ?? 'idle';
@@ -37,30 +37,30 @@ export default function Assistant({ published }: { published: PublishedBusiness 
 
   useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 50); }, [open]);
 
-  const ask = (q: string) => {
+  const ask = (q: string, spoken = false) => {
     const t = q.trim();
     if (!t) return;
     setBusy(true);
-    try { setResult(understand(t, snapshot)); } catch { setResult({ type: 'unknown', text: 'نتوانستم این را بفهمم.' }); }
+    let out: CommandResult;
+    try { out = understand(t, snapshot); } catch { out = { type: 'unknown', text: 'نتوانستم این را بفهمم.' }; }
+    setResult(out);
     setBusy(false);
+    // Like V2: a spoken question gets a spoken answer when a Persian voice is installed. Proposals are never read
+    // out as if done — the card still needs the member's explicit confirmation.
+    if (spoken) speakPersian(out.type === 'proposal' ? `پیش‌نویس ${out.title} آماده است؛ برای ثبت، آن را تأیید کن.` : out.type === 'navigate' ? `برویم به ${out.label}؟` : out.text);
   };
+  const voice = useVoiceInput((said) => setText(said), (said) => { setText(said); ask(said, true); });
+  const listening = voice.listening;
 
-  const speech = (): SpeechCtor | null => { const w = window as unknown as { SpeechRecognition?: SpeechCtor; webkitSpeechRecognition?: SpeechCtor }; return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null; };
   const listen = () => {
-    const Ctor = speech();
-    if (!Ctor) return;
-    if (!voiceOk) {
-      if (!window.confirm('برای تبدیل صدا به متن، صدایت به سرویس گفتار مرورگر (در کروم: گوگل) می‌رود. فهم فرمان روی همین دستگاه انجام می‌شود. موافقی؟')) return;
-      try { localStorage.setItem('mlino.panel.voice', 'ok'); } catch { /* optional */ }
-      setVoiceOk(true);
-    }
-    const r = new Ctor();
-    r.lang = 'fa-IR'; r.interimResults = false;
-    r.onresult = (e) => { const said = e.results[0]?.[0]?.transcript ?? ''; setText(said); ask(said); };
-    r.onend = () => setListening(false);
-    r.onerror = () => setListening(false);
-    setListening(true);
-    r.start();
+    if (voice.listening) { voice.stop(); return; }
+    if (!voiceOk) { setVoiceConsent(true); return; }
+    voice.start();
+  };
+  const acceptVoice = () => {
+    try { localStorage.setItem('mlino.panel.voice', 'ok'); } catch { /* per-viewer convenience only */ }
+    setVoiceOk(true); setVoiceConsent(false);
+    voice.start(); // started from this tap, so the browser treats it as the member's own gesture
   };
 
   return <div className="assistant">
@@ -85,10 +85,16 @@ export default function Assistant({ published }: { published: PublishedBusiness 
       </div>
 
       <form className="assist-input" onSubmit={(e) => { e.preventDefault(); ask(text); }}>
-        <input ref={inputRef} value={text} onChange={(e) => setText(e.target.value)} placeholder="بپرس یا بگو چه ثبت کنم…" aria-label="فرمان یا پرسش از ملینو" />
-        {speech() && <button type="button" className={`assist-mic${listening ? ' on' : ''}`} onClick={listen} aria-label="گفتن با صدا" aria-pressed={listening}><img className="assist-mic-img" src="/icons/voice.png" alt="" aria-hidden="true" draggable={false} /></button>}
+        <input ref={inputRef} value={text} onChange={(e) => setText(e.target.value)} placeholder={listening ? 'در حال شنیدن… بگو' : 'بپرس یا بگو چه ثبت کنم…'} aria-label="فرمان یا پرسش از ملینو" />
+        {voice.supported && <button type="button" className={`assist-mic${listening ? ' on' : ''}`} onClick={listen} aria-label={listening ? 'توقف شنیدن' : 'گفتن با صدا'} aria-pressed={listening}><img className="assist-mic-img" src="/icons/voice.png" alt="" aria-hidden="true" draggable={false} /></button>}
         <button type="submit" className="assist-send" aria-label="ارسال" disabled={!text.trim()}>➤</button>
       </form>
+      {voiceConsent && <div className="assist-card voice-consent" role="dialog" aria-label="اجازه‌ی صدا">
+        <p>برای تبدیل صدا به متن، صدایت به سرویس گفتار خود مرورگر می‌رود (در کروم: گوگل). فهم فرمان روی همین دستگاه انجام می‌شود و هیچ ثبتی بدون تأیید تو انجام نمی‌شود.</p>
+        <div className="assist-row"><button type="button" className="btn small" onClick={acceptVoice}>موافقم، گوش کن</button><button type="button" className="btn small ghost" onClick={() => setVoiceConsent(false)}>نه</button></div>
+      </div>}
+      {voice.error && <p className="assist-voice-error" role="alert">{voice.error}</p>}
+      {!voice.supported && <p className="assist-voice-error">این مرورگر تشخیص گفتار ندارد؛ کروم یا سافاری تازه را امتحان کن.</p>}
       <p className="assist-foot">هر ثبت فقط با تأیید تو انجام می‌شود. انتشار و دسترسی را خودت روی همان مورد تأیید می‌کنی.</p>
     </section>}
 
