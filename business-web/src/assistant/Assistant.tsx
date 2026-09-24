@@ -86,7 +86,7 @@ export default function Assistant({ published }: { published: PublishedBusiness 
 
       <form className="assist-input" onSubmit={(e) => { e.preventDefault(); ask(text); }}>
         <input ref={inputRef} value={text} onChange={(e) => setText(e.target.value)} placeholder="بپرس یا بگو چه ثبت کنم…" aria-label="فرمان یا پرسش از ملینو" />
-        {speech() && <button type="button" className={`assist-mic${listening ? ' on' : ''}`} onClick={listen} aria-label="گفتن با صدا">🎤</button>}
+        {speech() && <button type="button" className={`assist-mic${listening ? ' on' : ''}`} onClick={listen} aria-label="گفتن با صدا" aria-pressed={listening}><img className="assist-mic-img" src="/icons/voice.png" alt="" aria-hidden="true" draggable={false} /></button>}
         <button type="submit" className="assist-send" aria-label="ارسال" disabled={!text.trim()}>➤</button>
       </form>
       <p className="assist-foot">هر ثبت فقط با تأیید تو انجام می‌شود. انتشار و دسترسی را خودت روی همان مورد تأیید می‌کنی.</p>

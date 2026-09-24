@@ -418,6 +418,8 @@ b.pos { color: var(--pos); } b.neg { color: var(--neg); }
 .assist-send { color: #fff; border: 0; background: linear-gradient(135deg, var(--pink), var(--violet)); }
 .assist-send:disabled { opacity: .45; }
 .assist-mic.on { background: var(--bad-bg); animation: mic-pulse 1.2s ease-in-out infinite; }
+.assist-mic { display: grid; place-items: center; padding: 0; }
+.assist-mic-img { width: 30px; height: 30px; display: block; pointer-events: none; }
 @keyframes mic-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(214,51,108,.35); } 50% { box-shadow: 0 0 0 8px rgba(214,51,108,0); } }
 .assist-foot { margin: 0; padding: 0 12px 10px; font-size: 11px; color: var(--muted); }
 
