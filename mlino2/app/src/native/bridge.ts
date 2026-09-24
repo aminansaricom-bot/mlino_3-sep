@@ -28,4 +28,20 @@ export function onNative(plugin: string, event: string, cb: (data: unknown) => v
 }
 
 export const RUNNER = 'BackgroundRunner';
+export const SPEECH = 'MlinoSpeech';
+
+/**
+ * The phone's back button (Android app). The app asks the page first; a handler returns true when it closed
+ * something. Handlers stack: the most recently mounted layer (e.g. the welcome screen) answers first.
+ */
+const backStack: Array<() => boolean> = [];
+export function onBackButton(handler: () => boolean): () => void {
+  if (typeof window === 'undefined') return () => undefined;
+  backStack.push(handler);
+  (window as unknown as { __mlinoBack?: () => boolean }).__mlinoBack = () => {
+    for (let i = backStack.length - 1; i >= 0; i -= 1) if (backStack[i]()) return true;
+    return false;
+  };
+  return () => { const i = backStack.lastIndexOf(handler); if (i >= 0) backStack.splice(i, 1); };
+}
 export const NEARBY_LABEL = 'site.mlino.nearby';

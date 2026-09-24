@@ -58,7 +58,7 @@ export default function ChatPanel({ target, onClose }: { target: ChatTarget | nu
     try { await chatApi('DELETE', '/auth/account'); setPerson(null); setThreads(null); setView({ kind: 'list' }); } catch (e) { setError(chatErrorText(e)); }
   };
 
-  const title = view.kind === 'new' ? `پیام به ${clean(view.target.name)}` : view.kind === 'thread' ? clean(threads?.find((t) => t.id === view.id)?.businessName ?? 'گفتگو') : 'پیام‌های من';
+  const title = view.kind === 'new' ? `پیام به ${clean(view.target.name)}` : view.kind === 'thread' ? clean(threads?.find((t) => t.id === view.id)?.businessName ?? 'گفتگو') : !person && target ? `پیام به ${clean(target.name)}` : 'پیام‌های من';
   return <section className="panel chat-panel" aria-label={title}>
     <div className="panel-head">
       {view.kind !== 'list' && person && <button className="panel-close" onClick={() => { setView({ kind: 'list' }); void loadThreads(); }} aria-label="بازگشت">→</button>}

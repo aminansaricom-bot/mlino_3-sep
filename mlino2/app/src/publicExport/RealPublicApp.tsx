@@ -26,7 +26,8 @@ import { CHAT_ENABLED } from '../chat/chatApi';
 import ChatPanel, { ChatInboxButton, type ChatTarget } from '../chat/ChatPanel';
 import { hiddenForLackOfPosition, promoteMatches, toDataFrame, withNearbyOffers } from '../offers/nearbyOffers';
 import NearbyAlerts, { alertsOn, refreshAlertLocation } from '../offers/NearbyAlerts';
-import { NEARBY_LABEL, RUNNER, callNative, inApp, onNative } from '../native/bridge';
+import { NEARBY_LABEL, RUNNER, callNative, inApp, onBackButton, onNative } from '../native/bridge';
+import Welcome, { shouldWelcome } from '../onboarding/Welcome';
 import { demoBanner, nextDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, validPoint, visibleDemoRecords, type Point } from '../demo/demoRelocation';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
@@ -81,6 +82,7 @@ export default function RealPublicApp() {
   const [locating, setLocating] = useState(false);
   // Why there is no position: the user said no, the device could not tell, or (demo) the phone is outside the demo area.
   const [locError, setLocError] = useState<null | 'denied' | 'unavailable' | 'outside'>(null);
+  const [welcome, setWelcome] = useState(shouldWelcome);
   const [suggestionEmpty, setSuggestionEmpty] = useState(false);
   const [product, setProduct] = useState<{ item: CatalogItem; businessName: string } | null>(null);
   const [assistant, setAssistant] = useState<{ query: string; answer: AssistantAnswer | null; loading: boolean; voice: boolean } | null>(null);
@@ -153,12 +155,18 @@ export default function RealPublicApp() {
   const useMyLocation = () => {
     if (!navigator.geolocation) { setLocError('unavailable'); return; }
     setLocating(true);
+    // A quick network position first (a second or two), then GPS refines it; waiting for GPS alone took ~20 s.
+    const refine = () => navigator.geolocation.getCurrentPosition(({ coords }) => {
+      const next: Point = [coords.latitude, coords.longitude];
+      if (demoBuildEnabled && !validPoint(next)) return;
+      setMyPoint([next[0], next[1]]); setPoint([next[0], next[1]]);
+    }, () => undefined, { enableHighAccuracy: true, timeout: 30_000, maximumAge: 0 });
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => { const next: Point = [coords.latitude, coords.longitude]; if (demoBuildEnabled && !validPoint(next)) { setLocating(false); setLocError('outside'); return; }
+      ({ coords }) => { refine(); const next: Point = [coords.latitude, coords.longitude]; if (demoBuildEnabled && !validPoint(next)) { setLocating(false); setLocError('outside'); return; }
         setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setFlyTo([next[0], next[1]]); setPointLabel('موقعیت من'); setNearbyOnly(true); setLocating(false); setLocError(null);
         if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => nextDemoTarget(current, next)); },
       (error) => { setLocating(false); setLocError(error?.code === 1 ? 'denied' : 'unavailable'); },
-      { timeout: 15_000, maximumAge: 60_000 },
+      { enableHighAccuracy: false, timeout: 15_000, maximumAge: 5 * 60_000 },
     );
   };
   // Without a position the demo businesses can still be shown where they really are (the demo area).
@@ -177,6 +185,19 @@ export default function RealPublicApp() {
     return () => { alive = false; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const filtersOn = category !== null || openOnly || offersOnly || query.trim().length > 0;
+  // Android back button: close the top-most layer; nothing open means the app may go to the background.
+  const backRef = useRef<() => boolean>(() => false);
+  backRef.current = () => {
+    if (product) { setProduct(null); return true; }
+    if (pendingAsk) { setPendingAsk(null); return true; }
+    if (assistant) { setAssistant(null); return true; }
+    if (overlay === 'chat') { setOverlay(chatTarget ? 'detail' : 'none'); setChatRefresh((n) => n + 1); return true; }
+    if (overlay !== 'none') { setOverlay('none'); return true; }
+    if (sheet === 'full') { setSheet('half'); return true; }
+    if (sheet === 'half') { setSheet('peek'); return true; }
+    return false;
+  };
+  useEffect(() => onBackButton(() => backRef.current()), []);
   const clearFilters = () => { setCategory(null); setOpenOnly(false); setOffersOnly(false); setQuery(''); };
   // ویترین زنده باید از موقعیت واقعی گوشی کار کند، نه نقطهٔ پیش‌فرض تهران. در آزمون
   // روی گوشی، ویترین با «مرکز تهران (پیش‌فرض)» باز می‌شد و هیچ کسب‌وکاری در شعاعش نبود.
@@ -321,6 +342,7 @@ export default function RealPublicApp() {
       onOpen={(id) => openDetail(id)} onClose={() => setAssistant(null)} />}
     {pendingAsk && <AssistantConsent remote={ASSISTANT_REMOTE} onAccept={() => { const voice = pendingAsk.voice && !pendingAsk.query; decideConsent('granted'); if (voice) voiceInput.start(); }}
       onLocal={() => { const voice = ASSISTANT_REMOTE && pendingAsk.voice && !pendingAsk.query; decideConsent('local'); if (voice) voiceInput.start(); }} />}
+    {welcome && <Welcome onClose={() => setWelcome(false)} onLocate={() => { setSheet('half'); useMyLocation(); }} />}
     {product && <ProductPage item={product.item} businessName={product.businessName} onClose={() => setProduct(null)} />}
   </div>;
 }

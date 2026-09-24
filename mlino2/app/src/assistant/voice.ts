@@ -4,6 +4,7 @@
 // می‌رود و این در متن رضایت صریح گفته می‌شود. پاسخ صوتی فقط اگر صدای فارسی نصب باشد.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { SPEECH, callNative, inApp, onNative } from '../native/bridge';
 
 type RecognitionLike = {
   lang: string; interimResults: boolean; continuous: boolean; maxAlternatives: number;
@@ -14,7 +15,41 @@ type RecognitionLike = {
 };
 type RecognitionCtor = new () => RecognitionLike;
 
+/**
+ * Inside the Android app the web view has no working speech API; the app's MlinoSpeech plugin (the phone's own
+ * recogniser) is wrapped in the same shape, so everything above it stays the same.
+ */
+class NativeRecognition implements RecognitionLike {
+  lang = 'fa-IR'; interimResults = true; continuous = false; maxAlternatives = 1;
+  onresult: RecognitionLike['onresult'] = null;
+  onerror: RecognitionLike['onerror'] = null;
+  onend: RecognitionLike['onend'] = null;
+  private off: Array<() => void> = [];
+  private ended = false;
+  private emit(text: string, isFinal: boolean) {
+    const item = Object.assign([{ transcript: text }], { isFinal });
+    this.onresult?.({ results: [item] });
+  }
+  private finish() {
+    if (this.ended) return;
+    this.ended = true;
+    this.off.forEach((f) => f()); this.off = [];
+    this.onend?.();
+  }
+  start(): void {
+    this.off.push(onNative(SPEECH, 'partial', (d) => this.emit(String((d as { text?: string }).text ?? ''), false)));
+    this.off.push(onNative(SPEECH, 'result', (d) => this.emit(String((d as { text?: string }).text ?? ''), true)));
+    this.off.push(onNative(SPEECH, 'error', (d) => this.onerror?.({ error: String((d as { error?: string }).error ?? 'service-not-allowed') })));
+    this.off.push(onNative(SPEECH, 'end', () => this.finish()));
+    callNative(SPEECH, 'start', { lang: this.lang, interimResults: this.interimResults })
+      .catch((e: unknown) => { this.onerror?.({ error: e instanceof Error && e.message ? e.message : 'not-allowed' }); this.finish(); });
+  }
+  stop(): void { void callNative(SPEECH, 'stop').catch(() => undefined); }
+  abort(): void { void callNative(SPEECH, 'abort').catch(() => undefined); this.finish(); }
+}
+
 export function recognitionCtor(scope: unknown = globalThis): RecognitionCtor | null {
+  if (scope === globalThis && inApp()) return NativeRecognition;
   const g = scope as { SpeechRecognition?: RecognitionCtor; webkitSpeechRecognition?: RecognitionCtor };
   return g.SpeechRecognition ?? g.webkitSpeechRecognition ?? null;
 }
