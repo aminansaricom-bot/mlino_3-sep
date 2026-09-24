@@ -92,8 +92,8 @@ export default function OffersManager() {
               <small>{o.radiusMeters ? `شعاع ${radiusText(o.radiusMeters)}` : 'برای همه'}، {o.validUntil ? `تا ${jDate(o.validUntil.slice(0, 10))}` : 'بدون تاریخ پایان'}{o.priceAmount ? `، ${faNum(Number(o.priceAmount))} ریال` : ''}</small></div>
             <div className="offer-side">
               <span className={`badge ${live ? 'ok' : o.expired ? 'muted' : o.status === 'PUBLISHED' ? 'ok' : 'warn'}`}>{o.expired ? 'تمام‌شده' : o.status === 'PUBLISHED' ? 'منتشرشده' : o.status === 'WITHDRAWN' ? 'برداشته‌شده' : 'پیش‌نویس'}</span>
-              {o.status !== 'PUBLISHED' && !o.expired && <button type="button" className="btn small" disabled={busy} onClick={() => void act(o, 'publish')}>انتشار</button>}
-              {live && <button type="button" className="btn small ghost" disabled={busy} onClick={() => void act(o, 'withdraw')}>برداشتن</button>}
+              {o.status !== 'PUBLISHED' && !o.expired && s.can('publication.manage') && <button type="button" className="btn small" disabled={busy} onClick={() => void act(o, 'publish')}>انتشار</button>}
+              {live && s.can('publication.manage') && <button type="button" className="btn small ghost" disabled={busy} onClick={() => void act(o, 'withdraw')}>برداشتن</button>}
             </div>
           </li>;
         })}</ul>}

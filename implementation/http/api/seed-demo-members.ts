@@ -6,11 +6,15 @@ import { CHAT_PERMISSION } from '../../chat';
 /**
  * Demo only. Makes one fictional test identity a member of every fictional `test-demo-*` organization with
  * `chat.reply` (chat module), `offer.manage` + `publication.manage` (so the panel can create and publish offers —
- * publishing stays a person's tap) and `plan.manage` (demo plan switch), each granted by that organization's
+ * publishing stays a person's tap), `plan.manage` (demo plan switch) and the four member-management keys, each granted by that organization's
  * existing founding membership (basis `member_grant`, D-57). Refuses any organization outside the test-demo
  * range and any number outside the test range. Idempotent.
  */
-const DEMO_GRANTS = [CHAT_PERMISSION, 'offer.manage', 'publication.manage', 'plan.manage'] as const;
+const DEMO_GRANTS = [
+  CHAT_PERMISSION, 'offer.manage', 'publication.manage', 'plan.manage',
+  // Member management, so the demo can show adding a colleague and giving or taking a permission.
+  'membership.create', 'membership.revoke', 'permission_grant.issue', 'permission_grant.revoke',
+] as const;
 
 export async function seedDemoMembers(core: Pool, identity: CoreIdentity, phone: string): Promise<{ added: number; existing: number }> {
   const personId = await identity.ensureTestPerson(phone);

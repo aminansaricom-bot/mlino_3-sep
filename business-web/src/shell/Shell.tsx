@@ -3,6 +3,8 @@ import { useWorkspace, DEMO_MEMBER } from '../workspace';
 import { useChatSession } from '../chat/session';
 import { PackProvider } from '../industry/context';
 import SettingsPage from './SettingsPage';
+import MembersPage from './MembersPage';
+import { ADMIN_KEYS } from '../chat/permissions';
 import { usePublished } from '../published';
 import { MODULES, type ModuleId } from '../modules/registry';
 import { jDateLong } from '../format';
@@ -25,18 +27,19 @@ export function Link({ to, className, children, onNavigate }: { to: string; clas
   return <a href={to} className={className} onClick={(e: MouseEvent) => { if (e.metaKey || e.ctrlKey) return; e.preventDefault(); navigate(to); onNavigate?.(); }}>{children}</a>;
 }
 
-type Place = ModuleId | 'home' | 'settings';
+type Place = ModuleId | 'home' | 'settings' | 'members';
 
 function currentModule(path: string): Place {
   // Old addresses from before «ویترین مجازی» held offers and chat.
   const legacy: Record<string, ModuleId> = { offers: 'storefront', chat: 'storefront' };
   const first = path.split('/')[1] ?? '';
   if (legacy[first]) return legacy[first];
-  if (first === 'settings') return 'settings';
+  if (first === 'settings' || first === 'members') return first;
   return (MODULES.find((m) => m.route === `/${first}`)?.id ?? 'home') as Place;
 }
 
 function NavList({ active, onNavigate }: { active: Place; onNavigate?: () => void }) {
+  const s = useChatSession();
   return <nav className="side-nav" aria-label="ماژول‌ها">
     <Link to="/" className={`nav-item${active === 'home' ? ' on' : ''}`} onNavigate={onNavigate}><span aria-hidden="true">🏠</span>امروز</Link>
     <p className="nav-group">ماژول‌ها</p>
@@ -45,6 +48,7 @@ function NavList({ active, onNavigate }: { active: Place; onNavigate?: () => voi
     </Link>)}
     <p className="nav-group">کسب‌وکار</p>
     <Link to="/settings" className={`nav-item${active === 'settings' ? ' on' : ''}`} onNavigate={onNavigate}><span aria-hidden="true">⚙️</span>تنظیمات و نوع کسب‌وکار</Link>
+    {ADMIN_KEYS.some((k) => s.can(k)) && <Link to="/members" className={`nav-item${active === 'members' ? ' on' : ''}`} onNavigate={onNavigate}><span aria-hidden="true">🔑</span>اعضا و دسترسی‌ها</Link>}
   </nav>;
 }
 
@@ -71,6 +75,7 @@ export default function Shell() {
     case 'crm': page = <CrmModule tab={sub} />; break;
     case 'content': page = <LockedModule id={active} />; break;
     case 'settings': page = <SettingsPage />; break;
+    case 'members': page = <MembersPage />; break;
     default: page = <Home published={pub} />;
   }
 
@@ -80,7 +85,7 @@ export default function Shell() {
     <header className="top">
       <button type="button" className="icon-btn menu-btn" onClick={() => setDrawer(true)} aria-label="فهرست ماژول‌ها">☰</button>
       <Link to="/" className="brand"><img src="/logo.png" alt="" width="34" height="34" /></Link>
-      <div className="title"><strong>{businessName}</strong><small>{session.me ? 'عضو کسب‌وکار' : DEMO_MEMBER.name} — {jDateLong(ws.today)}</small></div>
+      <div className="title"><strong>{businessName}</strong><small>{session.me ? `عضو …${session.me.phoneHint.replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])}` : DEMO_MEMBER.name} — {jDateLong(ws.today)}</small></div>
       <span className="demo-tag">نمایشی</span>
     </header>
 

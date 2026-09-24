@@ -12,6 +12,8 @@ type ChatSession = Readonly<{
   orgId: string | null;
   org: Organization | null;
   summary: ChatSummary | null;
+  /** May the member on screen do this here? Logged out = the demo shows every section (each asks for login). */
+  can: (permissionKey: string) => boolean;
   setOrgId: (id: string) => void;
   refresh: () => Promise<void>;
   refreshSummary: () => Promise<void>;
@@ -66,7 +68,10 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
     setMe(null); setOrganizations([]); setSummary(null);
   };
 
-  const value = useMemo(() => ({ ready, config, me, organizations, orgId, org, summary, setOrgId, refresh, refreshSummary, logout }), [ready, config, me, organizations, orgId, org, summary, refresh, refreshSummary]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Only for what the panel shows; the server checks membership and grant on every act (D-57).
+  const can = useCallback((key: string) => !me || !!org?.permissions?.includes(key), [me, org]);
+
+  const value = useMemo(() => ({ ready, config, me, organizations, orgId, org, summary, can, setOrgId, refresh, refreshSummary, logout }), [ready, config, me, organizations, orgId, org, summary, can, refresh, refreshSummary]); // eslint-disable-line react-hooks/exhaustive-deps
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

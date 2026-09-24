@@ -42,6 +42,10 @@ const TEXT: Record<string, string> = {
   CSRF: 'درخواست از جای نامعتبر آمد.',
   PLAN_LIMIT: 'این امکان در پلن فعلی نیست؛ از «پلن و اشتراک» ارتقا بده.',
   MEMBERSHIP_REQUIRED: 'این شماره عضو این کسب‌وکار نیست.',
+  ADMIN_REQUIRED: 'دیدن اعضا فقط برای کسی است که اجازه‌ی مدیریت اعضا دارد.',
+  ALREADY_MEMBER: 'این شماره همین حالا عضو این کسب‌وکار است.',
+  SELF_REMOVAL: 'خودت را از اینجا نمی‌توانی حذف کنی؛ مدیر دیگری باید این کار را بکند.',
+  CONFLICT: 'این تغییر ممکن نیست؛ مثلاً آخرین کسی که اجازه می‌دهد نمی‌تواند حذف شود.',
   AUTHORIZATION_DENIED: 'این کار اجازه‌ای می‌خواهد که این عضو ندارد.',
   VALIDATION_FAILED: 'مقدارها درست نیست.',
 };
@@ -57,7 +61,7 @@ export function apiErrorText(e: unknown): string {
 }
 
 export type AuthConfig = { delivery: 'test' | 'sms'; testNumbers: { from: string; to: string } | null };
-export type Organization = { organizationId: string; name: string; published: boolean; canChat: boolean };
+export type Organization = { organizationId: string; name: string; published: boolean; canChat: boolean; permissions: string[] };
 export type Me = { person: { phoneHint: string; test: boolean } | null; organizations?: Organization[] };
 export type ChatSummary = { conversations: number; unreadConversations: number; unreadMessages: number; pendingQuestions: number; enabled: boolean; sensitive: boolean; autoReply: boolean; autoReplyAllowed: boolean };
 export type Thread = { id: string; organizationId: string; customerName: string; blockedBy: 'customer' | 'business' | null; lastMessageAt: string; expiresAt: string; lastBody: string; lastSender: 'customer' | 'business'; unread: number; test: boolean };

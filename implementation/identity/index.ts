@@ -285,6 +285,31 @@ export class CoreIdentity {
     return r.rows[0].id;
   }
 
+  /**
+   * The person for a phone number, created if missing, so an organization can add a member before their first
+   * login. Stores only what a login would (digest and last four digits).
+   */
+  async personForPhone(phoneInput: string): Promise<{ personId: string; phoneHint: string }> {
+    const phone = normalizePhone(phoneInput);
+    const test = isTestNumber(phone);
+    // Same rule as login: a member must be someone who can actually log in.
+    if (this.deliveryMode === 'test' && !test) throw new IdentityError('REAL_NUMBER_NEEDS_SMS', 'real numbers are accepted once an SMS provider is connected');
+    if (this.deliveryMode === 'sms' && test) throw new IdentityError('TEST_NUMBER_NOT_ALLOWED', 'test numbers are not accepted with real SMS delivery');
+    const r = await this.pool.query<{ id: string }>(
+      `INSERT INTO core_identity.persons (id, phone_digest, phone_hint, test_identity) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (phone_digest) DO UPDATE SET phone_hint = EXCLUDED.phone_hint RETURNING id`,
+      [crypto.randomUUID(), this.hmac(`phone:${phone}`), phone.slice(-4), test]);
+    return { personId: r.rows[0].id, phoneHint: phone.slice(-4) };
+  }
+
+  /** Last four digits for persons (member lists show only these). Unknown ids are left out. */
+  async phoneHints(personIds: readonly string[]): Promise<Map<string, { phoneHint: string; test: boolean }>> {
+    if (!personIds.length) return new Map();
+    const r = await this.pool.query<{ id: string; phone_hint: string; test_identity: boolean }>(
+      'SELECT id, phone_hint, test_identity FROM core_identity.persons WHERE id::text = ANY($1::text[])', [personIds]);
+    return new Map(r.rows.map((x) => [x.id, { phoneHint: x.phone_hint, test: x.test_identity }]));
+  }
+
   async purgeExpired(): Promise<{ challenges: number; sessions: number }> {
     const now = this.now();
     const a = await this.pool.query('DELETE FROM core_identity.otp_challenges WHERE created_at < $1', [new Date(now.getTime() - 86400_000)]);

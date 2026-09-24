@@ -543,3 +543,17 @@ b.pos { color: var(--pos); } b.neg { color: var(--neg); }
 .pack-card { display: grid; gap: 4px; text-align: start; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); }
 .pack-card small { color: var(--soft); font-size: 12px; line-height: 1.7; }
 .pack-card.on { border-color: var(--violet); box-shadow: 0 0 0 2px color-mix(in srgb, var(--violet) 30%, transparent); background: var(--surface); }
+
+/* Members and permissions */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.member-add .row-end { display: flex; width: 100%; }
+.member-add .row-end input { flex: 1; min-width: 0; }
+.member-add small { display: block; margin-top: 8px; }
+.member-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.member-list .card-head small { font-size: 12px; }
+.grant-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.grant-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 12.5px; background: color-mix(in srgb, var(--violet) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--violet) 30%, transparent); }
+.grant-chip.founding { background: var(--surface-2); border-color: var(--line); color: var(--soft); }
+.grant-chip button { border: 0; background: none; color: var(--neg); font-size: 15px; line-height: 1; padding: 0 2px; cursor: pointer; }
+.member-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.member-actions select { width: auto; flex: 1; min-width: 160px; }

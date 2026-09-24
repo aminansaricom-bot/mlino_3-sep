@@ -2,12 +2,14 @@ import http from 'node:http';
 import { Pool } from 'pg';
 import webpush from 'web-push';
 import { CoreIdentity, IDENTITY_SCHEMA_SQL, testDelivery, type Audience } from '../../identity';
-import { CHAT_SCHEMA_SQL, ChatModule } from '../../chat';
+import { CHAT_PERMISSION, CHAT_SCHEMA_SQL, ChatModule } from '../../chat';
 import { NOTIFY_SCHEMA_SQL, NotifyModule, type Sender } from '../../notify';
 import { prisma } from '../../foundation/prisma-client';
 import { OfferService } from '../../core/offer-service';
 import { PLAN_LIMITS, PlanService, planOf } from '../../core/plan-service';
 import { PublicationService } from '../../core/publication-service';
+import { MembershipService } from '../../core/membership-service';
+import { PermissionGrantService } from '../../core/permission-grant-service';
 import { createHandler } from './app';
 import type { CoreDeps } from './core-routes';
 import { businessPlace } from './facts';
@@ -100,7 +102,9 @@ async function main(): Promise<void> {
     if (host && (aud === 'v2' || aud === 'business')) hosts.set(host, aud);
   }
 
-  const handler = createHandler({ identity, chat, core: coreDeps, notify, config: { hosts, cookieSecure: process.env.COOKIE_SECURE === '1', publishedPath, catalogPath: process.env.CATALOG_PATH } });
+  // Installed modules declare their permission keys; Core grants them under its own rules (D-57, D-63).
+  const members = { prisma, identity, memberships: new MembershipService(prisma), grants: new PermissionGrantService(prisma, undefined, [CHAT_PERMISSION]) };
+  const handler = createHandler({ identity, chat, core: coreDeps, members, notify, config: { hosts, cookieSecure: process.env.COOKIE_SECURE === '1', publishedPath, catalogPath: process.env.CATALOG_PATH } });
   const server = http.createServer((req, res) => { void handler(req, res); });
   const port = Number(process.env.API_PORT ?? 8741);
   server.listen(port, '127.0.0.1', () => console.log(`[mlino-api] listening on 127.0.0.1:${port}, OTP delivery: ${delivery}, notifications: ${notify ? 'on' : 'off'}`));

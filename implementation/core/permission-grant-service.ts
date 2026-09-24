@@ -7,13 +7,32 @@ import { GRANT_ADMIN_PERMISSION, isCorePermissionKey } from './permission-regist
 import { lockOrganization, memberOrganizationMissingError, MembershipRepository, PermissionGrantRepository } from './repositories';
 import { PlatformIdentityVerifier, requireVerifiedPlatformActor } from './platform-identity-verifier';
 
+/** A module's own permission key: `module.action`, never one of Core's keys (D-63: Core names no module). */
+const MODULE_KEY = /^[a-z][a-z_]{1,39}\.[a-z][a-z_]{1,39}$/;
+
 export class PermissionGrantService {
-  constructor(private readonly db: PrismaClient, private readonly verifier?: PlatformIdentityVerifier) {}
+  private readonly moduleKeys: ReadonlySet<string>;
+  /**
+   * `moduleKeys` are the keys the installed modules declare (for example the chat module's `chat.reply`).
+   * Core does not know what they mean; it only issues and revokes them under the same rules as its own keys.
+   */
+  constructor(private readonly db: PrismaClient, private readonly verifier?: PlatformIdentityVerifier, moduleKeys: readonly string[] = []) {
+    for (const key of moduleKeys) {
+      if (!MODULE_KEY.test(key) || isCorePermissionKey(key)) throw validationFailed(`invalid module permission key: ${key}`);
+    }
+    this.moduleKeys = new Set(moduleKeys);
+  }
+
+  /** Keys this deployment can grant: Core's registry plus the installed modules' declared keys. */
+  isGrantable(permissionKey: string): boolean {
+    return isCorePermissionKey(permissionKey) || this.moduleKeys.has(permissionKey);
+  }
+
   async issue(context: AuthContext, targetMembershipId: string, permissionKey: string, reason?: string) {
     validateAuthContext(context);
     requireNonEmpty(targetMembershipId, 'targetMembershipId');
     requireNonEmpty(permissionKey, 'permissionKey');
-    if (!isCorePermissionKey(permissionKey)) throw validationFailed('permission key is not in the Core registry');
+    if (!this.isGrantable(permissionKey)) throw validationFailed('permission key is not in the Core registry or a declared module key');
     return runCoreTransaction(this.db, async (tx) => {
       await lockOrganization(tx, context.organizationId, memberOrganizationMissingError());
       const actor = await requireMembershipPermission(tx, context, GRANT_ADMIN_PERMISSION);

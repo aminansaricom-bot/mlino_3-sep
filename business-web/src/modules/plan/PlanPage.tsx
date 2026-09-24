@@ -63,8 +63,9 @@ export default function PlanPage() {
             <li>اولویت در جست‌وجوی V2 با برچسب «ویژه»: {t.limits.searchPromotion ? 'دارد' : 'ندارد'}</li>
             <li>اعلان آفر به کاربران داخل شعاع: {t.limits.offerPush ? 'دارد' : 'ندارد (فقط نمایش روی نقشه)'}</li>
           </ul>
-          {t.tier !== plan.tier && <button type="button" className="btn small" disabled={busy} onClick={() => void change(t.tier)}>انتخاب (نمایشی)</button>}
+          {t.tier !== plan.tier && s.can('plan.manage') && <button type="button" className="btn small" disabled={busy} onClick={() => void change(t.tier)}>انتخاب (نمایشی)</button>}
         </section>)}</div>}
+        {!s.can('plan.manage') && <p className="note">تغییر پلن با کسی است که اجازه‌ی «تغییر پلن» دارد.</p>}
         {note && <p className="note" role="status">{note}</p>}
       </>}
   </div>;

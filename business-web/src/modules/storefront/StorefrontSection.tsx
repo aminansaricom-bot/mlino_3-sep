@@ -18,7 +18,8 @@ export default function StorefrontSection({ rest, published }: { rest: string[];
   const s = useChatSession();
   const { pack } = usePack();
   // Sensitive trades keep customer chat off, like CRM (R8-a §3.10).
-  const tabs = TABS.filter(([id]) => id !== 'chat' || !pack.sensitive);
+  // A member sees only the parts they hold a permission for (the server checks every act anyway).
+  const tabs = TABS.filter(([id]) => (id !== 'chat' || (!pack.sensitive && s.can('chat.reply'))) && (id !== 'offers' || s.can('offer.manage')));
   const tab = tabs.some(([id]) => id === rest[0]) ? rest[0] : '';
   const pending = s.summary?.pendingQuestions ?? 0;
   const unread = s.summary?.unreadMessages ?? 0;

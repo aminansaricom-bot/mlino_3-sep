@@ -4,6 +4,7 @@ import { CoreIdentity, IdentityError, type Audience, type SessionIdentity } from
 import { CHAT_PERMISSION, ChatError, ChatModule, isSensitiveBusiness, type PublishedBusinessRef } from '../../chat';
 import { CoreDomainError } from '../../core/errors';
 import { type CoreDeps, RouteError, coreErrorStatus, handleCoreRoute } from './core-routes';
+import { type MemberDeps, handleMemberRoute } from './member-routes';
 import { businessFacts } from './facts';
 import { PLAN_LIMITS, planOf } from '../../core/plan-service';
 import type { AutoResolver } from '../../chat';
@@ -37,6 +38,8 @@ export interface ApiDeps {
   readonly config: ApiConfig;
   /** Core write routes (plans, offers). Absent in tests that exercise only identity and chat. */
   readonly core?: CoreDeps;
+  /** Members and permissions of an organization (Core services); absent = routes off. */
+  readonly members?: MemberDeps;
   /** Nearby-offer notifications (D-77). Absent when VAPID keys are not configured. */
   readonly notify?: { module: NotifyModule; publicKey: string };
 }
@@ -181,6 +184,8 @@ export function createHandler(deps: ApiDeps) {
           name: pub.get(m.organizationId)?.name ?? m.organizationName,
           published: pub.has(m.organizationId),
           canChat: m.permissions.includes(CHAT_PERMISSION),
+          // What this member may do here, so the panel shows only what they can use. The server still checks every act.
+          permissions: m.permissions,
         }));
         return send(res, 200, { person: base, organizations: orgs });
       }
@@ -276,6 +281,18 @@ export function createHandler(deps: ApiDeps) {
           if (!tail && method === 'DELETE') { await chat.erase('customer', s.personId, id, s.personId); return send(res, 200, { erased: true }); }
         }
         throw new HttpError(404, 'NOT_FOUND');
+      }
+
+      // ── Members and permissions: Core's membership and grant services decide every write.
+      const memberMatch = path.match(/^\/api\/biz\/([A-Za-z0-9_-]{1,64})(\/members(?:\/.*)?|\/grants\/.*)$/);
+      if (memberMatch && deps.members) {
+        if (audience !== 'business') throw new HttpError(404, 'NOT_FOUND');
+        const s = needSession();
+        const orgId = memberMatch[1];
+        if (!(await identity.memberships(s.personId)).some((m) => m.organizationId === orgId)) throw new HttpError(403, 'MEMBERSHIP_REQUIRED');
+        const out = await handleMemberRoute(deps.members, s.personId, orgId, memberMatch[2], method, () => readJson(req));
+        if (out === undefined) throw new HttpError(404, 'NOT_FOUND');
+        return send(res, 200, out);
       }
 
       // ── Core routes for the panel: plan and offers. Any active member may call; each service checks its own grant.
