@@ -33,7 +33,7 @@ export default function InventoryModule({ tab: raw }: { tab: string }) {
   const go = (t: Tab) => ws.navigate(t === 'stock' ? '/inventory' : `/inventory/${t}`);
 
   return <div className="module">
-    <header className="page-head"><h1>موجودی مواد و کالا</h1><span className="badge ok">ماژول</span></header>
+    <header className="page-head"><h1>موجودی مواد و کالا</h1></header>
     <nav className="subnav scroll-x" aria-label="بخش‌های انبار">
       {tabs.map(([key, icon, label]) => <button key={key} type="button" className={tab === key ? 'on' : ''} onClick={() => go(key)}><span aria-hidden="true">{icon}</span>{label}</button>)}
     </nav>

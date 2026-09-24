@@ -40,7 +40,7 @@ export default function PlanPage() {
   };
 
   return <div className="stack">
-    <header className="page-head"><h1>پلن و اشتراک</h1><span className="badge info">هسته</span></header>
+    <header className="page-head"><h1>پلن و اشتراک</h1></header>
     {!s.ready ? <p className="empty">در حال بررسی ورود…</p>
       : !s.me ? <LoginCard config={s.config} onDone={() => void s.refresh()} hint="شماره‌ی آزمایشیِ عضو کسب‌وکارهای نمایشی: ۰۹۰۰۰۰۰۰۰۹۰." />
       : !s.org ? <p className="empty">این شماره عضو هیچ کسب‌وکار منتشرشده‌ای نیست.</p>
@@ -55,12 +55,12 @@ export default function PlanPage() {
           </ul>
         </section>}
         {plan?.tiers && <div className="plan-grid">{plan.tiers.map((t) => <section key={t.tier} className={`card plan-card${t.tier === plan.tier ? ' current' : ''}`}>
-          <header className="card-head"><h3>{TIER_LABEL[t.tier]}</h3>{t.tier === plan.tier && <span className="badge ok">فعلی</span>}</header>
+          <header className="card-head"><h3>{TIER_LABEL[t.tier]}</h3><small className="muted">{t.tier === 'FREE' ? 'رایگان' : 'قیمت به‌زودی'}</small>{t.tier === plan.tier && <span className="badge ok">فعلی</span>}</header>
           <ul className="points">
             <li>محصول: {cap(t.limits.publishedCatalogItems, 'قلم')}</li>
             <li>آفر و تخفیف: {cap(t.limits.offersPerMonth, 'در ماه')}</li>
             <li>پاسخ‌گوی خودکار در گفتگو: {t.limits.chatAutoReply ? 'دارد' : 'ندارد'}</li>
-            <li>اولویت در جست‌وجوی V2 با برچسب «ویژه»: {t.limits.searchPromotion ? 'دارد' : 'ندارد'}</li>
+            <li>بالاتر آمدن در جست‌وجوی مشتری‌ها با برچسب «ویژه»: {t.limits.searchPromotion ? 'دارد' : 'ندارد'}</li>
             <li>اعلان آفر به کاربران داخل شعاع: {t.limits.offerPush ? 'دارد' : 'ندارد (فقط نمایش روی نقشه)'}</li>
           </ul>
           {t.tier !== plan.tier && s.can('plan.manage') && <button type="button" className="btn small" disabled={busy} onClick={() => void change(t.tier)}>انتخاب (نمایشی)</button>}

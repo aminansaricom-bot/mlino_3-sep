@@ -39,8 +39,8 @@ export default function Home({ published }: { published: PublishedBusiness | nul
 
   return <div className="stack">
     <section className="hero-today">
-      <h1>امروز در {ws.book.settings.businessName}</h1>
-      <p>کارهایی که بیشترین اثر را دارند، با دلیل، مسئول و نتیجه‌ای که باید سنجیده شود. هر مورد از داده‌ی واقعی همین ماژول‌ها آمده است.</p>
+      <h1>امروز در {(cs.org?.name ?? published?.name ?? ws.book.settings.businessName).replace(/\s*\(آزمایشی\)/, '')}</h1>
+      <p>مهم‌ترین کارهای امروز، هر کدام با دلیلش. همه از داده‌های خود کسب‌وکار آمده‌اند.</p>
     </section>
 
     <section className="card">
@@ -50,14 +50,14 @@ export default function Home({ published }: { published: PublishedBusiness | nul
     </section>
 
     <section>
-      <h2 className="section-title">ماژول‌ها</h2>
+      <h2 className="section-title">بخش‌ها</h2>
       <div className="module-grid">
         {MODULES.map((m) => {
           let stats: ReturnType<typeof m.summary> = [];
           try { stats = m.summary(snapshot); } catch { stats = [{ label: 'داده', value: '—' }]; }
           return <Link key={m.id} to={m.route} className={`module-card ${m.status}`}>
             <div className="module-top"><span className="module-icon" aria-hidden="true">{m.icon}</span><strong>{m.title}</strong>
-              <span className={`badge ${m.status === 'blocked' ? 'bad' : m.status === 'design' ? 'muted' : m.layer === 'core' ? 'info' : 'ok'}`}>{m.layer === 'core' ? 'هسته' : 'ماژول'}</span></div>
+              {m.status === 'design' || m.status === 'blocked' ? <span className="badge muted">به‌زودی</span> : null}</div>
             <div className="module-stats">{stats.map((s) => <div key={s.label}><span>{s.label}</span><b className={s.tone ?? ''}>{s.value}</b></div>)}</div>
             <small className="module-note">{m.statusNote}</small>
           </Link>;

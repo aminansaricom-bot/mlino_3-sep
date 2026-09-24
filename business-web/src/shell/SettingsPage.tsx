@@ -21,7 +21,7 @@ export default function SettingsPage() {
           </button>;
         })}
       </div>
-      {pack.sensitive && <p className="note">در حوزه‌ی سلامت، CRM و گفتگو با مشتری خاموش می‌مانند تا اطلاعات حساس کسی نگه داشته نشود (R8-a).</p>}
+      {pack.sensitive && <p className="note">در حوزه‌ی سلامت، CRM و گفتگو با مشتری خاموش می‌مانند تا اطلاعات حساس کسی نگه داشته نشود.</p>}
     </section>
   </div>;
 }

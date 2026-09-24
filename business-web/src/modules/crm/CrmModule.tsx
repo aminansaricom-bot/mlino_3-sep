@@ -20,12 +20,12 @@ export default function CrmModule({ tab: raw }: { tab: string }) {
   const go = (t: Tab) => ws.navigate(t === 'summary' ? '/crm' : `/crm/${t}`);
 
   const { pack } = usePack();
-  if (!ws.crm.enabled || pack.sensitive) return <Card title="مشتریان (CRM)"><p className="empty">CRM برای دسته‌های حساس (مثل سلامت) خاموش است — سیاست رضایت R8-a بند ۳٫۱۰.</p></Card>;
+  if (!ws.crm.enabled || pack.sensitive) return <Card title="مشتریان (CRM)"><p className="empty">در کسب‌وکارهای حوزه‌ی سلامت، فهرست مشتریان خاموش است تا اطلاعات حساس کسی نگه داشته نشود.</p></Card>;
 
   const open = (id: string) => { ws.commitCrm({ k: 'view', input: { customerId: id, by: DEMO_MEMBER.name, at: new Date().toISOString() } }, ''); setOpenId(id); };
 
   return <div className="module">
-    <header className="page-head"><h1>مشتریان (CRM)</h1><span className="badge ok">ماژول</span><span className="badge info">رضایت سطح A</span></header>
+    <header className="page-head"><h1>مشتریان (CRM)</h1><span className="badge info">فقط با رضایت مشتری</span></header>
     <nav className="subnav scroll-x" aria-label="بخش‌های CRM">
       {TABS.map(([key, icon, label]) => <button key={key} type="button" className={tab === key ? 'on' : ''} onClick={() => go(key)}><span aria-hidden="true">{icon}</span>{label}</button>)}
     </nav>
@@ -193,7 +193,7 @@ function LedgerTab() {
   return <div className="stack">
     <Card title="سیاست اجراشده">
       <ul className="points">
-        <li>سطح A سیاست رضایت R8-a (تصمیم D-72): فقط داده‌ای که خود کسب‌وکار با رضایت مشتری جمع کرده؛ بدون برداشت نظر، پیام یا پروفایل از شبکه‌ها.</li>
+        <li>فقط داده‌ای که خود کسب‌وکار با رضایت مشتری جمع کرده؛ بدون برداشت نظر، پیام یا پروفایل از شبکه‌ها.</li>
         <li>هر عضو تاریخ پایان رضایت دارد (حداکثر {faNum(MAX_CONSENT_MONTHS)} ماه)؛ پس از آن فقط تمدید با رضایت تازه یا حذف.</li>
         <li>رضایت بازاریابی جداست و جدا لغو می‌شود. لغو عضویت یا درخواست حذف یعنی حذف واقعی، نه پنهان کردن.</li>
         <li>هر باز کردن پرونده‌ی یک نفر ثبت می‌شود. گزارش‌ها تجمیعی‌اند.</li>

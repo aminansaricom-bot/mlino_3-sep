@@ -27,7 +27,7 @@ export default function AccountingModule({ tab: rawTab }: { tab: string }) {
   const formTitle = form ? FORMS.find((f) => f[0] === form)![2] : '';
 
   return <div className="module">
-    <header className="page-head"><h1>حسابداری</h1><span className="badge ok">ماژول</span>
+    <header className="page-head"><h1>حسابداری</h1>
       <button type="button" className="icon-btn" onClick={() => setShowSettings(true)} aria-label="تنظیمات حسابداری">⚙️</button></header>
     <nav className="subnav scroll-x" aria-label="بخش‌های حسابداری">
       {TABS.map(([key, icon, label]) => <button key={key} type="button" className={tab === key ? 'on' : ''} aria-current={tab === key ? 'page' : undefined} onClick={() => go(key)}>

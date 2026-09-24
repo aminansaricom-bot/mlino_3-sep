@@ -20,12 +20,12 @@ function PublishNote() {
 export function ProductsPage({ state }: { state: PublishedState }) {
   const { pack } = usePack();
   return <div className="stack">
-    <header className="page-head"><h1>{pack.catalogTitle}</h1><span className="badge info">هسته — کاتالوگ</span></header>
+    <header className="page-head"><h1>{pack.catalogTitle}</h1></header>
     <Guard state={state}>{(b) => {
       const groups = new Map<string, typeof b.items[number][]>();
       for (const item of b.items) groups.set(item.grouping_label ?? 'سایر', [...(groups.get(item.grouping_label ?? 'سایر') ?? []), item]);
       return <>
-        <p className="muted">{faNum(b.items.length)} قلم منتشرشده در V2. قیمت، عکس و بازه‌ی در دسترس بودن همان است که مشتری می‌بیند.</p>
+        <p className="muted">{faNum(b.items.length)} قلم منتشرشده در اپ مشتری‌ها. قیمت، عکس و بازه‌ی در دسترس بودن همان است که مشتری می‌بیند.</p>
         {[...groups.entries()].map(([group, items]) => <section key={group} className="card">
           <header className="card-head"><h3>{group}</h3></header>
           <ul className="product-list">{items.map((i) => <li key={i.catalog_item_id}>
@@ -43,7 +43,7 @@ export function ProductsPage({ state }: { state: PublishedState }) {
 
 export function StorefrontPage({ state }: { state: PublishedState }) {
   return <div className="stack">
-    <header className="page-head"><h1>ویترین مجازی</h1><span className="badge info">هسته — پروفایل و انتشار</span></header>
+    <header className="page-head"><h1>ویترین مجازی</h1></header>
     <Guard state={state}>{(b) => <>
       <section className="card storefront">
         <div className="sf-cover">{b.items.find((i) => i.media.length) ? <img src={mediaUrl(b.items.find((i) => i.media.length)!.media[0].path)} alt="" /> : null}<span className="badge ok">منتشرشده</span></div>
@@ -56,11 +56,11 @@ export function StorefrontPage({ state }: { state: PublishedState }) {
         <a className="btn primary" href="https://explore.mlino.site/">دیدن در نقشه و ویترین زنده</a>
       </section>
       <section className="card">
-        <header className="card-head"><h3>چه چیزی به V2 می‌رود و چه چیزی نه</h3></header>
+        <header className="card-head"><h3>چه چیزی به مشتری‌ها نشان داده می‌شود و چه چیزی نه</h3></header>
         <ul className="points">
-          <li>فقط آنچه شما منتشر کرده‌اید؛ پیش‌نویس، داده‌ی مالی، موجودی انبار و هر چیز داخلی هرگز به V2 نمی‌رود (لایه‌ی قابل‌انتشار، AC-2).</li>
-          <li>ساعت کاری «اعلام‌شده» است، نه «الان باز است» (D-56).</li>
-          <li>پیش از اولین انتشار واقعی، هویت کسب‌وکار راستی‌آزمایی می‌شود (D-61).</li>
+          <li>فقط آنچه شما منتشر کرده‌اید؛ پیش‌نویس، داده‌ی مالی، موجودی انبار و هر چیز داخلی هرگز به اپ مشتری‌ها نمی‌رود (لایه‌ی قابل‌انتشار، AC-2).</li>
+          <li>ساعت کاری «اعلام‌شده» است، نه «الان باز است».</li>
+          <li>پیش از اولین انتشار واقعی، هویت کسب‌وکار راستی‌آزمایی می‌شود.</li>
         </ul>
         <PublishNote />
       </section>
@@ -71,7 +71,7 @@ export function StorefrontPage({ state }: { state: PublishedState }) {
 export function OffersPage({ state }: { state: PublishedState }) {
   const { today } = useWorkspace();
   return <div className="stack">
-    <header className="page-head"><h1>آفر و تخفیف</h1><span className="badge info">هسته — آفر</span></header>
+    <header className="page-head"><h1>آفر و تخفیف</h1></header>
     <Guard state={state}>{(b) => <>
       <section className="card">
         {b.offers.length === 0 ? <p className="empty">آفر منتشرشده‌ای نیست.</p> :
@@ -87,9 +87,9 @@ export function OffersPage({ state }: { state: PublishedState }) {
       <section className="card">
         <header className="card-head"><h3>آفر بر اساس موقعیت</h3></header>
         <ul className="points">
-          <li>امروز: V2 آفرهای شما را کنار نتیجه‌ها و در ویترین زنده‌ی کاربرانی نشان می‌دهد که نزدیک کسب‌وکارند — این منطق تطبیق V2 است و شرط آفر را عوض نمی‌کند.</li>
+          <li>آفرهای شما کنار نتیجه‌ها و در ویترین زنده‌ی مشتری‌های نزدیک نشان داده می‌شود.</li>
           <li>اگر بخواهید آفری «فقط برای افراد تا شعاع مشخص» باشد، آن یک شرط تازه‌ی آفر است و تصمیم شما و تغییر قرارداد آفر را لازم دارد (سند طراحی، بخش ۹).</li>
-          <li>V2 هیچ شرطی اختراع نمی‌کند و قیمت را برای هر کاربر عوض نمی‌کند (D-53).</li>
+          <li>ملینو هیچ شرطی اختراع نمی‌کند و قیمت را برای هر کاربر عوض نمی‌کند.</li>
         </ul>
         <PublishNote />
       </section>

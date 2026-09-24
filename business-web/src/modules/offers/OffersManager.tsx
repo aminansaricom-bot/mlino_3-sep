@@ -1,3 +1,4 @@
+import { usePack } from '../../industry/context';
 import { useCallback, useEffect, useState } from 'react';
 import { useChatSession } from '../../chat/session';
 import LoginCard from '../../chat/LoginCard';
@@ -15,6 +16,7 @@ const RADII: ReadonlyArray<readonly [number | null, string]> = [[300, '۳۰۰ م
 const radiusText = (m: number | null) => (m === null ? 'همه' : m >= 1000 ? `${faNum(m / 1000)} کیلومتر` : `${faNum(m)} متر`);
 
 export default function OffersManager() {
+  const { pack } = usePack();
   const s = useChatSession();
   const orgId = s.org?.organizationId ?? null;
   const { plan, reload: reloadPlan } = usePlan(orgId);
@@ -39,16 +41,16 @@ export default function OffersManager() {
     try {
       await api('POST', `/biz/${orgId}/offers`, { name: form.name, shortDescription: form.description || null, priceAmount: form.price, validDays: form.days, radiusMeters: form.radius });
       setForm({ ...form, name: '', description: '', price: null });
-      setNote('پیش‌نویس ساخته شد. هنوز کسی آن را نمی‌بیند؛ برای نمایش در V2 «انتشار» را بزن.');
+      setNote('پیش‌نویس ساخته شد. هنوز کسی آن را نمی‌بیند؛ برای نمایش به مشتری‌ها «انتشار» را بزن.');
       await load();
     } catch (e) { setError(apiErrorText(e)); } finally { setBusy(false); }
   };
   const act = async (o: Offer, action: 'publish' | 'withdraw') => {
-    if (action === 'publish' && !window.confirm(`«${o.name}» منتشر شود؟ ${o.radiusMeters ? `کاربرانی که تا ${radiusText(o.radiusMeters)} از کسب‌وکار فاصله دارند آن را در V2 می‌بینند${plan?.limits.offerPush ? ' و اگر اعلان را روشن کرده باشند، خبردار می‌شوند' : ''}.` : 'همه‌ی کاربران V2 آن را می‌بینند.'}`)) return;
+    if (action === 'publish' && !window.confirm(`«${o.name}» منتشر شود؟ ${o.radiusMeters ? `کاربرانی که تا ${radiusText(o.radiusMeters)} از کسب‌وکار فاصله دارند آن را در اپ مشتری‌ها می‌بینند${plan?.limits.offerPush ? ' و اگر اعلان را روشن کرده باشند، خبردار می‌شوند' : ''}.` : 'همه‌ی مشتری‌ها آن را می‌بینند.'}`)) return;
     setBusy(true); setNote(null); setError(null);
     try {
       await api('POST', `/biz/${orgId}/offers/${o.versionId}/${action}`);
-      setNote(action === 'publish' ? 'منتشر شد؛ تا حدود یک دقیقه‌ی دیگر در V2 دیده می‌شود.' : 'از V2 برداشته شد.');
+      setNote(action === 'publish' ? 'منتشر شد؛ تا حدود یک دقیقه‌ی دیگر در اپ مشتری‌ها دیده می‌شود.' : 'از اپ مشتری‌ها برداشته شد.');
       await Promise.all([load(), reloadPlan()]);
     } catch (e) {
       setError(e instanceof Error && e.message === 'PLAN_LIMIT' ? `سقف آفرهای این ماه در پلن «${plan ? TIER_LABEL[plan.tier] : ''}» پر شده است. برای آفر بیشتر پلن را ارتقا بده.` : apiErrorText(e));
@@ -60,13 +62,13 @@ export default function OffersManager() {
   return <div className="stack">
     {plan && <section className="card chat-status">
       <div><strong>پلن {TIER_LABEL[plan.tier]}: {faNum(used)} از {limit === null ? 'نامحدود' : faNum(limit)} آفر این ماه</strong>
-        <small>{plan.limits.offerPush ? 'آفرهای شعاع‌دار به کاربرانی که اعلان را روشن کرده‌اند و داخل شعاع‌اند خبر داده می‌شود.' : 'در این پلن آفر فقط روی نقشه و در تب «تخفیف‌ها»ی V2 دیده می‌شود؛ اعلان فعال در پلن پرو و مکس است.'}</small></div>
+        <small>{plan.limits.offerPush ? 'آفرهای شعاع‌دار به کاربرانی که اعلان را روشن کرده‌اند و داخل شعاع‌اند خبر داده می‌شود.' : 'در این پلن آفر فقط روی نقشه و در بخش «تخفیف‌ها»ی اپ مشتری‌ها دیده می‌شود؛ اعلان فعال در پلن پرو و مکس است.'}</small></div>
     </section>}
 
     <section className="card">
       <header className="card-head"><h3>آفر تازه</h3></header>
       <form onSubmit={(e) => { e.preventDefault(); void create(); }}>
-        <Field label="عنوان آفر">{(id) => <input id={id} value={form.name} maxLength={120} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="مثلاً «۲۰٪ تخفیف ماچا لاته»" />}</Field>
+        <Field label="عنوان آفر">{(id) => <input id={id} value={form.name} maxLength={120} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={`مثلاً «${pack.offerExample}»`} />}</Field>
         <Field label="توضیح (اختیاری)">{(id) => <input id={id} value={form.description} maxLength={300} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="شرط‌ها، ساعت، …" />}</Field>
         <div className="form-row">
           <Field label="قیمت با تخفیف (اختیاری، ریال)">{(id) => <AmountInput id={id} value={form.price} onChange={(v) => setForm({ ...form, price: v })} />}</Field>

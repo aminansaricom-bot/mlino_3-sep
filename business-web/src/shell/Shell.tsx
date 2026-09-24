@@ -20,8 +20,6 @@ import PlanPage from '../modules/plan/PlanPage';
 import BottomBar from './BottomBar';
 import { RUNNER, inApp, onNative } from '../native/bridge';
 
-const STATUS_DOT: Record<string, string> = { demo: 'demo', 'published-view': 'live', live: 'live', design: 'design', blocked: 'blocked' };
-
 export function Link({ to, className, children, onNavigate }: { to: string; className?: string; children: ReactNode; onNavigate?: () => void }) {
   const { navigate } = useWorkspace();
   return <a href={to} className={className} onClick={(e: MouseEvent) => { if (e.metaKey || e.ctrlKey) return; e.preventDefault(); navigate(to); onNavigate?.(); }}>{children}</a>;
@@ -42,9 +40,9 @@ function NavList({ active, onNavigate }: { active: Place; onNavigate?: () => voi
   const s = useChatSession();
   return <nav className="side-nav" aria-label="ماژول‌ها">
     <Link to="/" className={`nav-item${active === 'home' ? ' on' : ''}`} onNavigate={onNavigate}><span aria-hidden="true">🏠</span>امروز</Link>
-    <p className="nav-group">ماژول‌ها</p>
+    <p className="nav-group">بخش‌ها</p>
     {MODULES.filter((m) => m.nav !== false).map((m) => <Link key={m.id} to={m.route} className={`nav-item${active === m.id ? ' on' : ''}`} onNavigate={onNavigate}>
-      <span aria-hidden="true">{m.icon}</span>{m.title}<i className={`dot ${STATUS_DOT[m.status]}`} title={m.statusNote} />
+      <span aria-hidden="true">{m.icon}</span>{m.title}{(m.status === 'design' || m.status === 'blocked') && <small className="nav-soon">به‌زودی</small>}
     </Link>)}
     <p className="nav-group">کسب‌وکار</p>
     <Link to="/settings" className={`nav-item${active === 'settings' ? ' on' : ''}`} onNavigate={onNavigate}><span aria-hidden="true">⚙️</span>تنظیمات و نوع کسب‌وکار</Link>
@@ -95,12 +93,13 @@ export default function Shell() {
         <div className="drawer-head"><strong>ملینو · کسب‌وکار</strong><button type="button" className="icon-btn" onClick={() => setDrawer(false)} aria-label="بستن">✕</button></div>
         <NavList active={active} onNavigate={() => setDrawer(false)} />
         <a className="nav-item" href="https://explore.mlino.site/"><span aria-hidden="true">🗺️</span>دیدن نسخه‌ی مشتری</a>
-        <a className="nav-item" href="https://app.mlino.site/"><span aria-hidden="true">↩️</span>تغییر نقش</a>
+        <a className="nav-item" href="https://app.mlino.site/"><span aria-hidden="true">↩️</span>صفحه‌ی شروع ملینو</a>
+        {session.me && <button type="button" className="nav-item nav-logout" onClick={() => { setDrawer(false); void session.logout(); }}><span aria-hidden="true">🚪</span>خروج از حساب</button>}
       </div>
     </div>}
 
     <main className="main">
-      <p className="demo-banner">نسخه‌ی نمایشی: دفترها ساختگی‌اند و ثبت‌های تو فقط روی همین مرورگر می‌ماند؛ محصولات، ویترین و آفرها از فایل امضاشده‌ی منتشرشده خوانده می‌شوند. <button type="button" className="link" onClick={() => { if (window.confirm('همه‌ی ثبت‌های تو پاک و داده‌های نمونه از نو ساخته شود؟')) ws.resetDemo(); }}>شروع دوباره</button></p>
+      <p className="demo-banner">نسخه‌ی نمایشی: حسابداری، انبار و مشتریان، دفترهای نمونه‌ی یک کافه‌اند و ثبت‌های تو فقط روی همین مرورگر می‌ماند. محصولات، ویترین و آفرها مال خود کسب‌وکارند. <button type="button" className="link" onClick={() => { if (window.confirm('همه‌ی ثبت‌های تو پاک و داده‌های نمونه از نو ساخته شود؟')) ws.resetDemo(); }}>شروع دوباره</button></p>
       {page}
     </main>
 

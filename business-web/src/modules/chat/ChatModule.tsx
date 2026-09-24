@@ -6,9 +6,9 @@ import { api, apiErrorText, type Knowledge, type Message, type Pending, type Thr
 import { faNum, toFaDigits } from '../../format';
 import DeviceAlerts from '../../chat/DeviceAlerts';
 
-// Customer ⇄ business chat (D-73), business side. A module with its own storage; every request is checked on the
+// Customer ⇄ business chat, business side. A module with its own storage; every request is checked on the
 // server against membership and the `chat.reply` grant. The panel assistant never reads these messages; the only
-// automatic reader is the business's own auto-reply (D-75): approved answers or published facts, the rest comes here.
+// automatic reader is the business's own auto-reply: approved answers or published facts, the rest comes here.
 
 const TABS = [['', 'گفتگوها'], ['questions', 'سؤال‌های بی‌جواب'], ['knowledge', 'دانسته‌های پاسخ‌گو'], ['log', 'دفتر دسترسی'], ['rules', 'قواعد']] as const;
 const ACTION = { list: 'فهرست گفتگوها دیده شد', read: 'گفتگو باز شد', reply: 'پاسخ فرستاده شد', block: 'مسدود شد', unblock: 'از مسدودی درآمد', erase: 'گفتگو حذف شد', enable: 'گفتگو روشن شد', disable: 'گفتگو خاموش شد', auto_on: 'پاسخ‌گوی خودکار روشن شد', auto_off: 'پاسخ‌گوی خودکار خاموش شد', knowledge: 'دانسته‌ها تغییر کرد' } as Record<string, string>;
@@ -22,7 +22,7 @@ export default function ChatModule({ tab }: { tab: string }) {
   const s = useChatSession();
 
   return <div className="stack">
-    <header className="page-head"><h2 className="section-title">گفتگو با مشتری‌های اطراف</h2><span className="badge ok">ماژول</span></header>
+    <header className="page-head"><h2 className="section-title">گفتگو با مشتری‌های اطراف</h2></header>
     {!s.ready ? <p className="empty">در حال بررسی ورود…</p>
       : !s.me ? <LoginCard config={s.config} onDone={() => void s.refresh()} hint="شماره‌ی آزمایشیِ عضو کسب‌وکارهای نمایشی: ۰۹۰۰۰۰۰۰۰۹۰." />
       : <>
@@ -39,7 +39,7 @@ export default function ChatModule({ tab }: { tab: string }) {
           <nav className="segmented" aria-label="بخش‌های گفتگو">
             {TABS.map(([id, label]) => <button key={id} type="button" className={tab === id ? 'on' : ''} onClick={() => ws.navigate(id ? `/storefront/chat/${id}` : '/storefront/chat')}>{label}{id === 'questions' && (s.summary?.pendingQuestions ?? 0) > 0 && <i className="tab-count">{faNum(s.summary!.pendingQuestions)}</i>}</button>)}
           </nav>
-          {!s.org.canChat ? <p className="empty">این شماره اجازه‌ی chat.reply را برای این کسب‌وکار ندارد. اجازه را عضوی از همان کسب‌وکار می‌دهد، نه پلتفرم (D-57).</p>
+          {!s.org.canChat ? <p className="empty">این شماره اجازه‌ی «گفتگو با مشتری» را برای این کسب‌وکار ندارد. اجازه را عضوی از همان کسب‌وکار می‌دهد، نه پلتفرم (D-57).</p>
             : tab === 'log' ? <AccessLog orgId={s.org.organizationId} /> : tab === 'rules' ? <Rules /> : tab === 'questions' ? <Questions orgId={s.org.organizationId} /> : tab === 'knowledge' ? <KnowledgeList orgId={s.org.organizationId} /> : <Inbox orgId={s.org.organizationId} />}
         </>}
       </>}
@@ -69,8 +69,8 @@ function Inbox({ orgId }: { orgId: string }) {
   const open = threads?.find((t) => t.id === openId) ?? null;
   return <>
     {s.summary && <section className="card chat-status">
-      <div><strong>{s.summary.sensitive ? 'گفتگو برای این کسب‌وکار خاموش است' : s.summary.enabled ? 'مشتری‌ها می‌توانند از V2 پیام بدهند' : 'پیام تازه پذیرفته نمی‌شود'}</strong>
-        <small>{s.summary.sensitive ? 'کسب‌وکارهای حوزه‌ی سلامت و مانند آن از گفتگو مستثنا هستند (R8-a §۳٫۱۰).' : `${faNum(s.summary.conversations)} گفتگو، ${faNum(s.summary.unreadMessages)} پیام خوانده‌نشده`}</small></div>
+      <div><strong>{s.summary.sensitive ? 'گفتگو برای این کسب‌وکار خاموش است' : s.summary.enabled ? 'مشتری‌ها می‌توانند از اپ مشتری‌ها پیام بدهند' : 'پیام تازه پذیرفته نمی‌شود'}</strong>
+        <small>{s.summary.sensitive ? 'کسب‌وکارهای حوزه‌ی سلامت و مانند آن از گفتگو مستثنا هستند.' : `${faNum(s.summary.conversations)} گفتگو، ${faNum(s.summary.unreadMessages)} پیام خوانده‌نشده`}</small></div>
       {!s.summary.sensitive && <button type="button" className="btn small ghost" onClick={() => void toggle()}>{s.summary.enabled ? 'خاموش کردن' : 'روشن کردن'}</button>}
     </section>}
     {s.summary && !s.summary.sensitive && <AutoReplyCard orgId={orgId} />}
@@ -78,7 +78,7 @@ function Inbox({ orgId }: { orgId: string }) {
     {error && <p className="note bad" role="alert">{error}</p>}
     <div className={`chat-layout${open ? ' has-open' : ''}`}>
       <section className="card chat-list">
-        {threads === null ? <p className="empty">در حال خواندن…</p> : threads.length === 0 ? <p className="empty">هنوز پیامی نیامده. گفتگو را همیشه مشتری از V2 شروع می‌کند.</p> :
+        {threads === null ? <p className="empty">در حال خواندن…</p> : threads.length === 0 ? <p className="empty">هنوز پیامی نیامده. گفتگو را همیشه مشتری از اپ مشتری‌ها شروع می‌کند.</p> :
           <ul>{threads.map((t) => <li key={t.id}><button type="button" className={`thread-row${t.id === openId ? ' on' : ''}`} onClick={() => setOpenId(t.id)}>
             <span className="thread-main"><strong>{t.customerName}</strong><small>{t.lastSender === 'business' ? 'شما: ' : ''}{t.lastBody}</small></span>
             <span className="thread-side"><small>{time(t.lastMessageAt)}</small>{t.unread > 0 ? <span className="unread">{faNum(t.unread)}</span> : t.blockedBy ? <span className="badge muted">مسدود</span> : null}</span>
@@ -157,7 +157,7 @@ function AccessLog({ orgId }: { orgId: string }) {
   useEffect(() => { api<{ entries: NonNullable<typeof entries> }>('GET', `/biz/${orgId}/chat/access-log`).then((r) => setEntries(r.entries), (e) => setError(apiErrorText(e))); }, [orgId]);
   return <section className="card">
     <header className="card-head"><h3>دفتر دسترسی</h3><small className="muted">۵۰ مورد آخر</small></header>
-    <p className="policy-note">هر بار که عضوی فهرست یا یک گفتگو را می‌بیند، پاسخ می‌دهد، مسدود یا حذف می‌کند، اینجا ثبت می‌شود (R8-a §۳٫۵). باز شدن دوباره‌ی همان گفتگو در ده دقیقه یک بار ثبت می‌شود.</p>
+    <p className="policy-note">هر بار که عضوی فهرست یا یک گفتگو را می‌بیند، پاسخ می‌دهد، مسدود یا حذف می‌کند، اینجا ثبت می‌شود. باز شدن دوباره‌ی همان گفتگو در ده دقیقه یک بار ثبت می‌شود.</p>
     {error && <p className="note bad">{error}</p>}
     {entries && (entries.length === 0 ? <p className="empty">هنوز چیزی ثبت نشده.</p> :
       <ul className="rows">{entries.map((e, i) => <li key={i}><span>{ACTION[e.action] ?? e.action}</span><small>{e.byMe ? 'خودتان' : 'عضو دیگر'}، {time(e.at)}</small></li>)}</ul>)}
@@ -166,17 +166,17 @@ function AccessLog({ orgId }: { orgId: string }) {
 
 function Rules() {
   return <section className="card">
-    <header className="card-head"><h3>قواعد گفتگو (D-73)</h3></header>
+    <header className="card-head"><h3>قواعد گفتگو</h3></header>
     <ul className="points">
-      <li>گفتگو را فقط مشتری از V2 شروع می‌کند؛ کسب‌وکار داخل همان گفتگو پاسخ می‌دهد.</li>
+      <li>گفتگو را فقط مشتری از اپ مشتری‌ها شروع می‌کند؛ کسب‌وکار داخل همان گفتگو پاسخ می‌دهد.</li>
       <li>شماره‌ی مشتری هرگز به کسب‌وکار نشان داده نمی‌شود؛ فقط نامی که خودش انتخاب کرده.</li>
       <li>فقط متن، حداکثر ۱۰۰۰ نویسه.</li>
       <li>پیام‌ها خودکار به CRM نمی‌روند و دستیار پنل فقط شمار پیام‌های خوانده‌نشده را می‌داند.</li>
-      <li>پاسخ‌گوی خودکار (پلن پرو و مکس، D-75) فقط با جواب‌هایی که شما تأیید کرده‌اید یا اطلاعات منتشرشده‌تان پاسخ می‌دهد، روی سرور خود ملینو و بدون هیچ مدل بیرونی. سؤالی را که نمی‌داند حدس نمی‌زند: به مشتری می‌گوید از شما پرسیده و سؤال به «سؤال‌های بی‌جواب» می‌آید. جواب شما، اگر بخواهید، برای دفعه‌های بعد یاد گرفته می‌شود.</li>
+      <li>پاسخ‌گوی خودکار (پلن پرو و مکس) فقط با جواب‌هایی که شما تأیید کرده‌اید یا اطلاعات منتشرشده‌تان پاسخ می‌دهد، روی سرور خود ملینو و بدون هیچ مدل بیرونی. سؤالی را که نمی‌داند حدس نمی‌زند: به مشتری می‌گوید از شما پرسیده و سؤال به «سؤال‌های بی‌جواب» می‌آید. جواب شما، اگر بخواهید، برای دفعه‌های بعد یاد گرفته می‌شود.</li>
       <li>هر گفتگو ۹۰ روز پس از آخرین پیام واقعاً حذف می‌شود (در حالت آزمایشی ۲۴ ساعت). هر طرف زودتر هم می‌تواند حذف کند، که برای هر دو طرف حذف می‌شود.</li>
       <li>هر طرف می‌تواند مسدود کند؛ فقط همان طرف مسدودی را برمی‌دارد.</li>
       <li>برای کسب‌وکارهای حساس (مثل حوزه‌ی سلامت) خاموش است.</li>
-      <li>پاسخ دادن اجازه‌ی <code>chat.reply</code> می‌خواهد که عضوی از خود کسب‌وکار به عضو دیگر می‌دهد، نه پلتفرم.</li>
+      <li>پاسخ دادن اجازه‌ی «گفتگو با مشتری» می‌خواهد که عضوی از خود کسب‌وکار به عضو دیگر می‌دهد، نه پلتفرم.</li>
     </ul>
   </section>;
 }

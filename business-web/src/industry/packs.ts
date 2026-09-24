@@ -24,6 +24,8 @@ export type Pack = Readonly<{
   purchaseWords: string;
   /** Example stock receipt for the assistant and its hints. */
   stockExample: string;
+  /** Example offer title in the offer form. */
+  offerExample: string;
 }>;
 
 export const PACKS: Readonly<Record<PackId, Pack>> = {
@@ -32,30 +34,35 @@ export const PACKS: Readonly<Record<PackId, Pack>> = {
     catalog: 'منو', catalogTitle: 'محصولات و منو', item: 'قلم منو', place: 'کافه', recipes: true, sensitive: false,
     purchaseWords: 'شیر|قهوه|مواد|نان|شیرینی|میوه|گوشت|مرغ|برنج|سبزی|چای',
     stockExample: '۲۰ کیلو شیر وارد انبار شد به قیمت ۹ میلیون',
+    offerExample: '۲۰٪ تخفیف ناهار دونفره',
   },
   retail: {
     id: 'retail', label: 'فروشگاه و خرده‌فروشی', hint: 'کالا، موجودی انبار، فروش و خرید از تأمین‌کننده',
     catalog: 'محصولات', catalogTitle: 'محصولات', item: 'کالا', place: 'فروشگاه', recipes: false, sensitive: false,
     purchaseWords: 'جنس|اجناس|بار|کالا|خرید از پخش|پخش',
     stockExample: '۲۰ عدد دفتر وارد انبار شد به قیمت ۴ میلیون',
+    offerExample: '۱۵٪ تخفیف خرید دوم',
   },
   services: {
     id: 'services', label: 'خدمات (آرایشگاه، آموزش، تعمیر و…)', hint: 'فهرست خدمات، نوبت و مشتری، مواد مصرفی',
     catalog: 'خدمات', catalogTitle: 'خدمات', item: 'خدمت', place: 'محل کار', recipes: false, sensitive: false,
     purchaseWords: 'مواد مصرفی|لوازم|قطعه|قطعات',
     stockExample: '۱۰ عدد رنگ مو وارد انبار شد به قیمت ۵ میلیون',
+    offerExample: '۲۰٪ تخفیف نوبت‌های صبح',
   },
   health: {
     id: 'health', label: 'سلامت (کلینیک، مطب، داروخانه)', hint: 'حوزه‌ی حساس: CRM و گفتگو خاموش می‌مانند',
     catalog: 'خدمات', catalogTitle: 'خدمات', item: 'خدمت', place: 'مطب', recipes: false, sensitive: true,
     purchaseWords: 'دارو|لوازم پزشکی|مواد مصرفی|تجهیزات',
     stockExample: '۵۰ عدد ماسک وارد انبار شد به قیمت ۲ میلیون',
+    offerExample: 'مشاوره‌ی رایگان هفته‌ی اول',
   },
   general: {
     id: 'general', label: 'سایر کسب‌وکارها', hint: 'واژه‌های عمومی: محصولات و خدمات',
     catalog: 'محصولات و خدمات', catalogTitle: 'محصولات و خدمات', item: 'قلم', place: 'محل کسب‌وکار', recipes: false, sensitive: false,
     purchaseWords: 'خرید کالا|اجناس|مواد',
     stockExample: '۲۰ عدد کالا وارد انبار شد به قیمت ۴ میلیون',
+    offerExample: '۱۰٪ تخفیف ویژه‌ی همسایه‌ها',
   },
 };
 

@@ -32,7 +32,7 @@ const TEXT: Record<string, string> = {
   CODE_WRONG: 'کد درست نیست.',
   TOO_MANY_ATTEMPTS: 'تعداد تلاش زیاد شد؛ کد تازه بگیر.',
   LOGIN_REQUIRED: 'اول وارد شو.',
-  PERMISSION_REQUIRED: 'برای گفتگوهای این کسب‌وکار اجازه‌ی chat.reply لازم است.',
+  PERMISSION_REQUIRED: 'برای گفتگوهای این کسب‌وکار اجازه‌ی «گفتگو با مشتری» لازم است.',
   BLOCKED: 'این گفتگو مسدود است.',
   NOT_FOUND: 'این گفتگو دیگر وجود ندارد.',
   INPUT_INVALID: 'متن خالی است یا از ۱۰۰۰ نویسه بیشتر است.',

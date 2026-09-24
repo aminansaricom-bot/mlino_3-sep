@@ -39,7 +39,7 @@ export default function MembersPage() {
   const who = (m: Member) => m.phoneHint ? `شماره‌ی …${digits(m.phoneHint)}` : 'عضو بنیان‌گذار';
 
   return <div className="stack">
-    <header className="page-head"><h1>اعضا و دسترسی‌ها</h1><span className="badge info">هسته — عضویت و اجازه</span></header>
+    <header className="page-head"><h1>اعضا و دسترسی‌ها</h1></header>
     {!s.ready ? <p className="empty">در حال بررسی ورود…</p>
       : !s.me ? <LoginCard config={s.config} onDone={() => void s.refresh()} hint="شماره‌ی آزمایشیِ مدیر کسب‌وکارهای نمایشی: ۰۹۰۰۰۰۰۰۰۹۰." />
       : !s.org ? <p className="empty">این شماره عضو هیچ کسب‌وکار منتشرشده‌ای نیست.</p>

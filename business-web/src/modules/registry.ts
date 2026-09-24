@@ -62,7 +62,7 @@ const monthOf = (today: string) => { const t = toJalali(today); return jalaliMon
 export const MODULES: readonly ModuleManifest[] = [
   {
     id: 'accounting', title: 'حسابداری', icon: '📒', route: '/accounting', layer: 'module', status: 'demo',
-    statusNote: 'نمایشی — دفتر نمونه، فقط در همین مرورگر',
+    statusNote: 'دفتر نمونه؛ ثبت‌ها فقط روی همین مرورگر',
     summary: ({ ledger, today }) => {
       const m = monthOf(today);
       const p = profitAndLoss(ledger, { from: m.from, to: today });
@@ -70,7 +70,7 @@ export const MODULES: readonly ModuleManifest[] = [
       return [
         { label: 'فروش این ماه', value: compactRial(p.netSales + p.otherIncome) },
         { label: 'نقد و بانک', value: compactRial(cash) },
-        { label: 'نتیجه‌ی این ماه', value: compactRial(p.netProfit), tone: p.netProfit >= 0 ? 'good' : 'bad' },
+        { label: 'سود یا زیان این ماه تا امروز', value: compactRial(p.netProfit), tone: p.netProfit >= 0 ? 'good' : 'bad' },
       ];
     },
     actions: ({ ledger, today, book }) => {
@@ -111,7 +111,7 @@ export const MODULES: readonly ModuleManifest[] = [
   },
   {
     id: 'inventory', title: 'موجودی مواد و کالا', icon: '📦', route: '/inventory', layer: 'module', status: 'demo',
-    statusNote: 'نمایشی — هم‌داستان با دفتر نمونه',
+    statusNote: 'انبار نمونه، هماهنگ با دفتر نمونه',
     summary: ({ inventory }) => {
       const low = lowStock(inventory).length;
       return [
@@ -136,8 +136,8 @@ export const MODULES: readonly ModuleManifest[] = [
     },
   },
   {
-    id: 'products', title: 'محصولات و خدمات', icon: '🏷️', route: '/products', layer: 'core', status: 'published-view',
-    statusNote: 'از فایل امضاشده‌ی منتشرشده در V2 — ویرایش پس از ورود عضو',
+    id: 'products', title: 'محصولات و خدمات', icon: '🛍️', route: '/products', layer: 'core', status: 'published-view',
+    statusNote: 'همان چیزی که مشتری‌ها در ملینو می‌بینند',
     summary: ({ published }) => published ? [
       { label: 'قلم منتشرشده', value: `${faNum(published.items.length)} قلم` },
       { label: 'بدون عکس', value: `${faNum(published.items.filter((i) => i.media.length === 0).length)} قلم`, tone: published.items.some((i) => i.media.length === 0) ? 'bad' : 'good' },
@@ -146,7 +146,7 @@ export const MODULES: readonly ModuleManifest[] = [
       const missing = published?.items.filter((i) => i.media.length === 0) ?? [];
       return missing.length ? [{
         id: 'photo-missing', module: 'products', urgency: 'later', title: `افزودن عکس برای ${missing.map((i) => i.name.replace(/\s*\(آزمایشی\)/, '')).slice(0, 2).join('، ')}`,
-        reason: `${faNum(missing.length)} قلم منتشرشده در V2 بدون عکس دیده می‌شود`, owner: 'marketing',
+        reason: `${faNum(missing.length)} قلم منتشرشده بدون عکس به مشتری‌ها نشان داده می‌شود`, owner: 'marketing',
         impact: 'دیده‌شدن بهتر در ویترین زنده', kpi: 'کامل بودن ویترین', outcome: 'عکس اضافه و با تأیید شما منتشر شود', to: '/products',
       }] : [];
     },
@@ -162,7 +162,7 @@ export const MODULES: readonly ModuleManifest[] = [
   },
   {
     id: 'offers', title: 'آفر اطراف', icon: '🏷️', route: '/storefront/offers', layer: 'core', status: 'live', nav: false,
-    statusNote: 'آفر با شعاع انتخابی (D-77)؛ ساخت پیش‌نویس و انتشار با دکمه‌ی خودتان',
+    statusNote: 'آفر برای مشتری‌های نزدیک، با شعاعی که خودتان انتخاب می‌کنید',
     summary: ({ published, today }) => {
       if (!published) return [{ label: 'آفر', value: '—' }];
       const active = published.offers.filter((o) => (!o.valid_from || o.valid_from.slice(0, 10) <= today) && (!o.valid_until || o.valid_until.slice(0, 10) >= today));
@@ -178,12 +178,12 @@ export const MODULES: readonly ModuleManifest[] = [
   },
   {
     id: 'content', title: 'تولید محتوا', icon: '✨', route: '/content', layer: 'module', status: 'design',
-    statusNote: 'Content Studio — پس از پیوند با رضایت دوطرفه وصل می‌شود', blockedBy: 'D-62 · OD-09',
+    statusNote: 'ایده و تقویم پست برای شبکه‌های اجتماعی', blockedBy: 'D-62 · OD-09',
     summary: () => [{ label: 'اتصال', value: 'وصل نشده' }], actions: () => [],
   },
   {
     id: 'crm', title: 'مشتریان (CRM)', icon: '👥', route: '/crm', layer: 'module', status: 'demo',
-    statusNote: 'رضایت سطح A (D-72) — فقط اعضای با رضایت، با تاریخ پایان و حذف واقعی',
+    statusNote: 'فقط مشتری‌هایی که خودشان رضایت داده‌اند',
     summary: ({ crm, today }) => {
       const s = crmSummary(crm, today, monthOf(today).from);
       return [{ label: 'اعضای فعال', value: `${faNum(s.members)} نفر` }, { label: 'مراجعه‌ی این ماه', value: faNum(s.visitsThisMonth) }];
@@ -194,7 +194,7 @@ export const MODULES: readonly ModuleManifest[] = [
       if (expired.length) out.push({
         id: 'crm-expired', module: 'crm', urgency: 'now', title: 'تمدید یا حذف اعضای با رضایت تمام‌شده',
         reason: `رضایت ${faNum(expired.length)} عضو تمام شده و اطلاعاتشان بدون رضایت نگه داشته شده`, owner: 'customer_service',
-        impact: 'پایبندی به سیاست رضایت (R8-a)', kpi: 'صفر داده‌ی بدون رضایت معتبر', outcome: 'تمدید با رضایت تازه یا حذف کامل', to: '/crm',
+        impact: 'نگه‌داشتن فقط داده‌ی با رضایت', kpi: 'صفر داده‌ی بدون رضایت معتبر', outcome: 'تمدید با رضایت تازه یا حذف کامل', to: '/crm',
       });
       const expiring = expiringConsents(crm, today);
       if (expiring.length) out.push({
@@ -213,7 +213,7 @@ export const MODULES: readonly ModuleManifest[] = [
   },
   {
     id: 'chat', title: 'گفتگو با مشتری', icon: '💬', route: '/storefront/chat', layer: 'module', status: 'live', nav: false,
-    statusNote: 'زنده روی سرور (D-73) — ورود عضو با شماره، حالت آزمایشی پیامک',
+    statusNote: 'پیام مشتری‌های اطراف و پاسخ‌گوی خودکار',
     summary: ({ chat }) => {
       if (!chat?.loggedIn) return [{ label: 'ورود عضو', value: 'لازم است' }];
       if (!chat.summary) return [{ label: 'گفتگوها', value: '—' }];
@@ -240,7 +240,7 @@ export const MODULES: readonly ModuleManifest[] = [
   },
   {
     id: 'plan', title: 'پلن و اشتراک', icon: '💎', route: '/plan', layer: 'core', status: 'live',
-    statusNote: 'رایگان، پرو، مکس (D-76) — تغییر در این نسخه نمایشی و بدون پرداخت',
+    statusNote: 'رایگان، پرو و مکس',
     summary: () => [{ label: 'پلن', value: 'در صفحه‌ی پلن' }],
     actions: () => [],
   },
