@@ -557,3 +557,11 @@ b.pos { color: var(--pos); } b.neg { color: var(--neg); }
 .grant-chip button { border: 0; background: none; color: var(--neg); font-size: 15px; line-height: 1; padding: 0 2px; cursor: pointer; }
 .member-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
 .member-actions select { width: auto; flex: 1; min-width: 160px; }
+
+/* The robot docks beside the bottom bar (its own slot), so it never sits on top of the page. */
+@media (max-width: 999px) {
+  .bottom-bar { left: 82px; }
+  .assistant { left: 12px; bottom: calc(13px + env(safe-area-inset-bottom)); }
+}
+/* Wide screens: the page keeps a free lane on the robot's side. */
+@media (min-width: 1000px) { .main { padding-left: 104px; } }
