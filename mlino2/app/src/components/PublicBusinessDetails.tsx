@@ -11,6 +11,7 @@ import { demoBusinessRating, displayName } from '../demo/demoSocial';
 import { formatDistance } from '../uiFormat';
 import Stars from './Stars';
 import { ChatBubbleIcon } from '../chat/ChatPanel';
+import { RatingBadge, useRatings, type RatingSummary } from '../ratings/ratings';
 
 interface Props {
   record: PublicUiRecord;
@@ -39,7 +40,7 @@ export function offerUntil(iso: string | null): string {
 }
 
 /** ردیف منو: متن در سمت راست، عکس کوچک در سمت چپ؛ عکس فقط وقتی به صفحه نزدیک شد بار می‌شود. */
-function MenuRow({ item, onOpen }: { item: CatalogItem; onOpen: () => void }) {
+function MenuRow({ item, rating, onOpen }: { item: CatalogItem; rating?: RatingSummary; onOpen: () => void }) {
   const ref = useRef<HTMLButtonElement | null>(null);
   const [near, setNear] = useState(typeof IntersectionObserver === 'undefined');
   useEffect(() => {
@@ -55,7 +56,7 @@ function MenuRow({ item, onOpen }: { item: CatalogItem; onOpen: () => void }) {
       {item.short_description && <span className="menu-desc">{item.short_description}</span>}
       <span className="menu-price">{catalogPrice(item)}</span>
     </span>
-    <span className="menu-thumb"><CatalogImage media={item.media[0]} load={near} /></span>
+    <span className="menu-thumb"><CatalogImage media={item.media[0]} load={near} /><RatingBadge summary={rating} className="on-thumb" /></span>
   </button>;
 }
 
@@ -71,6 +72,7 @@ export default function PublicBusinessDetails({ record, catalog, now, distanceMe
     if (last && last.label === label) last.items.push(item); else groups.push({ label, items: [item] });
   }
   const saved = experience.saved.includes(record.id);
+  const ratings = useRatings(record.id);
   return <section className="panel biz-page" aria-label={displayName(record.name)}>
     <header className="biz-hero">
       <button className="hero-btn" onClick={onClose} aria-label="بستن"><Icon name="close" /></button>
@@ -104,7 +106,7 @@ export default function PublicBusinessDetails({ record, catalog, now, distanceMe
 
       {groups.length > 0 ? groups.map((group) => <section key={group.label} className="menu-group">
         <h3>{group.label}</h3>
-        {group.items.map((item) => <MenuRow key={item.catalog_item_id} item={item} onOpen={() => onOpenItem(item)} />)}
+        {group.items.map((item) => <MenuRow key={item.catalog_item_id} item={item} rating={ratings.items[item.catalog_item_id]} onOpen={() => onOpenItem(item)} />)}
       </section>) : <>
         {record.description && <p className="biz-about">{record.description}</p>}
         {record.capabilities.length > 0 && <div className="biz-tags">{record.capabilities.map((item) => <span key={item.capability_id}>{item.name}</span>)}</div>}

@@ -84,7 +84,7 @@ export default function RealPublicApp() {
   const [locError, setLocError] = useState<null | 'denied' | 'unavailable' | 'outside'>(null);
   const [welcome, setWelcome] = useState(shouldWelcome);
   const [suggestionEmpty, setSuggestionEmpty] = useState(false);
-  const [product, setProduct] = useState<{ item: CatalogItem; businessName: string } | null>(null);
+  const [product, setProduct] = useState<{ item: CatalogItem; businessName: string; organizationId: string } | null>(null);
   const [assistant, setAssistant] = useState<{ query: string; answer: AssistantAnswer | null; loading: boolean; voice: boolean } | null>(null);
   const [consent, setConsent] = useState<ConsentState>(readConsent);
   const [pendingAsk, setPendingAsk] = useState<{ query: string; voice: boolean } | null>(null);
@@ -260,7 +260,7 @@ export default function RealPublicApp() {
     : [], [assistant, allRecords, catalogByOrg, assistantDistances, now]);
   const openProduct = (organizationId: string, item: CatalogItem) => {
     const owner = allRecords.find((record) => record.id === organizationId);
-    setProduct({ item, businessName: owner ? displayName(owner.name) : '' });
+    setProduct({ item, businessName: owner ? displayName(owner.name) : '', organizationId });
   };
 
   return <div className={`app-shell${demoBuildEnabled && demoEnabled ? ' demo-on' : ''}`} dir="rtl">
@@ -344,6 +344,6 @@ export default function RealPublicApp() {
     {pendingAsk && <AssistantConsent remote={ASSISTANT_REMOTE} onAccept={() => { const voice = pendingAsk.voice && !pendingAsk.query; decideConsent('granted'); if (voice) voiceInput.start(); }}
       onLocal={() => { const voice = ASSISTANT_REMOTE && pendingAsk.voice && !pendingAsk.query; decideConsent('local'); if (voice) voiceInput.start(); }} />}
     {welcome && <Welcome onClose={() => setWelcome(false)} onLocate={() => { setSheet('half'); useMyLocation(); }} />}
-    {product && <ProductPage item={product.item} businessName={product.businessName} onClose={() => setProduct(null)} />}
+    {product && <ProductPage item={product.item} businessName={product.businessName} organizationId={product.organizationId} onClose={() => setProduct(null)} />}
   </div>;
 }

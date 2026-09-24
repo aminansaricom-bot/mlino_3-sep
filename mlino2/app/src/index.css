@@ -1856,3 +1856,27 @@ body, button, input, textarea, select { font-family: Vazirmatn, "Segoe UI", Taho
 .welcome-foot { position: relative; margin: 10px 0 0; text-align: center; font-size: 11.5px; color: rgba(201,197,230,.6); }
 @media (prefers-reduced-motion: no-preference) { .welcome-body > * { animation: welcome-in .45s ease both; } }
 @keyframes welcome-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ═══════════ Product ratings (D-84) ═══════════ */
+.rating-badge { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,.94); color: #172B2A; font-size: 12px; font-weight: 800; line-height: 1.4; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+.rating-badge b { color: #E5A00D; font-size: 13px; }
+.rating-badge small { color: #566663; font-weight: 600; font-size: 11px; }
+.rating-badge.on-card { position: absolute; bottom: 10px; left: 10px; }
+.rating-badge.on-hero { position: absolute; bottom: 14px; left: 14px; font-size: 13.5px; padding: 5px 10px; }
+.menu-thumb { position: relative; }
+.rating-badge.on-thumb { position: absolute; bottom: 4px; left: 4px; padding: 1px 6px; font-size: 11px; }
+.rating-badge.on-thumb small { display: none; }
+.product-hero { position: relative; }
+.product-page { z-index: 1400 !important; }
+.rate-product { margin: 14px 0 4px; padding: 12px 14px; border-radius: 18px; background: var(--surface-2, #f3f5fa); border: 1px solid var(--border); display: grid; gap: 8px; }
+.rate-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px; }
+.rate-head strong { font-size: 14.5px; }
+.rate-summary { color: var(--ink-soft); font-size: 12.5px; }
+.rate-stars { display: flex; gap: 4px; }
+.rate-stars button { width: 44px; height: 44px; border: 0; background: none; font-size: 30px; line-height: 1; color: #C9D2CF; cursor: pointer; transition: transform .12s ease, color .12s ease; }
+.rate-stars button.on { color: #E5A00D; }
+.rate-stars button:active { transform: scale(.9); }
+.rate-stars button:disabled { opacity: .6; }
+.rate-note { color: var(--ink-soft); font-size: 12px; line-height: 1.8; }
+.rate-error { color: var(--danger, #A82D24); font-size: 12.5px; }
+.rate-login { display: grid; gap: 6px; }

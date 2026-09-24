@@ -14,6 +14,7 @@ import LiveIcon from './icons';
 import SearchDrawer from './SearchDrawer';
 import ChatSheet, { type ChatContext } from './ChatSheet';
 import { activeOffers, businessThumb, clean, faNum, itemPrice, rial, untilLabel, visibleItems, type CategoryGroup, groupOf } from './liveData';
+import { RatingBadge, useRatings } from '../ratings/ratings';
 import './live.css';
 
 // «ویترین زنده»: full-screen camera with HTML on top. Businesses are placed by the phone's direction and GPS, so
@@ -100,6 +101,7 @@ export default function LiveVitrine(p: Props) {
   const items = useMemo(() => visibleItems(catalog, offers, p.offersOnly), [catalog, offers, p.offersOnly]);
   const current = items[Math.min(index, Math.max(0, items.length - 1))];
   const thumb = businessThumb(catalog);
+  const ratings = useRatings(selectedId);
   const name = selected ? clean(selected.name) : '';
 
   // A new business starts at its first product; an explicit pick from the menu may set another.
@@ -226,6 +228,7 @@ export default function LiveVitrine(p: Props) {
                 {it.media[0] ? <CatalogImage media={it.media[0]} load={Math.abs(i - index) <= 1} /> : <img src="/icons/placeholder-product.svg" alt="" />}
                 {pr.percent && <span className="lv-offer on-img"><LiveIcon name="offer" size={14} />{faNum(pr.percent)}٪ تخفیف</span>}
                 {until && <span className="lv-until">{until}</span>}
+                <RatingBadge summary={ratings.items[it.catalog_item_id]} className="on-card" />
               </div>
               <div className="lv-card-body">
                 <button type="button" className={`lv-save${p.savedIds.includes(selected.id) ? ' on' : ''}`} onClick={() => p.onToggleSave(selected.id)} aria-pressed={p.savedIds.includes(selected.id)} aria-label={`ذخیره‌ی ${name}`}><LiveIcon name="bookmark" size={20} /></button>

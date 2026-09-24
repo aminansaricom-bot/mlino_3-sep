@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import type { CatalogItem } from './catalog';
 import { CatalogImage, catalogPrice } from './catalogCards';
 import { demoProductReviews, displayName } from '../demo/demoSocial';
-import Stars from '../components/Stars';
+import { RateProduct, RatingBadge, useRatings } from '../ratings/ratings';
 import { Icon } from '../design/Icon';
 
 /**
@@ -10,8 +10,9 @@ import { Icon } from '../design/Icon';
  * (در ساخت نمایشی، نظرهای نمونه با برچسب روشن). عکس همان مسیر سنجیده‌شده‌ی
  * کاتالوگ را دارد؛ هیچ تصویری بدون سنجش اثرانگشت نمایش داده نمی‌شود.
  */
-export default function ProductPage({ item, businessName, onClose }: { item: CatalogItem; businessName: string; onClose: () => void }) {
-  const { reviews, rating } = demoProductReviews(item.name);
+export default function ProductPage({ item, businessName, organizationId, onClose }: { item: CatalogItem; businessName: string; organizationId?: string; onClose: () => void }) {
+  const { reviews } = demoProductReviews(item.name);
+  const ratings = useRatings(organizationId);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
@@ -21,6 +22,7 @@ export default function ProductPage({ item, businessName, onClose }: { item: Cat
     <div className="product-hero">
       <CatalogImage key={item.catalog_item_id} media={item.media[0]} load />
       <button className="product-back" onClick={onClose} aria-label="بازگشت"><Icon name="close" /></button>
+      <RatingBadge summary={ratings.items[item.catalog_item_id]} className="on-hero" />
     </div>
     <div className="product-body">
       <div className="product-from">{businessName}</div>
@@ -29,7 +31,7 @@ export default function ProductPage({ item, businessName, onClose }: { item: Cat
         <span className="product-price">{catalogPrice(item)}</span>
         {item.grouping_label && <span className="product-group">{item.grouping_label}</span>}
       </div>
-      {rating && <Stars rating={rating} />}
+      {organizationId && <RateProduct orgId={organizationId} itemId={item.catalog_item_id} />}
       {item.short_description && <p className="product-desc">{item.short_description}</p>}
 
       <h3 className="product-section">نظرها</h3>
