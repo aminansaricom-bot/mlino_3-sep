@@ -63,10 +63,17 @@ export async function handleCoreRoute(deps: CoreDeps, personId: string, orgId: s
       take: 100,
     });
     const now = Date.now();
+    // The product a version is about (if any), for the panel list.
+    const links = await deps.prisma.offerVersionCatalogItem.findMany({
+      where: { organizationId: orgId, offerVersionId: { in: rows.flatMap((r) => r.versions.map((v) => v.id)) } },
+      select: { offerVersionId: true, catalogItem: { select: { id: true, name: true, priceAmount: true } } },
+    });
+    const itemOf = new Map(links.map((l) => [l.offerVersionId, { id: l.catalogItem.id, name: l.catalogItem.name, priceAmount: l.catalogItem.priceAmount?.toString() ?? null }]));
     return {
       offers: rows.filter((r) => r.versions[0]).map((r) => {
         const v = r.versions[0];
         return {
+          item: itemOf.get(v.id) ?? null,
           offerId: r.id, versionId: v.id, name: v.name, shortDescription: v.shortDescription, priceAmount: v.priceAmount?.toString() ?? null,
           validFrom: v.validFrom.toISOString(), validUntil: v.validUntil?.toISOString() ?? null, status: v.publicationStatus,
           publishedAt: v.publishedAt?.toISOString() ?? null, radiusMeters: v.visibilityRadiusMeters,
@@ -84,6 +91,13 @@ export async function handleCoreRoute(deps: CoreDeps, personId: string, orgId: s
     const radius = b.radiusMeters === null || b.radiusMeters === undefined ? null : Number(b.radiusMeters);
     const price = b.priceAmount === null || b.priceAmount === undefined || b.priceAmount === '' ? null : Number(b.priceAmount);
     if (price !== null && (!Number.isInteger(price) || price <= 0 || price > 10_000_000_000)) throw new RouteError(400, 'INPUT_INVALID', { field: 'priceAmount' });
+    // Optional: the offer is about one product. Its price must then be lower than the product's own price.
+    const catalogItemId = typeof b.catalogItemId === 'string' && /^[0-9a-f-]{36}$/.test(b.catalogItemId) ? b.catalogItemId : null;
+    if (catalogItemId) {
+      const it = await deps.prisma.catalogItem.findFirst({ where: { id: catalogItemId, organizationId: orgId, lifecycleStatus: { not: 'RETIRED' } }, select: { priceAmount: true } });
+      if (!it) throw new RouteError(400, 'INPUT_INVALID', { field: 'catalogItemId' });
+      if (price !== null && it.priceAmount !== null && price >= Number(it.priceAmount)) throw new RouteError(400, 'OFFER_NOT_LOWER', { field: 'priceAmount' });
+    }
     const offer = await deps.offers.create(context, { organizationId: orgId, offerKey: `panel-${crypto.randomUUID()}` });
     const validFrom = new Date();
     const version = await deps.offers.createVersion(context, {
@@ -91,6 +105,7 @@ export async function handleCoreRoute(deps: CoreDeps, personId: string, orgId: s
       priceAmount: price, priceCurrency: price === null ? null : 'IRR', onRequest: price === null,
       validFrom, validUntil: new Date(validFrom.getTime() + days * 86400_000), visibilityRadiusMeters: radius,
     });
+    if (catalogItemId) await deps.offers.linkCatalogItem(context, { offerVersionId: version.id, catalogItemId });
     // Created as a draft: nothing reaches V2 until the member presses «انتشار».
     return { offerId: offer.id, versionId: version.id, status: version.publicationStatus };
   }
@@ -99,6 +114,13 @@ export async function handleCoreRoute(deps: CoreDeps, personId: string, orgId: s
     const [, versionId, action] = m;
     if (action === 'publish') {
       const result = await deps.publications.publish(context, 'OFFER_VERSION', versionId, 'panel: published by member');
+      // The link lives in the product's public snapshot: a published product linked to this offer is republished in
+      // the same tap (same person, same grant), so customers see the offer on that product. A product never
+      // published stays unpublished.
+      const linked = await deps.prisma.offerVersionCatalogItem.findMany({ where: { organizationId: orgId, offerVersionId: versionId }, select: { catalogItem: { select: { id: true, publicationStatus: true, contentRevision: true, publishedContentRevision: true } } } });
+      for (const { catalogItem: it } of linked) {
+        if (it.publicationStatus === 'PUBLISHED' && it.contentRevision > (it.publishedContentRevision ?? 0)) await deps.publications.publish(context, 'CATALOG_ITEM', it.id, 'panel: published with its offer');
+      }
       if (deps.onOfferPublished) void deps.onOfferPublished(orgId, versionId).catch(() => undefined);
       return { outcome: result.outcome };
     }
