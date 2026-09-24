@@ -1,5 +1,8 @@
 app.mlino.site {
     root * /var/www/mlino-entry
+    @apk path /download/*.apk
+    header @apk Content-Type "application/vnd.android.package-archive"
+    header @apk Cache-Control "no-cache"
     encode gzip
     header {
         X-Content-Type-Options "nosniff"

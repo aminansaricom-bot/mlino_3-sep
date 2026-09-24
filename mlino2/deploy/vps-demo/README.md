@@ -9,3 +9,4 @@
 - ساخت V2 با `VITE_CHAT=1` (در کنار `VITE_ASSISTANT_REMOTE=0`).
 - `ops/mlino-api-setup-2.sh`: گام دوم API (D-75 تا D-78) — نشانی Prisma با همان نقش کم‌اختیار، پایگاه جدای `mlino_notify`، کلیدهای VAPID که روی خود سرور ساخته می‌شوند، مسیر فایل منوی منتشرشده، و اختیارهای لازم برای نوشتن آفر و انتشار؛ سرویس از build خود Core اجرا می‌شود (`/opt/mlino/core/dist/http/api/main.js`).
 - `ops/core-deploy.sh`: استقرار build هسته با پشتیبان کامل پیش از آن، `npm ci`، `prisma migrate deploy` و `prisma generate`؛ خروجی و API در حین جابه‌جایی متوقف‌اند.
+- اپ‌های اندروید (D-79): پروژه در `android-apps/` روی شاخه‌ی `guardian/accounting-a1`. ساخت: `node scripts/configure-native.cjs` پس از `npx cap add android`، سپس در هر `android/`: `./gradlew --init-script ../../scripts/mirrors.init.gradle assembleRelease bundleRelease` با `JAVA_HOME` روی JDK 21 و `MLINO_SIGNING` به فایل امضای بیرون از مخزن. فایل‌ها در `/var/www/mlino-entry/download/` (نوع `application/vnd.android.package-archive`).
