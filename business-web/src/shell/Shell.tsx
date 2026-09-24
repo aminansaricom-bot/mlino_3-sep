@@ -12,6 +12,7 @@ import Home from './Home';
 import AccountingModule from '../modules/accounting/AccountingApp';
 import InventoryModule from '../modules/inventory/InventoryModule';
 import { ProductsPage } from '../modules/catalog/CatalogPages';
+import ProductEditor from '../modules/catalog/ProductEditor';
 import LockedModule from './LockedModule';
 import CrmModule from '../modules/crm/CrmModule';
 import Assistant from '../assistant/Assistant';
@@ -74,7 +75,7 @@ export default function Shell() {
   switch (active) {
     case 'accounting': page = <AccountingModule tab={sub} />; break;
     case 'inventory': page = <InventoryModule tab={sub} />; break;
-    case 'products': page = <ProductsPage state={published} />; break;
+    case 'products': page = session.me && session.org && session.can('catalog_item.manage') ? <ProductEditor /> : <ProductsPage state={published} />; break;
     case 'storefront': page = <StorefrontSection rest={ws.path.split('/').slice(2).filter(Boolean)} published={published} />; break;
     case 'plan': page = <PlanPage />; break;
     case 'crm': page = <CrmModule tab={sub} />; break;

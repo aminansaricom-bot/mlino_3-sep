@@ -5,6 +5,7 @@ import { CHAT_PERMISSION, ChatError, ChatModule, isSensitiveBusiness, type Publi
 import { CoreDomainError } from '../../core/errors';
 import { type CoreDeps, RouteError, coreErrorStatus, handleCoreRoute } from './core-routes';
 import { type MemberDeps, handleMemberRoute } from './member-routes';
+import { type CatalogDeps, type FileReply, handleCatalogRoute } from './catalog-routes';
 import { businessFacts } from './facts';
 import { PLAN_LIMITS, planOf } from '../../core/plan-service';
 import type { AutoResolver } from '../../chat';
@@ -40,6 +41,8 @@ export interface ApiDeps {
   readonly core?: CoreDeps;
   /** Members and permissions of an organization (Core services); absent = routes off. */
   readonly members?: MemberDeps;
+  /** Products and storefront editing (Core catalog, profile and publication services). */
+  readonly catalog?: CatalogDeps;
   /** Nearby-offer notifications (D-77). Absent when VAPID keys are not configured. */
   readonly notify?: { module: NotifyModule; publicKey: string };
 }
@@ -95,6 +98,18 @@ async function readJson(req: IncomingMessage): Promise<Record<string, unknown>> 
     if (!v || typeof v !== 'object' || Array.isArray(v)) throw new Error('not an object');
     return v as Record<string, unknown>;
   } catch { throw new HttpError(400, 'JSON_INVALID'); }
+}
+
+/** Raw request body (photo upload), refused past `max` bytes. */
+async function readRaw(req: IncomingMessage, max: number): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += (chunk as Buffer).length;
+    if (size > max) throw new HttpError(413, 'BODY_TOO_LARGE');
+    chunks.push(chunk as Buffer);
+  }
+  return Buffer.concat(chunks);
 }
 
 function cookie(req: IncomingMessage, name: string): string | undefined {
@@ -281,6 +296,24 @@ export function createHandler(deps: ApiDeps) {
           if (!tail && method === 'DELETE') { await chat.erase('customer', s.personId, id, s.personId); return send(res, 200, { erased: true }); }
         }
         throw new HttpError(404, 'NOT_FOUND');
+      }
+
+      // ── Products and storefront: Core's catalog, profile and publication services decide every write.
+      const catalogMatch = path.match(/^\/api\/biz\/([A-Za-z0-9_-]{1,64})(\/catalog(?:\/.*)?|\/profile(?:\/.*)?|\/media\/.*)$/);
+      if (catalogMatch && deps.catalog) {
+        if (audience !== 'business') throw new HttpError(404, 'NOT_FOUND');
+        const s = needSession();
+        const orgId = catalogMatch[1];
+        if (!(await identity.memberships(s.personId)).some((m) => m.organizationId === orgId)) throw new HttpError(403, 'MEMBERSHIP_REQUIRED');
+        const out = await handleCatalogRoute(deps.catalog, s.personId, orgId, catalogMatch[2], method, () => readJson(req), (max) => readRaw(req, max), (name) => { const v = req.headers[name]; return Array.isArray(v) ? v[0] : v; });
+        if (out === undefined) throw new HttpError(404, 'NOT_FOUND');
+        if (out && typeof out === 'object' && 'file' in out) {
+          const f = out as FileReply;
+          res.writeHead(200, { 'content-type': f.contentType, 'cache-control': 'private, max-age=3600', 'x-content-type-options': 'nosniff', 'content-length': String(f.file.length) });
+          res.end(f.file);
+          return;
+        }
+        return send(res, 200, out);
       }
 
       // ── Members and permissions: Core's membership and grant services decide every write.

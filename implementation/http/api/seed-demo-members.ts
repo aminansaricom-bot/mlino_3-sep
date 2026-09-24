@@ -12,6 +12,8 @@ import { CHAT_PERMISSION } from '../../chat';
  */
 const DEMO_GRANTS = [
   CHAT_PERMISSION, 'offer.manage', 'publication.manage', 'plan.manage',
+  // Products and storefront editing from the panel.
+  'catalog_item.manage', 'business_profile.manage',
   // Member management, so the demo can show adding a colleague and giving or taking a permission.
   'membership.create', 'membership.revoke', 'permission_grant.issue', 'permission_grant.revoke',
 ] as const;

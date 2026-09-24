@@ -10,6 +10,8 @@ import { OfferService } from '../../core/offer-service';
 import { PLAN_LIMITS, PlanService, planOf } from '../../core/plan-service';
 import { PublicationService } from '../../core/publication-service';
 import { MembershipService } from '../../core/membership-service';
+import { CatalogItemService } from '../../core/catalog-item-service';
+import { BusinessProfileService } from '../../core/business-profile-service';
 import { PermissionGrantService } from '../../core/permission-grant-service';
 import { createHandler } from './app';
 import type { CoreDeps } from './core-routes';
@@ -31,6 +33,7 @@ import { seedDemoMembers } from './seed-demo-members';
  *   SMSIR_API_KEY       with sms: the sms.ir key (environment only, never logged)
  *   SMSIR_TEMPLATE_ID   with sms: the approved quick-send template; SMSIR_PARAMETER its code parameter (CODE)
  *   OTP_ALLOW_TEST_NUMBERS=1  with sms: keep the fictional test range working (demo)
+ *   MEDIA_STORE_DIR     absolute path of the catalog media store the export reads (photo upload); unset = no photos
  *   SMS_DAILY_LIMIT     with sms: real sends per 24 hours, all numbers together (100)
  *   API_HOSTS           e.g. explore.mlino.site=v2,business.mlino.site=business
  *   PUBLISHED_PATH      public-business.v1.json produced by the export
@@ -113,7 +116,9 @@ async function main(): Promise<void> {
 
   // Installed modules declare their permission keys; Core grants them under its own rules (D-57, D-63).
   const members = { prisma, identity, memberships: new MembershipService(prisma), grants: new PermissionGrantService(prisma, undefined, [CHAT_PERMISSION]) };
-  const handler = createHandler({ identity, chat, core: coreDeps, members, notify, config: { hosts, cookieSecure: process.env.COOKIE_SECURE === '1', publishedPath, catalogPath: process.env.CATALOG_PATH } });
+  // Products and storefront; photos only when the media store the export reads is configured.
+  const catalog = { prisma, catalog: new CatalogItemService(prisma), profiles: new BusinessProfileService(prisma), publications: coreDeps.publications, mediaStore: process.env.MEDIA_STORE_DIR || undefined };
+  const handler = createHandler({ identity, chat, core: coreDeps, members, catalog, notify, config: { hosts, cookieSecure: process.env.COOKIE_SECURE === '1', publishedPath, catalogPath: process.env.CATALOG_PATH } });
   const server = http.createServer((req, res) => { void handler(req, res); });
   const port = Number(process.env.API_PORT ?? 8741);
   server.listen(port, '127.0.0.1', () => console.log(`[mlino-api] listening on 127.0.0.1:${port}, OTP delivery: ${delivery}, notifications: ${notify ? 'on' : 'off'}`));

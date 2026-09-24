@@ -2,6 +2,7 @@ import { usePack } from '../../industry/context';
 import { useWorkspace } from '../../workspace';
 import { useChatSession } from '../../chat/session';
 import { StorefrontPage } from '../catalog/CatalogPages';
+import StorefrontEditor from '../catalog/StorefrontEditor';
 import OffersManager from '../offers/OffersManager';
 import ChatModule from '../chat/ChatModule';
 import type { PublishedState } from '../../published';
@@ -29,6 +30,6 @@ export default function StorefrontSection({ rest, published }: { rest: string[];
         {label}{id === 'chat' && unread + pending > 0 && <i className="tab-count">{faNum(unread + pending)}</i>}
       </button>)}
     </nav>
-    {tab === 'offers' ? <OffersManager /> : tab === 'chat' ? <ChatModule tab={rest[1] ?? ''} /> : <StorefrontPage state={published} />}
+    {tab === 'offers' ? <OffersManager /> : tab === 'chat' ? <ChatModule tab={rest[1] ?? ''} /> : <>{s.me && s.org && s.can('business_profile.manage') && <StorefrontEditor />}<StorefrontPage state={published} /></>}
   </div>;
 }

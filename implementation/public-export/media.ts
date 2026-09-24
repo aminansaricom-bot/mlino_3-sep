@@ -142,3 +142,52 @@ export async function readVerifiedMedia(store: string, meta: CatalogMedia): Prom
   verifyMediaBytes(bytes, meta);
   return bytes;
 }
+
+/**
+ * An uploaded photo, checked from its own bytes: JPEG, PNG or WebP only (no animation), the same size limits the
+ * export enforces, and no embedded camera metadata. The panel re-encodes photos on the device (which drops EXIF,
+ * including GPS position); a file that still carries such metadata is refused rather than published.
+ */
+export function inspectUploadedImage(bytes: Buffer): { mediaType: 'image/jpeg' | 'image/png' | 'image/webp'; width: number; height: number } {
+  let mediaType: 'image/jpeg' | 'image/png' | 'image/webp';
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) mediaType = 'image/jpeg';
+  else if (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex'))) mediaType = 'image/png';
+  else if (bytes.length >= 12 && bytes.toString('ascii', 0, 4) === 'RIFF' && bytes.toString('ascii', 8, 12) === 'WEBP') mediaType = 'image/webp';
+  else fail('CATALOG_MEDIA_TYPE');
+  if (bytes.length < 1 || bytes.length > 1_500_000) fail('CATALOG_MEDIA_SIZE');
+  const [width, height] = dimensions(bytes, mediaType);
+  if (width < 320 || width > 4096 || height < 320 || height > 4096 || width * height > 16_000_000) fail('CATALOG_MEDIA_DIMENSIONS');
+  if (hasCameraMetadata(bytes, mediaType)) fail('CATALOG_MEDIA_METADATA');
+  return { mediaType, width, height };
+}
+
+function hasCameraMetadata(bytes: Buffer, type: 'image/jpeg' | 'image/png' | 'image/webp'): boolean {
+  if (type === 'image/jpeg') {
+    for (let i = 2; i + 4 < bytes.length;) {
+      if (bytes[i] !== 0xff) return false;
+      const marker = bytes[i + 1];
+      if (marker === 0xda || marker === 0xd9) return false;
+      const length = bytes.readUInt16BE(i + 2);
+      if (marker === 0xe1) return true; // APP1: EXIF or XMP
+      i += 2 + length;
+    }
+    return false;
+  }
+  if (type === 'image/png') {
+    for (let i = 8; i + 8 <= bytes.length;) {
+      const length = bytes.readUInt32BE(i);
+      const name = bytes.toString('ascii', i + 4, i + 8);
+      if (name === 'eXIf' || name === 'iTXt' || name === 'zTXt' || name === 'tEXt') return true;
+      if (name === 'IEND') return false;
+      i += 12 + length;
+    }
+    return false;
+  }
+  for (let offset = 12; offset + 8 <= bytes.length;) {
+    const name = bytes.toString('ascii', offset, offset + 4);
+    const length = bytes.readUInt32LE(offset + 4);
+    if (name === 'EXIF' || name === 'XMP ') return true;
+    offset += 8 + length + (length % 2);
+  }
+  return false;
+}

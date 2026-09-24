@@ -137,7 +137,7 @@ button.kpi:active { transform: scale(.98); }
 .field label { font-size: 13px; font-weight: 800; color: var(--soft); }
 .field small { font-size: 12px; color: var(--muted); }
 .field small.err { color: var(--neg); }
-input, select { width: 100%; min-height: 44px; padding: 8px 12px; border-radius: 13px; border: 1px solid var(--line); background: var(--surface); font-size: 15px; }
+input, select, textarea { width: 100%; min-height: 44px; padding: 8px 12px; border-radius: 13px; border: 1px solid var(--line); background: var(--surface); font-size: 15px; }
 input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
 .amount-input { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); overflow: hidden; }
 .amount-input input { border: 0; border-radius: 0; font-weight: 800; font-variant-numeric: tabular-nums; text-align: left; }
@@ -620,3 +620,31 @@ b.pos { color: var(--pos); } b.neg { color: var(--neg); }
 }
 /* While the menu is open the assistant steps aside. */
 .shell:has(.drawer-backdrop) .assistant { display: none; }
+
+/* Products and storefront editing */
+.page-head .btn.primary { margin-inline-start: auto; }
+.product-edit-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.product-edit-list li { display: grid; grid-template-columns: 64px 1fr; grid-template-areas: "thumb body" "thumb actions"; gap: 6px 12px; align-items: start; padding: 10px 0; border-top: 1px solid var(--line); }
+.product-edit-list li:first-child { border-top: 0; }
+.pe-thumb { grid-area: thumb; width: 64px; height: 64px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); display: grid; place-items: center; font-size: 22px; padding: 0; cursor: pointer; }
+.pe-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.pe-body { grid-area: body; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.pe-body small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pe-actions { grid-area: actions; display: flex; flex-wrap: wrap; gap: 6px; }
+.pe-photos h4 { margin: 14px 0 4px; }
+.pe-photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; margin-top: 8px; }
+.pe-photo-grid figure { position: relative; margin: 0; aspect-ratio: 1; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
+.pe-photo-grid figure:first-child { outline: 2px solid var(--violet); outline-offset: -2px; }
+.pe-photo-grid img { width: 100%; height: 100%; object-fit: cover; }
+.pe-photo-grid figure button { position: absolute; top: 4px; left: 4px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 16px; cursor: pointer; }
+.pe-photo-add { aspect-ratio: 1; border-radius: 12px; border: 1.5px dashed var(--violet); display: grid; place-items: center; color: var(--violet); font-weight: 800; cursor: pointer; }
+.pe-photo-add input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.pe-photo-add.busy { opacity: .5; cursor: progress; }
+.sf-editor .row-end { display: flex; flex-wrap: wrap; gap: 8px; }
+.hours-edit { border: 1px solid var(--line); border-radius: 14px; padding: 8px 12px 12px; display: grid; gap: 6px; }
+.hours-edit legend { font-weight: 800; padding: 0 6px; }
+.hours-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 40px; }
+.hours-row .check { min-width: 96px; }
+.hours-times { display: inline-flex; align-items: center; gap: 6px; }
+.hours-times input { width: 104px; min-height: 38px; }
+textarea { font: inherit; color: var(--ink); line-height: 1.8; resize: vertical; }

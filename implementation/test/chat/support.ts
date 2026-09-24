@@ -27,6 +27,9 @@ export async function dropTestOrg(core: Pool): Promise<void> {
   await core.query(`DELETE FROM permission_grants WHERE membership_id IN (${free})`);
   await core.query(`DELETE FROM memberships WHERE id IN (${free})`);
   if ((await core.query('SELECT 1 FROM publications WHERE organization_id = $1 LIMIT 1', [TEST_ORG])).rowCount) return;
+  await core.query('DELETE FROM catalog_item_media WHERE organization_id = $1', [TEST_ORG]);
+  await core.query('DELETE FROM catalog_items WHERE organization_id = $1', [TEST_ORG]);
+  await core.query('DELETE FROM business_profiles WHERE organization_id = $1', [TEST_ORG]);
   await core.query('DELETE FROM permission_grants WHERE organization_id = $1', [TEST_ORG]);
   await core.query('DELETE FROM memberships WHERE organization_id = $1', [TEST_ORG]);
   await core.query('DELETE FROM organizations WHERE id = $1', [TEST_ORG]);

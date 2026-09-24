@@ -80,7 +80,7 @@ describe('members and permissions from the panel — Core rules unchanged (D-57)
 
     // Unknown keys, keys the granter does not hold, and grants by a non-admin are refused by Core.
     expect((await call('POST', `${org}/members/${added.json.membershipId}/grants`, { key: 'accounting.post' }, owner)).status).toBe(400);
-    expect((await call('POST', `${org}/members/${added.json.membershipId}/grants`, { key: 'catalog_item.manage' }, owner)).status).toBe(403);
+    expect((await call('POST', `${org}/members/${added.json.membershipId}/grants`, { key: 'evidence.manage' }, owner)).status).toBe(403);
     expect((await call('POST', `${org}/members/${list.json.me}/grants`, { key: 'chat.reply' }, staff)).status).toBe(403);
 
     const after = await call('GET', `${org}/members`, undefined, owner);
