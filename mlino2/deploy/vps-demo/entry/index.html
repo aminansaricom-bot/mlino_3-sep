@@ -16,9 +16,10 @@
   --grad: linear-gradient(135deg, #246B62, #2F8F9D);
   --shadow: 0 8px 28px rgba(22, 51, 45, .08); --r: 24px; color-scheme: light;
   /* Melino: calm charcoal-teal sphere for the light theme (owner's reference). */
-  --robot-body: #243D39; --robot-body-deep: #172B2A; --robot-rim: #246B62; --robot-rim-light: #7FAAA5;
-  --robot-sheen: #BFDCD5; --robot-eye: #D4EBE5; --robot-halo: #E7F4EF;
-  --robot-halo-strength: .34;   /* soft mint light hugging the ring */
+  --robot-body: #285A52; --robot-body-deep: #0F2B27; --robot-rim: #22806F; --robot-rim-light: #86D8C3;
+  --robot-sheen: #D2F4EA; --robot-eye: #E4FAF3; --robot-halo: #DDF5EC;
+  --robot-glow: 72, 190, 160;   /* rgb of the mint light hugging the ring */
+  --robot-halo-strength: .38;
   --robot-ring: 5px;
 }
 * { box-sizing: border-box; }
@@ -37,7 +38,7 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 .hero { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .orb { position: relative; width: min(74vw, 300px); aspect-ratio: 1; margin: 6px auto 0; }
 .orb-aura { position: absolute; inset: 3%; border-radius: 50%; pointer-events: none;   /* 1.5 × the sphere */
-  background: radial-gradient(closest-side, var(--robot-halo) 0%, var(--robot-halo) 45%, rgba(231,244,239,.7) 60%, rgba(231,244,239,.35) 76%, rgba(231,244,239,.12) 89%, rgba(231,244,239,0) 100%);
+  background: radial-gradient(closest-side, var(--robot-halo) 0%, var(--robot-halo) 45%, rgba(221,245,236,.72) 60%, rgba(221,245,236,.36) 76%, rgba(221,245,236,.12) 89%, rgba(221,245,236,0) 100%);
   animation: aura 5s ease-in-out infinite; }
 .orb.thinking .orb-aura { animation-duration: 1.4s; }
 @keyframes aura { 0%,100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.03); opacity: 1; } }
@@ -47,18 +48,18 @@ header { display: flex; align-items: center; justify-content: space-between; pad
   border: var(--robot-ring) solid var(--robot-rim);
   background:
     radial-gradient(90% 60% at 50% 4%, rgba(191,220,213,.26) 0%, rgba(191,220,213,0) 60%),
-    radial-gradient(circle at 50% 36%, var(--robot-body) 0%, #20362F 45%, var(--robot-body-deep) 100%);
+    radial-gradient(circle at 48% 32%, var(--robot-body) 0%, #1A423C 48%, var(--robot-body-deep) 100%);
   box-shadow:
     inset 0 0 0 1px rgba(127,170,165,.35),
     inset 7px 9px 16px -10px var(--robot-sheen),
     inset 0 12px 20px -14px rgba(191,220,213,.45),
     inset 0 -14px 26px -12px rgba(10,24,22,.45),
     0 0 0 1px var(--robot-rim-light),
-    0 0 38px 14px rgba(127,170,165,var(--robot-halo-strength)); }
+    0 0 38px 14px rgba(var(--robot-glow), var(--robot-halo-strength)); }
 .eye { position: absolute; width: 9.5%; height: 9.5%; margin: -4.75% 0 0 -4.75%; will-change: transform; }
 .eye-l { left: 35%; top: 53%; } .eye-r { left: 65%; top: 53%; }
 .eye i { display: block; width: 62%; height: 62%; margin: 19%; border-radius: 50%; background: var(--robot-eye);
-  box-shadow: 0 0 5px rgba(212,235,229,.45); transform-origin: 50% 50%; transition: transform .09s ease-in; pointer-events: none; }
+  box-shadow: 0 0 6px rgba(228,250,243,.6); transform-origin: 50% 50%; transition: transform .09s ease-in; pointer-events: none; }
 .eye.shut i { transform: scaleY(.1); }
 @media (prefers-reduced-motion: reduce) { .orb-float, .orb-aura { animation: none; } }
 
@@ -167,7 +168,7 @@ footer .more { max-width: 520px; margin: 6px auto 0; font-size: 13px; }
           <div><h2>دنبال کسب‌وکار هستم</h2><p class="sub">جاهای خوب و تخفیف‌های اطرافت</p></div>
         </div>
         <div class="actions">
-          <a class="btn primary" href="https://explore.mlino.site/" data-choice="customer">ورود به ملینو</a>
+          <a class="btn primary" href="https://explore.mlino.site/login" data-choice="customer">ورود به ملینو</a>
           <a class="btn ghost" href="/download/mlino.apk" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>اپ اندروید <small>۱۰٫۷ MB</small></a>
         </div>
         <details>
@@ -196,7 +197,7 @@ footer .more { max-width: 520px; margin: 6px auto 0; font-size: 13px; }
           <div><h2>صاحب کسب‌وکار هستم</h2><p class="sub">کسب‌وکارت را به محله نشان بده</p></div>
         </div>
         <div class="actions">
-          <a class="btn primary" href="https://business.mlino.site/" data-choice="business">ورود به پنل کسب‌وکار</a>
+          <a class="btn primary" href="https://business.mlino.site/login" data-choice="business">ورود به پنل کسب‌وکار</a>
           <a class="btn ghost" href="/download/mlino-business.apk" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>اپ اندروید <small>۱۰٫۷ MB</small></a>
         </div>
         <details>
@@ -232,7 +233,7 @@ footer .more { max-width: 520px; margin: 6px auto 0; font-size: 13px; }
 <script>
 (function () {
   'use strict';
-  var URLS = { customer: 'https://explore.mlino.site/', business: 'https://business.mlino.site/' };
+  var URLS = { customer: 'https://explore.mlino.site/login', business: 'https://business.mlino.site/login' };
   var LABELS = { customer: 'ورود به ملینو', business: 'ورود به پنل کسب‌وکار' };
   var store = {
     get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F7F8F6">
+<meta name="robots" content="noindex">
+<title>ورود به ملینو</title>
+<link rel="icon" href="https://app.mlino.site/assets/favicon-256.png">
+<style>
+@font-face { font-family: Vazirmatn; src: url('/login/fonts/Vazirmatn-wght.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+/* «روشنای محله» tokens, the same as the entry page, the app and the panel. */
+:root {
+  --brand: #246B62; --brand-soft: #E7F4EF; --on-brand: #FFFFFF; --canvas: #F7F8F6; --surface: #FFFFFF;
+  --ink: #172B2A; --ink-2: #566663; --ink-3: #6B7A77; --line: #D5DEDA; --bad: #AD4326; --bad-soft: #FFF0EB;
+  --shadow: 0 8px 28px rgba(22, 51, 45, .08); color-scheme: light;
+  --robot-body: #285A52; --robot-body-deep: #0F2B27; --robot-rim: #22806F; --robot-rim-light: #86D8C3;
+  --robot-sheen: #D2F4EA; --robot-eye: #E4FAF3; --robot-halo: #DDF5EC; --robot-glow: 72, 190, 160; --robot-halo-strength: .38;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { min-height: 100vh; background: radial-gradient(800px 460px at 50% -8%, #E3F2EE 0%, transparent 62%), var(--canvas);
+  color: var(--ink); font: 16px/1.75 Vazirmatn, Tahoma, sans-serif; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 440px; margin: 0 auto; padding: 12px 16px calc(28px + env(safe-area-inset-bottom)); }
+.top { display: flex; align-items: center; justify-content: space-between; min-height: 48px; }
+.back { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); text-decoration: none; font-size: 14.5px; padding: 8px 4px; }
+.back svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Melino, small: the same sphere as the entry page. */
+.orb { position: relative; width: 132px; aspect-ratio: 1; margin: 4px auto 0; }
+.orb-aura { position: absolute; inset: 3%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, var(--robot-halo) 0%, var(--robot-halo) 45%, rgba(221,245,236,.72) 60%, rgba(221,245,236,.36) 76%, rgba(221,245,236,.12) 89%, rgba(221,245,236,0) 100%); }
+.orb-float { position: absolute; inset: 6%; }
+.orb-base { position: absolute; inset: 14.5%; border-radius: 50%; pointer-events: none; border: 4px solid var(--robot-rim);
+  background: radial-gradient(90% 60% at 50% 4%, rgba(191,220,213,.26) 0%, rgba(191,220,213,0) 60%),
+              radial-gradient(circle at 48% 32%, var(--robot-body) 0%, #1A423C 48%, var(--robot-body-deep) 100%);
+  box-shadow: inset 0 0 0 1px rgba(127,170,165,.35), inset 5px 7px 12px -8px var(--robot-sheen), inset 0 -10px 18px -10px rgba(10,24,22,.45),
+              0 0 0 1px var(--robot-rim-light), 0 0 24px 8px rgba(var(--robot-glow), var(--robot-halo-strength)); }
+.eye { position: absolute; width: 9.5%; height: 9.5%; margin: -4.75% 0 0 -4.75%; will-change: transform; }
+.eye-l { left: 35%; top: 53%; } .eye-r { left: 65%; top: 53%; }
+.eye i { display: block; width: 62%; height: 62%; margin: 19%; border-radius: 50%; background: var(--robot-eye); box-shadow: 0 0 5px rgba(228,250,243,.6); transition: transform .09s ease-in; }
+.eye.shut i { transform: scaleY(.1); }
+
+h1 { font-size: 22px; line-height: 1.5; margin: 10px 0 2px; text-align: center; }
+.lead { margin: 0 0 18px; text-align: center; color: var(--ink-2); font-size: 14.5px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+label.f { display: block; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.phone { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; direction: ltr; }
+.phone:focus-within, .code:focus { border-color: var(--brand); box-shadow: 0 0 0 4px rgba(36,107,98,.14); }
+.phone span { padding: 0 12px; color: var(--ink-2); border-right: 1px solid var(--line); font-size: 15px; line-height: 50px; }
+.phone input, .code { flex: 1; min-width: 0; width: 0; border: 0; outline: 0; font: inherit; font-size: 18px; letter-spacing: .04em; padding: 0 14px; height: 50px; color: var(--ink); background: none; }
+.code { width: 100%; direction: ltr; text-align: center; letter-spacing: .5em; border: 1px solid var(--line); border-radius: 14px; font-size: 22px; }
+.btn { display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px; min-height: 50px; margin-top: 14px; border-radius: 14px; border: 1px solid transparent;
+  font: inherit; font-weight: 800; font-size: 15.5px; cursor: pointer; text-decoration: none; }
+.btn.primary { background: var(--brand); color: var(--on-brand); }
+.btn.primary:disabled { opacity: .45; cursor: default; }
+.btn.ghost { background: transparent; color: var(--ink-2); font-weight: 600; }
+.or { display: flex; align-items: center; gap: 12px; color: var(--ink-3); font-size: 13px; margin: 18px 0 14px; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+#gbtn { display: flex; justify-content: center; min-height: 44px; }
+.note { font-size: 13px; color: var(--ink-2); background: var(--brand-soft); border-radius: 12px; padding: 8px 12px; margin: 10px 0 0; }
+.err { font-size: 14px; color: var(--bad); background: var(--bad-soft); border-radius: 12px; padding: 8px 12px; margin: 12px 0 0; }
+.timer { text-align: center; font-size: 13.5px; color: var(--ink-2); margin: 8px 0 0; }
+.foot { text-align: center; margin-top: 16px; font-size: 13.5px; color: var(--ink-2); }
+.foot a { color: var(--brand); font-weight: 700; text-decoration: none; }
+.btn:focus-visible, .back:focus-visible, .foot a:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" id="back" href="https://app.mlino.site/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>برگشت</a>
+  </div>
+
+  <div class="orb" id="orb" aria-hidden="true">
+    <div class="orb-aura"></div>
+    <div class="orb-float"><div class="orb-base"></div><div class="eye eye-l"><i></i></div><div class="eye eye-r"><i></i></div></div>
+  </div>
+  <h1 id="title">ورود به ملینو</h1>
+  <p class="lead" id="lead">با شماره‌ی موبایل یا حساب گوگل وارد شو.</p>
+
+  <main class="card">
+    <form id="phoneStep" autocomplete="on">
+      <label class="f" for="phone">شماره‌ی موبایل</label>
+      <div class="phone"><span>+98</span><input id="phone" inputmode="numeric" autocomplete="tel-national" placeholder="912 345 6789" maxlength="14" aria-describedby="demoNote"></div>
+      <p class="note" id="demoNote" hidden></p>
+      <p class="err" id="phoneErr" role="alert" hidden></p>
+      <button class="btn primary" id="sendBtn" type="submit" disabled>گرفتن کد</button>
+      <div id="googleBox" hidden>
+        <div class="or">یا</div>
+        <div id="gbtn"></div>
+        <p class="note" id="gNote" hidden>دکمه‌ی گوگل باز نشد؛ اگر گوگل روی اینترنتت در دسترس نیست، با شماره وارد شو.</p>
+      </div>
+    </form>
+
+    <form id="codeStep" hidden autocomplete="off">
+      <label class="f" for="code">کد ۶ رقمی</label>
+      <input class="code" id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
+      <p class="note" id="testCode" hidden></p>
+      <p class="timer" id="timer" aria-live="polite"></p>
+      <p class="err" id="codeErr" role="alert" hidden></p>
+      <button class="btn primary" id="verifyBtn" type="submit" disabled>تأیید و ورود</button>
+      <button class="btn ghost" id="resendBtn" type="button" disabled>ارسال دوباره‌ی کد</button>
+      <button class="btn ghost" id="changeBtn" type="button">تغییر شماره</button>
+    </form>
+  </main>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var biz = location.hostname.indexOf('business.') === 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var FA = '۰۱۲۳۴۵۶۷۸۹';
+  var fa = function (s) { return String(s).replace(/\d/g, function (d) { return FA[d]; }); };
+  var latin = function (s) { return String(s).replace(/[۰-۹]/g, function (d) { return FA.indexOf(d); }).replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); }); };
+  // Where to go after signing in: a path on this same site only.
+  var next = (function () { var n = new URLSearchParams(location.search).get('next') || '/'; return /^\/(?!\/)/.test(n) ? n : '/'; })();
+  var go = function () { location.replace(next); };
+
+  $('title').textContent = biz ? 'ورود به پنل کسب‌وکار' : 'ورود به ملینو';
+  document.title = $('title').textContent;
+  $('foot').innerHTML = biz
+    ? 'دنبال کسب‌وکار اطرافت هستی؟ <a href="https://explore.mlino.site/login">ورود به ملینو</a>'
+    : '<a href="/">بدون ورود، فقط نگاه کن</a> · <a href="https://business.mlino.site/login">صاحب کسب‌وکار هستم</a>';
+
+  var api = function (method, path, body) {
+    return fetch('/api/auth/' + path, { method: method, credentials: 'same-origin',
+      headers: method === 'GET' ? {} : { 'Content-Type': 'application/json', 'x-mlino-csrf': '1' },
+      body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) { var e = new Error(j.error || 'HTTP_' + r.status); e.detail = j; throw e; } return j; }); });
+  };
+  var ERR = {
+    PHONE_INVALID: 'شماره درست نیست؛ مثل ۹۱۲۳۴۵۶۷۸۹ بنویس.',
+    REAL_NUMBER_NEEDS_SMS: 'فعلاً پیامک روشن نیست؛ در این نسخه‌ی نمایشی فقط شماره‌های آزمایشی کار می‌کنند.',
+    TEST_NUMBER_NOT_ALLOWED: 'شماره‌های آزمایشی دیگر پذیرفته نمی‌شوند.',
+    RATE_LIMITED: 'کمی صبر کن و دوباره امتحان کن.',
+    CODE_WRONG: 'کد درست نیست.', TOO_MANY_ATTEMPTS: 'چند بار اشتباه شد؛ کد تازه بگیر.', CHALLENGE_INVALID: 'این کد دیگر معتبر نیست؛ کد تازه بگیر.',
+    SMS_FAILED: 'پیامک فرستاده نشد؛ کمی بعد دوباره امتحان کن.',
+    GOOGLE_TOKEN_INVALID: 'ورود با گوگل تأیید نشد؛ دوباره امتحان کن.', GOOGLE_UNAVAILABLE: 'گوگل الان در دسترس نیست؛ با شماره وارد شو.'
+  };
+  var show = function (el, e) {
+    var msg = ERR[e.message] || 'چیزی درست پیش نرفت؛ دوباره امتحان کن.';
+    if (e.message === 'CODE_WRONG' && e.detail && e.detail.remainingAttempts != null) msg += ' ' + fa(e.detail.remainingAttempts) + ' بار دیگر می‌توانی امتحان کنی.';
+    el.textContent = msg; el.hidden = false;
+  };
+
+  // ---------- phone ----------
+  var phone = $('phone'), challenge = null, expiresAt = 0, resendAt = 0, tick = null;
+  var national = function () { return latin(phone.value).replace(/\D/g, '').replace(/^0098|^98|^0/, ''); };
+  phone.addEventListener('input', function () { $('sendBtn').disabled = !/^9\d{9}$/.test(national()); $('phoneErr').hidden = true; });
+  function start() {
+    $('sendBtn').disabled = true; $('phoneErr').hidden = true;
+    return api('POST', 'otp/start', { phone: '0' + national() }).then(function (r) {
+      challenge = r.challengeId; expiresAt = Date.now() + (r.expiresInSeconds || 120) * 1000; resendAt = Date.now() + 60000;
+      $('phoneStep').hidden = true; $('codeStep').hidden = false; $('code').value = ''; $('codeErr').hidden = true;
+      $('testCode').hidden = !r.testCode; if (r.testCode) $('testCode').textContent = 'کد آزمایشی: ' + fa(r.testCode);
+      $('code').focus(); clock();
+    }).catch(function (e) { show($('phoneErr'), e); $('sendBtn').disabled = false; });
+  }
+  $('phoneStep').addEventListener('submit', function (e) { e.preventDefault(); if (/^9\d{9}$/.test(national())) start(); });
+  function clock() {
+    clearInterval(tick);
+    var draw = function () {
+      var left = Math.max(0, Math.round((expiresAt - Date.now()) / 1000)), wait = Math.max(0, Math.round((resendAt - Date.now()) / 1000));
+      var mm = function (s) { return fa(String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0')); };
+      $('timer').textContent = left > 0 ? 'کد تا ' + mm(left) + ' دیگر معتبر است.' : 'زمان کد تمام شد؛ کد تازه بگیر.';
+      $('resendBtn').disabled = wait > 0; $('resendBtn').textContent = wait > 0 ? 'ارسال دوباره‌ی کد · ' + mm(wait) : 'ارسال دوباره‌ی کد';
+      $('verifyBtn').disabled = left === 0 || latin($('code').value).replace(/\D/g, '').length !== 6;
+    };
+    draw(); tick = setInterval(draw, 1000);
+  }
+  $('code').addEventListener('input', function () { var v = latin(this.value).replace(/\D/g, '').slice(0, 6); this.value = v; $('codeErr').hidden = true; $('verifyBtn').disabled = v.length !== 6 || Date.now() > expiresAt; });
+  $('codeStep').addEventListener('submit', function (e) {
+    e.preventDefault(); $('verifyBtn').disabled = true;
+    api('POST', 'otp/verify', { challengeId: challenge, code: $('code').value }).then(go)
+      .catch(function (err) { show($('codeErr'), err); $('verifyBtn').disabled = false; });
+  });
+  $('resendBtn').addEventListener('click', start);
+  $('changeBtn').addEventListener('click', function () { clearInterval(tick); $('codeStep').hidden = true; $('phoneStep').hidden = false; phone.focus(); });
+
+  // ---------- Google (only when the owner has set a client ID) ----------
+  function google(clientId) {
+    $('googleBox').hidden = false;
+    var s = document.createElement('script'); s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+    var failed = setTimeout(function () { $('gNote').hidden = false; }, 8000);
+    s.onerror = function () { clearTimeout(failed); $('gNote').hidden = false; };
+    s.onload = function () {
+      clearTimeout(failed);
+      try {
+        window.google.accounts.id.initialize({ client_id: clientId, ux_mode: 'popup', context: 'signin', callback: function (r) {
+          $('phoneErr').hidden = true;
+          api('POST', 'google', { credential: r.credential }).then(go).catch(function (e) { show($('phoneErr'), e); });
+        } });
+        window.google.accounts.id.renderButton($('gbtn'), { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', locale: 'fa', width: Math.min(360, $('gbtn').clientWidth || 320) });
+      } catch (e) { $('gNote').hidden = false; }
+    };
+    document.head.appendChild(s);
+  }
+
+  // Already signed in here: straight on. Otherwise read what this version offers.
+  api('GET', 'me').then(function (r) { if (r.person) go(); }).catch(function () {});
+  api('GET', 'config').then(function (c) {
+    if (c.testNumbers) { $('demoNote').hidden = false; $('demoNote').textContent = 'نسخه‌ی نمایشی: شماره‌های ' + fa('9000000001') + ' تا ' + fa('9000000099') + ' کار می‌کنند و کد همین‌جا نشان داده می‌شود.'; }
+    if (c.google) google(c.google); else $('lead').textContent = 'با شماره‌ی موبایلت وارد شو.';
+  }).catch(function () {});
+
+  // ---------- Melino's eyes (same behaviour as the entry page, lighter) ----------
+  var orb = $('orb'), eyes = orb.querySelectorAll('.eye'), ex = 0, ey = 0, tx = 0, ty = 0, run = false;
+  function loop() { if (run) return; run = true; requestAnimationFrame(function f() {
+    ex += (tx - ex) * .14; ey += (ty - ey) * .14; var t = 'translate(' + ex.toFixed(2) + 'px,' + ey.toFixed(2) + 'px)';
+    eyes[0].style.transform = t; eyes[1].style.transform = t;
+    if (Math.abs(tx - ex) > .05 || Math.abs(ty - ey) > .05) requestAnimationFrame(f); else run = false; }); }
+  function look(x, y) { var r = orb.getBoundingClientRect(), dx = x - (r.left + r.width / 2), dy = y - (r.top + r.height * .53), d = Math.sqrt(dx * dx + dy * dy) || 1, k = Math.min(1, d / (r.width * .9)) * r.width * .07; tx = dx / d * k; ty = dy / d * k; loop(); }
+  window.addEventListener('pointermove', function (e) { look(e.clientX, e.clientY); }, { passive: true });
+  window.addEventListener('pointerdown', function (e) { look(e.clientX, e.clientY); }, { passive: true });
+  document.addEventListener('focusin', function (e) { var r = e.target.getBoundingClientRect(); look(r.left + r.width / 2, r.top); });
+  (function blink() { setTimeout(function () {
+    var list = Math.random() < .34 ? [eyes[Math.random() < .5 ? 0 : 1]] : [eyes[0], eyes[1]];
+    list.forEach(function (el) { el.classList.add('shut'); }); setTimeout(function () { list.forEach(function (el) { el.classList.remove('shut'); }); }, list.length === 1 ? 260 : 120);
+    blink(); }, 2400 + Math.random() * 3200); })();
+})();
+</script>
+</body>
+</html>
