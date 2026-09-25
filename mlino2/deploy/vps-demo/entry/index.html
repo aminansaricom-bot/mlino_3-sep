@@ -344,7 +344,7 @@ footer .more { max-width: 520px; margin: 6px auto 0; font-size: 13px; }
     var asked = turns.filter(function (t) { return t.role === 'user'; }).length;
     thinking(true);
     var ctrl = window.AbortController ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 10000);
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 30000);
     var started = Date.now();
     fetch('/assistant/guide', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: turns.slice(-8) }), signal: ctrl && ctrl.signal })
       .then(function (r) { if (!r.ok || !/json/.test(r.headers.get('content-type') || '')) throw new Error('offline'); return r.json(); })
