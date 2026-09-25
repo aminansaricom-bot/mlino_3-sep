@@ -7,7 +7,6 @@
 <title>ملینو</title>
 <meta name="description" content="ملینو: کسب‌وکارهای اطرافت را پیدا کن، یا کسب‌وکارت را به محله نشان بده.">
 <link rel="icon" href="/assets/favicon-256.png">
-<link rel="preload" as="image" href="/assets/melino-core-base.webp" type="image/webp" fetchpriority="high">
 <style>
 @font-face { font-family: Vazirmatn; src: url('/fonts/Vazirmatn-wght.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
 /* «روشنای محله» tokens, the same as the app and the panel (light). */
@@ -16,6 +15,11 @@
   --canvas: #F7F8F6; --surface: #FFFFFF; --ink: #172B2A; --ink-2: #566663; --ink-3: #6B7A77; --line: #D5DEDA;
   --grad: linear-gradient(135deg, #246B62, #2F8F9D);
   --shadow: 0 8px 28px rgba(22, 51, 45, .08); --r: 24px; color-scheme: light;
+  /* Melino: calm charcoal-teal sphere for the light theme (owner's reference). */
+  --robot-body: #243D39; --robot-body-deep: #172B2A; --robot-rim: #246B62; --robot-rim-light: #7FAAA5;
+  --robot-sheen: #BFDCD5; --robot-eye: #D4EBE5; --robot-halo: #E7F4EF;
+  --robot-halo-strength: .2;   /* soft mint light hugging the ring */
+  --robot-ring: 5px;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -32,20 +36,30 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 /* ---------- Melino, live ---------- */
 .hero { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .orb { position: relative; width: min(74vw, 300px); aspect-ratio: 1; margin: 6px auto 0; }
-.orb-aura { position: absolute; inset: -12%; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(closest-side, rgba(47,143,157,.30) 0%, rgba(36,107,98,.16) 50%, transparent 74%);
+.orb-aura { position: absolute; inset: 3%; border-radius: 50%; pointer-events: none;   /* 1.5 × the sphere */
+  background: radial-gradient(closest-side, var(--robot-halo) 0%, var(--robot-halo) 45%, rgba(231,244,239,.7) 60%, rgba(231,244,239,.35) 76%, rgba(231,244,239,.12) 89%, rgba(231,244,239,0) 100%);
   animation: aura 5s ease-in-out infinite; }
 .orb.thinking .orb-aura { animation-duration: 1.4s; }
-@keyframes aura { 0%,100% { transform: scale(1); opacity: .75; } 50% { transform: scale(1.05); opacity: 1; } }
+@keyframes aura { 0%,100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.03); opacity: 1; } }
 .orb-float { position: absolute; inset: 6%; animation: bob 6s ease-in-out infinite; }
 @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
-/* The robot's images are violet/blue; the filter below repaints them in one brand green by brightness (no blue left). */
-.orb-base, .eye img { filter: url(#mlino-green); }
-.orb-base { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+.orb-base { position: absolute; inset: 14.5%; border-radius: 50%; pointer-events: none;
+  border: var(--robot-ring) solid var(--robot-rim);
+  background:
+    radial-gradient(90% 60% at 50% 4%, rgba(191,220,213,.26) 0%, rgba(191,220,213,0) 60%),
+    radial-gradient(circle at 50% 36%, var(--robot-body) 0%, #20362F 45%, var(--robot-body-deep) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(127,170,165,.35),
+    inset 7px 9px 16px -10px var(--robot-sheen),
+    inset 0 12px 20px -14px rgba(191,220,213,.45),
+    inset 0 -14px 26px -12px rgba(10,24,22,.45),
+    0 0 0 1px var(--robot-rim-light),
+    0 0 30px 10px rgba(127,170,165,var(--robot-halo-strength)); }
 .eye { position: absolute; width: 9.5%; height: 9.5%; margin: -4.75% 0 0 -4.75%; will-change: transform; }
 .eye-l { left: 35%; top: 53%; } .eye-r { left: 65%; top: 53%; }
-.eye img { width: 100%; height: 100%; display: block; transform-origin: 50% 50%; transition: transform .09s ease-in; pointer-events: none; }
-.eye.shut img { transform: scaleY(.1); }
+.eye i { display: block; width: 62%; height: 62%; margin: 19%; border-radius: 50%; background: var(--robot-eye);
+  box-shadow: 0 0 5px rgba(212,235,229,.45); transform-origin: 50% 50%; transition: transform .09s ease-in; pointer-events: none; }
+.eye.shut i { transform: scaleY(.1); }
 @media (prefers-reduced-motion: reduce) { .orb-float, .orb-aura { animation: none; } }
 
 /* ---------- Talk ---------- */
@@ -114,7 +128,6 @@ footer .more { max-width: 520px; margin: 6px auto 0; font-size: 13px; }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="mlino-green" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.0404 0.1359 0.0137 0 0  0.1914 0.6437 0.0650 0 0  0.1276 0.4291 0.0433 0 0  0 0 0 1 0"/></filter></svg>
 <div class="wrap">
   <header>
     <a class="brand" href="/"><img src="/logo.png" alt="" width="34" height="34">ملینو</a>
@@ -125,9 +138,9 @@ footer .more { max-width: 520px; margin: 6px auto 0; font-size: 13px; }
       <div class="orb" id="orb" aria-hidden="true">
         <div class="orb-aura"></div>
         <div class="orb-float">
-          <img class="orb-base" src="/assets/melino-core-base.webp" alt="" width="1024" height="1024">
-          <div class="eye eye-l"><img src="/assets/melino-eye-left.webp" alt=""></div>
-          <div class="eye eye-r"><img src="/assets/melino-eye-right.webp" alt=""></div>
+          <div class="orb-base"></div>
+          <div class="eye eye-l"><i></i></div>
+          <div class="eye eye-r"><i></i></div>
         </div>
       </div>
 
