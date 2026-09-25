@@ -10,7 +10,7 @@
 import { createServer } from 'node:http';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { createDailyBudget, createLimiter, normalizeLang, normalizeQuery, parseKeyFile, resolveIntent } from './assistantCore.mjs';
+import { createDailyBudget, createLimiter, normalizeConversation, normalizeLang, normalizeQuery, parseKeyFile, resolveGuide, resolveIntent } from './assistantCore.mjs';
 
 const keyFile = process.env.MLINO_ASSISTANT_KEY_FILE;
 if (!keyFile) { console.error(JSON.stringify({ level: 'fatal', code: 'KEY_FILE_REQUIRED' })); process.exit(1); }
@@ -33,16 +33,18 @@ const send = (res, status, body) => {
   res.end(JSON.stringify(body));
 };
 
-createServer(async (req, res) => {
+const server = createServer(async (req, res) => {
   const requestId = randomUUID();
   if (req.url === '/assistant/health' && req.method === 'GET') return send(res, 200, { ok: true });
-  if (req.url !== '/assistant/intent') return send(res, 404, { error: 'not_found' });
+  const guide = req.url === '/assistant/guide';
+  if (req.url !== '/assistant/intent' && !guide) return send(res, 404, { error: 'not_found' });
   if (req.method !== 'POST') return send(res, 405, { error: 'method_not_allowed' });
   if (!String(req.headers['content-type'] ?? '').startsWith('application/json')) return send(res, 415, { error: 'json_required' });
 
   let size = 0; const chunks = [];
-  for await (const chunk of req) { size += chunk.length; if (size > 4096) return send(res, 413, { error: 'too_large' }); chunks.push(chunk); }
+  for await (const chunk of req) { size += chunk.length; if (size > (guide ? 12288 : 4096)) return send(res, 413, { error: 'too_large' }); chunks.push(chunk); }
   let payload; try { payload = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return send(res, 400, { error: 'bad_json' }); }
+  if (guide) return handleGuide(req, res, requestId, payload);
   if (!payload || typeof payload !== 'object' || Object.keys(payload).some((key) => key !== 'query' && key !== 'lang')) return send(res, 400, { error: 'bad_request' });
   const query = normalizeQuery(payload.query);
   if (!query) return send(res, 400, { error: 'bad_query' });
@@ -57,4 +59,23 @@ createServer(async (req, res) => {
     log({ id: requestId, status: 200, model: result.model, latency_ms: result.latencyMs, tokens_in: result.tokens.in, tokens_out: result.tokens.out });
     return send(res, 200, { intent: { action: result.intent.action, keywords: result.intent.keywords, category: result.intent.category, open_now: result.intent.open_now, radius_meters: result.intent.radius_meters, sort: result.intent.sort }, answer: result.intent.answer, route: { task: 'intent', model: result.model } });
   } finally { limiter.release(client); }
-}).listen(port, host, () => log({ level: 'info', code: 'LISTENING', host, port, keys: keys.length }));
+});
+
+// The entry page's conversation (app.mlino.site): same limits, budget and log rules; the reply is {reply, path} only.
+async function handleGuide(req, res, requestId, payload) {
+  if (!payload || typeof payload !== 'object' || Object.keys(payload).some((key) => key !== 'messages')) return send(res, 400, { error: 'bad_request' });
+  const turns = normalizeConversation(payload.messages);
+  if (!turns) return send(res, 400, { error: 'bad_messages' });
+  const client = clientId(req);
+  const slot = limiter.acquire(client);
+  if (slot !== 'ok') { log({ id: requestId, task: 'guide', status: 429, outcome: slot }); return send(res, 429, { error: 'rate_limited' }); }
+  try {
+    if (!budget.take()) { log({ id: requestId, task: 'guide', status: 503, outcome: 'daily_budget' }); return send(res, 503, { error: 'budget_exhausted' }); }
+    const result = await resolveGuide(turns, { fetchImpl: fetch, keys, baseUrl });
+    if (!result.ok) { log({ id: requestId, task: 'guide', status: 502, error: result.error }); return send(res, 502, { error: result.error }); }
+    log({ id: requestId, task: 'guide', status: 200, model: result.model, latency_ms: result.latencyMs, tokens_in: result.tokens.in, tokens_out: result.tokens.out });
+    return send(res, 200, { reply: result.guide.reply, path: result.guide.path });
+  } finally { limiter.release(client); }
+}
+
+server.listen(port, host, () => log({ level: 'info', code: 'LISTENING', host, port, keys: keys.length }));

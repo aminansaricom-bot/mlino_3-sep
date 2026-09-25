@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMessages, normalizeLang, createDailyBudget, createLimiter, extractJson, normalizeQuery, parseKeyFile, resolveIntent, validateIntent } from './assistantCore.mjs';
+import { buildGuideMessages, normalizeConversation, resolveGuide, validateGuide, buildMessages, normalizeLang, createDailyBudget, createLimiter, extractJson, normalizeQuery, parseKeyFile, resolveIntent, validateIntent } from './assistantCore.mjs';
 
 const good = { action: 'discover', keywords: ['آیس‌کافی', 'موهیتو'], category: 'cafe', open_now: false, radius_meters: 1000, sort: 'relevance', answer: 'دنبال نوشیدنی خنک می‌گردم.' };
 const okResponse = (content) => new Response(JSON.stringify({ choices: [{ message: { content } }], usage: { prompt_tokens: 10, completion_tokens: 5 } }), { status: 200, headers: { 'content-type': 'application/json' } });
@@ -96,5 +96,42 @@ describe('gateway: upstream calls', () => {
     const fetchImpl = async (_url, init) => new Promise((_resolve, reject) => init.signal.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' }))));
     const result = await resolveIntent('خنک', { ...base, timeoutMs: 10, fetchImpl });
     expect(result).toEqual({ ok: false, error: 'upstream_timeout' });
+  });
+});
+
+describe('gateway: entry-page guide (fail-closed)', () => {
+  const turns = [{ role: 'user', content: 'یه کافه دارم' }];
+  const base = { keys: ['cc_first_key_000000000000'], baseUrl: 'https://example.invalid/v1', models: ['m1', 'm2'], timeoutMs: 1000 };
+  it('accepts only {reply, path} with a known path', () => {
+    expect(validateGuide({ reply: 'پنل کسب‌وکار برای توست.', path: 'business' })).toEqual({ reply: 'پنل کسب‌وکار برای توست.', path: 'business' });
+    expect(validateGuide({ reply: 'صاحب کسب‌وکاری؟', path: null })).toEqual({ reply: 'صاحب کسب‌وکاری؟', path: null });
+  });
+  it.each([
+    ['extra key', { reply: 'x', path: null, url: 'x' }],
+    ['unknown path', { reply: 'x', path: 'admin' }],
+    ['link in reply', { reply: 'برو به https://evil.example', path: 'customer' }],
+    ['too long', { reply: 'ا'.repeat(241), path: null }],
+    ['empty', { reply: '  ', path: null }],
+  ])('rejects %s', (_label, value) => { expect(validateGuide(value)).toBeNull(); });
+  it('keeps only role/content turns that end with the visitor', () => {
+    expect(normalizeConversation(turns)).toEqual(turns);
+    expect(normalizeConversation([{ role: 'system', content: 'x' }])).toBeNull();
+    expect(normalizeConversation([{ role: 'user', content: 'x', lat: 35 }])).toBeNull();
+    expect(normalizeConversation([{ role: 'user', content: 'a' }, { role: 'assistant', content: 'b' }])).toBeNull();
+    expect(normalizeConversation(Array.from({ length: 9 }, () => ({ role: 'user', content: 'a' })))).toBeNull();
+  });
+  it('sends the fixed prompt and only the typed turns', () => {
+    const messages = buildGuideMessages(turns);
+    expect(messages).toHaveLength(2);
+    expect(messages[0].role).toBe('system');
+    expect(messages[1]).toEqual(turns[0]);
+  });
+  it('returns a validated reply and retries once on bad output', async () => {
+    const models = [];
+    const fetchImpl = async (_url, init) => { models.push(JSON.parse(init.body).model); return okResponse(models.length === 1 ? 'nope' : JSON.stringify({ reply: 'پنل کسب‌وکار!', path: 'business' })); };
+    const result = await resolveGuide(turns, { ...base, fetchImpl });
+    expect(result.ok).toBe(true);
+    expect(result.guide).toEqual({ reply: 'پنل کسب‌وکار!', path: 'business' });
+    expect(models).toHaveLength(2);
   });
 });
