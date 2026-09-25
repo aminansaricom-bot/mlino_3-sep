@@ -410,4 +410,8 @@ export const EN: Readonly<Record<string, string>> = {
   'کد کشور': "Country code",
   'کشوری پیدا نشد.': "No country found.",
   'ورود با شماره‌ی خارج از ایران هنوز فعال نیست؛ فعلاً بدون ورود از نقشه و ویترین استفاده کن.': "Signing in with a number from outside Iran isn't available yet; for now use the map and storefront without signing in.",
+
+  // Assistant (six languages)
+  'دنبال «{0}» در اطرافت می‌گردم.': 'Looking for «{0}» around you.',
+  'نام کسب‌وکارها و محصولات همان‌طور که منتشر شده‌اند، به فارسی نشان داده می‌شوند.': 'Business and product names are shown in Persian, as the businesses published them.',
 };

@@ -368,4 +368,8 @@ export const DE: Readonly<Record<string, string>> = {
   'طبقه {0}': '{0}. Etage',
   'بدون قیمت': 'Kein Preis',
   '{0} کیلومتر': '{0} km',
+
+  // Assistant (six languages)
+  'دنبال «{0}» در اطرافت می‌گردم.': 'Ich suche «{0}» in deiner Nähe.',
+  'نام کسب‌وکارها و محصولات همان‌طور که منتشر شده‌اند، به فارسی نشان داده می‌شوند.': 'Namen von Geschäften und Produkten werden auf Persisch gezeigt, so wie die Geschäfte sie veröffentlicht haben.',
 };

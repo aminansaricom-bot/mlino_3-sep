@@ -106,3 +106,35 @@ describe('assistant client', () => {
     expect(voiceErrorMessage('not-allowed')).toContain('میکروفون');
   });
 });
+
+describe('local understanding in six languages', () => {
+  it.each([
+    ['coffee near me'], ['Ich suche einen Kaffee'], ['kahve istiyorum'], ['أريد قهوة'], ['un café por favor'], ['قهوه می‌خوام'],
+  ])('«%s» looks for coffee', (query) => {
+    const { intent } = localIntent(query);
+    expect(intent.category).toBe('cafe');
+    expect(intent.keywords).toContain('قهوه');
+  });
+  it('turns other ideas into the Persian words businesses publish', () => {
+    expect(localIntent('pizzas for dinner').intent.keywords).toContain('پیتزا');
+    expect(localIntent('Frühstück bitte').intent.keywords).toContain('کروسان');
+    expect(localIntent('kebap yemek').intent.category).toBe('restaurant');
+    expect(localIntent('بيتزا').intent.keywords).toContain('پیتزا');
+    expect(localIntent('farmacia').intent.keywords).toContain('داروخانه');
+  });
+  it('reads deals, nearness and open-now in any of the languages', () => {
+    expect(localIntent('descuento en tarta').intent.sort).toBe('offer');
+    expect(localIntent('Rabatt auf Kuchen').intent.sort).toBe('offer');
+    expect(localIntent('yakın bir kafe').intent.sort).toBe('nearest');
+    expect(localIntent('café abierto').intent.open_now).toBe(true);
+    expect(localIntent('walking distance bakery').intent.radius_meters).toBe(300);
+  });
+  it('does not see words inside other words', () => {
+    expect(localIntent('rice').intent.category).toBeNull();
+    expect(localIntent('customer service').intent.category).toBeNull();
+    expect(localIntent('pantalones').intent.keywords).not.toContain('نان');
+  });
+  it('drops filler words', () => {
+    expect(localIntent('I want a coffee please').intent.keywords).not.toContain('please');
+  });
+});

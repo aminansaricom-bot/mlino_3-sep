@@ -10,7 +10,7 @@
 import { createServer } from 'node:http';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { createDailyBudget, createLimiter, normalizeQuery, parseKeyFile, resolveIntent } from './assistantCore.mjs';
+import { createDailyBudget, createLimiter, normalizeLang, normalizeQuery, parseKeyFile, resolveIntent } from './assistantCore.mjs';
 
 const keyFile = process.env.MLINO_ASSISTANT_KEY_FILE;
 if (!keyFile) { console.error(JSON.stringify({ level: 'fatal', code: 'KEY_FILE_REQUIRED' })); process.exit(1); }
@@ -43,7 +43,7 @@ createServer(async (req, res) => {
   let size = 0; const chunks = [];
   for await (const chunk of req) { size += chunk.length; if (size > 4096) return send(res, 413, { error: 'too_large' }); chunks.push(chunk); }
   let payload; try { payload = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return send(res, 400, { error: 'bad_json' }); }
-  if (!payload || typeof payload !== 'object' || Object.keys(payload).some((key) => key !== 'query')) return send(res, 400, { error: 'bad_request' });
+  if (!payload || typeof payload !== 'object' || Object.keys(payload).some((key) => key !== 'query' && key !== 'lang')) return send(res, 400, { error: 'bad_request' });
   const query = normalizeQuery(payload.query);
   if (!query) return send(res, 400, { error: 'bad_query' });
 
@@ -52,7 +52,7 @@ createServer(async (req, res) => {
   if (slot !== 'ok') { log({ id: requestId, status: 429, outcome: slot }); return send(res, 429, { error: 'rate_limited' }); }
   try {
     if (!budget.take()) { log({ id: requestId, status: 503, outcome: 'daily_budget' }); return send(res, 503, { error: 'budget_exhausted' }); }
-    const result = await resolveIntent(query, { fetchImpl: fetch, keys, baseUrl });
+    const result = await resolveIntent(query, { fetchImpl: fetch, keys, baseUrl, lang: normalizeLang(payload.lang) });
     if (!result.ok) { log({ id: requestId, status: 502, error: result.error }); return send(res, 502, { error: result.error }); }
     log({ id: requestId, status: 200, model: result.model, latency_ms: result.latencyMs, tokens_in: result.tokens.in, tokens_out: result.tokens.out });
     return send(res, 200, { intent: { action: result.intent.action, keywords: result.intent.keywords, category: result.intent.category, open_now: result.intent.open_now, radius_meters: result.intent.radius_meters, sort: result.intent.sort }, answer: result.intent.answer, route: { task: 'intent', model: result.model } });

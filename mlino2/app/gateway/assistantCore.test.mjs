@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMessages, createDailyBudget, createLimiter, extractJson, normalizeQuery, parseKeyFile, resolveIntent, validateIntent } from './assistantCore.mjs';
+import { buildMessages, normalizeLang, createDailyBudget, createLimiter, extractJson, normalizeQuery, parseKeyFile, resolveIntent, validateIntent } from './assistantCore.mjs';
 
 const good = { action: 'discover', keywords: ['آیس‌کافی', 'موهیتو'], category: 'cafe', open_now: false, radius_meters: 1000, sort: 'relevance', answer: 'دنبال نوشیدنی خنک می‌گردم.' };
 const okResponse = (content) => new Response(JSON.stringify({ choices: [{ message: { content } }], usage: { prompt_tokens: 10, completion_tokens: 5 } }), { status: 200, headers: { 'content-type': 'application/json' } });
@@ -30,6 +30,19 @@ describe('gateway: strict intent contract (fail-closed)', () => {
     const messages = buildMessages('قهوه نزدیک');
     expect(messages).toHaveLength(2);
     expect(messages[1]).toEqual({ role: 'user', content: 'قهوه نزدیک' });
+  });
+  it('asks for the answer in the person\'s language and Persian keywords for any language', () => {
+    const [system, user] = buildMessages('coffee nearby', 'de');
+    expect(system.content).toMatch(/Answer language: German\.$/);
+    expect(system.content).toMatch(/keywords: always Persian/);
+    expect(user).toEqual({ role: 'user', content: 'coffee nearby' });
+    expect(buildMessages('x').at(0).content).toMatch(/Answer language: Persian/);
+  });
+  it('accepts only the app languages', () => {
+    expect(normalizeLang('tr')).toBe('tr');
+    expect(normalizeLang('fr')).toBe('fa');
+    expect(normalizeLang(undefined)).toBe('fa');
+    expect(normalizeLang('__proto__')).toBe('fa');
   });
   it('reads only cc_ keys from the key file', () => {
     expect(parseKeyFile('note\ncc_abcdefghijklmnopqrstuvwxyz0123\n\ncc_ZYXWVUTSRQPONMLKJIHGFEDCBA9876 extra')).toHaveLength(2);

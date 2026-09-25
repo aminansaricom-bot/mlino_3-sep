@@ -1,4 +1,5 @@
 import { localIntent, validateGatewayResponse, type AssistantAnswer } from './assistantIntent';
+import { locale } from '../i18n';
 
 export const ASSISTANT_ENDPOINT = '/assistant/intent';
 /** VITE_ASSISTANT_REMOTE=0: هیچ متنی به سرویس بیرونی نمی‌رود و فهم منظور فقط محلی است (نسخه‌ی سرور نمایشی). */
@@ -19,7 +20,7 @@ export async function askAssistant(query: string, options: { consented: boolean;
     const fetcher = options.fetcher ?? ((input: RequestInfo | URL, init?: RequestInit) => globalThis.fetch(input, init));
     const response = await fetcher(ASSISTANT_ENDPOINT, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
-      body: JSON.stringify({ query: query.slice(0, 500) }), signal: controller.signal,
+      body: JSON.stringify({ query: query.slice(0, 500), lang: locale() }), signal: controller.signal,
     });
     if (!response.ok) return localIntent(query);
     const answer = validateGatewayResponse(await response.json());

@@ -52,7 +52,7 @@ export default function AssistantPanel({ query, answer, results, loading, onOpen
       </div>
       <button type="button" className="assist-close" onClick={onClose} aria-label={tr('بستن پیشنهادها')}>✕</button>
     </header>
-    {locale() !== 'fa' && <small className="assist-lang-note">{tr('دستیار فعلاً فارسی را بهتر می‌فهمد و پاسخ کوتاهش را به فارسی می‌نویسد؛ نتیجه‌ها همان کسب‌وکارهای واقعی‌اند.')}</small>}
+    {locale() !== 'fa' && <small className="assist-lang-note">{tr('نام کسب‌وکارها و محصولات همان‌طور که منتشر شده‌اند، به فارسی نشان داده می‌شوند.')}</small>}
     {!loading && <div className="assist-results">
       {results.length === 0 ? <p className="assist-empty">{tr('چیزی مطابق این درخواست در اطرافت پیدا نشد. کمی ساده‌تر بپرس یا شعاع را بیشتر کن.')}</p> :
         results.map((result) => {
