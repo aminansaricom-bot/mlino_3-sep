@@ -164,7 +164,7 @@ export default function RealPublicApp() {
     }, () => undefined, { enableHighAccuracy: true, timeout: 30_000, maximumAge: 0 });
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => { refine(); const next: Point = [coords.latitude, coords.longitude]; noteLocation(next[0], next[1]); if (demoBuildEnabled && !validPoint(next)) { setLocating(false); setLocError('outside'); return; }
-        setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setFlyTo([next[0], next[1]]); setPointLabel('موقعیت من'); setNearbyOnly(true); setLocating(false); setLocError(null);
+        setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setFlyTo([next[0], next[1]]); setPointLabel(msg('موقعیت من')); setNearbyOnly(true); setLocating(false); setLocError(null);
         if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => nextDemoTarget(current, next)); },
       (error) => { setLocating(false); setLocError(error?.code === 1 ? 'denied' : 'unavailable'); },
       { enableHighAccuracy: false, timeout: 15_000, maximumAge: 5 * 60_000 },
@@ -174,7 +174,7 @@ export default function RealPublicApp() {
   const showSampleArea = () => {
     if (!demoAnchor) return;
     setDemoTarget(demoAnchor); setPoint([demoAnchor[0], demoAnchor[1]]); setFlyTo([demoAnchor[0], demoAnchor[1]]);
-    setPointLabel('محدوده‌ی نمونه'); setNearbyOnly(false); setSheet('half');
+    setPointLabel(msg('محدوده‌ی نمونه')); setNearbyOnly(false); setSheet('half');
   };
   // Already allowed on an earlier visit: locate straight away instead of showing an empty city.
   useEffect(() => {
@@ -208,7 +208,7 @@ export default function RealPublicApp() {
     const watch = navigator.geolocation.watchPosition(({ coords }) => {
       const next: Point = [coords.latitude, coords.longitude]; noteLocation(next[0], next[1]);
       if (!validPoint(next)) return;
-      setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setPointLabel('موقعیت زندهٔ من');
+      setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setPointLabel(msg('موقعیت زندهٔ من'));
       if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => nextDemoTarget(current, next));
     }, () => undefined, { enableHighAccuracy: true, maximumAge: 5_000, timeout: 20_000 });
     return () => navigator.geolocation.clearWatch(watch);
@@ -271,7 +271,7 @@ export default function RealPublicApp() {
     <MapView records={shown} matchIds={new Set()} selectedId={selectedId} center={TEHRAN_CENTER} myPoint={myPoint}
       flyTarget={selected?.coordinates ? [selected.coordinates.latitude, selected.coordinates.longitude] : flyTo}
       tileRetryKey={tileRetryKey} onSelect={openDetail}
-      onPickPoint={(lat, lng) => { setPoint([lat, lng]); setPointLabel('نقطهٔ انتخابی روی نقشه'); setNearbyOnly(true); }}
+      onPickPoint={(lat, lng) => { setPoint([lat, lng]); setPointLabel(msg('نقطهٔ انتخابی روی نقشه')); setNearbyOnly(true); }}
       onMapReady={() => undefined} onTileStatus={setTileStatus} />
 
     {!valid && <div className="app-banner warn" role="status">{tr('اطلاعات واقعی فعلاً در دسترس نیست. دادهٔ آزمایشی جای آن نمایش داده نمی‌شود.')}</div>}

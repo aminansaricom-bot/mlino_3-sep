@@ -1,0 +1,10 @@
+.mlino-robot { display: block; margin: 0 auto; overflow: visible; }
+.mlino-robot .robot-eyes { transition: transform .45s cubic-bezier(.3, .7, .3, 1); }
+.mlino-robot .robot-lids { transform-box: fill-box; transform-origin: center; transition: transform .07s ease-in; }
+.mlino-robot .robot-lids.closed { transform: scaleY(.08); }
+.mlino-robot .robot-float { animation: robot-float 4.5s ease-in-out infinite; transform-origin: center; }
+@keyframes robot-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) {
+  .mlino-robot .robot-float { animation: none; }
+}
+.welcome-robot { flex: 1; display: grid; place-items: center; min-height: 260px; }

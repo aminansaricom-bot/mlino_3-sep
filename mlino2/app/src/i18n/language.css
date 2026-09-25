@@ -12,14 +12,14 @@
   background: transparent; color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
 .lang-notice button.ok { background: #fff; color: #172B2A; border-color: #fff; }
 
-/* Vazirmatn draws Latin digits as Persian ones; in English a Latin font comes first and Persian business names fall back to Vazirmatn. */
-html[lang=en] body, html[lang=en] button, html[lang=en] input, html[lang=en] textarea, html[lang=en] select, html[lang=en] .lv-root {
+/* Vazirmatn draws Latin digits as Persian ones; in the left-to-right languages a Latin font comes first and Persian business names fall back to Vazirmatn. */
+html[dir=ltr] body, html[dir=ltr] button, html[dir=ltr] input, html[dir=ltr] textarea, html[dir=ltr] select, html[dir=ltr] .lv-root {
   font-family: Roboto, "Segoe UI", system-ui, Vazirmatn, sans-serif;
   font-feature-settings: normal;
 }
 
-/* In English, business content stays Persian: each text takes its own direction (like <bdi>), so «۲۰٪ تخفیف ماچا لاته» is not reordered. */
+/* In the left-to-right languages, business content stays Persian: each text takes its own direction (like <bdi>), so «۲۰٪ تخفیف ماچا لاته» is not reordered. */
 html[dir=ltr] :is(p, h1, h2, h3, h4, strong, small, b, span, li, figcaption) { unicode-bidi: plaintext; }
 
-/* Arrows drawn for right-to-left reading point the other way in English. */
+/* Arrows drawn for right-to-left reading point the other way in left-to-right languages. */
 html[dir=ltr] .lv-dir { transform: scaleX(-1); display: inline-block; }

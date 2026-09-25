@@ -402,4 +402,12 @@ export const EN: Readonly<Record<string, string>> = {
   'طبقه {0}': "Floor {0}",
   'بدون قیمت': "No price",
   '{0} کیلومتر': "{0} km",
+
+  // Phone number with country code
+  'کد کشور: {0} +{1}': "Country code: {0} +{1}",
+  'شماره‌ی موبایل بدون کد کشور': "Mobile number without the country code",
+  'جست‌وجوی کشور یا کد': "Search country or code",
+  'کد کشور': "Country code",
+  'کشوری پیدا نشد.': "No country found.",
+  'ورود با شماره‌ی خارج از ایران هنوز فعال نیست؛ فعلاً بدون ورود از نقشه و ویترین استفاده کن.': "Signing in with a number from outside Iran isn't available yet; for now use the map and storefront without signing in.",
 };

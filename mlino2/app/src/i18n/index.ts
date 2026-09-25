@@ -2,6 +2,9 @@ import { useSyncExternalStore } from 'react';
 import { pickLocale, regionAt, regionFromTimeZone, type Locale, type Region } from './region';
 import { EN } from './en';
 import { AR } from './ar';
+import { TR } from './tr';
+import { ES } from './es';
+import { DE } from './de';
 
 // The app's texts are written in Persian, and the Persian text itself is the key: tr('ویترین زنده') returns
 // «Live storefront» in English. A text missing from a dictionary shows in Persian rather than breaking the screen,
@@ -11,13 +14,15 @@ import { AR } from './ar';
 export type { Locale, Region } from './region';
 export { regionAt } from './region';
 
-const DICTS: Record<Locale, Readonly<Record<string, string>> | null> = { fa: null, en: EN, ar: AR };
+const DICTS: Record<Locale, Readonly<Record<string, string>> | null> = { fa: null, en: EN, ar: AR, tr: TR, es: ES, de: DE };
 export const LOCALES: ReadonlyArray<{ id: Locale; name: string }> = [
   { id: 'fa', name: 'فارسی' }, { id: 'en', name: 'English' }, { id: 'ar', name: 'العربية' },
+  { id: 'tr', name: 'Türkçe' }, { id: 'es', name: 'Español' }, { id: 'de', name: 'Deutsch' },
 ];
 const STORE_KEY = 'mlino.locale';
 
-type Saved = { chosen?: Locale; region?: Region };
+// chosen: picked in My space; countryLang: from the phone number's country on the welcome screen; region: last place seen.
+type Saved = { chosen?: Locale; countryLang?: Locale; region?: Region };
 function readSaved(): Saved {
   try { return JSON.parse(localStorage.getItem(STORE_KEY) ?? '{}') as Saved; } catch { return {}; }
 }
@@ -33,14 +38,14 @@ function timeZone(): string | undefined {
 function urlChoice(): Locale | null {
   try {
     const q = new URLSearchParams(location.search).get('lang');
-    return q === 'fa' || q === 'en' || q === 'ar' ? q : null;
+    return LOCALES.some((l) => l.id === q) ? q as Locale : null;
   } catch { return null; }
 }
 
 let saved = readSaved();
 const fromUrl = urlChoice();
 if (fromUrl) { saved = { ...saved, chosen: fromUrl }; writeSaved(saved); }
-let current: Locale = pickLocale({ chosen: saved.chosen, deviceLanguages: deviceLanguages(), region: saved.region ?? regionFromTimeZone(timeZone()) });
+let current: Locale = pickLocale({ chosen: saved.chosen, countryLang: saved.countryLang, deviceLanguages: deviceLanguages(), region: saved.region ?? regionFromTimeZone(timeZone()) });
 
 /** Set when the language changed by itself after a location fix, so the screen can offer a one-tap undo. */
 let autoSwitch: { from: Locale; to: Locale } | null = null;
@@ -56,7 +61,7 @@ function applyDocument() {
 applyDocument();
 
 export function locale(): Locale { return current; }
-export function dir(l: Locale = current): 'rtl' | 'ltr' { return l === 'en' ? 'ltr' : 'rtl'; }
+export function dir(l: Locale = current): 'rtl' | 'ltr' { return l === 'fa' || l === 'ar' ? 'rtl' : 'ltr'; }
 export function isChosen(): boolean { return !!saved.chosen; }
 
 /** The person picked a language: it is kept until they pick another. */
@@ -77,10 +82,22 @@ export function noteLocation(lat: number, lng: number) {
   if (region === saved.region) return;
   saved = { ...saved, region }; writeSaved(saved);
   if (saved.chosen) return;
-  const next = pickLocale({ deviceLanguages: deviceLanguages(), region });
+  const next = pickLocale({ countryLang: saved.countryLang, deviceLanguages: deviceLanguages(), region });
   if (next === current) return;
   autoSwitch = { from: current, to: next };
   current = next;
+  emit();
+}
+
+/**
+ * The country picked for the phone number on the welcome screen sets the default language (+90 → Türkçe),
+ * unless the person already chose a language in My space.
+ */
+export function setCountryLanguage(l: Locale) {
+  saved = { ...saved, countryLang: l }; writeSaved(saved);
+  if (saved.chosen || l === current) return;
+  autoSwitch = null;
+  current = l;
   emit();
 }
 
@@ -102,7 +119,7 @@ export function tr(fa: string, ...args: ReadonlyArray<string | number>): string 
 }
 
 // Arabic with Arabic-Indic digits (٠١٢…), as read in Iraq and the Gulf; plain 'ar' gives Latin digits in some browsers.
-const NUMBER_LOCALE: Record<Locale, string> = { fa: 'fa-IR', en: 'en-US', ar: 'ar-u-nu-arab' };
+const NUMBER_LOCALE: Record<Locale, string> = { fa: 'fa-IR', en: 'en-US', ar: 'ar-u-nu-arab', tr: 'tr-TR', es: 'es-ES', de: 'de-DE' };
 export function numberLocale(): string { return NUMBER_LOCALE[current]; }
 /** A number written with the current language's digits and grouping. */
 export function num(n: number, options?: Intl.NumberFormatOptions): string { return n.toLocaleString(NUMBER_LOCALE[current], options); }
@@ -111,10 +128,12 @@ export function digits(text: string): string {
   const s = String(text);
   if (current === 'fa') return s.replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
   if (current === 'ar') return s.replace(/[0-9۰-۹]/g, (d) => '٠١٢٣٤٥٦٧٨٩'[/[0-9]/.test(d) ? Number(d) : '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]);
+  // Latin digits for English, Turkish, Spanish and German.
   return s.replace(/[۰-۹٠-٩]/g, (d) => String(Math.max('۰۱۲۳۴۵۶۷۸۹'.indexOf(d), '٠١٢٣٤٥٦٧٨٩'.indexOf(d))));
 }
 /** Speech recognition and synthesis language. */
-export function speechLang(): string { return current === 'fa' ? 'fa-IR' : current === 'ar' ? 'ar-SA' : 'en-US'; }
+const SPEECH: Record<Locale, string> = { fa: 'fa-IR', en: 'en-US', ar: 'ar-SA', tr: 'tr-TR', es: 'es-ES', de: 'de-DE' };
+export function speechLang(): string { return SPEECH[current]; }
 
 /** Marks a Persian text kept in a constant; it is translated with tr() where it is shown (the dictionary test collects both). */
 export function msg(fa: string): string { return fa; }

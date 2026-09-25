@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { chatApi, chatErrorText, faDigits, type ChatConfig, type ChatMessage, type ChatPerson, type CustomerThread } from './chatApi';
 import { tr, numberLocale, latinDigits } from '../i18n';
+import { PhoneField } from '../i18n/PhoneField';
+import { SMS_COUNTRIES, defaultCountry, internationalNumber, plausibleNumber, type Country } from '../i18n/countries';
 
 // گفتگوی مشتری با کسب‌وکار (D-73). گفتگو را فقط مشتری شروع می‌کند؛ کسب‌وکار فقط نامی را می‌بیند که خودت می‌نویسی،
 // نه شماره‌ات را. هیچ هوش مصنوعی پیام‌ها را نمی‌خواند. هر گفتگو ۹۰ روز پس از آخرین پیام واقعاً پاک می‌شود.
@@ -88,14 +90,16 @@ export default function ChatPanel({ target, onClose }: { target: ChatTarget | nu
 }
 
 export function Login({ config, onDone }: { config: ChatConfig | null; onDone: () => void }) {
+  const [country, setCountry] = useState<Country>(() => defaultCountry());
   const [phone, setPhone] = useState('');
+  const canSend = SMS_COUNTRIES.has(country.iso);
   const [challenge, setChallenge] = useState<{ id: string; testCode?: string } | null>(null);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const start = async () => {
     setBusy(true); setError(null);
-    try { const r = await chatApi<{ challengeId: string; testCode?: string }>('POST', '/auth/otp/start', { phone }); setChallenge({ id: r.challengeId, testCode: r.testCode }); setCode(''); }
+    try { const r = await chatApi<{ challengeId: string; testCode?: string }>('POST', '/auth/otp/start', { phone: internationalNumber(country, phone) }); setChallenge({ id: r.challengeId, testCode: r.testCode }); setCode(''); }
     catch (e) { setError(chatErrorText(e)); } finally { setBusy(false); }
   };
   const verify = async () => {
@@ -108,10 +112,11 @@ export function Login({ config, onDone }: { config: ChatConfig | null; onDone: (
     {config?.delivery === 'test' && config.testNumbers && <p className="chat-test-note">{tr('حالت آزمایشی: پیامکی فرستاده نمی‌شود. فقط شماره‌های {0} تا {1} پذیرفته می‌شوند و کد همین‌جا نشان داده می‌شود. پیام‌های آزمایشی ۲۴ ساعت پس از آخرین پیام پاک می‌شوند؛ اطلاعات واقعی ننویس.', faDigits(config.testNumbers.from), faDigits(config.testNumbers.to))}</p>}
     {config?.delivery === 'sms' && <p className="chat-test-note">{tr('کد ورود با پیامک به شماره‌ات فرستاده می‌شود. شماره‌ات به هیچ کسب‌وکاری نشان داده نمی‌شود.')}</p>}
     {!challenge ? <form onSubmit={(e) => { e.preventDefault(); void start(); }}>
-      <label>{tr('شمارهٔ موبایل')}<input dir="ltr" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(latinDigits(e.target.value))} placeholder="09…" /></label>
-      <button type="submit" className="chat-primary" disabled={busy || phone.trim().length < 10}>{busy ? tr('در حال ارسال…') : tr('گرفتن کد')}</button>
+      <div className="chat-phone"><span>{tr('شمارهٔ موبایل')}</span><PhoneField country={country} onCountry={setCountry} national={phone} onNational={setPhone} />
+        {!canSend && <p className="phone-unsupported">{tr('ورود با شماره‌ی خارج از ایران هنوز فعال نیست؛ فعلاً بدون ورود از نقشه و ویترین استفاده کن.')}</p>}</div>
+      <button type="submit" className="chat-primary" disabled={busy || !canSend || !plausibleNumber(country, phone)}>{busy ? tr('در حال ارسال…') : tr('گرفتن کد')}</button>
     </form> : <form onSubmit={(e) => { e.preventDefault(); void verify(); }}>
-      {!challenge.testCode && <p className="chat-muted" role="status">{tr('کد ۶ رقمی به {0} پیامک شد. تا ۲ دقیقه معتبر است.', faDigits(phone))}</p>}
+      {!challenge.testCode && <p className="chat-muted" role="status">{tr('کد ۶ رقمی به {0} پیامک شد. تا ۲ دقیقه معتبر است.', faDigits(internationalNumber(country, phone)))}</p>}
       {challenge.testCode && <p className="chat-test-code">{tr('کد آزمایشی:')} <b dir="ltr">{faDigits(challenge.testCode)}</b></p>}
       <label>{tr('کد ۶ رقمی')}<input dir="ltr" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(latinDigits(e.target.value))} /></label>
       <button type="submit" className="chat-primary" disabled={busy || code.trim().length < 6}>{busy ? tr('در حال بررسی…') : tr('ورود')}</button>
