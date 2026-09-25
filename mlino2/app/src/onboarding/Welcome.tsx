@@ -134,7 +134,7 @@ export default function Welcome({ onClose, onLocate }: { onClose: () => void; on
       </form>}
 
       {step === 'location' && <>
-        <AppHeader title={tr('موقعیت من')} />
+        <AppHeader title={tr('موقعیت من')} onBack={() => setStep('intro')} />
         <div className="rs-hero-icon" aria-hidden="true"><LiveIcon name="my-location" size={48} /></div>
         <h2>{tr('کسب‌وکارهای کنارت را پیدا کنیم؟')}</h2>
         <p className="welcome-lead">{tr('فاصله‌ی کسب‌وکارها روی گوشی‌ات حساب می‌شود. موقعیت دقیقت برای هیچ کسب‌وکاری فرستاده نمی‌شود.')}</p>

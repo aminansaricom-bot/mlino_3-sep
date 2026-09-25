@@ -93,9 +93,9 @@ export default function ExperiencePanel({data, records, storageFailed, onClose, 
 
   return <section className="panel personal-panel" aria-label={titles[view]}>
     <header className="panel-head">
-      {view !== 'menu' && <button className="panel-close" onClick={() => setView('menu')} aria-label={tr('بازگشت')}><LiveIcon name="chevron-right" size={20} /></button>}
+      <button className="panel-close panel-back" onClick={() => (view !== 'menu' ? setView('menu') : onClose())} aria-label={tr('بازگشت')}><LiveIcon name="chevron-right" size={20} /></button>
       <h3>{titles[view]}</h3>
-      <button className="panel-close" onClick={onClose} aria-label={tr('بستن فضای من')}><LiveIcon name="close" size={20} /></button>
+      <span className="panel-head-space" aria-hidden="true" />
     </header>
     <div className="panel-body pm-body">
       {storageFailed && <p role="status" className="inline-note">{tr('ذخیره در مرورگر ممکن نیست؛ انتخاب‌ها فقط تا بستن این صفحه می‌مانند.')}</p>}

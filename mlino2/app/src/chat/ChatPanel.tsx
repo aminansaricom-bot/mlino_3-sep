@@ -3,6 +3,8 @@ import { chatApi, chatErrorText, faDigits, type ChatConfig, type ChatMessage, ty
 import { tr, numberLocale, latinDigits } from '../i18n';
 import { PhoneField } from '../i18n/PhoneField';
 import { SMS_COUNTRIES, defaultCountry, internationalNumber, plausibleNumber, type Country } from '../i18n/countries';
+import LiveIcon from '../live/icons';
+import { onBackButton } from '../native/bridge';
 
 // گفتگوی مشتری با کسب‌وکار (D-73). گفتگو را فقط مشتری شروع می‌کند؛ کسب‌وکار فقط نامی را می‌بیند که خودت می‌نویسی،
 // نه شماره‌ات را. هیچ هوش مصنوعی پیام‌ها را نمی‌خواند. هر گفتگو ۹۰ روز پس از آخرین پیام واقعاً پاک می‌شود.
@@ -62,12 +64,17 @@ export default function ChatPanel({ target, onClose, embedded = false }: { targe
     try { await chatApi('DELETE', '/auth/account'); setPerson(null); setThreads(null); setView({ kind: 'list' }); } catch (e) { setError(chatErrorText(e)); }
   };
 
+  // Back: from a conversation to the list (on the «پیام‌ها» tab, or when the chat was opened without a business);
+  // otherwise back leaves the chat for the page it came from.
+  const toList = view.kind !== 'list' && !!person && (embedded || !target);
+  const back = () => { if (toList) { setView({ kind: 'list' }); void loadThreads(); } else onClose(); };
+  useEffect(() => onBackButton(() => { if (!toList) return false; setView({ kind: 'list' }); void loadThreads(); return true; }), [toList]); // eslint-disable-line react-hooks/exhaustive-deps
   const title = view.kind === 'new' ? tr('پیام به {0}', clean(view.target.name)) : view.kind === 'thread' ? clean(threads?.find((t) => t.id === view.id)?.businessName ?? tr('گفتگو')) : !person && target ? tr('پیام به {0}', clean(target.name)) : tr('پیام‌های من');
   return <section className={`panel chat-panel${embedded ? ' embedded' : ''}`} aria-label={title}>
     <div className="panel-head">
-      {view.kind !== 'list' && person && <button className="panel-close" onClick={() => { setView({ kind: 'list' }); void loadThreads(); }} aria-label={tr('بازگشت')}><span className="lv-dir" aria-hidden="true">→</span></button>}
+      <button className="panel-close panel-back" onClick={back} aria-label={tr('بازگشت')}><LiveIcon name="chevron-right" size={20} /></button>
       <h3>{title}</h3>
-      {!embedded && <button className="panel-close" onClick={onClose} aria-label={tr('بستن')}>✕</button>}
+      <span className="panel-head-space" aria-hidden="true" />
     </div>
     <div className="panel-body chat-body">
       {!ready ? <p className="chat-muted">{tr('در حال بررسی…')}</p>

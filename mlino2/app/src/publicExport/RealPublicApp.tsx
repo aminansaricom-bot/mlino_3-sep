@@ -348,14 +348,14 @@ export default function RealPublicApp() {
     </BottomSheet>
 
     {tab === 'offers' && <OffersPage records={allRecords.filter((r) => !experience.data.hidden.includes(r.id))} catalogByOrg={catalogByOrg} now={now}
-      distanceById={assistantDistances} hiddenCount={hiddenOffers} onOpen={openDetail} onLocate={useMyLocation}
+      distanceById={assistantDistances} hiddenCount={hiddenOffers} onOpen={openDetail} onLocate={useMyLocation} onBack={() => setTab('discover')}
       alerts={CHAT_ENABLED ? <NearbyAlerts point={alertPoint} demoFrame={demoFrame} demoBuild={demoBuildEnabled && demoEnabled} onNeedLocation={useMyLocation} /> : undefined} />}
     {tab === 'messages' && <section className="rs-page rs-page-chat" aria-label={tr('پیام‌ها')}>
       {CHAT_ENABLED ? <ChatPanel embedded target={null} onClose={() => setTab('discover')} />
         : <div className="rs-inner"><EmptyState title={tr('پیام‌ها')} text={tr('گفتگو در این نسخه روشن نیست.')} /></div>}
     </section>}
     {tab === 'saved' && <SavedPage records={allRecords} catalogByOrg={catalogByOrg} saved={experience.data.saved} savedItems={experience.data.savedItems}
-      distanceById={assistantDistances} onOpenBusiness={openDetail} onOpenItem={openProduct} storageFailed={experience.storageFailed}
+      distanceById={assistantDistances} onOpenBusiness={openDetail} onOpenItem={openProduct} storageFailed={experience.storageFailed} onBack={() => setTab('discover')}
       onUnsaveBusiness={(id) => experience.toggle('saved', id)} onUnsaveItem={experience.toggleItem} />}
     <CustomerBottomNav tab={tab} unread={unread} onTab={(next) => { setTab(next); setSearchOpen(false); if (next === 'messages') setChatRefresh((n) => n + 1); }} />
 

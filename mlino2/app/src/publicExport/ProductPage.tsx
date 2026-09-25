@@ -3,7 +3,6 @@ import type { CatalogItem } from './catalog';
 import { CatalogImage, catalogPrice } from './catalogCards';
 import { demoProductReviews, displayName } from '../demo/demoSocial';
 import { RateProduct, RatingBadge, useRatings } from '../ratings/ratings';
-import { Icon } from '../design/Icon';
 import { tr, numberLocale } from '../i18n';
 import { Button } from '../design/ui';
 import LiveIcon from '../live/icons';
@@ -28,7 +27,7 @@ export default function ProductPage({ item, businessName, organizationId, onClos
   return <section className="product-page" role="dialog" aria-modal="true" aria-label={displayName(item.name)}>
     <div className="product-hero">
       <CatalogImage key={item.catalog_item_id} media={item.media[0]} load />
-      <button className="product-back" onClick={onClose} aria-label={tr('بازگشت')}><Icon name="close" /></button>
+      <button className="product-back" onClick={onClose} aria-label={tr('بازگشت')}><LiveIcon name="chevron-right" size={22} /></button>
       <RatingBadge summary={ratings.items[item.catalog_item_id]} className="on-hero" />
       {onToggleSave && <button type="button" className={`product-save${saved ? ' on' : ''}`} onClick={onToggleSave} aria-pressed={saved}
         aria-label={saved ? tr('برداشتن از ذخیره‌ها') : tr('ذخیره')}><LiveIcon name="bookmark" size={22} /></button>}

@@ -14,10 +14,10 @@ import { tr } from '../i18n';
  * «آفرها»: every active offer the viewer may see, nearest business first. Radius-limited offers are already filtered
  * by position (D-77) before they reach this page; «ویژه» marks a paid placement (D-78), never a discount.
  */
-export default function OffersPage({ records, catalogByOrg, now, distanceById, hiddenCount, alerts, onOpen, onLocate }: {
+export default function OffersPage({ records, catalogByOrg, now, distanceById, hiddenCount, alerts, onOpen, onLocate, onBack }: {
   records: readonly PublicUiRecord[]; catalogByOrg: ReadonlyMap<string, CatalogRecord>; now: number;
   distanceById: ReadonlyMap<string, number>; hiddenCount: number; alerts?: ReactNode;
-  onOpen: (id: string) => void; onLocate: () => void;
+  onOpen: (id: string) => void; onLocate: () => void; onBack: () => void;
 }) {
   const cards = records
     .flatMap((record) => activeOffersFor(record, now, 10).map((offer) => ({ record, offer, distance: distanceById.get(record.id) })))
@@ -26,7 +26,7 @@ export default function OffersPage({ records, catalogByOrg, now, distanceById, h
 
   return <section className="rs-page" aria-labelledby="offers-title">
     <div className="rs-inner">
-      <AppHeader title={<span id="offers-title">{tr('تخفیف‌های اطراف')}</span>} />
+      <AppHeader title={<span id="offers-title">{tr('تخفیف‌های اطراف')}</span>} onBack={onBack} />
       <p className="rs-lead">{tr('آفرهایی که در محدوده‌ی تقریبی تو دیده می‌شوند.')}</p>
       {alerts}
       {hiddenCount > 0 && <button type="button" className="rs-card tint" onClick={onLocate}>

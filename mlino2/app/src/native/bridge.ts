@@ -45,3 +45,25 @@ export function onBackButton(handler: () => boolean): () => void {
   return () => { const i = backStack.lastIndexOf(handler); if (i >= 0) backStack.splice(i, 1); };
 }
 export const NEARBY_LABEL = 'site.mlino.nearby';
+
+/** The same «back» as the phone's back button: closes the top-most layer; false when nothing was open. */
+export function goBack(): boolean {
+  const back = (window as unknown as { __mlinoBack?: () => boolean }).__mlinoBack;
+  return back ? back() : false;
+}
+
+/**
+ * In a browser, the phone's back button moves through the browser history, not through the app, so it used to leave
+ * the site from any page. One «guard» history entry sits on top: pressing back pops it, the app closes its top-most
+ * layer (the same stack the Android app uses) and the guard is put back. Only when nothing is open does back really
+ * leave. The Android app handles its back button natively and does not need this.
+ */
+export function installWebBackGuard(): void {
+  if (typeof window === 'undefined' || inApp()) return;
+  const guard = () => { try { window.history.pushState({ mlinoGuard: true }, ''); } catch { /* history unavailable */ } };
+  guard();
+  window.addEventListener('popstate', () => {
+    if (goBack()) guard();
+    else window.history.back();
+  });
+}

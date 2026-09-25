@@ -13,6 +13,7 @@ import { formatDistance } from '../uiFormat';
 import { ChatBubbleIcon } from '../chat/ChatPanel';
 import { RatingBadge, useRatings, type RatingSummary } from '../ratings/ratings';
 import { tr, numberLocale } from '../i18n';
+import LiveIcon from '../live/icons';
 
 interface Props {
   record: PublicUiRecord;
@@ -75,7 +76,7 @@ export default function PublicBusinessDetails({ record, catalog, now, distanceMe
   const ratings = useRatings(record.id);
   return <section className="panel biz-page" aria-label={displayName(record.name)}>
     <header className="biz-hero">
-      <button className="hero-btn" onClick={onClose} aria-label={tr('بستن')}><Icon name="close" /></button>
+      <button className="hero-btn hero-back" onClick={onClose} aria-label={tr('بازگشت')}><LiveIcon name="chevron-right" size={22} /></button>
       <div className="hero-actions">
         <button className={`hero-btn${saved ? ' on' : ''}`} onClick={() => onToggle('saved', record.id)} aria-label={saved ? tr('ذخیره شد') : tr('ذخیره')} aria-pressed={saved}><Icon name="bookmark" /></button>
         <ShareBusinessAction record={record} />

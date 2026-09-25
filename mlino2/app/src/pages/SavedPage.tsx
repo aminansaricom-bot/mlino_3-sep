@@ -14,11 +14,11 @@ type Filter = 'all' | 'businesses' | 'products';
  * «ذخیره‌ها»: businesses and products the person kept. The list lives on this phone (it survives reloads and
  * needs no account); a saved business or product that is no longer published is simply not shown.
  */
-export default function SavedPage({ records, catalogByOrg, saved, savedItems, distanceById, onOpenBusiness, onOpenItem, onUnsaveBusiness, onUnsaveItem, storageFailed }: {
+export default function SavedPage({ records, catalogByOrg, saved, savedItems, distanceById, onOpenBusiness, onOpenItem, onUnsaveBusiness, onUnsaveItem, storageFailed, onBack }: {
   records: readonly PublicUiRecord[]; catalogByOrg: ReadonlyMap<string, CatalogRecord>;
   saved: readonly string[]; savedItems: readonly string[]; distanceById: ReadonlyMap<string, number>;
   onOpenBusiness: (id: string) => void; onOpenItem: (organizationId: string, item: CatalogItem) => void;
-  onUnsaveBusiness: (id: string) => void; onUnsaveItem: (organizationId: string, itemId: string) => void; storageFailed: boolean;
+  onUnsaveBusiness: (id: string) => void; onUnsaveItem: (organizationId: string, itemId: string) => void; storageFailed: boolean; onBack: () => void;
 }) {
   const [filter, setFilter] = useState<Filter>('all');
   const businesses = saved.map((id) => records.find((r) => r.id === id)).filter((r): r is PublicUiRecord => !!r);
@@ -34,7 +34,7 @@ export default function SavedPage({ records, catalogByOrg, saved, savedItems, di
 
   return <section className="rs-page" aria-labelledby="saved-title">
     <div className="rs-inner">
-      <AppHeader title={<span id="saved-title">{tr('ذخیره‌ها')}</span>} />
+      <AppHeader title={<span id="saved-title">{tr('ذخیره‌ها')}</span>} onBack={onBack} />
       <Segmented label={tr('نوع ذخیره')} value={filter} onChange={setFilter} options={[
         { id: 'all', label: tr('همه') }, { id: 'businesses', label: tr('کسب‌وکارها'), count: businesses.length }, { id: 'products', label: tr('محصولات'), count: products.length },
       ]} />

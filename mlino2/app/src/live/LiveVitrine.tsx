@@ -164,9 +164,9 @@ export default function LiveVitrine(p: Props) {
     <div className="lv-shade" aria-hidden="true" />
 
     <header className="lv-top">
-      <button type="button" className="lv-iconbtn" onClick={() => setDrawer(true)} aria-label={tr('جست‌وجو و دسته‌بندی')}><LiveIcon name="menu" /></button>
+      <button type="button" className="lv-iconbtn" onClick={p.onClose} aria-label={tr('بازگشت')}><LiveIcon name="chevron-right" /></button>
       <h1 className="lv-title">{tr('ویترین زنده')}</h1>
-      <button type="button" className="lv-iconbtn" onClick={p.onClose} aria-label={tr('بستن ویترین زنده')}><LiveIcon name="close" /></button>
+      <button type="button" className="lv-iconbtn" onClick={() => setDrawer(true)} aria-label={tr('جست‌وجو و دسته‌بندی')}><LiveIcon name="menu" /></button>
     </header>
     <div className="lv-topstack" ref={topStack}>
     <div className="lv-chips">
