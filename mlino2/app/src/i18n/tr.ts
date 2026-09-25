@@ -431,4 +431,13 @@ export const TR: Readonly<Record<string, string>> = {
   'در حال خروج…': 'Çıkış yapılıyor…',
   'خروج از حساب': 'Hesaptan çık',
   'بازگرداندن': 'Geri getir',
+
+  // Live storefront search and location request
+  'دنبال چی می‌گردی؟ مثلاً قهوه': 'Ne arıyorsun? ör. kahve',
+  'جست‌وجو در ویترین زنده': 'Canlı vitrinde ara',
+  'گوشی جهت را نمی‌دهد؛ نزدیک‌ترین کسب‌وکار نشان داده می‌شود.': 'Telefon yön bilgisi vermiyor; en yakın işletme gösteriliyor.',
+  'موقعیتت را روشن کن': 'Konumunu aç',
+  'از تنظیمات مرورگر یا گوشی، اجازه‌ی موقعیت را برای ملینو روشن کن و دوباره امتحان کن.': 'Tarayıcı veya telefon ayarlarından MLINO için konum iznini aç ve tekrar dene.',
+  'تا کسب‌وکارها و تخفیف‌های کنار خودت را ببینی. موقعیت فقط روی همین گوشی حساب می‌شود.': 'Hemen yanındaki işletmeleri ve teklifleri görmek için. Konum yalnızca bu telefonda hesaplanır.',
+  'روشن کردن': 'Aç',
 };

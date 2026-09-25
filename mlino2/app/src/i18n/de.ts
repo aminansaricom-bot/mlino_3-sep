@@ -431,4 +431,13 @@ export const DE: Readonly<Record<string, string>> = {
   'در حال خروج…': 'Wird abgemeldet…',
   'خروج از حساب': 'Abmelden',
   'بازگرداندن': 'Wiederherstellen',
+
+  // Live storefront search and location request
+  'دنبال چی می‌گردی؟ مثلاً قهوه': 'Was suchst du? z. B. Kaffee',
+  'جست‌وجو در ویترین زنده': 'Im Live-Schaufenster suchen',
+  'گوشی جهت را نمی‌دهد؛ نزدیک‌ترین کسب‌وکار نشان داده می‌شود.': 'Das Handy liefert keine Richtung; das nächste Geschäft wird gezeigt.',
+  'موقعیتت را روشن کن': 'Schalte deinen Standort ein',
+  'از تنظیمات مرورگر یا گوشی، اجازه‌ی موقعیت را برای ملینو روشن کن و دوباره امتحان کن.': 'Erlaube MLINO den Standort in den Browser- oder Handy-Einstellungen und versuch es erneut.',
+  'تا کسب‌وکارها و تخفیف‌های کنار خودت را ببینی. موقعیت فقط روی همین گوشی حساب می‌شود.': 'Um Geschäfte und Angebote direkt um dich zu sehen. Der Standort wird nur auf diesem Handy verwendet.',
+  'روشن کردن': 'Einschalten',
 };

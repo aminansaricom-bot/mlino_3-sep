@@ -187,12 +187,6 @@ export default function RealPublicApp() {
       { enableHighAccuracy: false, timeout: 15_000, maximumAge: 5 * 60_000 },
     );
   };
-  // Without a position the demo businesses can still be shown where they really are (the demo area).
-  const showSampleArea = () => {
-    if (!demoAnchor) return;
-    setDemoTarget(demoAnchor); setPoint([demoAnchor[0], demoAnchor[1]]); setFlyTo([demoAnchor[0], demoAnchor[1]]);
-    setPointLabel(msg('محدوده‌ی نمونه')); setNearbyOnly(false); setSheet('half');
-  };
   // Already allowed on an earlier visit: locate straight away instead of showing an empty city.
   useEffect(() => {
     let alive = true;
@@ -320,6 +314,12 @@ export default function RealPublicApp() {
         <button className={`chip${openOnly ? ' active' : ''}`} onClick={() => setOpenOnly((value) => !value)}>{tr('الان باز است')}</button>
         <button className={`chip${nearbyOnly ? ' active' : ''}`} onClick={() => setNearbyOnly((value) => !value)}>{tr('نزدیک من')}</button>
       </div>
+      {!myPoint && <div className="loc-prompt" role="status">
+        <span className="loc-prompt-ico" aria-hidden="true"><LiveIcon name="my-location" size={22} /></span>
+        <span className="loc-prompt-copy"><strong>{locError === 'denied' ? tr('اجازه‌ی موقعیت بسته است') : tr('موقعیتت را روشن کن')}</strong>
+          <small>{locError === 'denied' ? tr('از تنظیمات مرورگر یا گوشی، اجازه‌ی موقعیت را برای ملینو روشن کن و دوباره امتحان کن.') : tr('تا کسب‌وکارها و تخفیف‌های کنار خودت را ببینی. موقعیت فقط روی همین گوشی حساب می‌شود.')}</small></span>
+        <button type="button" onClick={useMyLocation} disabled={locating}>{locating ? tr('در حال پیدا کردن…') : locError === 'denied' ? tr('تلاش دوباره') : tr('روشن کردن')}</button>
+      </div>}
     </div>
 
     <div className="map-fabs"><button className={`fab-locate${locating ? ' busy' : ''}`} onClick={useMyLocation} aria-label={tr('موقعیت من')}>◎</button></div>
@@ -328,17 +328,6 @@ export default function RealPublicApp() {
     <BottomSheet state={sheet} onStateChange={setSheet} title={offersOnly ? tr('تخفیف‌های اطراف') : tr('اطراف شما')} subtitle={demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget ? tr('موقعیتت را بده') : tr('{0} مورد', shown.length.toLocaleString(numberLocale()))}>
       {offersOnly && CHAT_ENABLED && <NearbyAlerts point={alertPoint} demoFrame={demoFrame} demoBuild={demoBuildEnabled && demoEnabled} onNeedLocation={useMyLocation} />}
       {offersOnly && hiddenOffers > 0 && <p className="offers-hint" role="status">{tr('بعضی تخفیف‌ها فقط برای کسانی است که نزدیک کسب‌وکارند؛ برای دیدنشان دکمه‌ی ◎ را بزن.')}</p>}
-      {demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget && <div className="start-card" role="status">
-        <strong>{locError === 'denied' ? tr('اجازه‌ی موقعیت بسته است') : locError === 'outside' ? tr('این نسخه فقط در تهران نمونه نشان می‌دهد') : locError === 'unavailable' ? tr('موقعیتت پیدا نشد') : tr('کسب‌وکارهای اطرافت را ببین')}</strong>
-        <p>{locError === 'denied' ? tr('می‌توانی از تنظیمات مرورگر، موقعیت را برای این سایت روشن کنی؛ یا فعلاً کسب‌وکارهای نمونه را در محدوده‌ی خودشان ببین.')
-          : locError === 'outside' ? tr('کسب‌وکارهای نمونه را در محدوده‌ی خودشان ببین.')
-          : locError === 'unavailable' ? tr('گوشی موقعیت را نداد. دوباره امتحان کن یا نمونه‌ها را در محدوده‌ی خودشان ببین.')
-          : tr('با موقعیتت، فاصله و تخفیف‌های نزدیک را نشان می‌دهیم. موقعیت فقط روی همین گوشی حساب می‌شود.')}</p>
-        <div className="start-card-actions">
-          {locError !== 'denied' && locError !== 'outside' && <button className="primary" onClick={useMyLocation} disabled={locating}>{locating ? tr('در حال پیدا کردن…') : tr('◎ استفاده از موقعیت من')}</button>}
-          <button onClick={showSampleArea}>{tr('دیدن محدوده‌ی نمونه')}</button>
-        </div>
-      </div>}
       {!(demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget) && locError === 'denied' && !myPoint && <p className="offers-hint" role="status">{tr('اجازه‌ی موقعیت بسته است؛ فاصله‌ها از نقطه‌ی انتخابی روی نقشه حساب می‌شود.')}</p>}
       {shown.length === 0 && !(demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget) ? <div className="empty">{filtersOn
         ? <>{tr('با این جست‌وجو یا فیلترها چیزی پیدا نشد.')}<br /><button className="link-btn" onClick={clearFilters}>{tr('پاک کردن فیلترها')}</button></>

@@ -11,9 +11,9 @@ import { CHAT_ENABLED } from '../chat/chatApi';
 import { onBackButton } from '../native/bridge';
 import { formatDistance } from '../uiFormat';
 import LiveIcon from './icons';
-import SearchDrawer from './SearchDrawer';
+import { localIntent, normalizeFa } from '../assistant/assistantIntent';
 import ChatSheet, { type ChatContext } from './ChatSheet';
-import { activeOffers, businessThumb, clean, faNum, itemPrice, rial, untilLabel, visibleItems, type CategoryGroup, groupOf } from './liveData';
+import { CATEGORY_GROUPS, activeOffers, businessThumb, clean, faNum, itemPrice, rial, untilLabel, visibleItems, type CategoryGroup, groupOf } from './liveData';
 import { RatingBadge, useRatings } from '../ratings/ratings';
 import './live.css';
 import { tr, dir } from '../i18n';
@@ -47,12 +47,15 @@ export default function LiveVitrine(p: Props) {
   const heading = useDeviceHeading(camera.state.kind === 'active');
   const video = camera.videoRef;
   const [radius, setRadius] = useState(clampRadius(p.initialRadius ?? AR_DEFAULT_RADIUS));
-  const [manual, setManual] = useState(0);
   const [paused, setPaused] = useState(false);
   const [group, setGroup] = useState<CategoryGroup>('all');
   const [picked, setPicked] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
-  const [drawer, setDrawer] = useState(false);
+  // The search field at the top: typed text reaches the shared query after a short pause.
+  const [text, setText] = useState(p.query);
+  const searchInput = useRef<HTMLInputElement | null>(null);
+  useEffect(() => { const t = window.setTimeout(() => { if (text !== p.query) p.onQuery(text); }, 250); return () => window.clearTimeout(t); }, [text]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (p.query !== text && document.activeElement !== searchInput.current) setText(p.query); }, [p.query]); // eslint-disable-line react-hooks/exhaustive-deps
   const [chat, setChat] = useState<ChatContext | null>(null);
   const [unread, setUnread] = useState<Map<string, number>>(new Map());
   const track = useRef<HTMLDivElement | null>(null);
@@ -68,23 +71,46 @@ export default function LiveVitrine(p: Props) {
 
   useEffect(() => { heading.request(); void camera.start(); return () => camera.stop(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // No compass on this phone: start facing north (0°) so the page is not empty; the «جهت» bar turns it.
-  useEffect(() => {
-    if (heading.source !== 'none' || heading.headingDeg !== null) return undefined;
-    const t = window.setTimeout(() => heading.setSimulatedHeading(0), 1200);
-    return () => window.clearTimeout(t);
-  }, [heading.source, heading.headingDeg]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Shared filters: text and «فقط آفرها» come from the map; the menu's group narrows further.
   const q = p.query.trim().toLocaleLowerCase('fa-IR');
+  // Only the businesses that match what the person is looking for stay on the camera: the words typed and the
+  // assistant's understanding of them (local, in six languages: «coffee» or «قهوه نزدیک» → قهوه، اسپرسو… and cafés).
+  const wanted = useMemo(() => {
+    if (!q) return null;
+    const intent = localIntent(p.query).intent;
+    const words = [...new Set([normalizeFa(q), ...intent.keywords.map(normalizeFa)])].filter((w) => w.length >= 2);
+    return { words, category: intent.category };
+  }, [q, p.query]);
   const pool = useMemo(() => p.records.filter((r) => {
     if (group !== 'all' && groupOf(r.category.key) !== group) return false;
     if (p.offersOnly && activeOffers(r, p.now).length === 0) return false;
-    if (!q) return true;
+    if (!wanted) return true;
+    if (wanted.category && r.category.key === wanted.category) return true;
     const cat = p.catalogByOrg.get(r.id);
-    return `${r.name} ${(cat?.items ?? []).map((i) => i.name).join(' ')}`.toLocaleLowerCase('fa-IR').includes(q);
-  }), [p.records, p.catalogByOrg, p.offersOnly, p.now, group, q]);
+    const hay = normalizeFa(`${r.name} ${r.description ?? ''} ${tr(r.category.label)} ${(cat?.items ?? []).map((i) => `${i.name} ${i.short_description ?? ''}`).join(' ')}`);
+    return wanted.words.some((w) => hay.includes(w));
+  }), [p.records, p.catalogByOrg, p.offersOnly, p.now, group, wanted]);
 
+  // No compass (some phones and browsers): the view turns by itself towards the nearest matching business, so there is
+  // always something to see; no manual direction control.
+  const nearestBearing = useMemo(() => {
+    let best: { d: number; b: number } | null = null;
+    const [lat1, lng1] = p.searchPoint.map((v) => (v * Math.PI) / 180);
+    for (const r of pool) {
+      if (!r.coordinates) continue;
+      const lat2 = (r.coordinates.latitude * Math.PI) / 180; const dl = (r.coordinates.longitude * Math.PI) / 180 - lng1;
+      const d = Math.hypot(lat2 - lat1, dl * Math.cos(lat1));
+      const b = (Math.atan2(Math.sin(dl) * Math.cos(lat2), Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dl)) * 180 / Math.PI + 360) % 360;
+      if (!best || d < best.d) best = { d, b };
+    }
+    return best ? Math.round(best.b) : null;
+  }, [pool, p.searchPoint]);
+  useEffect(() => {
+    if (heading.source === 'compass') return undefined;
+    const t = window.setTimeout(() => heading.setSimulatedHeading(nearestBearing ?? 0), heading.headingDeg === null ? 1200 : 0);
+    return () => window.clearTimeout(t);
+  }, [heading.source, nearestBearing]); // eslint-disable-line react-hooks/exhaustive-deps
   const headingDeg = heading.headingDeg;
   const reliable = heading.source === 'compass';
   const scene = useMemo(() => {
@@ -124,14 +150,13 @@ export default function LiveVitrine(p: Props) {
   // Back button: chat → menu → leave the storefront.
   useEffect(() => onBackButton(() => {
     if (chat) { setChat(null); return true; }
-    if (drawer) { setDrawer(false); return true; }
     p.onClose(); return true;
-  }), [chat, drawer, p]);
+  }), [chat, p]);
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !drawer) { if (chat) setChat(null); else p.onClose(); } };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { if (chat) setChat(null); else p.onClose(); } };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [chat, drawer, p]);
+  }, [chat, p]);
 
   const togglePause = () => {
     const v = video.current; if (!v) return;
@@ -158,15 +183,39 @@ export default function LiveVitrine(p: Props) {
   const unreadHere = selectedId ? unread.get(selectedId) ?? 0 : 0;
 
   const noCompass = heading.source !== 'compass';
-  return <div className={`lv-root${noCompass ? ' no-compass' : ''}`} dir={dir()} style={{ ['--lv-below' as string]: `${below}px` }}>
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+  const stepGroup = (step: number) => {
+    const i = CATEGORY_GROUPS.findIndex((g) => g.id === group);
+    const next = CATEGORY_GROUPS[(i + step + CATEGORY_GROUPS.length) % CATEGORY_GROUPS.length];
+    setGroup(next.id); setPicked(null);
+  };
+  const onTouchStart = (e: React.TouchEvent) => {
+    const el = e.target as HTMLElement;
+    swipe.current = el.closest('button, input, form, .lv-track, .lv-catbar, .lv-side, .lv-chat') ? null : { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const s = swipe.current; swipe.current = null;
+    if (!s) return;
+    const dx = e.changedTouches[0].clientX - s.x; const dy = e.changedTouches[0].clientY - s.y;
+    if (Math.abs(dx) < 60 || Math.abs(dy) > 60) return;
+    // Reading direction: in right-to-left languages a swipe to the right moves to the next category.
+    stepGroup((dx > 0) === (dir() === 'rtl') ? 1 : -1);
+  };
+  const catBar = useRef<HTMLDivElement | null>(null);
+  useEffect(() => { catBar.current?.querySelector('.on')?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); }, [group]);
+  return <div className={`lv-root${noCompass ? ' no-compass' : ''}`} dir={dir()} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} style={{ ['--lv-below' as string]: `${below}px` }}>
     <video ref={video} className="lv-video" playsInline muted autoPlay style={{ display: camera.state.kind === 'active' ? 'block' : 'none' }} />
     {camera.state.kind !== 'active' && <div className="lv-video lv-video-sim" aria-hidden="true" />}
     <div className="lv-shade" aria-hidden="true" />
 
     <header className="lv-top">
       <button type="button" className="lv-iconbtn" onClick={p.onClose} aria-label={tr('بازگشت')}><LiveIcon name="chevron-right" /></button>
-      <h1 className="lv-title">{tr('ویترین زنده')}</h1>
-      <button type="button" className="lv-iconbtn" onClick={() => setDrawer(true)} aria-label={tr('جست‌وجو و دسته‌بندی')}><LiveIcon name="menu" /></button>
+      <form className="lv-searchbar" role="search" onSubmit={(e) => { e.preventDefault(); p.onQuery(text); searchInput.current?.blur(); }}>
+        <LiveIcon name="search" size={20} />
+        <input ref={searchInput} value={text} onChange={(e) => setText(e.target.value)} placeholder={tr('دنبال چی می‌گردی؟ مثلاً قهوه')}
+          aria-label={tr('جست‌وجو در ویترین زنده')} enterKeyHint="search" />
+        {text && <button type="button" className="lv-clear" onClick={() => { setText(''); p.onQuery(''); }} aria-label={tr('پاک کردن جست‌وجو')}><LiveIcon name="close" size={16} /></button>}
+      </form>
     </header>
     <div className="lv-topstack" ref={topStack}>
     <div className="lv-chips">
@@ -176,10 +225,6 @@ export default function LiveVitrine(p: Props) {
       {paused && <span className="lv-chip static" role="status">{tr('تصویر ثابت')}</span>}
       {(q || group !== 'all') && <button type="button" className="lv-chip" onClick={() => { p.onQuery(''); setGroup('all'); }} aria-label={tr('پاک کردن جست‌وجو')}>{q ? `«${p.query.trim()}»` : tr('دسته‌ی انتخابی')} <LiveIcon name="close" size={14} /></button>}
     </div>
-    {noCompass && <label className="lv-heading">
-      <span>{tr('جهت')}</span>
-      <input type="range" min={0} max={359} value={manual} onChange={(e) => { const v = Number(e.target.value); setManual(v); heading.setSimulatedHeading(v); }} aria-label={tr('چرخاندن دستی جهت')} />
-    </label>}
     </div>
 
     {/* Other businesses in view: small pills at their direction. */}
@@ -214,7 +259,7 @@ export default function LiveVitrine(p: Props) {
     {/* Notices, never hiding a way out. */}
     {!selected && (p.locationPending || scene !== null || headingDeg === null) && <div className="lv-notice" role="status">
       {p.locationPending ? <><LiveIcon name="my-location" /><span>{tr('در حال گرفتن موقعیت گوشی…')}</span></>
-        : headingDeg === null ? <><LiveIcon name="my-location" /><span>{noCompass ? tr('گوشی جهت را نمی‌دهد؛ با نوار «جهت» بالای صفحه بچرخان.') : tr('در حال گرفتن جهت…')}</span></>
+        : headingDeg === null ? <><LiveIcon name="my-location" /><span>{noCompass ? tr('گوشی جهت را نمی‌دهد؛ نزدیک‌ترین کسب‌وکار نشان داده می‌شود.') : tr('در حال گرفتن جهت…')}</span></>
         : <><LiveIcon name="search" /><span>{pool.length === 0 ? tr('با این فیلتر چیزی پیدا نشد.') : tr('در این جهت کسب‌وکاری نیست؛ گوشی را بچرخان یا شعاع را بیشتر کن.')}</span></>}
     </div>}
 
@@ -259,21 +304,17 @@ export default function LiveVitrine(p: Props) {
           ? <button type="button" className="lv-secondary" onClick={() => current && p.onOpenItem(selected.id, current)}>{tr('دیدن محصول')}</button>
           : <button type="button" className="lv-secondary" onClick={() => p.onOpenBusiness(selected.id)}><LiveIcon name="store" size={18} />{tr('دیدن ویترین')}</button>}
       </div>}
+      <nav ref={catBar} className="lv-catbar" aria-label={tr('دسته‌بندی کسب‌وکارها')}>
+        {CATEGORY_GROUPS.map((c) => <button key={c.id} type="button" className={group === c.id ? 'on' : ''} aria-pressed={group === c.id} onClick={() => { setGroup(c.id); setPicked(null); }}>
+          <LiveIcon name={c.icon} size={18} /><span>{tr(c.label)}</span>
+        </button>)}
+      </nav>
     </div>
 
     {selected && unreadHere > 0 && !chat && <button type="button" className="lv-chatbubble" onClick={openChat} aria-label={tr('{0} پیام خوانده‌نشده از {1}', faNum(unreadHere), name)}>
       {thumb ? <CatalogImage media={thumb} load /> : <img src="/icons/placeholder-business.svg" alt="" />}<b>{faNum(unreadHere)}</b>
     </button>}
 
-    {drawer && <SearchDrawer records={p.records} catalogs={p.catalogByOrg} query={p.query} onQuery={p.onQuery} group={group} onGroup={setGroup}
-      onClose={() => setDrawer(false)}
-      onPick={(hit) => {
-        setPicked(hit.businessId);
-        const list = visibleItems(p.catalogByOrg.get(hit.businessId), activeOffers(p.records.find((r) => r.id === hit.businessId), p.now), p.offersOnly);
-        const i = Math.max(0, list.findIndex((x) => x.catalog_item_id === hit.item.catalog_item_id));
-        lastBiz.current = hit.businessId; setIndex(i); setDrawer(false);
-        window.setTimeout(() => goTo(i), 50);
-      }} />}
     {chat && <ChatSheet context={chat} onClose={() => { setChat(null); void refreshUnread(); }} onOpenItem={(item) => p.onOpenItem(chat.organizationId, item)} onRead={() => setUnread((m) => { const n = new Map(m); n.delete(chat.organizationId); return n; })} />}
   </div>;
 }

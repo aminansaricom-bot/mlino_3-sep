@@ -473,4 +473,13 @@ export const EN: Readonly<Record<string, string>> = {
   'در حال خروج…': 'Signing out…',
   'خروج از حساب': 'Sign out',
   'بازگرداندن': 'Restore',
+
+  // Live storefront search and location request
+  'دنبال چی می‌گردی؟ مثلاً قهوه': 'What are you looking for? e.g. coffee',
+  'جست‌وجو در ویترین زنده': 'Search the live storefront',
+  'گوشی جهت را نمی‌دهد؛ نزدیک‌ترین کسب‌وکار نشان داده می‌شود.': 'The phone doesn\'t report direction; the nearest business is shown.',
+  'موقعیتت را روشن کن': 'Turn on your location',
+  'از تنظیمات مرورگر یا گوشی، اجازه‌ی موقعیت را برای ملینو روشن کن و دوباره امتحان کن.': 'Turn on location permission for MLINO in your browser or phone settings, then try again.',
+  'تا کسب‌وکارها و تخفیف‌های کنار خودت را ببینی. موقعیت فقط روی همین گوشی حساب می‌شود.': 'To see the businesses and offers right around you. Your location is only used on this phone.',
+  'روشن کردن': 'Turn on',
 };

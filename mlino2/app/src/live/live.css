@@ -157,3 +157,15 @@
 .lv-root .catalog-image, .lv-card-img > img { display: block; }
 .lv-chip.warn { background: var(--ml-surface); color: var(--ml-danger); }
 .lv-radius input { height: 96px; }
+
+/* Search at the top instead of the title; categories at the bottom (swipe the camera to change them). */
+.lv-searchbar { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 48px; padding-inline: 14px 6px; border-radius: 999px;
+  background: var(--lv-glass); color: var(--ml-text); box-shadow: 0 6px 18px rgba(0, 0, 0, .18); }
+.lv-searchbar input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: inherit; font: inherit; font-size: 16px; }
+.lv-searchbar input::placeholder { color: var(--ml-muted, rgba(0, 0, 0, .55)); }
+.lv-searchbar:focus-within { box-shadow: 0 0 0 2px var(--ml-primary, #246B62), 0 6px 18px rgba(0, 0, 0, .18); }
+.lv-catbar { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 4px 16px 0; scroll-snap-type: x proximity; }
+.lv-catbar::-webkit-scrollbar { display: none; }
+.lv-catbar button { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 999px; scroll-snap-align: center;
+  border: 1px solid transparent; background: var(--lv-glass); color: var(--ml-text); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, .15); }
+.lv-catbar button.on { background: var(--ml-primary); color: var(--ml-on-primary); }
