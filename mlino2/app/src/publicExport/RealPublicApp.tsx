@@ -16,14 +16,20 @@ import LiveVitrine from '../live/LiveVitrine';
 import { formatDistance } from '../uiFormat';
 import { CatalogConsumer, CatalogFetchTransport, type CatalogItem } from './catalog';
 import { displayName } from '../demo/demoSocial';
-import { Icon } from '../design/Icon';
 import { ASSISTANT_REMOTE, askAssistant, readConsent, writeConsent, type ConsentState } from '../assistant/assistantApi';
 import type { AssistantAnswer } from '../assistant/assistantIntent';
 import { rankRecords } from '../assistant/rankRecords';
-import AssistantPanel, { AssistantConsent } from '../assistant/AssistantPanel';
+import { AssistantConsent } from '../assistant/AssistantPanel';
 import { speakPersian, useVoiceInput } from '../assistant/voice';
 import { CHAT_ENABLED } from '../chat/chatApi';
-import ChatPanel, { ChatInboxButton, type ChatTarget } from '../chat/ChatPanel';
+import ChatPanel, { useChatUnread, type ChatTarget } from '../chat/ChatPanel';
+import { CustomerBottomNav, EmptyState, IconButton, type NavTab } from '../design/ui';
+import LiveIcon from '../live/icons';
+import OffersPage from '../pages/OffersPage';
+import SavedPage from '../pages/SavedPage';
+import SearchPage from '../pages/SearchPage';
+import CameraIntro from '../pages/CameraIntro';
+import '../design/app.css';
 import { hiddenForLackOfPosition, promoteMatches, toDataFrame, withNearbyOffers } from '../offers/nearbyOffers';
 import NearbyAlerts, { alertsOn, refreshAlertLocation } from '../offers/NearbyAlerts';
 import { NEARBY_LABEL, RUNNER, callNative, inApp, onBackButton, onNative } from '../native/bridge';
@@ -92,6 +98,13 @@ export default function RealPublicApp() {
   const experience = useLocalExperience();
   const [chatTarget, setChatTarget] = useState<ChatTarget | null>(null);
   const [chatRefresh, setChatRefresh] = useState(0);
+  // The four places of the app (bottom navigation); business, product, chat and camera open above them.
+  const [tab, setTab] = useState<NavTab>('discover');
+  const unread = useChatUnread(chatRefresh);
+  // «جست‌وجو»: a page over the map with businesses, products and offers for one query.
+  const [searchOpen, setSearchOpen] = useState(false);
+  // The live storefront opens after the camera step (asked once per opening, skipped when already allowed).
+  const [cameraOk, setCameraOk] = useState(false);
   const openChat = (target: ChatTarget | null) => { setChatTarget(target); setOverlay('chat'); };
 
   useEffect(() => {
@@ -191,9 +204,10 @@ export default function RealPublicApp() {
   backRef.current = () => {
     if (product) { setProduct(null); return true; }
     if (pendingAsk) { setPendingAsk(null); return true; }
-    if (assistant) { setAssistant(null); return true; }
+    if (searchOpen && overlay === 'none') { setSearchOpen(false); return true; }
     if (overlay === 'chat') { setOverlay(chatTarget ? 'detail' : 'none'); setChatRefresh((n) => n + 1); return true; }
     if (overlay !== 'none') { setOverlay('none'); return true; }
+    if (tab !== 'discover') { setTab('discover'); return true; }
     if (sheet === 'full') { setSheet('half'); return true; }
     if (sheet === 'half') { setSheet('peek'); return true; }
     return false;
@@ -254,6 +268,12 @@ export default function RealPublicApp() {
     const pending = pendingAsk; setPendingAsk(null);
     if (pending && pending.query) runAssistant(pending.query, pending.voice, value);
   };
+  const micPress = () => {
+    if (voiceInput.listening) { voiceInput.stop(); return; }
+    // بدون سرویس بیرونی، رضایت فقط برای گفتار است؛ «نه» یعنی میکروفون تا موافقت بعدی خاموش می‌ماند.
+    if (ASSISTANT_REMOTE ? consent === 'unknown' : consent !== 'granted') { setPendingAsk({ query: '', voice: true }); return; }
+    voiceInput.start();
+  };
   const voiceInput = useVoiceInput((text) => setQuery(text), (text) => { setQuery(text); runAssistant(text, true); });
   const assistantDistances = useMemo(() => new Map(nearbyPublicUiRecords(allRecords, point[0], point[1], 20000).map((item) => [item.record.id, item.distanceMeters])), [allRecords, point]);
   const assistantResults = useMemo(() => assistant?.answer
@@ -279,18 +299,14 @@ export default function RealPublicApp() {
     {tileStatus === 'error' && <div className="map-state"><p>{tr('نقشه در دسترس نیست؛ فهرست دادهٔ امضاشده همچنان قابل استفاده است.')}</p><button onClick={() => setTileRetryKey((value) => value + 1)}>{tr('تلاش دوباره')}</button></div>}
     {demoBuildEnabled && !demoEnabled && <button className="demo-reenable" onClick={() => setDemoEnabled(true)}>{tr('روشن کردن حالت نمایشی')}</button>}
 
-    <div className="top-bar"><div className="search-row"><form className="search-bar" role="search" onSubmit={(event) => { event.preventDefault(); runAssistant(query, false); }}>
-      <span className="search-icon">🔍</span>
-      <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={tr('چی می‌خوای؟')} aria-label={tr('جست‌وجو یا پرسش از دستیار')} enterKeyHint="search" />
-      {voiceInput.supported && <button type="button" className={`search-mic${voiceInput.listening ? ' on' : ''}`} aria-pressed={voiceInput.listening}
-        aria-label={voiceInput.listening ? tr('توقف شنیدن') : tr('پرسیدن با صدا')} onClick={() => {
-          if (voiceInput.listening) { voiceInput.stop(); return; }
-          // بدون سرویس بیرونی، رضایت فقط برای گفتار است؛ «نه» یعنی میکروفون تا موافقت بعدی خاموش می‌ماند.
-          if (ASSISTANT_REMOTE ? consent === 'unknown' : consent !== 'granted') { setPendingAsk({ query: '', voice: true }); return; }
-          voiceInput.start();
-        }}><img className="search-mic-img" src="/icons/voice.png" alt="" aria-hidden="true" draggable={false} /></button>}
-      <button type="submit" className="search-ask" aria-label={tr('پرسیدن از دستیار')} disabled={query.trim().length < 2}>✦</button>
-    </form>{CHAT_ENABLED && <ChatInboxButton refreshKey={chatRefresh} onOpen={() => openChat(null)} />}<button className="profile-btn" onClick={() => setOverlay('experience')} aria-label={tr('ذخیره‌های من')}><Icon name="bookmark" /></button></div>
+    <div className="top-bar"><div className="search-row"><div className="search-bar search-launch">
+      <button type="button" className="search-launch-btn" onClick={() => setSearchOpen(true)} aria-label={tr('جست‌وجو یا پرسش از دستیار')}>
+        <span className="search-icon" aria-hidden="true"><LiveIcon name="search" size={20} /></span>
+        <span className={query ? 'search-launch-q' : 'search-launch-ph'}>{query || tr('چی می‌خوای؟')}</span>
+        <span className="search-launch-spark" aria-hidden="true">✦</span>
+      </button>
+      {query && <button type="button" className="search-launch-clear" onClick={() => setQuery('')} aria-label={tr('پاک کردن جست‌وجو')}><LiveIcon name="close" size={18} /></button>}
+    </div><IconButton icon="user" className="profile-rs" label={tr('فضای من')} onClick={() => setOverlay('experience')} /></div>
       <div className="chips" aria-label={tr('فیلترهای واقعی')}>
         <button className={`chip${category === null ? ' active' : ''}`} onClick={() => setCategory(null)}>{tr('همه')}</button>
         {categories.filter((item) => item.key !== 'uncategorized').map((item) => <button key={item.key} className={`chip${category === item.key ? ' active' : ''}`} onClick={() => setCategory(item.key)}>{tr(item.label)}</button>)}
@@ -325,6 +341,18 @@ export default function RealPublicApp() {
           selected={record.id === selectedId} featured={searching && record.promoted} onOpen={() => openDetail(record.id)} />)}
     </BottomSheet>
 
+    {tab === 'offers' && <OffersPage records={allRecords.filter((r) => !experience.data.hidden.includes(r.id))} catalogByOrg={catalogByOrg} now={now}
+      distanceById={assistantDistances} hiddenCount={hiddenOffers} onOpen={openDetail} onLocate={useMyLocation}
+      alerts={CHAT_ENABLED ? <NearbyAlerts point={alertPoint} demoFrame={demoFrame} demoBuild={demoBuildEnabled && demoEnabled} onNeedLocation={useMyLocation} /> : undefined} />}
+    {tab === 'messages' && <section className="rs-page rs-page-chat" aria-label={tr('پیام‌ها')}>
+      {CHAT_ENABLED ? <ChatPanel embedded target={null} onClose={() => setTab('discover')} />
+        : <div className="rs-inner"><EmptyState title={tr('پیام‌ها')} text={tr('گفتگو در این نسخه روشن نیست.')} /></div>}
+    </section>}
+    {tab === 'saved' && <SavedPage records={allRecords} catalogByOrg={catalogByOrg} saved={experience.data.saved} savedItems={experience.data.savedItems}
+      distanceById={assistantDistances} onOpenBusiness={openDetail} onOpenItem={openProduct} storageFailed={experience.storageFailed}
+      onUnsaveBusiness={(id) => experience.toggle('saved', id)} onUnsaveItem={experience.toggleItem} />}
+    <CustomerBottomNav tab={tab} unread={unread} onTab={(next) => { setTab(next); setSearchOpen(false); if (next === 'messages') setChatRefresh((n) => n + 1); }} />
+
     {overlay === 'detail' && selected && <PublicBusinessDetails record={selected} catalog={catalogByOrg.get(selected.id)} now={now} distanceMeters={distanceById.get(selected.id)} experience={experience.data}
       onClose={() => setOverlay('none')} onToggle={experience.toggle} onOpenItem={(item) => openProduct(selected.id, item)}
       onMessage={CHAT_ENABLED ? () => openChat({ organizationId: selected.id, name: selected.name }) : undefined} />}
@@ -334,17 +362,24 @@ export default function RealPublicApp() {
       onSuggest={() => setSuggestionEmpty(!nearby.some((item) => item.record.offers.length > 0))} suggestionEmpty={suggestionEmpty}
       radiusLabel={formatDistance(5000)} pointLabel={tr(pointLabel)} filtersApplied={category !== null || openOnly}
       onChangePoint={() => setOverlay('none')} onUseLocation={useMyLocation} locating={locating} />}
-    {overlay === 'vitrine' && <LiveVitrine records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point}
+    {overlay === 'vitrine' && !cameraOk && <CameraIntro onAllow={() => setCameraOk(true)} onLater={() => setOverlay('none')} />}
+    {overlay === 'vitrine' && cameraOk && <LiveVitrine records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point}
       locationPending={myPoint === null && locError === null} initialRadius={demoBuildEnabled && demoEnabled ? 100 : undefined}
       offersOnly={offersOnly} onOffersOnly={setOffersOnly} query={query} onQuery={setQuery}
       savedIds={experience.data.saved} onToggleSave={(id) => experience.toggle('saved', id)}
-      onOpenItem={openProduct} onOpenBusiness={openDetail} onClose={() => setOverlay('none')} demo={demoBuildEnabled && demoEnabled} />}
+      onOpenItem={openProduct} onOpenBusiness={openDetail} onClose={() => { setOverlay('none'); setCameraOk(false); }} demo={demoBuildEnabled && demoEnabled} />}
     {voiceInput.error && <div className="app-banner warn" role="status">{voiceInput.error}</div>}
-    {assistant && <AssistantPanel query={assistant.query} answer={assistant.answer} results={assistantResults} loading={assistant.loading}
-      onOpen={(id) => openDetail(id)} onClose={() => setAssistant(null)} />}
+    {searchOpen && <SearchPage query={query} onQuery={setQuery} onAsk={() => runAssistant(query, false)}
+      assistant={assistant} ranked={assistantResults} records={allRecords.filter((r) => !experience.data.hidden.includes(r.id))} catalogByOrg={catalogByOrg}
+      now={now} distanceById={assistantDistances} voice={{ supported: voiceInput.supported, listening: voiceInput.listening, onMic: micPress }}
+      onOpenBusiness={openDetail} onOpenItem={openProduct} onClose={() => setSearchOpen(false)}
+      onShowMap={() => { setSearchOpen(false); setTab('discover'); setSheet('half'); }} />}
     {pendingAsk && <AssistantConsent remote={ASSISTANT_REMOTE} onAccept={() => { const voice = pendingAsk.voice && !pendingAsk.query; decideConsent('granted'); if (voice) voiceInput.start(); }}
       onLocal={() => { const voice = ASSISTANT_REMOTE && pendingAsk.voice && !pendingAsk.query; decideConsent('local'); if (voice) voiceInput.start(); }} />}
     {welcome && <Welcome onClose={() => setWelcome(false)} onLocate={() => { setSheet('half'); useMyLocation(); }} />}
-    {product && <ProductPage item={product.item} businessName={product.businessName} organizationId={product.organizationId} onClose={() => setProduct(null)} />}
+    {product && <ProductPage item={product.item} businessName={product.businessName} organizationId={product.organizationId} onClose={() => setProduct(null)}
+      saved={experience.data.savedItems.includes(`${product.organizationId}/${product.item.catalog_item_id}`)}
+      onToggleSave={() => experience.toggleItem(product.organizationId, product.item.catalog_item_id)}
+      onAsk={CHAT_ENABLED ? () => { const { organizationId, businessName } = product; setProduct(null); openChat({ organizationId, name: businessName }); } : undefined} />}
   </div>;
 }

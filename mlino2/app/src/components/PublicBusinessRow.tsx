@@ -4,15 +4,21 @@ import type { CatalogRecord } from '../publicExport/catalog';
 import { CatalogImage } from '../publicExport/catalogCards';
 import { openNow } from '../publicExport/businessHours';
 import { activeOffersFor } from '../ar/ArGlassCard';
-import { demoBusinessRating, displayName } from '../demo/demoSocial';
+import { displayName } from '../demo/demoSocial';
 import { formatDistance } from '../uiFormat';
-import Stars from './Stars';
+import { BusinessRating } from '../ratings/ratings';
 import { tr, digits, latinDigits } from '../i18n';
 
 /** «۳۰٪» when the offer names a percentage, otherwise «آفر». */
 export function offerBadge(name: string): string {
   const m = name.match(/([0-9۰-۹]{1,2})\s*[٪%]/);
   return m ? tr('{0}٪', digits(latinDigits(m[1]))) : tr('آفر');
+}
+
+/** «باز است» / «بسته است» / «ساعت نامشخص» from the published weekly hours. */
+export function businessOpenLabel(record: PublicUiRecord, now: number): string {
+  const hours = openNow(record, now);
+  return hours === 'open' ? tr('باز است') : hours === 'closed' ? tr('بسته است') : tr('ساعت نامشخص');
 }
 
 const GLYPH: Record<string, string> = { cafe: '☕', restaurant: '🍽', retail_shop: '🛍', dental_clinic: '🦷', beauty_clinic: '💠' };
@@ -36,7 +42,6 @@ export default function PublicBusinessRow({ record, catalog, distanceMeters, now
     return () => observer.disconnect();
   }, []);
   const cover = catalog?.items.find((item) => item.media.length > 0)?.media[0];
-  const rating = demoBusinessRating(record.id);
   const offer = activeOffersFor(record, now, 1)[0];
   const hours = openNow(record, now);
   return <button ref={ref} className={`biz-row${selected ? ' selected' : ''}`} onClick={onOpen}>
@@ -47,7 +52,7 @@ export default function PublicBusinessRow({ record, catalog, distanceMeters, now
     <span className="biz-row-copy">
       <strong>{displayName(record.name)}{featured && <span className="biz-row-featured" title={tr('جایگاه ویژه‌ی پولی')}>{tr('ویژه')}</span>}</strong>
       <span className="biz-row-meta">
-        {rating && <Stars rating={rating} compact />}
+        <BusinessRating orgId={record.id} />
         {record.category.key !== 'uncategorized' && <span>{tr(record.category.label)}</span>}
         {distanceMeters !== undefined && <span>{formatDistance(distanceMeters)}</span>}
       </span>

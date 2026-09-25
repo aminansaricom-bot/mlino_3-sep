@@ -7,9 +7,9 @@ import type { CatalogItem, CatalogRecord } from '../publicExport/catalog';
 import { CatalogImage, catalogPrice } from '../publicExport/catalogCards';
 import type { LocalExperience } from '../experience/useLocalExperience';
 import { activeOffersFor, offerPriceLabel } from '../ar/ArGlassCard';
-import { demoBusinessRating, displayName } from '../demo/demoSocial';
+import { displayName } from '../demo/demoSocial';
+import { BusinessRating } from '../ratings/ratings';
 import { formatDistance } from '../uiFormat';
-import Stars from './Stars';
 import { ChatBubbleIcon } from '../chat/ChatPanel';
 import { RatingBadge, useRatings, type RatingSummary } from '../ratings/ratings';
 import { tr, numberLocale } from '../i18n';
@@ -63,7 +63,6 @@ function MenuRow({ item, rating, onOpen }: { item: CatalogItem; rating?: RatingS
 
 export default function PublicBusinessDetails({ record, catalog, now, distanceMeters, experience, onClose, onToggle, onOpenItem, onMessage }: Props) {
   const hours = openNow(record, now);
-  const rating = demoBusinessRating(record.id);
   const offers = activeOffersFor(record, now, 10);
   const items = catalog?.items ?? [];
   const groups: { label: string; items: CatalogItem[] }[] = [];
@@ -84,7 +83,7 @@ export default function PublicBusinessDetails({ record, catalog, now, distanceMe
       <span className={`hero-coin coin-${record.category.key}`} aria-hidden="true">{displayName(record.name).trim().charAt(0)}</span>
       <h2>{displayName(record.name)}</h2>
       <div className="hero-meta">
-        {rating && <Stars rating={rating} compact />}
+        <BusinessRating orgId={record.id} />
         {record.category.key !== 'uncategorized' && <span>{tr(record.category.label)}</span>}
         {distanceMeters !== undefined && <span>{formatDistance(distanceMeters)}</span>}
         <span className={hours === 'open' ? 'open' : hours === 'closed' ? 'closed' : ''}>{hours === 'open' ? tr('باز است') : hours === 'closed' ? tr('بسته است') : tr('ساعت نامشخص')}</span>

@@ -1,0 +1,87 @@
+/* Shared «روشنای محله» components. Colours only from design/roshan.css tokens. */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.rs-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--touch); padding: 10px 16px;
+  border-radius: 14px; border: 1px solid transparent; font: inherit; font-size: var(--fs-14); font-weight: 700; cursor: pointer;
+  transition: background var(--t-state), color var(--t-state), border-color var(--t-state), opacity var(--t-state); }
+.rs-btn.primary { background: var(--brand); color: var(--on-brand); }
+.rs-btn.secondary { background: var(--brand-soft); color: var(--brand); border-color: var(--line); }
+.rs-btn.ghost { background: transparent; color: var(--ink-2); }
+.rs-btn.wide { width: 100%; }
+.rs-btn:disabled { opacity: .55; cursor: default; }
+.rs-spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-inline-end-color: transparent; animation: rs-spin .8s linear infinite; }
+@keyframes rs-spin { to { transform: rotate(360deg); } }
+
+.rs-icon-btn { position: relative; display: inline-grid; place-items: center; width: var(--touch); height: var(--touch); flex: none; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; box-shadow: var(--sh-1); }
+.rs-badge-dot { position: absolute; inset-block-start: 2px; inset-inline-end: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  background: var(--warm); color: var(--on-warm); font-size: 11px; font-weight: 800; line-height: 18px; text-align: center; }
+
+.rs-head { display: flex; align-items: center; gap: 8px; min-height: 56px; padding: 4px 0 8px; }
+.rs-head-title { flex: 1; min-width: 0; text-align: center; }
+.rs-head-title h1 { margin: 0; font-size: 17px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rs-head-title small { display: block; color: var(--ink-2); font-size: var(--fs-12); }
+.rs-head-space { width: var(--touch); flex: none; }
+.rs-head .rs-icon-btn { box-shadow: none; }
+
+.rs-status { display: inline-flex; align-items: center; min-height: 28px; padding: 2px 11px; border-radius: 999px; font-size: var(--fs-12); font-weight: 700;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); white-space: nowrap; }
+.rs-status.good { background: var(--brand-soft); color: var(--brand); border-color: transparent; }
+.rs-status.special { background: var(--warm); color: var(--on-warm); border-color: var(--warm); }
+.rs-status.bad { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+.rs-status.draft { border-style: dashed; }
+
+.rs-empty { display: grid; gap: 8px; justify-items: center; text-align: center; padding: 28px 16px; margin: 12px 0; border-radius: var(--r-24);
+  background: var(--surface); border: 1px solid var(--line); }
+.rs-empty strong { font-size: var(--fs-16); }
+.rs-empty p { margin: 0; color: var(--ink-2); line-height: 1.85; }
+
+.rs-skeleton { display: grid; gap: 10px; padding: 16px; border-radius: var(--r-24); background: var(--surface); border: 1px solid var(--line); }
+.rs-skeleton span { height: 14px; border-radius: 20px; background: var(--line); animation: rs-pulse 1.6s infinite; }
+.rs-skeleton span.short { width: 60%; }
+@keyframes rs-pulse { 50% { opacity: .4; } }
+
+.rs-error { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--bad-soft); color: var(--bad); line-height: 1.7; }
+.rs-error span { flex: 1; }
+.rs-error button { min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid currentColor; background: transparent; color: inherit; font: inherit; font-weight: 700; cursor: pointer; }
+
+.rs-segmented { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--brand-soft); overflow-x: auto; scrollbar-width: none; }
+.rs-segmented button { flex: 1; min-height: 42px; padding: 0 12px; border: 0; border-radius: 11px; background: transparent; color: var(--brand); font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.rs-segmented button.on { background: var(--surface); color: var(--ink); box-shadow: var(--sh-1); }
+.rs-segmented small { margin-inline-start: 6px; opacity: .7; }
+
+/* Customer bottom navigation. */
+.rs-bottom-nav { position: fixed; inset-inline: 0; bottom: 0; z-index: 900; display: grid; grid-template-columns: repeat(4, 1fr);
+  min-height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px)); padding: 6px 4px env(safe-area-inset-bottom, 0px);
+  background: var(--surface); border-top: 1px solid var(--line); }
+.rs-bottom-nav button { display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 52px; border: 0; background: none; color: var(--ink-2);
+  font: inherit; font-size: 11px; cursor: pointer; }
+.rs-bottom-nav button.on { color: var(--brand); font-weight: 800; }
+.rs-nav-ico { position: relative; display: grid; place-items: center; width: 56px; height: 30px; border-radius: 15px; transition: background var(--t-state); }
+.rs-bottom-nav button.on .rs-nav-ico { background: var(--brand-soft); }
+.rs-nav-ico .rs-badge-dot { inset-block-start: -4px; inset-inline-end: 6px; }
+
+/* A page under the bottom navigation. */
+.rs-page { position: fixed; inset: 0; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px)); z-index: 850; overflow-y: auto;
+  background: var(--canvas); padding: max(12px, env(safe-area-inset-top)) 16px 24px; }
+.rs-page > .rs-inner { max-width: 640px; margin: 0 auto; }
+.rs-page h2 { font-size: 22px; line-height: 1.5; margin: 8px 0; }
+.rs-page .rs-lead { color: var(--ink-2); line-height: 1.85; margin: 0 0 12px; }
+
+.rs-card { display: block; width: 100%; text-align: start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-24);
+  padding: 16px; margin: 12px 0; box-shadow: var(--shadow); color: inherit; font: inherit; }
+button.rs-card { cursor: pointer; }
+.rs-card.tint { background: var(--brand-soft); box-shadow: none; }
+.rs-card.feature { border-inline-start: 4px solid var(--warm); }
+.rs-card strong { font-size: 15px; }
+.rs-card p { margin: 5px 0; color: var(--ink-2); line-height: 1.8; }
+.rs-card small { color: var(--ink-2); font-size: var(--fs-12); }
+
+.rs-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 66px; padding: 10px 2px; border: 0; border-bottom: 1px solid var(--line);
+  background: none; color: inherit; font: inherit; text-align: start; cursor: pointer; }
+.rs-row-copy { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.rs-row-copy b { font-size: var(--fs-14); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rs-row-copy small { color: var(--ink-2); font-size: var(--fs-12); line-height: 1.7; }
+.rs-row-end { flex: none; color: var(--brand); font-size: var(--fs-12); font-weight: 700; white-space: nowrap; }
+.rs-thumb { flex: none; width: 56px; height: 56px; border-radius: 14px; overflow: hidden; background: var(--brand-soft); display: grid; place-items: center; color: var(--brand); }
+.rs-thumb img { width: 100%; height: 100%; object-fit: cover; }

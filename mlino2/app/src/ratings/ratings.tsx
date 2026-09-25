@@ -93,3 +93,21 @@ export function RateProduct({ orgId, itemId }: { orgId: string; itemId: string }
     {error && <small className="rate-error" role="alert">{error}</small>}
   </div>;
 }
+
+/** A business's rating: the average of its products' ratings, weighted by their number of votes. */
+export function businessSummary(items: Readonly<Record<string, RatingSummary>>): RatingSummary | undefined {
+  const rated = Object.values(items).filter((s) => s.count > 0);
+  const count = rated.reduce((n, s) => n + s.count, 0);
+  if (!count) return undefined;
+  return { avg: rated.reduce((sum, s) => sum + s.avg * s.count, 0) / count, count, mine: null };
+}
+
+/** «★ ۴٫۳ (۱۲)» from real product ratings; nothing when nobody has rated this business's products yet. */
+export function BusinessRating({ orgId }: { orgId: string }) {
+  const { items } = useRatings(orgId);
+  const summary = businessSummary(items);
+  if (!summary) return null;
+  return <span className="rs-rating" aria-label={tr('امتیاز {0} از ۵، {1} رأی', avgText(summary.avg), faDigits(String(summary.count)))}>
+    <b aria-hidden="true">★</b> {avgText(summary.avg)} <small>({faDigits(String(summary.count))})</small>
+  </span>;
+}

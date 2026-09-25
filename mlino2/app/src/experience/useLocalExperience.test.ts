@@ -56,3 +56,11 @@ describe('personal collection exclusions', () => {
     expect(restored.liked).toEqual([]);
   });
 });
+
+describe('saved products', () => {
+  it('keeps saved products across a reload and drops junk', () => {
+    const state = parseExperience(JSON.stringify({version: 1, savedItems: ['org-1/item-1', 'org-1/item-1', 7, 'org-2/item-9']}));
+    expect(state.savedItems).toEqual(['org-1/item-1', 'org-2/item-9']);
+    expect(parseExperience(null).savedItems).toEqual([]);
+  });
+});

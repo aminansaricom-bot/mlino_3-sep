@@ -1,9 +1,9 @@
 import type { AssistantAnswer } from './assistantIntent';
 import type { RankedResult } from './rankRecords';
 import { CatalogImage, catalogPrice } from '../publicExport/catalogCards';
-import { demoBusinessRating, displayName } from '../demo/demoSocial';
+import { displayName } from '../demo/demoSocial';
+import { BusinessRating } from '../ratings/ratings';
 import { formatDistance } from '../uiFormat';
-import Stars from '../components/Stars';
 import { locale, tr } from '../i18n';
 
 /** رضایت پیش از نخستین ارسال (U-N3): روشن و بدون ابهام. */
@@ -56,13 +56,12 @@ export default function AssistantPanel({ query, answer, results, loading, onOpen
     {!loading && <div className="assist-results">
       {results.length === 0 ? <p className="assist-empty">{tr('چیزی مطابق این درخواست در اطرافت پیدا نشد. کمی ساده‌تر بپرس یا شعاع را بیشتر کن.')}</p> :
         results.map((result) => {
-          const rating = demoBusinessRating(result.record.id);
           const cover = result.items.find((item) => item.media.length)?.media[0];
           return <button type="button" key={result.record.id} className="assist-row" onClick={() => onOpen(result.record.id)}>
             <span className="assist-thumb">{cover ? <CatalogImage media={cover} load /> : <span aria-hidden="true">✦</span>}</span>
             <span className="assist-copy">
               <strong>{displayName(result.record.name)}</strong>
-              <span className="assist-meta">{rating && <Stars rating={rating} compact />}{result.distanceMeters !== undefined && <span>{formatDistance(result.distanceMeters)}</span>}</span>
+              <span className="assist-meta"><BusinessRating orgId={result.record.id} />{result.distanceMeters !== undefined && <span>{formatDistance(result.distanceMeters)}</span>}</span>
               {result.items.map((item) => <span key={item.catalog_item_id} className="assist-item">{displayName(item.name)} · {catalogPrice(item)}</span>)}
               {result.offerName && <span className="assist-offer">{displayName(result.offerName)}</span>}
             </span>

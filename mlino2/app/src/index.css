@@ -68,16 +68,7 @@
   --sheet-full: 88vh;
 }
 
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --surface: #111a2e;
-  --surface-2: #1a2540;
-  --border: #536582;
-  --ink: #f0f4fc;
-  --ink-soft: #c5d1e8;
-  --muted: #aabbd8;
-  --accent-soft: #24365c;
-}
+/* Dark palette: design/roshan.css. */
 
 :root[data-theme="light"] { color-scheme: light; }
 /* Keep light map attribution readable independently of the panel theme. */

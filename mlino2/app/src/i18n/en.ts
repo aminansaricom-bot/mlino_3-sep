@@ -414,4 +414,53 @@ export const EN: Readonly<Record<string, string>> = {
   // Assistant (six languages)
   'دنبال «{0}» در اطرافت می‌گردم.': 'Looking for «{0}» around you.',
   'نام کسب‌وکارها و محصولات همان‌طور که منتشر شده‌اند، به فارسی نشان داده می‌شوند.': 'Business and product names are shown in Persian, as the businesses published them.',
+
+  // Bottom navigation, offers and saved pages
+  'کشف': 'Discover',
+  'آفرها': 'Offers',
+  'پیام‌ها': 'Messages',
+  'ذخیره‌ها': 'Saved',
+  'بخش‌های ملینو': 'MLINO sections',
+  '{0} خوانده‌نشده': '{0} unread',
+  'آفرهایی که در محدوده‌ی تقریبی تو دیده می‌شوند.': 'Offers you can see in your approximate area.',
+  'فعلاً آفر فعالی در اطرافت نیست.': 'No active offers around you right now.',
+  'وقتی کسب‌وکاری نزدیک تو آفر تازه‌ای بگذارد، اینجا دیده می‌شود.': 'When a business near you posts a new offer, it shows up here.',
+  '«ویژه» یعنی جایگاه پولی در جست‌وجو.': '«Featured» means a paid spot in search.',
+  'نوع ذخیره': 'Kind of saved item',
+  'کسب‌وکارها': 'Businesses',
+  'هنوز موردی اینجا نیست': 'Nothing here yet',
+  'کسب‌وکار یا محصولی را با نشانک ذخیره کن تا اینجا بماند.': 'Save a business or product with the bookmark to keep it here.',
+  'برداشتن از ذخیره‌ها': 'Remove from saved',
+  'ذخیره‌ها دست خودت هستند': 'Your saved items are yours',
+  'فهرست روی همین گوشی می‌ماند و هر مورد را هر زمان خواستی برمی‌داری.': 'The list stays on this phone, and you can remove anything whenever you like.',
+  'گفتگو در این نسخه روشن نیست.': 'Chat isn\'t turned on in this version.',
+
+  // Welcome, sign-in and location steps
+  'تأیید شماره': 'Verify number',
+  'کد ۶ رقمی به {0} پیامک شد.': 'A 6-digit code was texted to {0}.',
+  'کد تا {0} دیگر معتبر است.': 'The code is valid for another {0}.',
+  'زمان این کد تمام شد؛ کد تازه بگیر.': 'This code has expired; get a new one.',
+  'ارسال دوباره‌ی کد · {0}': 'Resend code · {0}',
+  'ارسال دوباره‌ی کد': 'Resend code',
+  'فاصله‌ی کسب‌وکارها روی گوشی‌ات حساب می‌شود. موقعیت دقیقت برای هیچ کسب‌وکاری فرستاده نمی‌شود.': 'Distances to businesses are worked out on your phone. Your exact location is never sent to any business.',
+  'با اجازه‌ی تو': 'Only with your permission',
+  'هر وقت خواستی می‌توانی این اجازه را در تنظیمات گوشی تغییر بدهی.': 'You can change this permission in your phone\'s settings whenever you like.',
+  'اجازه‌ی موقعیت': 'Allow location',
+  'بعداً؛ شهر را دستی ببینم': 'Later; I\'ll browse the city myself',
+
+  // Search page and product page
+  'جست‌وجو': 'Search',
+  'نوع نتیجه': 'Result type',
+  'پاسخ دستیار ملینو': 'MLINO assistant\'s answer',
+  'بر پایه‌ی اطلاعات ثبت‌شده‌ی کسب‌وکارها': 'Based on the information businesses published',
+  'نام محصول، کسب‌وکار یا نیازت را بنویس؛ مثلاً «قهوه نزدیک من».': 'Type a product, a business or what you need, e.g. «coffee near me».',
+  'کمی ساده‌تر بنویس یا از دستیار بپرس.': 'Try something simpler or ask the assistant.',
+  'نمایش روی نقشه': 'Show on map',
+  'پرسش از کسب‌وکار': 'Ask the business',
+
+  // Camera step
+  'نمایش در محیط اطراف': 'See it in your surroundings',
+  'گوشی را به اطراف بگیر تا کسب‌وکارها و محصولات نزدیک در جهت خودشان دیده شوند. برای این کار دسترسی دوربین لازم است؛ تصویر دوربین از گوشی بیرون نمی‌رود.': 'Point your phone around to see nearby businesses and products in their own direction. This needs camera access; the camera image never leaves the phone.',
+  'اجازه‌ی دوربین': 'Allow camera',
+  'اگر دوربین در دسترس نباشد، ویترین بدون تصویر دوربین باز می‌شود.': 'If the camera isn\'t available, the storefront opens without the camera view.',
 };

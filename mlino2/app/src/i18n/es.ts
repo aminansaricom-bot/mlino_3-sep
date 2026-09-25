@@ -372,4 +372,53 @@ export const ES: Readonly<Record<string, string>> = {
   // Assistant (six languages)
   'دنبال «{0}» در اطرافت می‌گردم.': 'Buscando «{0}» cerca de ti.',
   'نام کسب‌وکارها و محصولات همان‌طور که منتشر شده‌اند، به فارسی نشان داده می‌شوند.': 'Los nombres de negocios y productos se muestran en persa, tal como los publicaron.',
+
+  // Bottom navigation, offers and saved pages
+  'کشف': 'Descubrir',
+  'آفرها': 'Ofertas',
+  'پیام‌ها': 'Mensajes',
+  'ذخیره‌ها': 'Guardados',
+  'بخش‌های ملینو': 'Secciones de MLINO',
+  '{0} خوانده‌نشده': '{0} sin leer',
+  'آفرهایی که در محدوده‌ی تقریبی تو دیده می‌شوند.': 'Ofertas que se ven en tu zona aproximada.',
+  'فعلاً آفر فعالی در اطرافت نیست.': 'Ahora no hay ofertas activas cerca de ti.',
+  'وقتی کسب‌وکاری نزدیک تو آفر تازه‌ای بگذارد، اینجا دیده می‌شود.': 'Cuando un negocio cercano publique una oferta nueva, aparecerá aquí.',
+  '«ویژه» یعنی جایگاه پولی در جست‌وجو.': '«Destacado» significa un lugar de pago en la búsqueda.',
+  'نوع ذخیره': 'Tipo de guardado',
+  'کسب‌وکارها': 'Negocios',
+  'هنوز موردی اینجا نیست': 'Aún no hay nada aquí',
+  'کسب‌وکار یا محصولی را با نشانک ذخیره کن تا اینجا بماند.': 'Guarda un negocio o producto con el marcador para tenerlo aquí.',
+  'برداشتن از ذخیره‌ها': 'Quitar de guardados',
+  'ذخیره‌ها دست خودت هستند': 'Tus guardados son tuyos',
+  'فهرست روی همین گوشی می‌ماند و هر مورد را هر زمان خواستی برمی‌داری.': 'La lista se queda en este teléfono y puedes quitar cualquier cosa cuando quieras.',
+  'گفتگو در این نسخه روشن نیست.': 'El chat no está activado en esta versión.',
+
+  // Welcome, sign-in and location steps
+  'تأیید شماره': 'Verificar número',
+  'کد ۶ رقمی به {0} پیامک شد.': 'Se envió un código de 6 dígitos a {0}.',
+  'کد تا {0} دیگر معتبر است.': 'El código vale {0} más.',
+  'زمان این کد تمام شد؛ کد تازه بگیر.': 'Este código caducó; pide uno nuevo.',
+  'ارسال دوباره‌ی کد · {0}': 'Reenviar código · {0}',
+  'ارسال دوباره‌ی کد': 'Reenviar código',
+  'فاصله‌ی کسب‌وکارها روی گوشی‌ات حساب می‌شود. موقعیت دقیقت برای هیچ کسب‌وکاری فرستاده نمی‌شود.': 'Las distancias a los negocios se calculan en tu teléfono. Tu ubicación exacta nunca se envía a ningún negocio.',
+  'با اجازه‌ی تو': 'Solo con tu permiso',
+  'هر وقت خواستی می‌توانی این اجازه را در تنظیمات گوشی تغییر بدهی.': 'Puedes cambiar este permiso en los ajustes del teléfono cuando quieras.',
+  'اجازه‌ی موقعیت': 'Permitir ubicación',
+  'بعداً؛ شهر را دستی ببینم': 'Más tarde; veré la ciudad yo mismo',
+
+  // Search page and product page
+  'جست‌وجو': 'Búsqueda',
+  'نوع نتیجه': 'Tipo de resultado',
+  'پاسخ دستیار ملینو': 'Respuesta del asistente de MLINO',
+  'بر پایه‌ی اطلاعات ثبت‌شده‌ی کسب‌وکارها': 'Según la información publicada por los negocios',
+  'نام محصول، کسب‌وکار یا نیازت را بنویس؛ مثلاً «قهوه نزدیک من».': 'Escribe un producto, un negocio o lo que necesitas, p. ej. «café cerca de mí».',
+  'کمی ساده‌تر بنویس یا از دستیار بپرس.': 'Escribe algo más sencillo o pregunta al asistente.',
+  'نمایش روی نقشه': 'Ver en el mapa',
+  'پرسش از کسب‌وکار': 'Preguntar al negocio',
+
+  // Camera step
+  'نمایش در محیط اطراف': 'Verlo a tu alrededor',
+  'گوشی را به اطراف بگیر تا کسب‌وکارها و محصولات نزدیک در جهت خودشان دیده شوند. برای این کار دسترسی دوربین لازم است؛ تصویر دوربین از گوشی بیرون نمی‌رود.': 'Apunta el teléfono a tu alrededor para ver los negocios y productos cercanos en su dirección. Hace falta acceso a la cámara; la imagen nunca sale del teléfono.',
+  'اجازه‌ی دوربین': 'Permitir cámara',
+  'اگر دوربین در دسترس نباشد، ویترین بدون تصویر دوربین باز می‌شود.': 'Si la cámara no está disponible, el escaparate se abre sin la imagen de la cámara.',
 };

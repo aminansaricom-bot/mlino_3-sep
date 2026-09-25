@@ -1,0 +1,78 @@
+/* «روشنای محله» design tokens (owner's design reference 01-roshan-melino-2).
+   One source for colour, type, space, radius, shadow and motion. Older token names used across the app are aliases
+   of these, so every screen follows the same palette in light and dark.
+   Contrast (checked): brand #246B62 on white 6.3:1; ink-2 #566663 on canvas 5.8:1; warm text uses #B4532E (4.8:1),
+   the lighter #D16A42 only as a fill behind dark text. In dark mode text on the light brand fill is dark (#0E2420). */
+
+:root {
+  --brand: #246B62;
+  --brand-soft: #E7F4EF;
+  --on-brand: #FFFFFF;
+  --canvas: #F7F8F6;
+  --surface: #FFFFFF;
+  --ink: #172B2A;
+  --ink-2: #566663;
+  --line: #D5DEDA;
+  --warm: #D16A42;
+  --warm-text: #B4532E;
+  --warm-soft: #FBEDE6;
+  --on-warm: #171717;
+  --good: #1E7B4F;
+  --bad: #AD4326;
+  --bad-soft: #FFF0EB;
+
+  --fs-12: 12px; --fs-14: 14px; --fs-16: 16px; --fs-20: 20px; --fs-28: 28px;
+  --sp-4: 4px; --sp-8: 8px; --sp-12: 12px; --sp-16: 16px; --sp-24: 24px; --sp-32: 32px;
+  --r-16: 16px; --r-24: 24px;
+  --shadow: 0 8px 28px rgba(22, 51, 45, .08);
+  --t-state: 180ms; --t-sheet: 240ms;
+  --touch: 48px;
+  --nav-h: 64px;
+
+  /* Older names, now the same palette. */
+  --accent: var(--brand);
+  --accent-soft: var(--brand-soft);
+  --accent-ring: rgba(36, 107, 98, .24);
+  --violet: var(--brand);
+  --gold: var(--warm);
+  --gold-soft: var(--warm-soft);
+  --ok: var(--good);
+  --danger: var(--bad);
+  --surface-2: var(--canvas);
+  --border: var(--line);
+  --ink-soft: var(--ink-2);
+  --muted: var(--ink-2);
+  --sh-1: 0 1px 2px rgba(22, 51, 45, .05), 0 2px 8px rgba(22, 51, 45, .05);
+  --sh-2: var(--shadow);
+  --sh-3: 0 16px 40px rgba(22, 51, 45, .14);
+  --r-sm: 12px; --r-md: 16px; --r-lg: 24px;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --brand: #78D4BE;
+  --brand-soft: #163932;
+  --on-brand: #0E2420;
+  --canvas: #101B1B;
+  --surface: #1B2928;
+  --ink: #F0F6F2;
+  --ink-2: #AEC4BF;
+  --line: #38524D;
+  --warm: #FFA780;
+  --warm-text: #FFA780;
+  --warm-soft: #3A2A22;
+  --on-warm: #171717;
+  --good: #7BD8A2;
+  --bad: #FF9D84;
+  --bad-soft: #3A221C;
+  --shadow: 0 8px 28px rgba(0, 0, 0, .35);
+  --accent-ring: rgba(120, 212, 190, .3);
+  --sh-3: 0 16px 40px rgba(0, 0, 0, .45);
+  color-scheme: dark;
+}
+
+body { background: var(--canvas); color: var(--ink); font-size: var(--fs-14); }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

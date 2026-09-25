@@ -5,13 +5,19 @@ import { demoProductReviews, displayName } from '../demo/demoSocial';
 import { RateProduct, RatingBadge, useRatings } from '../ratings/ratings';
 import { Icon } from '../design/Icon';
 import { tr, numberLocale } from '../i18n';
+import { Button } from '../design/ui';
+import LiveIcon from '../live/icons';
 
 /**
  * صفحه‌ی محصول: عکس بزرگ، نام، قیمت، توضیح، و زیر آن نظرهای کاربران
  * (در ساخت نمایشی، نظرهای نمونه با برچسب روشن). عکس همان مسیر سنجیده‌شده‌ی
  * کاتالوگ را دارد؛ هیچ تصویری بدون سنجش اثرانگشت نمایش داده نمی‌شود.
  */
-export default function ProductPage({ item, businessName, organizationId, onClose }: { item: CatalogItem; businessName: string; organizationId?: string; onClose: () => void }) {
+export default function ProductPage({ item, businessName, organizationId, onClose, saved = false, onToggleSave, onAsk }: {
+  item: CatalogItem; businessName: string; organizationId?: string; onClose: () => void;
+  /** Saved on this phone («ذخیره‌ها»). */ saved?: boolean; onToggleSave?: () => void;
+  /** Opens a conversation with the business (chat enabled only). */ onAsk?: () => void;
+}) {
   const { reviews } = demoProductReviews(item.name);
   const ratings = useRatings(organizationId);
   useEffect(() => {
@@ -24,6 +30,8 @@ export default function ProductPage({ item, businessName, organizationId, onClos
       <CatalogImage key={item.catalog_item_id} media={item.media[0]} load />
       <button className="product-back" onClick={onClose} aria-label={tr('بازگشت')}><Icon name="close" /></button>
       <RatingBadge summary={ratings.items[item.catalog_item_id]} className="on-hero" />
+      {onToggleSave && <button type="button" className={`product-save${saved ? ' on' : ''}`} onClick={onToggleSave} aria-pressed={saved}
+        aria-label={saved ? tr('برداشتن از ذخیره‌ها') : tr('ذخیره')}><LiveIcon name="bookmark" size={22} /></button>}
     </div>
     <div className="product-body">
       <div className="product-from">{businessName}</div>
@@ -34,6 +42,7 @@ export default function ProductPage({ item, businessName, organizationId, onClos
       </div>
       {organizationId && <RateProduct orgId={organizationId} itemId={item.catalog_item_id} />}
       {item.short_description && <p className="product-desc">{item.short_description}</p>}
+      {onAsk && <Button wide variant="secondary" icon="chat" onClick={onAsk}>{tr('پرسش از کسب‌وکار')}</Button>}
 
       <h3 className="product-section">{tr('نظرها')}</h3>
       {reviews.length === 0 ? <p className="product-empty">{tr('هنوز نظری ثبت نشده است.')}</p> : <>

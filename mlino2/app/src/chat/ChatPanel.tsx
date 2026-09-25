@@ -18,7 +18,8 @@ export function ChatBubbleIcon() {
     <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4A1.5 1.5 0 0 1 4 14.5z" /><path d="M8.5 8.5h7M8.5 11.5h4.5" /></svg>;
 }
 
-export default function ChatPanel({ target, onClose }: { target: ChatTarget | null; onClose: () => void }) {
+/** Conversations: a layer over a business page, or (embedded) the «پیام‌ها» tab itself, without a close button. */
+export default function ChatPanel({ target, onClose, embedded = false }: { target: ChatTarget | null; onClose: () => void; embedded?: boolean }) {
   const [ready, setReady] = useState(false);
   const [config, setConfig] = useState<ChatConfig | null>(null);
   const [person, setPerson] = useState<ChatPerson>(null);
@@ -62,11 +63,11 @@ export default function ChatPanel({ target, onClose }: { target: ChatTarget | nu
   };
 
   const title = view.kind === 'new' ? tr('پیام به {0}', clean(view.target.name)) : view.kind === 'thread' ? clean(threads?.find((t) => t.id === view.id)?.businessName ?? tr('گفتگو')) : !person && target ? tr('پیام به {0}', clean(target.name)) : tr('پیام‌های من');
-  return <section className="panel chat-panel" aria-label={title}>
+  return <section className={`panel chat-panel${embedded ? ' embedded' : ''}`} aria-label={title}>
     <div className="panel-head">
       {view.kind !== 'list' && person && <button className="panel-close" onClick={() => { setView({ kind: 'list' }); void loadThreads(); }} aria-label={tr('بازگشت')}><span className="lv-dir" aria-hidden="true">→</span></button>}
       <h3>{title}</h3>
-      <button className="panel-close" onClick={onClose} aria-label={tr('بستن')}>✕</button>
+      {!embedded && <button className="panel-close" onClick={onClose} aria-label={tr('بستن')}>✕</button>}
     </div>
     <div className="panel-body chat-body">
       {!ready ? <p className="chat-muted">{tr('در حال بررسی…')}</p>
@@ -205,7 +206,8 @@ function Thread({ id, thread, onChanged, onGone }: { id: string; thread: Custome
 }
 
 /** دکمهٔ «پیام‌های من» در نوار بالا، با شمار خوانده‌نشده‌ها (فقط وقتی واردشده است). */
-export function ChatInboxButton({ onOpen, refreshKey }: { onOpen: () => void; refreshKey: number }) {
+/** Unread messages across the person's conversations (0 when signed out); checked every 30 s while visible. */
+export function useChatUnread(refreshKey: number): number {
   const [unread, setUnread] = useState(0);
   useEffect(() => {
     let active = true;
@@ -222,6 +224,11 @@ export function ChatInboxButton({ onOpen, refreshKey }: { onOpen: () => void; re
     timer = window.setInterval(() => { if (document.visibilityState === 'visible') void poll(); }, 30_000);
     return () => { active = false; window.clearInterval(timer); };
   }, [refreshKey]);
+  return unread;
+}
+
+export function ChatInboxButton({ onOpen, refreshKey }: { onOpen: () => void; refreshKey: number }) {
+  const unread = useChatUnread(refreshKey);
   return <button className="profile-btn chat-inbox-btn" onClick={onOpen} aria-label={unread ? tr('پیام‌های من، {0} خوانده‌نشده', faDigits(unread)) : tr('پیام‌های من')}>
     <ChatBubbleIcon />{unread > 0 && <b className="chat-unread badge-dot">{faDigits(unread)}</b>}
   </button>;

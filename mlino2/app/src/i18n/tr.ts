@@ -372,4 +372,53 @@ export const TR: Readonly<Record<string, string>> = {
   // Assistant (six languages)
   'دنبال «{0}» در اطرافت می‌گردم.': 'Çevrende «{0}» arıyorum.',
   'نام کسب‌وکارها و محصولات همان‌طور که منتشر شده‌اند، به فارسی نشان داده می‌شوند.': 'İşletme ve ürün adları, işletmelerin yayımladığı gibi Farsça gösterilir.',
+
+  // Bottom navigation, offers and saved pages
+  'کشف': 'Keşfet',
+  'آفرها': 'Teklifler',
+  'پیام‌ها': 'Mesajlar',
+  'ذخیره‌ها': 'Kaydedilenler',
+  'بخش‌های ملینو': 'MLINO bölümleri',
+  '{0} خوانده‌نشده': '{0} okunmamış',
+  'آفرهایی که در محدوده‌ی تقریبی تو دیده می‌شوند.': 'Yaklaşık bölgende görünen teklifler.',
+  'فعلاً آفر فعالی در اطرافت نیست.': 'Şu an çevrende aktif teklif yok.',
+  'وقتی کسب‌وکاری نزدیک تو آفر تازه‌ای بگذارد، اینجا دیده می‌شود.': 'Yakınındaki bir işletme yeni bir teklif koyduğunda burada görünür.',
+  '«ویژه» یعنی جایگاه پولی در جست‌وجو.': '«Öne çıkan», aramada ücretli bir yer demektir.',
+  'نوع ذخیره': 'Kayıt türü',
+  'کسب‌وکارها': 'İşletmeler',
+  'هنوز موردی اینجا نیست': 'Burada henüz bir şey yok',
+  'کسب‌وکار یا محصولی را با نشانک ذخیره کن تا اینجا بماند.': 'Burada kalması için bir işletmeyi veya ürünü yer imiyle kaydet.',
+  'برداشتن از ذخیره‌ها': 'Kaydedilenlerden çıkar',
+  'ذخیره‌ها دست خودت هستند': 'Kaydettiklerin senin elinde',
+  'فهرست روی همین گوشی می‌ماند و هر مورد را هر زمان خواستی برمی‌داری.': 'Liste bu telefonda kalır ve istediğin zaman her şeyi kaldırabilirsin.',
+  'گفتگو در این نسخه روشن نیست.': 'Bu sürümde sohbet açık değil.',
+
+  // Welcome, sign-in and location steps
+  'تأیید شماره': 'Numarayı doğrula',
+  'کد ۶ رقمی به {0} پیامک شد.': '{0} numarasına 6 haneli kod gönderildi.',
+  'کد تا {0} دیگر معتبر است.': 'Kod {0} daha geçerli.',
+  'زمان این کد تمام شد؛ کد تازه بگیر.': 'Bu kodun süresi doldu; yeni kod al.',
+  'ارسال دوباره‌ی کد · {0}': 'Kodu tekrar gönder · {0}',
+  'ارسال دوباره‌ی کد': 'Kodu tekrar gönder',
+  'فاصله‌ی کسب‌وکارها روی گوشی‌ات حساب می‌شود. موقعیت دقیقت برای هیچ کسب‌وکاری فرستاده نمی‌شود.': 'İşletmelere olan mesafeler telefonunda hesaplanır. Tam konumun hiçbir işletmeye gönderilmez.',
+  'با اجازه‌ی تو': 'Yalnızca izninle',
+  'هر وقت خواستی می‌توانی این اجازه را در تنظیمات گوشی تغییر بدهی.': 'Bu izni istediğin zaman telefon ayarlarından değiştirebilirsin.',
+  'اجازه‌ی موقعیت': 'Konuma izin ver',
+  'بعداً؛ شهر را دستی ببینم': 'Sonra; şehre kendim bakayım',
+
+  // Search page and product page
+  'جست‌وجو': 'Arama',
+  'نوع نتیجه': 'Sonuç türü',
+  'پاسخ دستیار ملینو': 'MLINO asistanının yanıtı',
+  'بر پایه‌ی اطلاعات ثبت‌شده‌ی کسب‌وکارها': 'İşletmelerin yayımladığı bilgilere dayanarak',
+  'نام محصول، کسب‌وکار یا نیازت را بنویس؛ مثلاً «قهوه نزدیک من».': 'Bir ürün, işletme ya da ihtiyacını yaz; ör. «yakınımda kahve».',
+  'کمی ساده‌تر بنویس یا از دستیار بپرس.': 'Daha basit yaz ya da asistana sor.',
+  'نمایش روی نقشه': 'Haritada göster',
+  'پرسش از کسب‌وکار': 'İşletmeye sor',
+
+  // Camera step
+  'نمایش در محیط اطراف': 'Çevrende gör',
+  'گوشی را به اطراف بگیر تا کسب‌وکارها و محصولات نزدیک در جهت خودشان دیده شوند. برای این کار دسترسی دوربین لازم است؛ تصویر دوربین از گوشی بیرون نمی‌رود.': 'Yakındaki işletmeleri ve ürünleri kendi yönlerinde görmek için telefonunu etrafa tut. Bunun için kamera izni gerekir; kamera görüntüsü telefondan çıkmaz.',
+  'اجازه‌ی دوربین': 'Kameraya izin ver',
+  'اگر دوربین در دسترس نباشد، ویترین بدون تصویر دوربین باز می‌شود.': 'Kamera kullanılamazsa vitrin kamera görüntüsü olmadan açılır.',
 };

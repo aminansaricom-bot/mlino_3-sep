@@ -10,17 +10,19 @@ export interface LocalExperience {
   liked: string[];
   hidden: string[];
   viewed: string[];
+  /** Saved products as «organizationId/catalogItemId». */
+  savedItems: string[];
   sound: boolean;
   haptics: boolean;
 }
-export const freshExperience = (): LocalExperience => ({version: 1, theme: 'light', saved: [], later: [], liked: [], hidden: [], viewed: [], sound: false, haptics: false});
+export const freshExperience = (): LocalExperience => ({version: 1, theme: 'light', saved: [], later: [], liked: [], hidden: [], viewed: [], savedItems: [], sound: false, haptics: false});
 export function parseExperience(raw: string | null): LocalExperience {
   const base = freshExperience();
   if (!raw) return base;
   try {
     const data = JSON.parse(raw);
     if (!data || data.version !== 1) return base;
-    for (const key of ['saved','later','liked','hidden','viewed'] as const) {
+    for (const key of ['saved','later','liked','hidden','viewed','savedItems'] as const) {
       if (Array.isArray(data[key])) base[key] = [...new Set<string>(data[key].filter((id: unknown) => typeof id === 'string'))].slice(0, 1000);
     }
     // Existing hidden choices take precedence when repairing older browser state.
@@ -64,10 +66,15 @@ export function useLocalExperience() {
   function toggle(key: Collection | 'hidden', id: string) {
     setData(prev => toggleExperience(prev, key, id));
   }
+  /** Save or unsave one product; the key names its business too. */
+  function toggleItem(organizationId: string, itemId: string) {
+    const key = `${organizationId}/${itemId}`;
+    setData(prev => ({...prev, savedItems: prev.savedItems.includes(key) ? prev.savedItems.filter(x => x !== key) : [...prev.savedItems, key]}));
+  }
   function viewed(id: string) {
     setData(prev => prev.viewed.includes(id) ? prev : {...prev, viewed: [...prev.viewed, id]});
   }
-  return { data, setData, toggle, viewed, storageFailed };
+  return { data, setData, toggle, toggleItem, viewed, storageFailed };
 }
 
 /** Explicit user gestures only; sounds never autoplay in response to map updates. */
