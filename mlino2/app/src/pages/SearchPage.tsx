@@ -12,6 +12,7 @@ import { businessThumb, clean } from '../live/liveData';
 import { formatDistance } from '../uiFormat';
 import { AppHeader, Button, EmptyState, Segmented, Skeleton } from '../design/ui';
 import LiveIcon from '../live/icons';
+import MicIcon from '../design/MicIcon';
 import { tr } from '../i18n';
 
 type Tab = 'businesses' | 'products' | 'offers';
@@ -70,7 +71,7 @@ export default function SearchPage(p: {
         <input ref={input} value={p.query} onChange={(e) => p.onQuery(e.target.value)} placeholder={tr('چی می‌خوای؟')} aria-label={tr('جست‌وجو یا پرسش از دستیار')} enterKeyHint="search" />
         {p.query && <button type="button" className="rs-search-clear" aria-label={tr('پاک کردن جست‌وجو')} onClick={() => p.onQuery('')}><LiveIcon name="close" size={18} /></button>}
         {p.voice?.supported && <button type="button" className={`rs-search-mic${p.voice.listening ? ' on' : ''}`} aria-pressed={p.voice.listening}
-          aria-label={p.voice.listening ? tr('توقف شنیدن') : tr('پرسیدن با صدا')} onClick={p.voice.onMic}><img src="/icons/voice.png" alt="" aria-hidden="true" /></button>}
+          aria-label={p.voice.listening ? tr('توقف شنیدن') : tr('پرسیدن با صدا')} onClick={p.voice.onMic}><MicIcon size={26} /></button>}
         <button type="submit" className="rs-search-ask" aria-label={tr('پرسیدن از دستیار')} disabled={p.query.trim().length < 2}>✦</button>
       </form>
       <Segmented label={tr('نوع نتیجه')} value={tab} onChange={setTab} options={[

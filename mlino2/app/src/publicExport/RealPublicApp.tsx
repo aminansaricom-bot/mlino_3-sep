@@ -361,7 +361,7 @@ export default function RealPublicApp() {
       onChange={experience.setData} onToggle={experience.toggle} onDiagnostics={() => setOverlay('none')}
       onSuggest={() => setSuggestionEmpty(!nearby.some((item) => item.record.offers.length > 0))} suggestionEmpty={suggestionEmpty}
       radiusLabel={formatDistance(5000)} pointLabel={tr(pointLabel)} filtersApplied={category !== null || openOnly}
-      onChangePoint={() => setOverlay('none')} onUseLocation={useMyLocation} locating={locating} />}
+      onChangePoint={() => setOverlay('none')} onUseLocation={useMyLocation} locating={locating} onAccountChange={() => setChatRefresh((n) => n + 1)} />}
     {overlay === 'vitrine' && !cameraOk && <CameraIntro onAllow={() => setCameraOk(true)} onLater={() => setOverlay('none')} />}
     {overlay === 'vitrine' && cameraOk && <LiveVitrine records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point}
       locationPending={myPoint === null && locError === null} initialRadius={demoBuildEnabled && demoEnabled ? 100 : undefined}

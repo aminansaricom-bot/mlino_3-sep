@@ -421,4 +421,14 @@ export const ES: Readonly<Record<string, string>> = {
   'گوشی را به اطراف بگیر تا کسب‌وکارها و محصولات نزدیک در جهت خودشان دیده شوند. برای این کار دسترسی دوربین لازم است؛ تصویر دوربین از گوشی بیرون نمی‌رود.': 'Apunta el teléfono a tu alrededor para ver los negocios y productos cercanos en su dirección. Hace falta acceso a la cámara; la imagen nunca sale del teléfono.',
   'اجازه‌ی دوربین': 'Permitir cámara',
   'اگر دوربین در دسترس نباشد، ویترین بدون تصویر دوربین باز می‌شود.': 'Si la cámara no está disponible, el escaparate se abre sin la imagen de la cámara.',
+
+  // Profile menu
+  'صدا و لرزش': 'Sonido y vibración',
+  'ورود با شماره‌ی موبایل': 'Entrar con tu número de móvil',
+  'حساب کاربری': 'Cuenta',
+  'هنوز وارد نشده‌ای.': 'Aún no has iniciado sesión.',
+  'خاموش': 'Desactivado',
+  'در حال خروج…': 'Cerrando sesión…',
+  'خروج از حساب': 'Cerrar sesión',
+  'بازگرداندن': 'Restaurar',
 };

@@ -5,7 +5,8 @@ import type { ReactNode } from 'react';
 export type LiveIconName =
   | 'close' | 'menu' | 'search' | 'chat' | 'bookmark' | 'offer' | 'pause' | 'play' | 'chevron-left' | 'chevron-right'
   | 'chevron-down' | 'send' | 'location' | 'my-location' | 'store' | 'clock' | 'camera' | 'refresh' | 'warning' | 'lock'
-  | 'grid' | 'food' | 'shop' | 'service' | 'health' | 'more' | 'map' | 'compass' | 'user' | 'image' | 'check';
+  | 'grid' | 'food' | 'shop' | 'service' | 'health' | 'more' | 'map' | 'compass' | 'user' | 'image' | 'check'
+  | 'globe' | 'heart' | 'sparkle' | 'flag' | 'moon' | 'sun' | 'volume' | 'eye-off' | 'info' | 'logout' | 'phone';
 
 const P: Record<LiveIconName, ReactNode> = {
   close: <path d="m5 5 14 14M5 19 19 5" />,
@@ -39,6 +40,17 @@ const P: Record<LiveIconName, ReactNode> = {
   user: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
   image: <><rect x="3" y="4" width="18" height="16" rx="3" /><path d="m3 16 5-5 5 5 3-3 5 5M15.5 9.5h.01" /></>,
   check: <path d="m5 12 5 5 9-10" />,
+  globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3Z" /></>,
+  heart: <path d="M12 20s-8-4.7-8-10.3A4.7 4.7 0 0 1 12 7a4.7 4.7 0 0 1 8 2.7C20 15.3 12 20 12 20Z" />,
+  sparkle: <path d="M12 3.5 13.9 10l6.6 2-6.6 2L12 20.5 10.1 14l-6.6-2 6.6-2Z" />,
+  flag: <path d="M5 21V4M5 4h11l-2 4 2 4H5" />,
+  moon: <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" />,
+  sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
+  volume: <path d="M4 9h4l5-4v14l-5-4H4ZM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />,
+  'eye-off': <path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c5 0 9 5 9 7a11 11 0 0 1-2.6 3.4M6.6 6.6C4.3 8 3 10.3 3 12c0 2 4 7 9 7a9.6 9.6 0 0 0 4.4-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2" />,
+  info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7.5h.01" /></>,
+  logout: <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" />,
+  phone: <path d="M8 2.5h8a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 20V4A1.5 1.5 0 0 1 8 2.5ZM11 18.5h2" />,
 };
 
 export default function LiveIcon({ name, size = 22, className = '' }: { name: LiveIconName; size?: number; className?: string }) {

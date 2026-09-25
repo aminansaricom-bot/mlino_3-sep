@@ -421,4 +421,14 @@ export const TR: Readonly<Record<string, string>> = {
   'گوشی را به اطراف بگیر تا کسب‌وکارها و محصولات نزدیک در جهت خودشان دیده شوند. برای این کار دسترسی دوربین لازم است؛ تصویر دوربین از گوشی بیرون نمی‌رود.': 'Yakındaki işletmeleri ve ürünleri kendi yönlerinde görmek için telefonunu etrafa tut. Bunun için kamera izni gerekir; kamera görüntüsü telefondan çıkmaz.',
   'اجازه‌ی دوربین': 'Kameraya izin ver',
   'اگر دوربین در دسترس نباشد، ویترین بدون تصویر دوربین باز می‌شود.': 'Kamera kullanılamazsa vitrin kamera görüntüsü olmadan açılır.',
+
+  // Profile menu
+  'صدا و لرزش': 'Ses ve titreşim',
+  'ورود با شماره‌ی موبایل': 'Cep numarasıyla giriş',
+  'حساب کاربری': 'Hesap',
+  'هنوز وارد نشده‌ای.': 'Henüz giriş yapmadın.',
+  'خاموش': 'Kapalı',
+  'در حال خروج…': 'Çıkış yapılıyor…',
+  'خروج از حساب': 'Hesaptan çık',
+  'بازگرداندن': 'Geri getir',
 };
