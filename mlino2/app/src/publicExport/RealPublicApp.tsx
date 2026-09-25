@@ -29,6 +29,7 @@ import OffersPage from '../pages/OffersPage';
 import SavedPage from '../pages/SavedPage';
 import SearchPage from '../pages/SearchPage';
 import CameraIntro from '../pages/CameraIntro';
+import MicIcon from '../design/MicIcon';
 import '../design/app.css';
 import { hiddenForLackOfPosition, promoteMatches, toDataFrame, withNearbyOffers } from '../offers/nearbyOffers';
 import NearbyAlerts, { alertsOn, refreshAlertLocation } from '../offers/NearbyAlerts';
@@ -72,6 +73,8 @@ export default function RealPublicApp() {
   }, [consumer]);
   const [now, setNow] = useState(() => Date.now());
   const [refreshFailed, setRefreshFailed] = useState(false);
+  // The first download is still on its way: that is loading, not «no valid data».
+  const [firstLoadDone, setFirstLoadDone] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [overlay, setOverlay] = useState<Overlay>('none');
   const [sheet, setSheet] = useState<SheetState>('peek');
@@ -123,6 +126,7 @@ export default function RealPublicApp() {
     const refresh = async () => {
       try { await consumer.refresh(); if (active) setRefreshFailed(false); }
       catch { if (active) setRefreshFailed(true); }
+      if (active) setFirstLoadDone(true);
       if (catalog) await catalog.refresh(consumer).catch(() => undefined);
       if (active) setNow(Date.now());
     };
@@ -294,7 +298,7 @@ export default function RealPublicApp() {
       onPickPoint={(lat, lng) => { setPoint([lat, lng]); setPointLabel(msg('نقطهٔ انتخابی روی نقشه')); setNearbyOnly(true); }}
       onMapReady={() => undefined} onTileStatus={setTileStatus} />
 
-    {!valid && <div className="app-banner warn" role="status">{tr('اطلاعات واقعی فعلاً در دسترس نیست. دادهٔ آزمایشی جای آن نمایش داده نمی‌شود.')}</div>}
+    {!valid && firstLoadDone && <div className="app-banner warn" role="status">{tr('اطلاعات واقعی فعلاً در دسترس نیست. دادهٔ آزمایشی جای آن نمایش داده نمی‌شود.')}</div>}
     {valid && refreshFailed && <div className="app-banner warn" role="status">{tr('دریافت تازه انجام نشد؛ نسخهٔ معتبر پیشین فقط تا پایان اعتبارش نمایش داده می‌شود.')}</div>}
     {tileStatus === 'error' && <div className="map-state"><p>{tr('نقشه در دسترس نیست؛ فهرست دادهٔ امضاشده همچنان قابل استفاده است.')}</p><button onClick={() => setTileRetryKey((value) => value + 1)}>{tr('تلاش دوباره')}</button></div>}
     {demoBuildEnabled && !demoEnabled && <button className="demo-reenable" onClick={() => setDemoEnabled(true)}>{tr('روشن کردن حالت نمایشی')}</button>}
@@ -305,6 +309,8 @@ export default function RealPublicApp() {
         <span className={query ? 'search-launch-q' : 'search-launch-ph'}>{query || tr('چی می‌خوای؟')}</span>
         <span className="search-launch-spark" aria-hidden="true">✦</span>
       </button>
+      {voiceInput.supported && <button type="button" className={`search-launch-mic${voiceInput.listening ? ' on' : ''}`} aria-pressed={voiceInput.listening}
+        aria-label={voiceInput.listening ? tr('توقف شنیدن') : tr('پرسیدن با صدا')} onClick={() => { setSearchOpen(true); micPress(); }}><MicIcon size={24} /></button>}
       {query && <button type="button" className="search-launch-clear" onClick={() => setQuery('')} aria-label={tr('پاک کردن جست‌وجو')}><LiveIcon name="close" size={18} /></button>}
     </div><IconButton icon="user" className="profile-rs" label={tr('فضای من')} onClick={() => setOverlay('experience')} /></div>
       <div className="chips" aria-label={tr('فیلترهای واقعی')}>

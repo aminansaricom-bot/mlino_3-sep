@@ -192,3 +192,5 @@
 .pm-sub .collection-row { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
 .rs-search-mic { color: var(--brand); }
 .rs-search-mic.on { color: var(--bad); }
+.search-launch-mic { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 0; border-radius: 12px; background: none; color: var(--brand); cursor: pointer; }
+.search-launch-mic.on { color: var(--bad); background: var(--bad-soft); }
