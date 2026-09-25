@@ -317,7 +317,7 @@ export default function RealPublicApp() {
     </div>
 
     <div className="map-fabs"><button className={`fab-locate${locating ? ' busy' : ''}`} onClick={useMyLocation} aria-label={tr('موقعیت من')}>◎</button></div>
-    <div className="primary-actions"><button className="action-fab vitrine" onClick={() => setOverlay('vitrine')} aria-label={tr('ویترین زنده')} title={tr('ویترین زنده')}><img className="action-fab-img" src="/icons/vitrine.png" alt="" width={64} height={64} /></button></div>
+    <div className="primary-actions"><button className="action-fab vitrine" onClick={() => setOverlay('vitrine')} aria-label={tr('ویترین زنده')} title={tr('ویترین زنده')}><img className="action-fab-img" src="/icons/vitrine-live.png" alt="" width={64} height={64} /></button></div>
 
     <BottomSheet state={sheet} onStateChange={setSheet} title={offersOnly ? tr('تخفیف‌های اطراف') : tr('اطراف شما')} subtitle={demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget ? tr('موقعیتت را بده') : tr('{0} مورد', shown.length.toLocaleString(numberLocale()))}>
       {offersOnly && CHAT_ENABLED && <NearbyAlerts point={alertPoint} demoFrame={demoFrame} demoBuild={demoBuildEnabled && demoEnabled} onNeedLocation={useMyLocation} />}

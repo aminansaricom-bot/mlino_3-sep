@@ -25,7 +25,8 @@
 
 /* Floating buttons */
 .app-shell .fab-locate { width: 48px; height: 48px; border-radius: 50%; background: var(--surface); color: var(--ink); border: 1px solid var(--line); box-shadow: var(--shadow); }
-.app-shell .action-fab.vitrine { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.app-shell .action-fab.vitrine { width: 64px; height: 64px; background: transparent; border: 0; box-shadow: 0 8px 22px rgba(22, 51, 45, .22); }
+.app-shell .action-fab.vitrine .action-fab-img { width: 64px; height: 64px; filter: none; }
 
 /* Sheet «اطراف شما» */
 .app-shell .sheet-title strong, .app-shell .sheet-title h2 { font-size: 17px; font-weight: 800; color: var(--ink); }
