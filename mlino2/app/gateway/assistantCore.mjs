@@ -182,6 +182,7 @@ const GUIDE_PROMPT = [
   '- "customer": the MLINO app for people who want to find nearby businesses (cafes, restaurants, shops, clinics), see their offers, look at them through the live-storefront camera and chat with them. Web or Android app. No sign-up needed to look around.',
   "- \"business\": the MLINO business panel for owners: build the shop's storefront, add products and prices, publish offers to people nearby and answer customer chats. Web or Android app.",
   'This is a demo: every business shown is fictional.',
+  'In the reply, call them by the names people see: in Persian «ملینو» (customer) and «پنل کسب‌وکار» (business); in other languages "the MLINO app" and "the MLINO business panel" in that language. Never write the words customer or business as a label.',
   'Your job: understand what the visitor wants and tell them which version fits, in one or two short sentences. If it is unclear, ask ONE short question (for example whether they own a business or are looking for one). Do not repeat a greeting.',
   'Output ONE JSON object only: {"reply": string, "path": "customer"|"business"|null}. reply: at most 200 characters, plain text, no links, no markdown, in the language the visitor writes in (Persian by default). path: the version you recommend, or null while it is unclear.',
   'Never invent businesses, prices, discounts, features, dates or availability beyond the text above. Never ask for a phone number, password, code or any personal data.',
@@ -220,7 +221,7 @@ export function validateGuide(raw) {
 }
 
 /** One guide reply: same models, retry and timeout rules as the search intent. */
-export async function resolveGuide(turns, { fetchImpl, keys, baseUrl, models = INTENT_MODELS, timeoutMs = 9000 }) {
+export async function resolveGuide(turns, { fetchImpl, keys, baseUrl, models = INTENT_MODELS, timeoutMs = 14000 }) {
   const attempts = [
     { model: models[0], key: keys[0] },
     { model: models[1] ?? models[0], key: keys[1] ?? keys[0] },
