@@ -1,0 +1,95 @@
+/* «روشنای محله» for the business panel (owner's design reference 01-roshan-melino-2).
+   The panel's older token names are mapped to the design palette, so every page follows it in light and dark.
+   Kept from the owner's earlier requests: the glass sidebar with his icons and the raised bottom-bar orb, now in the
+   brand green. Contrast: brand #246B62 on white 6.3:1; secondary text #566663 on canvas 5.8:1; warm text #B4532E 4.8:1. */
+
+:root {
+  --brand: #246B62; --brand-soft: #E7F4EF; --on-brand: #FFFFFF; --canvas: #F7F8F6;
+  --warm: #D16A42; --warm-text: #B4532E; --warm-soft: #FBEDE6; --on-warm: #171717;
+  --shadow-rs: 0 8px 28px rgba(22, 51, 45, .08);
+  --t-state: 180ms; --t-sheet: 240ms;
+
+  --bg: #F7F8F6; --surface: #FFFFFF; --surface-2: #F0F4F2; --ink: #172B2A; --soft: #566663; --muted: #5F6F6C; --line: #D5DEDA;
+  --violet: var(--brand); --pink: #2F8175; --cyan: var(--brand);
+  --pos: #1E7B4F; --neg: #AD4326; --warn: #9A5A12;
+  --ok-bg: #E7F4EF; --bad-bg: #FFF0EB; --warn-bg: #FBEDE6; --info-bg: #E7F4EF; --muted-bg: #EEF2F0;
+  --sales: var(--brand); --exp: var(--warm);
+  --shadow: var(--shadow-rs); --radius: 24px;
+  --glass-1: rgba(36, 107, 98, .94); --glass-2: rgba(30, 92, 84, .9); --glass-3: rgba(23, 76, 70, .88);
+  --glass-edge: rgba(255, 255, 255, .26); --glass-ink: rgba(255, 255, 255, .92); --glass-icon: #CFEFE6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand: #78D4BE; --brand-soft: #163932; --on-brand: #0E2420; --canvas: #101B1B;
+    --warm: #FFA780; --warm-text: #FFA780; --warm-soft: #3A2A22;
+    --bg: #101B1B; --surface: #1B2928; --surface-2: #213331; --ink: #F0F6F2; --soft: #AEC4BF; --muted: #9DB5B0; --line: #38524D;
+    --pink: #5FBFA8; --pos: #7BD8A2; --neg: #FF9D84; --warn: #FFC37A;
+    --ok-bg: #163932; --bad-bg: #3A221C; --warn-bg: #3A2A22; --info-bg: #163932; --muted-bg: rgba(255, 255, 255, .06);
+    --shadow: 0 8px 28px rgba(0, 0, 0, .35);
+    --glass-1: rgba(22, 57, 50, .92); --glass-2: rgba(19, 48, 43, .9); --glass-3: rgba(16, 40, 37, .88); --glass-edge: rgba(255, 255, 255, .16); --glass-icon: #9FE3D1;
+  }
+}
+
+body { background: var(--bg); }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/* Buttons: solid brand, dark text on the light brand in dark mode */
+.btn.primary { color: var(--on-brand); background: var(--brand); box-shadow: none; }
+.btn.secondary { background: var(--brand-soft); color: var(--brand); border: 1px solid var(--line); }
+.btn { min-height: 48px; border-radius: 13px; }
+.btn.small { min-height: 40px; }
+.assist-send { color: var(--on-brand); background: var(--brand); }
+.bubble.mine { color: var(--on-brand); background: var(--brand); }
+.bubble.mine.auto { background: var(--brand-soft); color: var(--ink); border: 1px dashed var(--line); }
+.bar.sales { background: var(--brand); }
+.bar.exp { background: var(--warm); }
+.sf-cover { background: var(--brand-soft); }
+
+/* Sidebar glass in brand green; the active item is a white chip with the brand icon */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .sidebar, .drawer { background: #246B62; } }
+.sidebar, .drawer { box-shadow: 0 18px 50px rgba(22, 51, 45, .28), inset 0 1px 0 rgba(255, 255, 255, .3); }
+.side-nav .nav-item.on { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 8px 20px rgba(10, 40, 35, .25); }
+.side-nav .nav-item.on .nav-ico { color: #246B62; }
+
+/* Bottom bar: the raised orb in brand, one calm tint */
+.bottom-bar { box-shadow: 0 14px 34px rgba(22, 51, 45, .14), 0 2px 6px rgba(22, 51, 45, .05); }
+.bottom-bar .on { color: var(--brand); }
+.bottom-bar .on .bb-ico { color: var(--on-brand); }
+.bb-orb { background: var(--brand); box-shadow: 0 10px 22px rgba(36, 107, 98, .35), 0 0 0 5px color-mix(in srgb, var(--tint, transparent) 26%, var(--surface)); }
+
+/* Cards and headers */
+.card { border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--shadow); }
+header.top { background: color-mix(in srgb, var(--bg) 88%, transparent); }
+
+/* «امروز» */
+.today-rs { gap: 14px; }
+.today-hello small { color: var(--soft); font-size: 12px; }
+.today-hello h1 { margin: 2px 0 0; font-size: 23px; line-height: 1.5; }
+.rs-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+.rs-card.feature { border-inline-start: 4px solid var(--warm); }
+.rs-card > strong { font-size: 15px; display: block; }
+.rs-card p { margin: 5px 0 7px; color: var(--soft); line-height: 1.8; }
+.rs-card small { color: var(--soft); font-size: 11.5px; }
+.rs-card .actions { margin-top: 8px; }
+.twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.metric-card { padding: 12px 14px; }
+.metric-card > strong { font-size: 12.5px; }
+.metric { color: var(--brand) !important; font-size: 22px !important; font-weight: 800; margin: 4px 0 !important; }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tiles .btn { justify-content: center; text-decoration: none; }
+.section-title { font-size: 17px; margin: 6px 0 10px; }
+.empty-note { font-size: 13px; }
+.trend { margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: end; height: 170px; padding: 14px 12px 8px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); position: relative; }
+.trend-col { display: grid; grid-template-rows: auto 1fr auto; justify-items: center; height: 100%; gap: 4px; }
+.trend-bar { align-self: end; width: 60%; min-height: 4px; background: var(--brand); border-radius: 6px 6px 0 0; }
+.trend-value { font-size: 10.5px; color: var(--soft); white-space: nowrap; }
+.trend-label { font-size: 11px; color: var(--soft); }
+.trend figcaption { grid-column: 1 / -1; font-size: 11px; color: var(--muted); text-align: center; }
+.rs-row-link { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 66px; padding: 11px 14px; text-decoration: none;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.rs-row-link > span:first-child { display: grid; gap: 3px; }
+.rs-row-link small { color: var(--soft); font-size: 12px; }
+.rs-row-link .end { color: var(--brand); font-size: 20px; }
+.module-card { border-radius: var(--radius); }
+.tasks-more { margin-top: 8px; width: 100%; }

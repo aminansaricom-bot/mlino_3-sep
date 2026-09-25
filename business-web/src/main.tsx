@@ -4,6 +4,7 @@ import { WorkspaceProvider } from './workspace';
 import { ChatSessionProvider } from './chat/session';
 import Shell from './shell/Shell';
 import './styles.css';
+import './roshan.css';
 
 createRoot(document.getElementById('root')!).render(<StrictMode><WorkspaceProvider><ChatSessionProvider><Shell /></ChatSessionProvider></WorkspaceProvider></StrictMode>);
 

@@ -22,11 +22,11 @@ export function NavIcon({ name }: { name: Key }) {
 }
 
 const ITEMS: readonly { key: Key; to?: string; label: string; tint: string }[] = [
-  { key: 'home', to: '/', label: 'امروز', tint: '#ddd3ff' },
-  { key: 'accounting', to: '/accounting', label: 'حسابداری', tint: '#fbd3ef' },
-  { key: 'inventory', to: '/inventory', label: 'انبار', tint: '#ffe3bf' },
-  { key: 'storefront', to: '/storefront', label: 'ویترین', tint: '#c9eefa' },
-  { key: 'more', label: 'همه', tint: '#e4e2ee' },
+  { key: 'home', to: '/', label: 'امروز', tint: '#E7F4EF' },
+  { key: 'accounting', to: '/accounting', label: 'حسابداری', tint: '#E7F4EF' },
+  { key: 'inventory', to: '/inventory', label: 'انبار', tint: '#E7F4EF' },
+  { key: 'storefront', to: '/storefront', label: 'ویترین', tint: '#E7F4EF' },
+  { key: 'more', label: 'همه', tint: '#E7F4EF' },
 ];
 
 export default function BottomBar({ active, onMore }: { active: string; onMore: () => void }) {
