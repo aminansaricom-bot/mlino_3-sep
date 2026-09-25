@@ -68,6 +68,28 @@ export function nextDemoTarget(current: Point | null, fix: Point): Point | null 
   return current ?? (validPoint(fix) ? fix : null);
 }
 
+/** How far the person may get from the sample businesses before they are laid out around them again. */
+export const DEMO_FOLLOW_METRES = 250;
+
+/** Metres between two points (haversine). */
+export function distanceMetres(a: Point, b: Point): number {
+  const dLat = radians(b[0] - a[0]);
+  const dLng = radians(b[1] - a[1]);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(radians(a[0])) * Math.cos(radians(b[0])) * Math.sin(dLng / 2) ** 2;
+  return 2 * EARTH_RADIUS_METRES * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+/**
+ * A later, better fix (GPS after the quick network one, or the person walking): the samples follow when the fix is
+ * more than DEMO_FOLLOW_METRES from where they were laid out, so a rough first position (often kilometres off)
+ * never leaves them behind. Small moves keep them still, so the person can walk up to one.
+ */
+export function followDemoTarget(current: Point | null, fix: Point, minMove = DEMO_FOLLOW_METRES): Point | null {
+  if (!validPoint(fix)) return current;
+  if (!current || distanceMetres(current, fix) > minMove) return fix;
+  return current;
+}
+
 export function reanchorDemoTarget(fix: Point | null): Point | null {
   return fix && validPoint(fix) ? fix : null;
 }

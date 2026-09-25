@@ -35,7 +35,7 @@ import { hiddenForLackOfPosition, promoteMatches, toDataFrame, withNearbyOffers 
 import NearbyAlerts, { alertsOn, refreshAlertLocation } from '../offers/NearbyAlerts';
 import { NEARBY_LABEL, RUNNER, callNative, inApp, onBackButton, onNative } from '../native/bridge';
 import Welcome, { shouldWelcome } from '../onboarding/Welcome';
-import { demoBanner, nextDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, validPoint, visibleDemoRecords, type Point } from '../demo/demoRelocation';
+import { demoBanner, followDemoTarget, nextDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, validPoint, visibleDemoRecords, type Point } from '../demo/demoRelocation';
 import { tr, numberLocale, msg, dir, noteLocation } from '../i18n';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
@@ -178,6 +178,8 @@ export default function RealPublicApp() {
       const next: Point = [coords.latitude, coords.longitude]; noteLocation(next[0], next[1]);
       if (demoBuildEnabled && !validPoint(next)) return;
       setMyPoint([next[0], next[1]]); setPoint([next[0], next[1]]);
+      // The quick first position can be kilometres off: the samples follow the precise one.
+      if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => followDemoTarget(current, next));
     }, () => undefined, { enableHighAccuracy: true, timeout: 30_000, maximumAge: 0 });
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => { refine(); const next: Point = [coords.latitude, coords.longitude]; noteLocation(next[0], next[1]); if (demoBuildEnabled && !validPoint(next)) { setLocating(false); setLocError('outside'); return; }
@@ -221,7 +223,7 @@ export default function RealPublicApp() {
       const next: Point = [coords.latitude, coords.longitude]; noteLocation(next[0], next[1]);
       if (!validPoint(next)) return;
       setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setPointLabel(msg('موقعیت زندهٔ من'));
-      if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => nextDemoTarget(current, next));
+      if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => followDemoTarget(current, next));
     }, () => undefined, { enableHighAccuracy: true, maximumAge: 5_000, timeout: 20_000 });
     return () => navigator.geolocation.clearWatch(watch);
   }, [overlay, demoBuildEnabled, demoEnabled, demoAnchor]);

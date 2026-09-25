@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PublicUiRecord } from '../publicExport/uiAdapter';
-import { demoBanner, nextDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, relocate,
+import { demoBanner, distanceMetres, followDemoTarget, nextDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, relocate,
   visibleDemoRecords, type Point } from './demoRelocation';
 
 const anchor: Point = [35.7575, 51.4098];
@@ -83,6 +83,17 @@ describe('K6D demo relocation', () => {
     expect(reanchorDemoTarget(null)).toBeNull();
     const item = record('test-demo-01', 35.7577, 51.41);
     expect(relocate([item], anchor, first)[0].coordinates).not.toEqual(relocate([item], anchor, later)[0].coordinates);
+  });
+
+  it('samples follow a better fix that is far away, and stay put for small moves', () => {
+    const rough: Point = [35.70, 51.40];            // quick network fix, ~3.3 km off
+    const gps: Point = [35.73, 51.40];
+    expect(Math.round(distanceMetres(rough, gps) / 100)).toBe(33);
+    expect(followDemoTarget(null, rough)).toBe(rough);
+    expect(followDemoTarget(rough, gps)).toBe(gps);
+    const step: Point = [35.7310, 51.40];           // ~110 m walked: they stay, so one can be reached
+    expect(followDemoTarget(gps, step)).toBe(gps);
+    expect(followDemoTarget(gps, [NaN, 0] as unknown as Point)).toBe(gps);
   });
 
   it('renders a persistent banner only in enabled mode', () => {
