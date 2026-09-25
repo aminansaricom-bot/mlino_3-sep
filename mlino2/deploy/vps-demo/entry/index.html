@@ -39,8 +39,8 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 @keyframes aura { 0%,100% { transform: scale(1); opacity: .75; } 50% { transform: scale(1.05); opacity: 1; } }
 .orb-float { position: absolute; inset: 6%; animation: bob 6s ease-in-out infinite; }
 @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
-/* The robot's images are violet/blue; one hue turn makes the neon ring and the eyes the brand's green-blue. */
-.orb-base, .eye img { filter: hue-rotate(-68deg) saturate(.85); }
+/* The robot's images are violet/blue; the filter below repaints them in one brand green by brightness (no blue left). */
+.orb-base, .eye img { filter: url(#mlino-green); }
 .orb-base { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; }
 .eye { position: absolute; width: 9.5%; height: 9.5%; margin: -4.75% 0 0 -4.75%; will-change: transform; }
 .eye-l { left: 35%; top: 53%; } .eye-r { left: 65%; top: 53%; }
@@ -114,6 +114,7 @@ footer .more { max-width: 520px; margin: 6px auto 0; font-size: 13px; }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="mlino-green" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.0404 0.1359 0.0137 0 0  0.1914 0.6437 0.0650 0 0  0.1276 0.4291 0.0433 0 0  0 0 0 1 0"/></filter></svg>
 <div class="wrap">
   <header>
     <a class="brand" href="/"><img src="/logo.png" alt="" width="34" height="34">ملینو</a>
