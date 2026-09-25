@@ -18,6 +18,7 @@ import { createHandler } from './app';
 import type { CoreDeps } from './core-routes';
 import { businessPlace } from './facts';
 import { seedDemoMembers } from './seed-demo-members';
+import { removeDemoRatings, seedDemoRatings } from './seed-demo-ratings';
 
 /**
  * Entry point of the MLINO API service. Runs from the Core build (/opt/mlino/core) so the panel's writes go
@@ -80,6 +81,15 @@ async function main(): Promise<void> {
   }
 
   const publishedPath = required('PUBLISHED_PATH');
+
+  // `node main.js seed-demo-ratings` gives the test businesses' published products sample ratings (synthetic test voters);
+  // `seed-demo-ratings remove` takes exactly those votes away again.
+  if (process.argv[2] === 'seed-demo-ratings') {
+    if (process.argv[3] === 'remove') console.log(`[mlino-api] demo ratings removed: ${await removeDemoRatings(chatDb)}`);
+    else { const out = await seedDemoRatings(chatDb, publishedPath, required('CATALOG_PATH')); console.log(`[mlino-api] demo ratings: ${out.added} added of ${out.planned}`); }
+    await core.end(); await chatDb.end();
+    return;
+  }
 
   let notify: { module: NotifyModule; publicKey: string } | undefined;
   let notifyDb: Pool | undefined;
