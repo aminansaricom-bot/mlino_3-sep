@@ -194,3 +194,9 @@
 .rs-search-mic.on { color: var(--bad); }
 .search-launch-mic { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 0; border-radius: 12px; background: none; color: var(--brand); cursor: pointer; }
 .search-launch-mic.on { color: var(--bad); background: var(--bad-soft); }
+/* «فضای من» icons (owner's kit): 24px inside a 44px rounded frame; title up to two lines, value and chevron never cut */
+.pm-ico { width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0; }
+.pm-row { gap: 12px; min-height: 56px; }
+.pm-label { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6; }
+.pm-value, .pm-chev { flex-shrink: 0; }
+.pm-avatar { width: 48px; height: 48px; flex-shrink: 0; }

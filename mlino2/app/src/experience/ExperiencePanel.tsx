@@ -11,6 +11,7 @@ import { CHAT_ENABLED, chatApi, type ChatConfig, type ChatPerson } from '../chat
 import { Login } from '../chat/ChatPanel';
 import { onBackButton } from '../native/bridge';
 import LiveIcon, { type LiveIconName } from '../live/icons';
+import SpaceIcon, { type SpaceIconName } from './MySpaceIcons';
 
 function coinCategory(record: RichUiRecord): V2BusinessCategory {
   const category = businessCategory(record);
@@ -42,9 +43,9 @@ interface Props {
 }
 
 /** One line of the menu: icon, label, a short value, and a chevron when it opens a submenu. */
-function Row({ icon, label, value, onClick, danger = false, opens = true }: { icon: LiveIconName; label: string; value?: string; onClick: () => void; danger?: boolean; opens?: boolean }) {
+function Row({ icon, space, label, value, onClick, danger = false, opens = true }: { icon?: LiveIconName; space?: SpaceIconName; label: string; value?: string; onClick: () => void; danger?: boolean; opens?: boolean }) {
   return <button type="button" className={`pm-row${danger ? ' danger' : ''}`} onClick={onClick}>
-    <span className="pm-ico" aria-hidden="true"><LiveIcon name={icon} size={20} /></span>
+    <span className="pm-ico" aria-hidden="true">{space ? <SpaceIcon name={space} /> : icon && <LiveIcon name={icon} size={22} />}</span>
     <span className="pm-label">{label}</span>
     {value && <span className="pm-value">{value}</span>}
     {opens && <span className="pm-chev" aria-hidden="true"><LiveIcon name="chevron-left" size={18} /></span>}
@@ -84,7 +85,7 @@ export default function ExperiencePanel({data, records, storageFailed, onClose, 
   const count = (n: number) => digits(String(n));
   const languageName = LOCALES.find((l) => l.id === locale())?.name ?? '';
   const collectionTitle: Record<Collection, string> = { saved: tr('مکان‌های من'), later: tr('بعداً ببینم'), liked: tr('مناسب من') };
-  const collectionIcon: Record<Collection, LiveIconName> = { saved: 'bookmark', later: 'clock', liked: 'heart' };
+  const collectionIcon: Record<Collection, SpaceIconName> = { saved: 'my-places', later: 'watch-later', liked: 'for-me' };
   const titles: Record<View, string> = {
     menu: tr('فضای من'), language: tr('زبان برنامه'), saved: collectionTitle.saved, later: collectionTitle.later, liked: collectionTitle.liked,
     discover: tr('یک کشف کوچک، به انتخاب تو'), steps: tr('قدم‌های کوچکِ کشف'), feedback: tr('صدا و لرزش'), hidden: tr('از کشف کنار گذاشته‌شده‌ها'), login: tr('ورود با شماره‌ی موبایل'),
@@ -101,7 +102,7 @@ export default function ExperiencePanel({data, records, storageFailed, onClose, 
 
       {view === 'menu' && <>
         {CHAT_ENABLED && <div className="pm-account">
-          <span className="pm-avatar" aria-hidden="true"><LiveIcon name="user" size={26} /></span>
+          <span className="pm-avatar" aria-hidden="true"><SpaceIcon name="account" /></span>
           <div className="pm-account-copy">
             <strong>{tr('حساب کاربری')}</strong>
             <small>{person === undefined ? tr('در حال بررسی…') : person ? `${tr('واردشده با …')}${digits(person.phoneHint)}${person.test ? tr(' (آزمایشی)') : ''}` : tr('هنوز وارد نشده‌ای.')}</small>
@@ -110,20 +111,20 @@ export default function ExperiencePanel({data, records, storageFailed, onClose, 
         </div>}
 
         <div className="pm-group">
-          <Row icon="globe" label={tr('زبان برنامه')} value={languageName} onClick={() => setView('language')} />
-          <Row icon={data.theme === 'dark' ? 'moon' : 'sun'} label={tr('ظاهر پنل‌ها')} value={data.theme === 'dark' ? tr('تیره') : tr('روشن')} opens={false}
+          <Row space="language" label={tr('زبان برنامه')} value={languageName} onClick={() => setView('language')} />
+          <Row space="appearance" label={tr('ظاهر پنل‌ها')} value={data.theme === 'dark' ? tr('تیره') : tr('روشن')} opens={false}
             onClick={() => onChange({...data, theme: data.theme === 'dark' ? 'light' : 'dark'})} />
-          <Row icon="volume" label={tr('صدا و لرزش')} value={data.sound || data.haptics ? tr('روشن') : tr('خاموش')} onClick={() => setView('feedback')} />
+          <Row space="sound-vibration" label={tr('صدا و لرزش')} value={data.sound || data.haptics ? tr('روشن') : tr('خاموش')} onClick={() => setView('feedback')} />
         </div>
 
         <div className="pm-group">
-          {(['saved', 'later', 'liked'] as const).map(key => <Row key={key} icon={collectionIcon[key]} label={collectionTitle[key]} value={count(inList(key).length)} onClick={() => setView(key)} />)}
+          {(['saved', 'later', 'liked'] as const).map(key => <Row key={key} space={collectionIcon[key]} label={collectionTitle[key]} value={count(inList(key).length)} onClick={() => setView(key)} />)}
           {inList('hidden').length > 0 && <Row icon="eye-off" label={tr('از کشف کنار گذاشته‌شده‌ها')} value={count(inList('hidden').length)} onClick={() => setView('hidden')} />}
         </div>
 
         <div className="pm-group">
-          <Row icon="sparkle" label={tr('یک کشف کوچک، به انتخاب تو')} onClick={() => setView('discover')} />
-          <Row icon="flag" label={tr('قدم‌های کوچکِ کشف')} value={tr('{0} از {1}', count(doneCount), count(tasks.length))} onClick={() => setView('steps')} />
+          <Row space="small-discovery" label={tr('یک کشف کوچک، به انتخاب تو')} onClick={() => setView('discover')} />
+          <Row space="discovery-steps" label={tr('قدم‌های کوچکِ کشف')} value={tr('{0} از {1}', count(doneCount), count(tasks.length))} onClick={() => setView('steps')} />
           <Row icon="info" label={tr('وضعیت فنی و داده‌ها')} opens={false} onClick={onDiagnostics} />
         </div>
 
