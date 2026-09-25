@@ -68,11 +68,11 @@ describe('K6D demo relocation', () => {
     }
   });
 
-  it('hides demo records before the first fix, while leaving real records visible', () => {
+  it('shows demo records in their own sample area before the first fix; «بستن نمونه‌ها» still hides them', () => {
     const demo = record('test-demo-01', 35.7577, 51.41);
     const real = record('real-business', 35.7578, 51.41);
     expect(visibleDemoRecords([demo, real], null)).toEqual([real]);
-    expect(presentationRecords([demo, real], true, anchor, null)).toEqual([real]);
+    expect(presentationRecords([demo, real], true, anchor, null)).toEqual([demo, real]);
   });
 
   it('anchors once, ignores later fixes, and explicit re-anchor moves to the latest fix', () => {

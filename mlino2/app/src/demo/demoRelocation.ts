@@ -59,7 +59,9 @@ export function presentationRecords(
   move: typeof relocate = relocate,
 ): readonly PublicUiRecord[] {
   if (!enabled) return records;
-  return target ? move(records, anchor, target) : visibleDemoRecords(records, null);
+  // Before the first location fix the sample businesses stay in their own area (labelled as samples), so there is
+  // always something to try; the first fix moves them around the person.
+  return target ? move(records, anchor, target) : [...records];
 }
 
 export function nextDemoTarget(current: Point | null, fix: Point): Point | null {
