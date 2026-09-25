@@ -31,7 +31,7 @@ export const SESSION_TTL_DAYS = 30;
 export type IdentityErrorCode =
   | 'PHONE_INVALID' | 'REAL_NUMBER_NEEDS_SMS' | 'TEST_NUMBER_NOT_ALLOWED' | 'RATE_LIMITED'
   | 'CHALLENGE_INVALID' | 'CODE_WRONG' | 'TOO_MANY_ATTEMPTS' | 'AUDIENCE_INVALID'
-  | 'SESSION_INVALID' | 'MEMBER_OF_ORGANIZATION' | 'SMS_FAILED';
+  | 'SESSION_INVALID' | 'MEMBER_OF_ORGANIZATION' | 'SMS_FAILED' | 'GOOGLE_TOKEN_INVALID' | 'GOOGLE_UNAVAILABLE';
 
 export class IdentityError extends Error {
   constructor(readonly code: IdentityErrorCode, message: string, readonly detail: Record<string, unknown> = {}) {
@@ -69,6 +69,8 @@ export interface SessionIdentity {
   readonly personId: string;
   readonly audience: Audience;
   readonly phoneHint: string;
+  /** Masked Google email («a•••@gmail.com») for a person who signed in with Google; absent otherwise. */
+  readonly emailHint?: string;
   readonly testIdentity: boolean;
 }
 
@@ -180,18 +182,54 @@ export class CoreIdentity {
          RETURNING id`,
         [crypto.randomUUID(), c.phone_digest, c.phone_hint, c.test_identity, now]);
       const personId = person.rows[0].id;
-
-      const token = crypto.randomBytes(32).toString('base64url');
-      const sessionId = crypto.randomUUID();
-      const expiresAt = new Date(now.getTime() + SESSION_TTL_DAYS * 86400_000);
-      await db.query(
-        `INSERT INTO core_identity.sessions (id, token_digest, person_id, audience, created_at, last_seen_at, expires_at)
-         VALUES ($1, $2, $3, $4, $5, $5, $6)`,
-        [sessionId, sha256(token), personId, audience, now, expiresAt]);
-      return { token, expiresAt, sessionId, personId, audience, phoneHint: c.phone_hint, testIdentity: c.test_identity };
+      const opened = await this.openSession(db, personId, audience, now);
+      return { ...opened, personId, audience, phoneHint: c.phone_hint, testIdentity: c.test_identity };
     });
     if (outcome instanceof IdentityError) throw outcome;
     return outcome;
+  }
+
+  /**
+   * Sign-in with Google (D-90), after the token was checked by the Google verifier. Only an HMAC of Google's subject
+   * id and a masked email are kept; the person is a Core person like any other (sessions per audience, D-66/D-70).
+   * A Google person has no phone number, so it is a separate person from a phone login until linking exists.
+   */
+  async loginWithGoogle(input: { subject: string; emailHint: string; audience: string }): Promise<VerifiedLogin> {
+    const audience = this.checkAudience(input.audience);
+    if (!input.subject) throw new IdentityError('GOOGLE_TOKEN_INVALID', 'missing subject');
+    const emailHint = String(input.emailHint).slice(0, 64);
+    return this.tx(async (db) => {
+      const now = this.now();
+      const digest = this.hmac(`google:${input.subject}`);
+      const found = await db.query<{ person_id: string }>(
+        "SELECT person_id FROM core_identity.external_logins WHERE provider = 'google' AND subject_digest = $1 FOR UPDATE", [digest]);
+      let personId = found.rows[0]?.person_id;
+      if (personId) {
+        await db.query("UPDATE core_identity.external_logins SET last_login_at = $2 WHERE provider = 'google' AND subject_digest = $1", [digest, now]);
+        await db.query('UPDATE core_identity.persons SET last_login_at = $2, email_hint = $3 WHERE id = $1', [personId, now, emailHint]);
+      } else {
+        personId = crypto.randomUUID();
+        await db.query(
+          `INSERT INTO core_identity.persons (id, phone_digest, phone_hint, email_hint, test_identity, created_at, last_login_at)
+           VALUES ($1, NULL, '', $2, false, $3, $3)`, [personId, emailHint, now]);
+        await db.query(
+          "INSERT INTO core_identity.external_logins (provider, subject_digest, person_id, created_at, last_login_at) VALUES ('google', $1, $2, $3, $3)",
+          [digest, personId, now]);
+      }
+      const opened = await this.openSession(db, personId, audience, now);
+      return { ...opened, personId, audience, phoneHint: '', emailHint, testIdentity: false };
+    });
+  }
+
+  private async openSession(db: PoolClient, personId: string, audience: Audience, now: Date): Promise<{ token: string; expiresAt: Date; sessionId: string }> {
+    const token = crypto.randomBytes(32).toString('base64url');
+    const sessionId = crypto.randomUUID();
+    const expiresAt = new Date(now.getTime() + SESSION_TTL_DAYS * 86400_000);
+    await db.query(
+      `INSERT INTO core_identity.sessions (id, token_digest, person_id, audience, created_at, last_seen_at, expires_at)
+       VALUES ($1, $2, $3, $4, $5, $5, $6)`,
+      [sessionId, sha256(token), personId, audience, now, expiresAt]);
+    return { token, expiresAt, sessionId };
   }
 
   /** Identity only (D-66). Returns null for anything that is not a live session of this audience. */
@@ -199,8 +237,8 @@ export class CoreIdentity {
     if (!token || token.length > 100) return null;
     const aud = this.checkAudience(audience);
     const now = this.now();
-    const r = await this.pool.query<{ id: string; person_id: string; phone_hint: string; test_identity: boolean; last_seen_at: Date }>(
-      `SELECT s.id, s.person_id, p.phone_hint, p.test_identity, s.last_seen_at
+    const r = await this.pool.query<{ id: string; person_id: string; phone_hint: string; email_hint: string | null; test_identity: boolean; last_seen_at: Date }>(
+      `SELECT s.id, s.person_id, p.phone_hint, p.email_hint, p.test_identity, s.last_seen_at
          FROM core_identity.sessions s JOIN core_identity.persons p ON p.id = s.person_id
         WHERE s.token_digest = $1 AND s.audience = $2 AND s.closed_at IS NULL AND s.expires_at > $3`,
       [sha256(token), aud, now]);
@@ -209,7 +247,7 @@ export class CoreIdentity {
     if (now.getTime() - new Date(s.last_seen_at).getTime() > 5 * 60_000) {
       await this.pool.query('UPDATE core_identity.sessions SET last_seen_at = $2 WHERE id = $1', [s.id, now]);
     }
-    return { sessionId: s.id, personId: s.person_id, audience: aud, phoneHint: s.phone_hint, testIdentity: s.test_identity };
+    return { sessionId: s.id, personId: s.person_id, audience: aud, phoneHint: s.phone_hint, ...(s.email_hint ? { emailHint: s.email_hint } : {}), testIdentity: s.test_identity };
   }
 
   async closeSession(sessionId: string, reason = 'logout'): Promise<void> {
@@ -402,6 +440,19 @@ CREATE TABLE IF NOT EXISTS core_identity.device_keys (
   revoked_at      timestamptz
 );
 CREATE INDEX IF NOT EXISTS device_key_person_idx ON core_identity.device_keys (person_id, organization_id);
+-- D-90: a person may sign in with Google instead of a phone (no phone digest then); only an HMAC of Google's
+-- subject id is kept, and a masked email as the hint.
+ALTER TABLE core_identity.persons ALTER COLUMN phone_digest DROP NOT NULL;
+ALTER TABLE core_identity.persons ADD COLUMN IF NOT EXISTS email_hint varchar(64);
+CREATE TABLE IF NOT EXISTS core_identity.external_logins (
+  provider       varchar(16) NOT NULL CHECK (provider IN ('google')),
+  subject_digest bytea NOT NULL,
+  person_id      uuid NOT NULL REFERENCES core_identity.persons(id) ON DELETE CASCADE,
+  created_at     timestamptz NOT NULL,
+  last_login_at  timestamptz,
+  PRIMARY KEY (provider, subject_digest)
+);
+CREATE INDEX IF NOT EXISTS external_login_person_idx ON core_identity.external_logins (person_id);
 CREATE TABLE IF NOT EXISTS core_identity.erasure_log (
   ref       uuid PRIMARY KEY,
   erased_at timestamptz NOT NULL,

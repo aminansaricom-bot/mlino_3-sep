@@ -11,6 +11,7 @@ import { RatingError, type RatingsModule } from '../../ratings';
 import { PLAN_LIMITS, planOf } from '../../core/plan-service';
 import type { AutoResolver } from '../../chat';
 import { NotifyError, type NotifyModule } from '../../notify';
+import { type GoogleVerifier, maskEmail } from '../../identity/google';
 
 /**
  * MLINO API — Core identity routes (/api/auth/*) and the chat module's routes
@@ -48,6 +49,8 @@ export interface ApiDeps {
   readonly notify?: { module: NotifyModule; publicKey: string };
   /** Product ratings (D-84). Absent = routes off. */
   readonly ratings?: RatingsModule;
+  /** Sign-in with Google (D-90). Absent until the owner sets a Google client ID. */
+  readonly google?: GoogleVerifier;
 }
 
 class HttpError extends Error {
@@ -177,7 +180,7 @@ export function createHandler(deps: ApiDeps) {
 
       // ── Core identity ──
       if (path === '/api/auth/config' && method === 'GET') {
-        return send(res, 200, { delivery: identity.deliveryMode, testNumbers: identity.testNumbersAllowed ? { from: '09000000001', to: '09000000099' } : null, audience });
+        return send(res, 200, { delivery: identity.deliveryMode, testNumbers: identity.testNumbersAllowed ? { from: '09000000001', to: '09000000099' } : null, audience, google: deps.google?.clientId ?? null });
       }
       if (path === '/api/auth/otp/start' && method === 'POST') {
         limit(`otp:${clientAddress(req)}`, 10, 10 * 60_000);
@@ -192,9 +195,19 @@ export function createHandler(deps: ApiDeps) {
         const maxAge = Math.floor((login.expiresAt.getTime() - Date.now()) / 1000);
         return send(res, 200, { person: { phoneHint: login.phoneHint, test: login.testIdentity } }, { 'set-cookie': sessionCookie(login.token, maxAge, config.cookieSecure) });
       }
+      if (path === '/api/auth/google' && method === 'POST') {
+        if (!deps.google) throw new HttpError(404, 'NOT_FOUND');
+        limit(`google:${clientAddress(req)}`, 20, 10 * 60_000);
+        const body = await readJson(req);
+        const claims = await deps.google.verify(String(body.credential ?? ''));
+        const login = await identity.loginWithGoogle({ subject: claims.sub, emailHint: maskEmail(claims.email), audience });
+        if (session) await identity.closeSession(session.sessionId, 'replaced');
+        const maxAge = Math.floor((login.expiresAt.getTime() - Date.now()) / 1000);
+        return send(res, 200, { person: { phoneHint: '', emailHint: login.emailHint, test: false } }, { 'set-cookie': sessionCookie(login.token, maxAge, config.cookieSecure) });
+      }
       if (path === '/api/auth/me' && method === 'GET') {
         if (!session) return send(res, 200, { person: null });
-        const base = { phoneHint: session.phoneHint, test: session.testIdentity };
+        const base = { phoneHint: session.phoneHint, ...(session.emailHint ? { emailHint: session.emailHint } : {}), test: session.testIdentity };
         if (audience !== 'business') return send(res, 200, { person: base });
         const pub = published();
         const orgs = (await identity.memberships(session.personId)).map((m) => ({
@@ -431,7 +444,7 @@ export function createHandler(deps: ApiDeps) {
       if (e instanceof NotifyError) return send(res, 400, { error: e.code });
       if (e instanceof CoreDomainError) return send(res, coreErrorStatus(e), { error: e.code, message: e.code === 'PLAN_LIMIT' ? e.message : undefined });
       if (e instanceof IdentityError) {
-        const status = e.code === 'RATE_LIMITED' || e.code === 'TOO_MANY_ATTEMPTS' ? 429 : e.code === 'MEMBER_OF_ORGANIZATION' ? 409 : e.code === 'SMS_FAILED' ? 503 : 400;
+        const status = e.code === 'RATE_LIMITED' || e.code === 'TOO_MANY_ATTEMPTS' ? 429 : e.code === 'MEMBER_OF_ORGANIZATION' ? 409 : e.code === 'SMS_FAILED' || e.code === 'GOOGLE_UNAVAILABLE' ? 503 : 400;
         return send(res, status, { error: e.code, ...e.detail });
       }
       if (e instanceof RatingError) return send(res, 400, { error: e.code });

@@ -2,6 +2,7 @@ import http from 'node:http';
 import { Pool } from 'pg';
 import webpush from 'web-push';
 import { CoreIdentity, IDENTITY_SCHEMA_SQL, testDelivery, type Audience } from '../../identity';
+import { googleVerifier } from '../../identity/google';
 import { smsIrDelivery } from '../../identity/smsir';
 import { CHAT_PERMISSION, CHAT_SCHEMA_SQL, ChatModule } from '../../chat';
 import { NOTIFY_SCHEMA_SQL, NotifyModule, type Sender } from '../../notify';
@@ -42,6 +43,7 @@ import { removeDemoRatings, seedDemoRatings } from './seed-demo-ratings';
  *   CATALOG_PATH        public-catalog.v1.json (published catalog for the chat auto-reply)
  *   API_PORT            default 8741, bound to 127.0.0.1
  *   COOKIE_SECURE       1 in production
+ *   GOOGLE_CLIENT_ID    optional: the owner's Google OAuth web client ID; turns on «ورود با گوگل» (D-90)
  *
  * `node main.js seed-demo-members 09000000090` makes that test identity a member of every fictional
  * test-demo-* organization with chat.reply, offer.manage, publication.manage and plan.manage.
@@ -132,10 +134,11 @@ async function main(): Promise<void> {
   const members = { prisma, identity, memberships: new MembershipService(prisma), grants: new PermissionGrantService(prisma, undefined, [CHAT_PERMISSION]) };
   // Products and storefront; photos only when the media store the export reads is configured.
   const catalog = { prisma, catalog: new CatalogItemService(prisma), profiles: new BusinessProfileService(prisma), publications: coreDeps.publications, mediaStore: process.env.MEDIA_STORE_DIR || undefined };
-  const handler = createHandler({ identity, chat, core: coreDeps, members, catalog, notify, ratings, config: { hosts, cookieSecure: process.env.COOKIE_SECURE === '1', publishedPath, catalogPath: process.env.CATALOG_PATH } });
+  const google = process.env.GOOGLE_CLIENT_ID ? googleVerifier({ clientId: process.env.GOOGLE_CLIENT_ID }) : undefined;
+  const handler = createHandler({ identity, chat, core: coreDeps, members, catalog, notify, ratings, google, config: { hosts, cookieSecure: process.env.COOKIE_SECURE === '1', publishedPath, catalogPath: process.env.CATALOG_PATH } });
   const server = http.createServer((req, res) => { void handler(req, res); });
   const port = Number(process.env.API_PORT ?? 8741);
-  server.listen(port, '127.0.0.1', () => console.log(`[mlino-api] listening on 127.0.0.1:${port}, OTP delivery: ${delivery}, notifications: ${notify ? 'on' : 'off'}`));
+  server.listen(port, '127.0.0.1', () => console.log(`[mlino-api] listening on 127.0.0.1:${port}, OTP delivery: ${delivery}, notifications: ${notify ? 'on' : 'off'}, google: ${google ? 'on' : 'off'}`));
 
   const sweep = async () => {
     try {
