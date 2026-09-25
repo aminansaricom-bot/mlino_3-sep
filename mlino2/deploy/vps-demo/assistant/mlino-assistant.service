@@ -1,0 +1,33 @@
+[Unit]
+Description=MLINO V2 assistant gateway (search text to intent JSON; key stays on the server)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# No fixed account: systemd makes a throwaway user; the key file reaches it only as a read-only credential.
+DynamicUser=yes
+LoadCredential=keys:/etc/mlino/assistant-keys.txt
+Environment=MLINO_ASSISTANT_KEY_FILE=%d/keys
+Environment=MLINO_ASSISTANT_HOST=127.0.0.1
+Environment=MLINO_ASSISTANT_PORT=8787
+Environment=MLINO_ASSISTANT_DAILY_LIMIT=2000
+ExecStart=/usr/bin/node /opt/mlino/assistant/server.mjs
+Restart=on-failure
+RestartSec=5
+# Hardening: read-only system, no writes anywhere, no privilege changes, small memory ceiling.
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryMax=192M
+
+[Install]
+WantedBy=multi-user.target
