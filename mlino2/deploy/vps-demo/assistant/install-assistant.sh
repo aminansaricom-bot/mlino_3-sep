@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Installs the V2 assistant gateway on the demo VPS. Run as root ON THE VPS, only after the owner has:
-#   1. approved sending search text to CodeCraft for the demo (U-G1), and
+#   1. approved sending search text and the entry-page conversation to CodeCraft for the demo (U-G1), and
 #   2. put the CodeCraft key(s) in /etc/mlino/assistant-keys.txt (root:root, mode 600; lines starting with cc_).
 # The gateway files (server.mjs, assistantCore.mjs) must already be in /tmp/mlino-assistant/.
 # The key is never printed: this script only checks that the file exists and has the right mode.
@@ -34,8 +34,16 @@ block = re.compile(r'handle /assistant/\* \{\s*respond 404\s*\}')
 m = block.search(t, site)
 if not m: sys.exit('assistant block not found in explore.mlino.site')
 t = t[:m.start()] + 'handle /assistant/* {\n        reverse_proxy 127.0.0.1:8787\n    }' + t[m.end():]
+# The entry page (app.mlino.site) talks to the same gateway at /assistant/guide; everything else stays the static page.
+app = t.index('app.mlino.site {')
+spa = '    try_files {path} /index.html\n    file_server\n'
+at = t.find(spa, app)
+if at < 0: sys.exit('app.mlino.site static block not found')
+if t.find('handle /assistant/guide', app, at + len(spa) + 400) < 0:
+    t = (t[:at] + '    handle /assistant/guide {\n        reverse_proxy 127.0.0.1:8787\n    }\n'
+         + '    handle {\n        try_files {path} /index.html\n        file_server\n    }\n' + t[at + len(spa):])
 open(p, 'w', encoding='utf-8').write(t)
 PY
 caddy validate --config "$CADDY" --adapter caddyfile >/dev/null
 systemctl reload caddy
-echo "assistant routed; rebuild V2 with VITE_ASSISTANT_REMOTE=1 to use it"
+echo "assistant routed (explore /assistant/*, app /assistant/guide); rebuild V2 with VITE_ASSISTANT_REMOTE=1 to use it in the app"
