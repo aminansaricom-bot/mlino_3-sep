@@ -545,4 +545,28 @@ export const TR: Readonly<Record<string, string>> = {
   // Voice and photo in search (2026-09-26)
   'در حال شنیدن…': 'Dinleniyor…',
   'جست‌وجو با صدا': 'Sesle ara',
+
+  // Melino in the search page (2026-09-26)
+  'دارم نگاه می‌کنم…': 'Bir bakayım…',
+  'دنبال چی می‌گردی؟ بنویس یا بگو تا کمکت کنم.': 'Ne arıyorsun? Yaz ya da söyle, yardım edeyim.',
+  'بستن پیام ملینو': 'Melino\'nun mesajını kapat',
+  'پرسیدن از ملینو دربارهٔ «{0}»': 'Melino\'ya “{0}” hakkında sor',
+  'ملینو، دستیار جست‌وجو': 'Melino, arama asistanı',
+  'از یک محصول عکس بگیر تا مشابهش را در کسب‌وکارهای ملینو پیدا کنم.': 'Bir ürünün fotoğrafını çek, MLINO işletmelerinde benzerlerini bulayım.',
+  'در ویترین زنده گوشی را به اطراف بگیر تا کسب‌وکارها و محصولات نزدیک را ببینی.': 'Canlı vitrinde telefonu etrafa çevir, yakındaki işletme ve ürünleri gör.',
+  'می‌توانی با صدا بپرسی؛ مثلاً «کافه‌ی باز نزدیک من».': 'Sesle sorabilirsin; örneğin “yakınımda açık bir kafe”.',
+  'آفرهای فعال نزدیکت را یک‌جا ببین.': 'Yakınındaki aktif teklifleri tek yerde gör.',
+  'دیدن آفرها': 'Teklifleri gör',
+  'با هر کسب‌وکار می‌توانی مستقیم گفتگو کنی؛ شماره‌ات به او نشان داده نمی‌شود.': 'Her işletmeyle doğrudan yazışabilirsin; numaran ona gösterilmez.',
+  'محصولی را که دوست داری ذخیره کن تا بعداً راحت پیدایش کنی.': 'Beğendiğin ürünleri kaydet, sonra kolayca bul.',
+  'سلام! من ملینو هستم. دنبال چی می‌گردی؟ بنویس یا بگو تا کمکت کنم.': 'Merhaba! Ben Melino. Ne arıyorsun? Yaz ya da söyle, yardım edeyim.',
+  'دنبال چی می‌گردی؟': 'Ne arıyorsun?',
+  'بگو چی لازم داری تا نزدیک‌ترینش را پیدا کنیم.': 'Neye ihtiyacın olduğunu söyle, en yakınını bulalım.',
+  'برای «{0}» چیزی پیدا نکردم. ساده‌تر بنویس یا با عکس بگرد.': '“{0}” için bir şey bulamadım. Daha basit yaz ya da fotoğrafla ara.',
+  'برای «{0}»، {1} کسب‌وکار و {2} محصول پیدا کردم. برای پاسخ کامل‌تر روی من بزن.': '“{0}” için {1} işletme ve {2} ürün buldum. Daha ayrıntılı cevap için bana dokun.',
+  'کمی ساده‌تر بنویس یا روی ربات ملینو بزن تا کمکت کند.': 'Daha basit yaz ya da yardım için robot Melino\'ya dokun.',
+
+  // Melino in the search page (2026-09-26)
+  'نزدیک‌ترینش «{0}» است، {1} از تو.': 'En yakını “{0}”, sana {1} uzaklıkta.',
+  '«{0}» را پیشنهاد می‌کنم.': '“{0}” öneririm.',
 };

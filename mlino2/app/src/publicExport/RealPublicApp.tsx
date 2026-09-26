@@ -35,6 +35,7 @@ import SavedPage from '../pages/SavedPage';
 import SearchPage from '../pages/SearchPage';
 import CameraIntro from '../pages/CameraIntro';
 import MicIcon from '../design/MicIcon';
+import { MelinoOrb } from '../assistant/MelinoBuddy';
 import '../design/app.css';
 import { hiddenForLackOfPosition, promoteMatches, toDataFrame, withNearbyOffers } from '../offers/nearbyOffers';
 import NearbyAlerts, { alertsOn, refreshAlertLocation } from '../offers/NearbyAlerts';
@@ -343,7 +344,7 @@ export default function RealPublicApp() {
       <button type="button" className="search-launch-btn" onClick={() => setSearchOpen(true)} aria-label={tr('جست‌وجو یا پرسش از دستیار')}>
         <span className="search-icon" aria-hidden="true"><LiveIcon name="search" size={20} /></span>
         <span className={query ? 'search-launch-q' : 'search-launch-ph'}>{query || tr('چی می‌خوای؟')}</span>
-        <span className="search-launch-spark" aria-hidden="true">✦</span>
+        <span className="search-launch-buddy"><MelinoOrb size={36} track={false} /></span>
       </button>
       {visualOn && <button type="button" className="search-launch-photo" onClick={() => setVisual({ initial: null })} aria-label={tr('جست‌وجو با عکس')} title={tr('جست‌وجو با عکس')}><LiveIcon name="photo-search" size={22} /></button>}
       {voiceInput.supported && <button type="button" className={`search-launch-mic${voiceInput.listening ? ' on' : ''}`} aria-pressed={voiceInput.listening}
@@ -412,6 +413,7 @@ export default function RealPublicApp() {
       assistant={assistant} ranked={assistantResults} records={allRecords.filter((r) => !experience.data.hidden.includes(r.id))} catalogByOrg={catalogByOrg}
       now={now} distanceById={assistantDistances} voice={{ supported: voiceInput.supported, listening: voiceInput.listening, onMic: micPress }}
       onPhoto={visualOn ? () => setVisual({ initial: null }) : undefined}
+      onLive={() => { setSearchOpen(false); setOverlay('vitrine'); }} onOffers={() => { setSearchOpen(false); setTab('offers'); }} onSaved={() => { setSearchOpen(false); setTab('saved'); }}
       onOpenBusiness={openDetail} onOpenItem={openProduct} onClose={() => setSearchOpen(false)}
       onShowMap={() => { setSearchOpen(false); setTab('discover'); setSheet('half'); }} />}
     {pendingAsk && <AssistantConsent remote={ASSISTANT_REMOTE} onAccept={() => { const voice = pendingAsk.voice && !pendingAsk.query; decideConsent('granted'); if (voice) voiceInput.start(); }}

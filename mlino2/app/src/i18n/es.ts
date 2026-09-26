@@ -545,4 +545,28 @@ export const ES: Readonly<Record<string, string>> = {
   // Voice and photo in search (2026-09-26)
   'در حال شنیدن…': 'Escuchando…',
   'جست‌وجو با صدا': 'Buscar por voz',
+
+  // Melino in the search page (2026-09-26)
+  'دارم نگاه می‌کنم…': 'Déjame mirar…',
+  'دنبال چی می‌گردی؟ بنویس یا بگو تا کمکت کنم.': '¿Qué buscas? Escríbelo o dilo y te ayudo.',
+  'بستن پیام ملینو': 'Cerrar el mensaje de Melino',
+  'پرسیدن از ملینو دربارهٔ «{0}»': 'Preguntar a Melino por «{0}»',
+  'ملینو، دستیار جست‌وجو': 'Melino, asistente de búsqueda',
+  'از یک محصول عکس بگیر تا مشابهش را در کسب‌وکارهای ملینو پیدا کنم.': 'Haz una foto de un producto y encontraré similares en los negocios de MLINO.',
+  'در ویترین زنده گوشی را به اطراف بگیر تا کسب‌وکارها و محصولات نزدیک را ببینی.': 'En el escaparate en vivo, apunta el móvil a tu alrededor para ver negocios y productos cercanos.',
+  'می‌توانی با صدا بپرسی؛ مثلاً «کافه‌ی باز نزدیک من».': 'Puedes preguntar por voz, p. ej. «una cafetería abierta cerca».',
+  'آفرهای فعال نزدیکت را یک‌جا ببین.': 'Mira las ofertas activas cerca de ti en un solo lugar.',
+  'دیدن آفرها': 'Ver ofertas',
+  'با هر کسب‌وکار می‌توانی مستقیم گفتگو کنی؛ شماره‌ات به او نشان داده نمی‌شود.': 'Puedes chatear directamente con cualquier negocio; no ven tu número.',
+  'محصولی را که دوست داری ذخیره کن تا بعداً راحت پیدایش کنی.': 'Guarda los productos que te gusten para encontrarlos luego.',
+  'سلام! من ملینو هستم. دنبال چی می‌گردی؟ بنویس یا بگو تا کمکت کنم.': '¡Hola! Soy Melino. ¿Qué buscas? Escríbelo o dilo y te ayudo.',
+  'دنبال چی می‌گردی؟': '¿Qué buscas?',
+  'بگو چی لازم داری تا نزدیک‌ترینش را پیدا کنیم.': 'Dime qué necesitas y encontramos lo más cercano.',
+  'برای «{0}» چیزی پیدا نکردم. ساده‌تر بنویس یا با عکس بگرد.': 'No encontré nada para «{0}». Escribe más simple o busca con una foto.',
+  'برای «{0}»، {1} کسب‌وکار و {2} محصول پیدا کردم. برای پاسخ کامل‌تر روی من بزن.': 'Para «{0}» encontré {1} negocios y {2} productos. Tócame para una respuesta más completa.',
+  'کمی ساده‌تر بنویس یا روی ربات ملینو بزن تا کمکت کند.': 'Escribe más simple o toca al robot Melino para que te ayude.',
+
+  // Melino in the search page (2026-09-26)
+  'نزدیک‌ترینش «{0}» است، {1} از تو.': 'Lo más cercano es «{0}», a {1} de ti.',
+  '«{0}» را پیشنهاد می‌کنم.': 'Te sugiero «{0}».',
 };

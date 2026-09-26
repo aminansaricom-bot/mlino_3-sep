@@ -3,7 +3,8 @@ import type { PublicUiRecord } from '../publicExport/uiAdapter';
 import type { CatalogItem, CatalogRecord } from '../publicExport/catalog';
 import { CatalogImage, catalogPrice } from '../publicExport/catalogCards';
 import type { AssistantAnswer } from '../assistant/assistantIntent';
-import { normalizeFa } from '../assistant/assistantIntent';
+import { localIntent, normalizeFa } from '../assistant/assistantIntent';
+import MelinoBuddy from '../assistant/MelinoBuddy';
 import type { RankedResult } from '../assistant/rankRecords';
 import { activeOffersFor, offerPriceLabel } from '../ar/ArGlassCard';
 import { offerUntil } from '../components/PublicBusinessDetails';
@@ -29,6 +30,8 @@ export default function SearchPage(p: {
   voice?: { supported: boolean; listening: boolean; onMic: () => void };
   /** «جست‌وجو با عکس» (only when the server has visual search). */
   onPhoto?: () => void;
+  /** Where Melino's tips lead (the robot offers only what exists here). */
+  onLive?: () => void; onOffers?: () => void; onSaved?: () => void;
   onOpenBusiness: (id: string) => void; onOpenItem: (organizationId: string, item: CatalogItem) => void; onShowMap: () => void; onClose: () => void;
 }) {
   const [tab, setTab] = useState<Tab>('businesses');
@@ -39,7 +42,9 @@ export default function SearchPage(p: {
   // With an assistant answer, its Persian keywords widen the match («coffee» → قهوه، اسپرسو…); otherwise the words typed.
   const words = useMemo(() => {
     const own = q ? [q] : [];
-    const asked = p.assistant?.answer && p.assistant.query.trim() === p.query.trim() ? p.assistant.answer.intent.keywords.map(normalizeFa) : [];
+    // The assistant's words when it was asked; otherwise the phone's own understanding («قهوه» → اسپرسو، لاته…), no network.
+    const asked = p.assistant?.answer && p.assistant.query.trim() === p.query.trim() ? p.assistant.answer.intent.keywords.map(normalizeFa)
+      : q.length >= 2 ? localIntent(p.query).intent.keywords.map(normalizeFa) : [];
     return [...new Set([...own, ...asked])].filter((w) => w.length >= 2);
   }, [q, p.assistant, p.query]);
   const hits = (text: string) => { const t = normalizeFa(text); return words.some((w) => t.includes(w)); };
@@ -75,7 +80,6 @@ export default function SearchPage(p: {
         {p.voice?.supported && <button type="button" className={`rs-search-mic${p.voice.listening ? ' on' : ''}`} aria-pressed={p.voice.listening}
           aria-label={p.voice.listening ? tr('توقف شنیدن') : tr('پرسیدن با صدا')} onClick={p.voice.onMic}><MicIcon size={26} /></button>}
         {p.onPhoto && <button type="button" className="rs-search-photo" aria-label={tr('جست‌وجو با عکس')} title={tr('جست‌وجو با عکس')} onClick={p.onPhoto}><LiveIcon name="photo-search" size={24} /></button>}
-        <button type="submit" className="rs-search-ask" aria-label={tr('پرسیدن از دستیار')} disabled={p.query.trim().length < 2}>✦</button>
       </form>
       <Segmented label={tr('نوع نتیجه')} value={tab} onChange={setTab} options={[
         { id: 'businesses', label: tr('کسب‌وکارها'), count: words.length ? counts.businesses : undefined },
@@ -84,13 +88,13 @@ export default function SearchPage(p: {
       ]} />
 
       {answer && <div className="rs-card tint rs-answer" aria-live="polite">
-        <strong><span className="rs-spark" aria-hidden="true">✦</span> {tr('پاسخ دستیار ملینو')}</strong>
+        <strong>{tr('پاسخ دستیار ملینو')}</strong>
         {answer.loading ? <Skeleton lines={2} /> : <p>{answer.answer?.answer}</p>}
         {!answer.loading && <small>{tr('بر پایه‌ی اطلاعات ثبت‌شده‌ی کسب‌وکارها')} · {answer.answer?.source === 'ai' ? tr('هوش مصنوعی') : tr('پردازش محلی')}</small>}
       </div>}
 
       {!words.length ? <EmptyState title={tr('چی می‌خوای پیدا کنی؟')} text={tr('نام محصول، کسب‌وکار یا نیازت را بنویس؛ مثلاً «قهوه نزدیک من».')} />
-        : counts[tab] === 0 ? <EmptyState title={tr('با این جست‌وجو یا فیلترها چیزی پیدا نشد.')} text={tr('کمی ساده‌تر بنویس یا از دستیار بپرس.')} />
+        : counts[tab] === 0 ? <EmptyState title={tr('با این جست‌وجو یا فیلترها چیزی پیدا نشد.')} text={tr('کمی ساده‌تر بنویس یا روی ربات ملینو بزن تا کمکت کند.')} />
         : <div className="rs-list">
           {tab === 'businesses' && businesses.map((r) => {
             const thumb = businessThumb(p.catalogByOrg.get(r.id));
@@ -114,5 +118,14 @@ export default function SearchPage(p: {
         </div>}
       {words.length > 0 && counts.businesses > 0 && <Button wide variant="secondary" icon="map" onClick={p.onShowMap}>{tr('نمایش روی نقشه')}</Button>}
     </div>
+    <MelinoBuddy query={p.query} counts={words.length ? { businesses: counts.businesses, products: counts.products } : null}
+      answer={answer ? { loading: answer.loading, text: answer.answer?.answer ?? null } : null} onAsk={p.onAsk} input={input}
+      best={businesses[0] ? (() => {
+        const r = businesses[0]; const d = distance(r.id); const name = clean(r.name);
+        return { line: Number.isFinite(d) ? tr('نزدیک‌ترینش «{0}» است، {1} از تو.', name, formatDistance(d)) : tr('«{0}» را پیشنهاد می‌کنم.', name),
+          label: tr('دیدن {0}', name), open: () => p.onOpenBusiness(r.id) };
+      })() : null}
+      actions={{ ...(p.onPhoto ? { photo: p.onPhoto } : {}), ...(p.voice?.supported ? { voice: p.voice.onMic } : {}),
+        ...(p.onLive ? { live: p.onLive } : {}), ...(p.onOffers ? { offers: p.onOffers } : {}), ...(p.onSaved ? { saved: p.onSaved } : {}) }} />
   </section>;
 }

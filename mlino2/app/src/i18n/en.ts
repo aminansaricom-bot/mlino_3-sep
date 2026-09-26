@@ -587,4 +587,28 @@ export const EN: Readonly<Record<string, string>> = {
   // Voice and photo in search (2026-09-26)
   'در حال شنیدن…': 'Listening…',
   'جست‌وجو با صدا': 'Search by voice',
+
+  // Melino in the search page (2026-09-26)
+  'دارم نگاه می‌کنم…': 'Let me look…',
+  'دنبال چی می‌گردی؟ بنویس یا بگو تا کمکت کنم.': 'What are you looking for? Type or say it and I\'ll help.',
+  'بستن پیام ملینو': 'Close Melino\'s message',
+  'پرسیدن از ملینو دربارهٔ «{0}»': 'Ask Melino about “{0}”',
+  'ملینو، دستیار جست‌وجو': 'Melino, search assistant',
+  'از یک محصول عکس بگیر تا مشابهش را در کسب‌وکارهای ملینو پیدا کنم.': 'Take a photo of a product and I\'ll find similar ones at MLINO businesses.',
+  'در ویترین زنده گوشی را به اطراف بگیر تا کسب‌وکارها و محصولات نزدیک را ببینی.': 'In the live storefront, point your phone around to see nearby businesses and products.',
+  'می‌توانی با صدا بپرسی؛ مثلاً «کافه‌ی باز نزدیک من».': 'You can ask by voice, e.g. “an open café near me”.',
+  'آفرهای فعال نزدیکت را یک‌جا ببین.': 'See the active offers near you in one place.',
+  'دیدن آفرها': 'See offers',
+  'با هر کسب‌وکار می‌توانی مستقیم گفتگو کنی؛ شماره‌ات به او نشان داده نمی‌شود.': 'You can chat directly with any business; your number isn\'t shown to them.',
+  'محصولی را که دوست داری ذخیره کن تا بعداً راحت پیدایش کنی.': 'Save products you like to find them easily later.',
+  'سلام! من ملینو هستم. دنبال چی می‌گردی؟ بنویس یا بگو تا کمکت کنم.': 'Hi! I\'m Melino. What are you looking for? Type or say it and I\'ll help.',
+  'دنبال چی می‌گردی؟': 'What are you looking for?',
+  'بگو چی لازم داری تا نزدیک‌ترینش را پیدا کنیم.': 'Tell me what you need and we\'ll find the nearest.',
+  'برای «{0}» چیزی پیدا نکردم. ساده‌تر بنویس یا با عکس بگرد.': 'I found nothing for “{0}”. Try simpler words or search with a photo.',
+  'برای «{0}»، {1} کسب‌وکار و {2} محصول پیدا کردم. برای پاسخ کامل‌تر روی من بزن.': 'For “{0}” I found {1} businesses and {2} products. Tap me for a fuller answer.',
+  'کمی ساده‌تر بنویس یا روی ربات ملینو بزن تا کمکت کند.': 'Try simpler words or tap Melino the robot for help.',
+
+  // Melino in the search page (2026-09-26)
+  'نزدیک‌ترینش «{0}» است، {1} از تو.': 'The nearest is “{0}”, {1} from you.',
+  '«{0}» را پیشنهاد می‌کنم.': 'I suggest “{0}”.',
 };

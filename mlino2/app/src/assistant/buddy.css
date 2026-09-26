@@ -1,0 +1,40 @@
+/* Melino in the corner of the search page: the entry page's charcoal-teal sphere (owner's palette), small. */
+.mb-orb { --mb-body: #285A52; --mb-deep: #0F2B27; --mb-rim: #22806F; --mb-rim-light: #86D8C3; --mb-sheen: #D2F4EA; --mb-eye: #E4FAF3; --mb-halo: #DDF5EC;
+  position: relative; display: inline-block; flex: none; }
+:root[data-theme="dark"] .mb-orb { --mb-halo: rgba(139, 216, 196, .28); }
+.mb-aura { position: absolute; inset: -8%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, var(--mb-halo) 0%, var(--mb-halo) 45%, rgba(221,245,236,.5) 64%, rgba(221,245,236,0) 100%);
+  animation: mb-aura 5s ease-in-out infinite; }
+:root[data-theme="dark"] .mb-aura { background: radial-gradient(closest-side, var(--mb-halo) 0%, rgba(139,216,196,.12) 65%, rgba(139,216,196,0) 100%); }
+.mb-orb.thinking .mb-aura { animation-duration: 1.2s; }
+@keyframes mb-aura { 0%, 100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.05); opacity: 1; } }
+.mb-float { position: absolute; inset: 0; animation: mb-bob 6s ease-in-out infinite; }
+@keyframes mb-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+.mb-base { position: absolute; inset: 12%; border-radius: 50%; border: 2.5px solid var(--mb-rim);
+  background: radial-gradient(90% 60% at 50% 4%, rgba(191,220,213,.26) 0%, rgba(191,220,213,0) 60%),
+    radial-gradient(circle at 48% 32%, var(--mb-body) 0%, #1A423C 48%, var(--mb-deep) 100%);
+  box-shadow: inset 3px 4px 8px -5px var(--mb-sheen), inset 0 -6px 12px -6px rgba(10,24,22,.45), 0 0 0 1px var(--mb-rim-light), 0 0 14px 4px rgba(72,190,160,.32); }
+.mb-eye { position: absolute; width: 12%; height: 12%; margin: -6% 0 0 -6%; will-change: transform; }
+.mb-eye.l { left: 36%; top: 53%; } .mb-eye.r { left: 64%; top: 53%; }
+.mb-eye i { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--mb-eye); box-shadow: 0 0 4px rgba(228,250,243,.7); transition: transform .09s ease-in; }
+.mb-eye.shut i { transform: scaleY(.1); }
+
+.mb-root { position: fixed; z-index: 860; inset-inline-end: 12px; bottom: calc(var(--nav-h, 84px) + env(safe-area-inset-bottom, 0px) + 12px);
+  display: flex; flex-direction: column; align-items: flex-end; gap: 6px; max-width: calc(100vw - 24px); pointer-events: none; }
+.mb-root > * { pointer-events: auto; }
+.mb-bot { width: 72px; height: 72px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
+.mb-bot:focus-visible { outline: 3px solid var(--brand, #246B62); outline-offset: 2px; }
+.mb-bubble { position: relative; width: min(300px, calc(100vw - 24px)); padding-block: 12px; padding-inline: 14px 40px; border-radius: 18px; border-end-end-radius: 6px;
+  background: var(--surface, #fff); color: var(--ink, #183E36); border: 1px solid var(--line, #D3E0DA); box-shadow: 0 10px 28px rgba(8, 30, 26, .16);
+  animation: mb-in .22s ease; }
+.mb-bubble p { margin: 0; font-size: 14.5px; line-height: 1.85; unicode-bidi: plaintext; }
+.mb-bubble.thinking p { color: var(--ink-2, #526D64); }
+.mb-act { margin-top: 8px; min-height: 40px; padding: 0 14px; border-radius: 12px; border: 0; background: var(--brand, #246B62); color: var(--on-brand, #fff); font: inherit; font-size: 13.5px; font-weight: 800; cursor: pointer; }
+.mb-close { position: absolute; top: 4px; inset-inline-end: 4px; width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; color: var(--ink-2, #526D64); cursor: pointer; }
+.mb-close::after { content: ""; position: absolute; inset: -4px; }
+@keyframes mb-in { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .mb-aura, .mb-float, .mb-bubble { animation: none; } }
+
+/* The small face in the map's search bar, where the ✦ used to be. */
+.search-launch-buddy { display: grid; place-items: center; flex: none; }
+.rs-search .rs-inner { padding-bottom: 104px; }
