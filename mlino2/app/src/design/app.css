@@ -217,3 +217,6 @@
 .loc-prompt-copy small { color: var(--ink-2); font-size: 12px; line-height: 1.7; }
 .loc-prompt button { flex: none; min-height: 44px; padding: 0 14px; border: 0; border-radius: 12px; background: var(--brand); color: var(--on-brand); font: inherit; font-weight: 700; cursor: pointer; }
 .loc-prompt button:disabled { opacity: .6; }
+
+/* The footer orb rises 28 px over the sheet: the last card scrolls clear of it. */
+.app-shell .sheet-body { padding-bottom: 40px; }

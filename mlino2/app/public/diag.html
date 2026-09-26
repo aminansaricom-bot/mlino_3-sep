@@ -70,6 +70,36 @@ button { font: inherit; background: #246B62; color: #fff; border: 0; border-radi
     });
   }).catch(function (e) { data(false, String(e)); clock(false, 'no response'); });
 
+  // Compass: what this browser really gives while the phone is turned (8 s after the button).
+  var cmp = row('قطب‌نما (دکمه را بزن و گوشی را بچرخان)');
+  var btn = document.createElement('button'); btn.textContent = 'آزمون قطب‌نما (۸ ثانیه)'; out.appendChild(btn);
+  btn.onclick = function () {
+    var DOE = window.DeviceOrientationEvent;
+    if (DOE && typeof DOE.requestPermission === 'function') DOE.requestPermission().catch(function () {});
+    var n = { rel: 0, abs: 0, absFlag: 0, ios: 0 }, alphas = [], iosVals = [], sensor = 'none';
+    function onRel(e) { n.rel++; if (e.absolute) n.absFlag++; if (typeof e.webkitCompassHeading === 'number') { n.ios++; iosVals.push(Math.round(e.webkitCompassHeading)); } if (typeof e.alpha === 'number') alphas.push(Math.round(e.alpha)); }
+    function onAbs(e) { n.abs++; if (typeof e.alpha === 'number') alphas.push(Math.round(e.alpha)); }
+    window.addEventListener('deviceorientation', onRel, true);
+    window.addEventListener('deviceorientationabsolute', onAbs, true);
+    try {
+      if ('AbsoluteOrientationSensor' in window) {
+        var s = new window.AbsoluteOrientationSensor({ frequency: 10 });
+        s.onreading = function () { sensor = 'reading'; }; s.onerror = function (ev) { sensor = 'error: ' + (ev.error && ev.error.name); };
+        s.start(); sensor = 'started';
+        setTimeout(function () { try { s.stop(); } catch (e) {} }, 8000);
+      } else sensor = 'not available';
+    } catch (e) { sensor = 'error: ' + e.name; }
+    cmp(true, 'در حال گوش دادن… گوشی را دور خودت بچرخان');
+    setTimeout(function () {
+      window.removeEventListener('deviceorientation', onRel, true);
+      window.removeEventListener('deviceorientationabsolute', onAbs, true);
+      var spread = alphas.length ? (Math.max.apply(null, alphas) - Math.min.apply(null, alphas)) : 0;
+      var trueNorth = n.abs > 0 || n.absFlag > 0 || n.ios > 0;
+      cmp(trueNorth, 'deviceorientation=' + n.rel + ' (absolute=' + n.absFlag + ')  deviceorientationabsolute=' + n.abs +
+        '  iOS=' + n.ios + '  alpha spread=' + spread + '°  sensorAPI=' + sensor + (trueNorth ? '  → true north OK' : n.rel ? '  → relative only' : '  → no motion events'));
+    }, 8000);
+  };
+
   var app = row('نسخه‌ی برنامه');
   fetch('/version.json?diag=' + t0, { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { app(true, v.slice(0, 160)); }).catch(function (e) { app(false, String(e)); });
 })();

@@ -27,7 +27,7 @@
   --shadow: 0 8px 28px rgba(22, 51, 45, .08);
   --t-state: 180ms; --t-sheet: 240ms;
   --touch: 48px;
-  --nav-h: 64px;
+  --nav-h: 84px;   /* the curved footer; its middle orb rises 28 px above */
 
   /* Older names, now the same palette. */
   --accent: var(--brand);

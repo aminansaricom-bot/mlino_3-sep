@@ -25,7 +25,8 @@ import { AssistantConsent } from '../assistant/AssistantPanel';
 import { speakPersian, useVoiceInput } from '../assistant/voice';
 import { CHAT_ENABLED } from '../chat/chatApi';
 import ChatPanel, { useChatUnread, type ChatTarget } from '../chat/ChatPanel';
-import { CustomerBottomNav, EmptyState, IconButton, type NavTab } from '../design/ui';
+import { EmptyState, IconButton, type NavTab } from '../design/ui';
+import { CurvedBottomNav } from '../design/CurvedBottomNav';
 import LiveIcon from '../live/icons';
 import OffersPage from '../pages/OffersPage';
 import SavedPage from '../pages/SavedPage';
@@ -351,7 +352,7 @@ export default function RealPublicApp() {
     </div>
 
     <div className="map-fabs"><button className={`fab-locate${locating ? ' busy' : ''}`} onClick={useMyLocation} aria-label={tr('موقعیت من')}>◎</button></div>
-    <div className="primary-actions"><button className="action-fab vitrine" onClick={() => setOverlay('vitrine')} aria-label={tr('ویترین زنده')} title={tr('ویترین زنده')}><img className="action-fab-img" src="/icons/vitrine-live.png" alt="" width={64} height={64} /></button></div>
+    {/* The live storefront opens from the orb in the middle of the bottom bar (one entry, not also a button on the map). */}
 
     <BottomSheet state={sheet} onStateChange={setSheet} title={offersOnly ? tr('تخفیف‌های اطراف') : tr('اطراف شما')} subtitle={demoBuildEnabled && demoEnabled && demoAnchor && !demoTarget ? tr('موقعیتت را بده') : tr('{0} مورد', shown.length.toLocaleString(numberLocale()))}>
       {offersOnly && CHAT_ENABLED && <NearbyAlerts point={alertPoint} demoFrame={demoFrame} demoBuild={demoBuildEnabled && demoEnabled} onNeedLocation={useMyLocation} />}
@@ -374,7 +375,8 @@ export default function RealPublicApp() {
     {tab === 'saved' && <SavedPage records={allRecords} catalogByOrg={catalogByOrg} saved={experience.data.saved} savedItems={experience.data.savedItems}
       distanceById={assistantDistances} onOpenBusiness={openDetail} onOpenItem={openProduct} storageFailed={experience.storageFailed} onBack={() => setTab('discover')}
       onUnsaveBusiness={(id) => experience.toggle('saved', id)} onUnsaveItem={experience.toggleItem} />}
-    <CustomerBottomNav tab={tab} unread={unread} onTab={(next) => { setTab(next); setSearchOpen(false); if (next === 'messages') setChatRefresh((n) => n + 1); }} />
+    <CurvedBottomNav tab={tab} live={overlay === 'vitrine'} unread={unread} onLive={() => setOverlay('vitrine')}
+      onTab={(next) => { if (overlay === 'vitrine') setOverlay('none'); setTab(next); setSearchOpen(false); if (next === 'messages') setChatRefresh((n) => n + 1); }} />
 
     {overlay === 'detail' && selected && <PublicBusinessDetails record={selected} catalog={catalogByOrg.get(selected.id)} now={now} distanceMeters={distanceById.get(selected.id)} experience={experience.data}
       onClose={() => setOverlay('none')} onToggle={experience.toggle} onOpenItem={(item) => openProduct(selected.id, item)}
