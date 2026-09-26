@@ -44,8 +44,21 @@ export async function verifyArtifact(raw: Uint8Array, trust: TrustBundle, domain
   const bytes = new Uint8Array(separator.length + signed.length);
   bytes.set(separator);
   bytes.set(signed, separator.length);
-  const key = await globalThis.crypto.subtle.importKey('raw', new Uint8Array(keyBytes) as BufferSource, { name: 'Ed25519' }, false, ['verify']);
-  const valid = await globalThis.crypto.subtle.verify('Ed25519', key, new Uint8Array(value) as BufferSource, new Uint8Array(bytes) as BufferSource);
-  if (!valid) throw new Error('PUBLIC_EXPORT_BAD_SIGNATURE');
+  if (!(await verifyEd25519(new Uint8Array(keyBytes), new Uint8Array(value), bytes))) throw new Error('PUBLIC_EXPORT_BAD_SIGNATURE');
   return envelope;
+}
+
+/**
+ * Ed25519 in the browser's own WebCrypto when it has it; otherwise the same check in JavaScript (@noble/ed25519,
+ * strict RFC 8032). Brave on Android and older Android WebViews have no WebCrypto Ed25519: the export was refused
+ * there (ED25519_NOT_SUPPORTED) and the app showed no businesses at all. The check itself is the same either way.
+ */
+export async function verifyEd25519(publicKey: Uint8Array, signature: Uint8Array, message: Uint8Array): Promise<boolean> {
+  let key: CryptoKey | null = null;
+  try {
+    key = await globalThis.crypto.subtle.importKey('raw', publicKey as BufferSource, { name: 'Ed25519' }, false, ['verify']);
+  } catch { key = null; }
+  if (key) return globalThis.crypto.subtle.verify('Ed25519', key, signature as BufferSource, message as BufferSource);
+  const { verifyAsync } = await import('@noble/ed25519');
+  try { return await verifyAsync(signature, message, publicKey, { zip215: false }); } catch { return false; }
 }

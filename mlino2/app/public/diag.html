@@ -44,7 +44,7 @@ button { font: inherit; background: #246B62; color: #fff; border: 0; border-radi
   var ed = row('پشتیبانی از امضای Ed25519');
   (async function () {
     try { await crypto.subtle.importKey('raw', b64u(PUB), { name: 'Ed25519' }, false, ['verify']); ed(true, 'supported'); }
-    catch (e) { ed(false, (e && e.name) + ': ' + (e && e.message)); }
+    catch (e) { ed(true, 'not in this browser (' + (e && e.name) + ') — MLINO checks the signature in JavaScript instead'); }
   })();
 
   var sw = row('Service Worker');

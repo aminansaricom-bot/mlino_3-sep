@@ -253,3 +253,30 @@ describe('a phone whose clock is off (server Date header)', () => {
     } finally { vi.useRealTimers(); resetServerClock(); }
   });
 });
+
+describe('a browser without WebCrypto Ed25519 (Brave on Android)', () => {
+  it('verifies the export with the JavaScript Ed25519, and still refuses a bad signature', async () => {
+    const { pair, trust } = await keyPair();
+    const good = await signed(pair);
+    const realImport = crypto.subtle.importKey.bind(crypto.subtle);
+    const spy = vi.spyOn(crypto.subtle, 'importKey').mockImplementation(((format: string, keyData: BufferSource, algorithm: AlgorithmIdentifier, ...rest: unknown[]) => {
+      const name = typeof algorithm === 'string' ? algorithm : algorithm.name;
+      if (name === 'Ed25519') return Promise.reject(new DOMException('Algorithm: Unrecognized name', 'NotSupportedError'));
+      return (realImport as (...a: unknown[]) => Promise<CryptoKey>)(format, keyData, algorithm, ...rest);
+    }) as typeof crypto.subtle.importKey);
+    try {
+      const consumer = new PublicExportConsumer(new FileTransport(good), trust);
+      await consumer.refresh(now);
+      expect(consumer.read(now)).toHaveLength(1);
+      // Flip one signature character: refused exactly as before.
+      const text = new TextDecoder().decode(good);
+      const at = text.indexOf('"value":"') + 12;
+      const bad = new TextEncoder().encode(text.slice(0, at) + (text[at] === 'A' ? 'B' : 'A') + text.slice(at + 1));
+      await expect(new PublicExportConsumer(new FileTransport(bad), trust).refresh(now)).rejects.toThrow(/PUBLIC_EXPORT_(BAD_SIGNATURE|SIGNATURE_VALUE)/);
+      // A record changed after signing: refused.
+      const edited = new TextEncoder().encode(text.replace('کافهٔ واقعی', 'کافهٔ جعلی'));
+      await expect(new PublicExportConsumer(new FileTransport(edited), trust).refresh(now)).rejects.toThrow(/PUBLIC_EXPORT_(BAD_SIGNATURE|SNAPSHOT_ID|NOT_CANONICAL)/);
+      expect(spy).toHaveBeenCalled();
+    } finally { spy.mockRestore(); }
+  });
+});
