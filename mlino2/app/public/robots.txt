@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /assistant/
+Disallow: /login
+
+Sitemap: https://explore.mlino.site/sitemap.xml
