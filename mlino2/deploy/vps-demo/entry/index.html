@@ -4,9 +4,151 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#F7F8F6">
-<title>ملینو</title>
-<meta name="description" content="ملینو: کسب‌وکارهای اطرافت را پیدا کن، یا کسب‌وکارت را به محله نشان بده.">
+<title>ملینو — کسب‌وکارها و تخفیف‌های اطرافت</title>
+<meta name="description" content="ملینو: کافه، رستوران، مغازه و تخفیف‌های اطرافت را روی نقشه و ویترین زنده ببین، یا کسب‌وکارت را به محله نشان بده.">
+<link rel="canonical" href="https://app.mlino.site/">
 <link rel="icon" href="/assets/favicon-256.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ملینو">
+<meta property="og:locale" content="fa_IR">
+<meta property="og:url" content="https://app.mlino.site/">
+<meta property="og:title" content="ملینو — کسب‌وکارها و تخفیف‌های اطرافت">
+<meta property="og:description" content="کسب‌وکارها و تخفیف‌های اطرافت را پیدا کن، یا کسب‌وکارت را به محله نشان بده.">
+<meta property="og:image" content="https://app.mlino.site/assets/og-mlino.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ملینو — کسب‌وکارها و تخفیف‌های اطرافت">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://app.mlino.site/assets/og-mlino.png">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="ملینو برای دستیارهای هوش مصنوعی">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://app.mlino.site/#org",
+   "name": "ملینو",
+   "alternateName": "MLINO",
+   "url": "https://app.mlino.site/",
+   "logo": "https://app.mlino.site/logo.png",
+   "description": "پلتفرم محله‌ای که مردم را به کسب‌وکارها و تخفیف‌های اطرافشان وصل می‌کند و به کسب‌وکارهای کوچک ابزار معرفی و مدیریت می‌دهد."
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://app.mlino.site/#site",
+   "name": "ملینو",
+   "alternateName": "MLINO",
+   "url": "https://app.mlino.site/",
+   "inLanguage": "fa-IR",
+   "publisher": {
+    "@id": "https://app.mlino.site/#org"
+   }
+  },
+  {
+   "@type": "SoftwareApplication",
+   "name": "ملینو",
+   "alternateName": "MLINO",
+   "applicationCategory": "LifestyleApplication",
+   "operatingSystem": "Android, Web",
+   "url": "https://explore.mlino.site/",
+   "downloadUrl": "https://app.mlino.site/download/mlino.apk",
+   "inLanguage": "fa-IR",
+   "description": "کسب‌وکارها و تخفیف‌های اطراف روی نقشه و ویترین زنده (واقعیت افزوده)، گفت‌وگو با کسب‌وکار و ذخیره‌ی محصول.",
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "IRR"
+   },
+   "publisher": {
+    "@id": "https://app.mlino.site/#org"
+   }
+  },
+  {
+   "@type": "SoftwareApplication",
+   "name": "پنل کسب‌وکار ملینو",
+   "alternateName": "MLINO Business",
+   "applicationCategory": "BusinessApplication",
+   "operatingSystem": "Android, Web",
+   "url": "https://business.mlino.site/",
+   "downloadUrl": "https://app.mlino.site/download/mlino-business.apk",
+   "inLanguage": "fa-IR",
+   "description": "ساخت ویترین کسب‌وکار، محصول و قیمت، تخفیف برای آدم‌های اطراف، پاسخ به پیام مشتری‌ها و دیدن امتیازها.",
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "IRR"
+   },
+   "publisher": {
+    "@id": "https://app.mlino.site/#org"
+   }
+  },
+  {
+   "@type": "FAQPage",
+   "inLanguage": "fa-IR",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "ملینو چیست؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "ملینو کسب‌وکارهای محله و مشتری‌هایشان را کنار هم می‌آورد: مردم کافه، رستوران، مغازه، کلینیک و تخفیف‌های اطرافشان را روی نقشه و «ویترین زنده» می‌بینند، و صاحبان کسب‌وکار با «پنل کسب‌وکار» ویترین، محصول و تخفیفشان را به آدم‌های نزدیک نشان می‌دهند."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "ویترین زنده چیست؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "دوربین گوشی را به اطراف بچرخان؛ کسب‌وکارهای همان سمت با فاصله، امتیاز و تخفیفشان روی تصویر ظاهر می‌شوند و می‌توانی با جست‌وجو فقط مرتبط‌ترین‌ها را نگه داری."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "استفاده از ملینو رایگان است؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "برای مشتری‌ها رایگان است و برای گشتن ثبت‌نام هم لازم نیست. کسب‌وکارها با طرح پایه شروع می‌کنند و امکانات بیشتر، مثل پاسخ خودکار و اعلان تخفیف به اطرافیان، در طرح‌های بالاتر است."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "چطور کسب‌وکارم را در ملینو بگذارم؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "وارد پنل کسب‌وکار شو، ویترین را با عکس، ساعت کار و آدرس بساز، محصول‌ها و قیمت‌ها را اضافه کن و منتشرش کن. هیچ چیز بدون تأیید خودت منتشر نمی‌شود."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "موقعیت من برای کسی فرستاده می‌شود؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "نه. فاصله‌ی کسب‌وکارها روی گوشی خودت حساب می‌شود و موقعیت دقیقت برای هیچ کسب‌وکاری فرستاده نمی‌شود."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "روی چه دستگاه‌هایی کار می‌کند؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "در مرورگر هر گوشی و کامپیوتر، و با اپ اندروید. روی آیفون همین سایت را در سافاری باز کن و «افزودن به صفحه‌ی اصلی» را بزن."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "کسب‌وکارهایی که الان می‌بینم واقعی‌اند؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "نه. این نسخه‌ی نمایشی ملینوست و کسب‌وکارها، محصول‌ها و تخفیف‌هایش ساختگی‌اند تا بشود همه‌چیز را امتحان کرد."
+     }
+    }
+   ]
+  }
+ ]
+}
+</script>
 <style>
 @font-face { font-family: Vazirmatn; src: url('/fonts/Vazirmatn-wght.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
 /* «روشنای محله» tokens, the same as the app and the panel (light). */
@@ -122,6 +264,12 @@ details[open] summary::after { transform: rotate(-135deg) translateY(-2px); }
 .more p { margin: 0 0 6px; }
 .hash { direction: ltr; text-align: left; font: 11px/1.6 ui-monospace, monospace; word-break: break-all; color: var(--ink-3); margin-top: 6px; }
 
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.faq { margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 20px 14px; box-shadow: var(--shadow); }
+.faq h2 { margin: 12px 2px 2px; font-size: 17px; }
+.faq details:first-of-type { margin-top: 8px; }
+.faq details:last-child summary { padding-bottom: 0; }
+.faq details[open]:last-child summary { padding-bottom: 12px; }
 footer { margin-top: 26px; text-align: center; color: var(--ink-3); font-size: 13px; }
 footer details { border: 0; margin: 0; }
 footer summary { color: var(--ink-2); font-weight: 500; font-size: 13px; padding: 0; justify-content: center; }
@@ -136,6 +284,7 @@ footer .more { max-width: 520px; margin: 6px auto 0; font-size: 13px; }
 
   <main>
     <section class="hero" aria-label="ملینو">
+      <h1 class="sr">ملینو؛ کسب‌وکارها و تخفیف‌های اطرافت روی نقشه و ویترین زنده، و پنلی برای کسب‌وکارهای محله</h1>
       <div class="orb" id="orb" aria-hidden="true">
         <div class="orb-aura"></div>
         <div class="orb-float">
@@ -219,6 +368,16 @@ footer .more { max-width: 520px; margin: 6px auto 0; font-size: 13px; }
           </div>
         </details>
       </article>
+    </section>
+    <section class="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">پرسش‌های رایج</h2>
+      <details><summary>ملینو چیست؟</summary><div class="more"><p>ملینو کسب‌وکارهای محله و مشتری‌هایشان را کنار هم می‌آورد: مردم کافه، رستوران، مغازه، کلینیک و تخفیف‌های اطرافشان را روی نقشه و «ویترین زنده» می‌بینند، و صاحبان کسب‌وکار با «پنل کسب‌وکار» ویترین، محصول و تخفیفشان را به آدم‌های نزدیک نشان می‌دهند.</p></div></details>
+      <details><summary>ویترین زنده چیست؟</summary><div class="more"><p>دوربین گوشی را به اطراف بچرخان؛ کسب‌وکارهای همان سمت با فاصله، امتیاز و تخفیفشان روی تصویر ظاهر می‌شوند و می‌توانی با جست‌وجو فقط مرتبط‌ترین‌ها را نگه داری.</p></div></details>
+      <details><summary>استفاده از ملینو رایگان است؟</summary><div class="more"><p>برای مشتری‌ها رایگان است و برای گشتن ثبت‌نام هم لازم نیست. کسب‌وکارها با طرح پایه شروع می‌کنند و امکانات بیشتر، مثل پاسخ خودکار و اعلان تخفیف به اطرافیان، در طرح‌های بالاتر است.</p></div></details>
+      <details><summary>چطور کسب‌وکارم را در ملینو بگذارم؟</summary><div class="more"><p>وارد پنل کسب‌وکار شو، ویترین را با عکس، ساعت کار و آدرس بساز، محصول‌ها و قیمت‌ها را اضافه کن و منتشرش کن. هیچ چیز بدون تأیید خودت منتشر نمی‌شود.</p></div></details>
+      <details><summary>موقعیت من برای کسی فرستاده می‌شود؟</summary><div class="more"><p>نه. فاصله‌ی کسب‌وکارها روی گوشی خودت حساب می‌شود و موقعیت دقیقت برای هیچ کسب‌وکاری فرستاده نمی‌شود.</p></div></details>
+      <details><summary>روی چه دستگاه‌هایی کار می‌کند؟</summary><div class="more"><p>در مرورگر هر گوشی و کامپیوتر، و با اپ اندروید. روی آیفون همین سایت را در سافاری باز کن و «افزودن به صفحه‌ی اصلی» را بزن.</p></div></details>
+      <details><summary>کسب‌وکارهایی که الان می‌بینم واقعی‌اند؟</summary><div class="more"><p>نه. این نسخه‌ی نمایشی ملینوست و کسب‌وکارها، محصول‌ها و تخفیف‌هایش ساختگی‌اند تا بشود همه‌چیز را امتحان کرد.</p></div></details>
     </section>
   </main>
 

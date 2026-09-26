@@ -1,0 +1,25 @@
+# MLINO (ملینو)
+
+> MLINO is a neighbourhood platform from Iran that connects people with the local businesses around them, and gives small businesses a simple panel to show their storefront, products and offers to people nearby. The interface is in Persian (Farsi) and five other languages (English, Arabic, Turkish, Spanish, German).
+
+MLINO has two versions:
+
+- **MLINO app (ملینو)** — for people looking for places nearby: cafés, restaurants, shops, bakeries, pharmacies and clinics on a map, their active discounts, a "live storefront" camera view (augmented reality: point the phone and nearby businesses appear on the image with distance, rating and offer), chat with a business, and saving products. Free; no sign-up is needed to look around. Location is used only on the person's own phone for distances.
+- **MLINO Business panel (پنل کسب‌وکار ملینو)** — for business owners: build the storefront (photos, opening hours, address), add products and prices, publish offers to people nearby, answer customer chats and see ratings. Nothing is published without the owner's approval.
+
+Current status: public demo. The businesses, products and offers shown are fictional test data.
+
+## Links
+
+- [Entry page](https://app.mlino.site/): choose between the MLINO app and the business panel; Melino, the round robot assistant, helps you choose.
+- [MLINO app on the web](https://explore.mlino.site/)
+- [MLINO Business panel on the web](https://business.mlino.site/)
+- [Android app (APK)](https://app.mlino.site/download/mlino.apk)
+- [Android business app (APK)](https://app.mlino.site/download/mlino-business.apk)
+
+## Frequently asked (Persian answers on the entry page)
+
+- What is MLINO? A local discovery and small-business platform: map, live storefront (AR), offers, chat.
+- Is it free? Free for customers. Businesses start on a basic plan; higher plans add auto-replies and nearby offer notifications.
+- Where does it work? In any browser on phone or computer, and as an Android app; on iPhone via "Add to Home Screen".
+- Is my location shared? No. Distances are calculated on the phone; the exact location is not sent to businesses.
