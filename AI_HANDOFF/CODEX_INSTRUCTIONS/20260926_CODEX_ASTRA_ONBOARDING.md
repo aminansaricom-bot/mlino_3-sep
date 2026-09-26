@@ -7,6 +7,37 @@
 
 ---
 
+## ۰. نسخه‌ی درست: فقط آخرین نسخه، نه کدی که قبلاً روی آن کار می‌کردی
+
+کد فعلی ملینو در شاخه‌های `guardian/*` و `main` است. کلون و شاخه‌های قبلی تو **قدیمی‌اند**. هیچ کار، بازبینی یا مقایسه‌ای روی آن‌ها انجام نده و کد آن‌ها را مبنا قرار نده:
+
+- کلون `C:\Users\galexy\mlino code\v2-intent-flow`؛
+- شاخه‌های `codex/*`، از جمله `codex/v2-intent-flow-foundation`، `codex/v2-real-ui-wiring` و `codex/core-*`؛
+- پوشه‌های هم‌نام آن‌ها در `C:\Users\galexy\mlino code\`.
+
+همه‌ی آن کارها در این شاخه‌ها ادغام شده و بعد از آن خیلی جلو رفته است.
+
+| بخش | شاخه | commit مبنا (حداقل) |
+|---|---|---|
+| اپ مشتری V2 و دروازه‌ی دستیار | `guardian/v2-ar-glass` | `ba9b079` |
+| Core API، پنل کسب‌وکار، اندروید | `guardian/accounting-a1` | `40bb17e` |
+| پیکربندی آزمون Core | `guardian/demo-food-seed` | `e13bdd2` |
+| حاکمیت، استقرار و این دستور | `main` | همین commit یا بعدتر |
+
+پیش از هر کار:
+
+1. `git fetch origin`.
+2. بررسی کن HEAD شاخه‌ای که می‌خوانی برابر یا جلوتر از commit جدول باشد: `git merge-base --is-ancestor <commit> origin/<branch>`. اگر نبود، `BLOCKED` بده و ادامه نده.
+3. برای خواندن یا اجرای آزمون، یا از worktreeهای جدول بخش ۲ استفاده کن (همین کامپیوتر؛ فقط خواندن، بدون commit در آن‌ها)، یا یک worktree تازه از همین شاخه‌ها بساز:
+
+   ```text
+   git worktree add C:\Users\galexy\mlino code\astra-review-v2 origin/guardian/v2-ar-glass
+   ```
+
+4. برای اصلاح کد، شاخه‌ی تازه‌ی `codex/<task>` بساز. مبنای آن باید `origin/guardian/<همان بخش>` باشد، نه شاخه‌های قدیمی `codex/*`.
+
+---
+
 ## ۱. نقش تو
 
 - **مالک محصول** مرجع نهایی است.
