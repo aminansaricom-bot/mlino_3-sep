@@ -1,8 +1,12 @@
+import path from 'node:path';
 import http from 'node:http';
 import { Pool } from 'pg';
 import webpush from 'web-push';
 import { CoreIdentity, IDENTITY_SCHEMA_SQL, testDelivery, type Audience } from '../../identity';
 import { googleVerifier } from '../../identity/google';
+import { VISUAL_SCHEMA_SQL, VisualSearchModule } from '../../visual';
+import { OnnxDinoV2Model } from '../../visual/model';
+import { fetchVisualModel, runVisualEval } from '../../visual/setup';
 import { smsIrDelivery } from '../../identity/smsir';
 import { CHAT_PERMISSION, CHAT_SCHEMA_SQL, ChatModule } from '../../chat';
 import { NOTIFY_SCHEMA_SQL, NotifyModule, type Sender } from '../../notify';
@@ -44,6 +48,13 @@ import { removeDemoRatings, seedDemoRatings } from './seed-demo-ratings';
  *   API_PORT            default 8741, bound to 127.0.0.1
  *   COOKIE_SECURE       1 in production
  *   GOOGLE_CLIENT_ID    optional: the owner's Google OAuth web client ID; turns on «ورود با گوگل» (D-90)
+ *   VISUAL_MODEL_DIR    optional: directory with the pinned DINOv2 model (visual-model-fetch); turns on visual search (D-91)
+ *   VISUAL_MEDIA_ROOT   directory holding media/sha256/… of the public export (default: the catalog file's directory)
+ *   VISUAL_MIN_SIMILARITY  cosine threshold for «similar» (evaluated with visual-eval; default 0.5)
+ *   VISUAL_THREADS      CPU threads for the model (default 1)
+ *
+ * Visual search commands: `visual-model-fetch <dir>` (download and verify the pinned model once),
+ * `visual-index` (idempotent backfill of the published catalog), `visual-eval <dir-of-query-images>`.
  *
  * `node main.js seed-demo-members 09000000090` makes that test identity a member of every fictional
  * test-demo-* organization with chat.reply, offer.manage, publication.manage and plan.manage.
@@ -83,6 +94,45 @@ async function main(): Promise<void> {
   }
 
   const publishedPath = required('PUBLISHED_PATH');
+
+  // Visual product search (D-91): module tables beside chat and ratings; the model runs in this process (no external AI).
+  if (process.argv[2] === 'visual-model-fetch') {
+    console.log(`[mlino-api] visual model: ${await fetchVisualModel(process.argv[3] ?? required('VISUAL_MODEL_DIR'))}`);
+    await core.end(); await chatDb.end();
+    return;
+  }
+  let visual: VisualSearchModule | undefined;
+  if (process.env.VISUAL_MODEL_DIR) {
+    await chatDb.query(VISUAL_SCHEMA_SQL);
+    const catalogPath = required('CATALOG_PATH');
+    visual = new VisualSearchModule(chatDb, {
+      catalogPath, publishedPath,
+      mediaRoot: process.env.VISUAL_MEDIA_ROOT || path.dirname(catalogPath),
+      minSimilarity: Number(process.env.VISUAL_MIN_SIMILARITY ?? 0.5),
+    });
+    visual.setModelState('loading');
+    const load = OnnxDinoV2Model.load(process.env.VISUAL_MODEL_DIR, Number(process.env.VISUAL_THREADS) || 1)
+      .then((m) => { visual!.setModel(m); console.log('[mlino-api] visual model ready'); })
+      .catch((e) => { visual!.setModelState((e as Error).message.startsWith('VISUAL_MODEL_MISSING') ? 'missing' : 'error', (e as Error).message.slice(0, 200)); console.error(`[mlino-api] visual model not loaded: ${(e as Error).message}`); });
+    if (process.argv[2] === 'visual-index' || process.argv[2] === 'visual-eval') {
+      await load;
+      if (process.argv[2] === 'visual-index') {
+        // Backfill: repeat passes until nothing is left; running it again adds nothing (one vector per image and version).
+        let total = { embedded: 0, failed: 0 };
+        for (;;) {
+          const out = await visual.indexPass(25);
+          total = { embedded: total.embedded + out.embedded, failed: total.failed + out.failed };
+          console.log(`[mlino-api] visual index: +${out.embedded} embedded, ${out.failed} failed, ${out.skipped} already done, ${out.remaining} remaining`);
+          if (!out.remaining) break;
+        }
+        console.log(`[mlino-api] visual index done: ${total.embedded} embedded, ${total.failed} failed`);
+      } else {
+        console.log(await runVisualEval(visual, process.argv[3] ?? '.'));
+      }
+      await core.end(); await chatDb.end();
+      return;
+    }
+  }
 
   // `node main.js seed-demo-ratings` gives the test businesses' published products sample ratings (synthetic test voters);
   // `seed-demo-ratings remove` takes exactly those votes away again.
@@ -135,10 +185,18 @@ async function main(): Promise<void> {
   // Products and storefront; photos only when the media store the export reads is configured.
   const catalog = { prisma, catalog: new CatalogItemService(prisma), profiles: new BusinessProfileService(prisma), publications: coreDeps.publications, mediaStore: process.env.MEDIA_STORE_DIR || undefined };
   const google = process.env.GOOGLE_CLIENT_ID ? googleVerifier({ clientId: process.env.GOOGLE_CLIENT_ID }) : undefined;
-  const handler = createHandler({ identity, chat, core: coreDeps, members, catalog, notify, ratings, google, config: { hosts, cookieSecure: process.env.COOKIE_SECURE === '1', publishedPath, catalogPath: process.env.CATALOG_PATH } });
+  const handler = createHandler({ identity, chat, core: coreDeps, members, catalog, notify, ratings, google, visual, config: { hosts, cookieSecure: process.env.COOKIE_SECURE === '1', publishedPath, catalogPath: process.env.CATALOG_PATH } });
   const server = http.createServer((req, res) => { void handler(req, res); });
   const port = Number(process.env.API_PORT ?? 8741);
-  server.listen(port, '127.0.0.1', () => console.log(`[mlino-api] listening on 127.0.0.1:${port}, OTP delivery: ${delivery}, notifications: ${notify ? 'on' : 'off'}, google: ${google ? 'on' : 'off'}`));
+  server.listen(port, '127.0.0.1', () => console.log(`[mlino-api] listening on 127.0.0.1:${port}, OTP delivery: ${delivery}, notifications: ${notify ? 'on' : 'off'}, google: ${google ? 'on' : 'off'}, visual: ${visual ? 'on' : 'off'}`));
+
+  // Background indexing of newly published product images: never in the request path of saving a product.
+  if (visual) {
+    const v = visual;
+    const tick = () => { v.indexPass(20).then((out) => { if (out.embedded || out.failed) console.log(`[mlino-api] visual index: +${out.embedded} embedded, ${out.failed} failed`); }).catch((e) => console.error(`[mlino-api] visual index: ${(e as Error).message}`)); };
+    setTimeout(tick, 15_000).unref();
+    setInterval(tick, 30_000).unref();
+  }
 
   const sweep = async () => {
     try {

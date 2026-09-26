@@ -12,6 +12,7 @@ import { PLAN_LIMITS, planOf } from '../../core/plan-service';
 import type { AutoResolver } from '../../chat';
 import { NotifyError, type NotifyModule } from '../../notify';
 import { type GoogleVerifier, maskEmail } from '../../identity/google';
+import { MAX_UPLOAD_BYTES, VisualError, type VisualSearchModule } from '../../visual';
 
 /**
  * MLINO API — Core identity routes (/api/auth/*) and the chat module's routes
@@ -51,6 +52,8 @@ export interface ApiDeps {
   readonly ratings?: RatingsModule;
   /** Sign-in with Google (D-90). Absent until the owner sets a Google client ID. */
   readonly google?: GoogleVerifier;
+  /** Visual product search (D-91). Absent = routes off. */
+  readonly visual?: VisualSearchModule;
 }
 
 class HttpError extends Error {
@@ -88,6 +91,35 @@ function send(res: ServerResponse, status: number, body: unknown, headers: Recor
   const data = JSON.stringify(body);
   res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', ...headers });
   res.end(data);
+}
+
+/** The photo of a visual search, in memory only (never written to disk or logged), refused past the size limit. */
+async function readImage(req: IncomingMessage): Promise<Buffer> {
+  const type = String(req.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase();
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(type)) throw new VisualError('IMAGE_UNSUPPORTED');
+  const declared = Number(req.headers['content-length']);
+  if (Number.isFinite(declared) && declared > MAX_UPLOAD_BYTES) throw new VisualError('IMAGE_TOO_LARGE');
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += (chunk as Buffer).length;
+    if (size > MAX_UPLOAD_BYTES) throw new VisualError('IMAGE_TOO_LARGE');
+    chunks.push(chunk as Buffer);
+  }
+  return Buffer.concat(chunks);
+}
+
+/** Visual search filters from the query string: bounded, validated, and never a position (D-91). */
+function visualFilter(url: URL): { organizationIds?: string[]; minPrice?: number; maxPrice?: number; limit: number; offset: number } {
+  const num = (k: string) => { const v = url.searchParams.get(k); if (v === null || v === '') return undefined; const n = Number(v); if (!Number.isFinite(n) || n < 0) throw new VisualError('BAD_FILTER'); return n; };
+  const limit = num('limit') ?? 12; const offset = num('offset') ?? 0;
+  if (!Number.isInteger(limit) || limit < 1 || limit > 24 || !Number.isInteger(offset) || offset > 200) throw new VisualError('BAD_FILTER');
+  const orgs = url.searchParams.get('orgs');
+  const organizationIds = orgs ? orgs.split(',').map((s) => s.trim()).filter(Boolean) : undefined;
+  if (organizationIds && (organizationIds.length > 300 || organizationIds.some((o) => !/^[\w.-]{1,80}$/.test(o)))) throw new VisualError('BAD_FILTER');
+  const minPrice = num('minPrice'); const maxPrice = num('maxPrice');
+  if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) throw new VisualError('BAD_FILTER');
+  return { organizationIds, minPrice, maxPrice, limit, offset };
 }
 
 async function readJson(req: IncomingMessage): Promise<Record<string, unknown>> {
@@ -179,6 +211,23 @@ export function createHandler(deps: ApiDeps) {
       };
 
       // ── Core identity ──
+      // ── visual product search (D-91): the photo is processed on MLINO's own server, in memory ──
+      if (path === '/api/visual/status' && method === 'GET') {
+        if (audience !== 'v2' || !deps.visual) throw new HttpError(404, 'NOT_FOUND');
+        return send(res, 200, await deps.visual.status());
+      }
+      if (path === '/api/visual/search' && method === 'POST') {
+        if (audience !== 'v2' || !deps.visual) throw new HttpError(404, 'NOT_FOUND');
+        limit(`visual:${clientAddress(req)}`, 30, 10 * 60_000);
+        const filter = visualFilter(url);
+        const photo = await readImage(req);
+        let timer: NodeJS.Timeout | undefined;
+        const timeout = new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new VisualError('TIMEOUT')), 20_000); });
+        try {
+          const out = await Promise.race([deps.visual.search(photo, filter), timeout]);
+          return send(res, 200, out);
+        } finally { clearTimeout(timer); }
+      }
       if (path === '/api/auth/config' && method === 'GET') {
         return send(res, 200, { delivery: identity.deliveryMode, testNumbers: identity.testNumbersAllowed ? { from: '09000000001', to: '09000000099' } : null, audience, google: deps.google?.clientId ?? null });
       }
@@ -448,6 +497,10 @@ export function createHandler(deps: ApiDeps) {
         return send(res, status, { error: e.code, ...e.detail });
       }
       if (e instanceof RatingError) return send(res, 400, { error: e.code });
+      if (e instanceof VisualError) {
+        const status = e.code === 'IMAGE_TOO_LARGE' ? 413 : e.code === 'IMAGE_UNSUPPORTED' ? 415 : e.code === 'MODEL_UNAVAILABLE' ? 503 : e.code === 'BUSY' ? 429 : e.code === 'TIMEOUT' ? 504 : 400;
+        return send(res, status, { error: e.code });
+      }
       if (e instanceof ChatError) {
         const status = e.code === 'NOT_FOUND' || e.code === 'BUSINESS_UNKNOWN' ? 404 : e.code === 'INPUT_INVALID' ? 400 : 409;
         return send(res, status, { error: e.code });
