@@ -35,7 +35,7 @@ import { hiddenForLackOfPosition, promoteMatches, toDataFrame, withNearbyOffers 
 import NearbyAlerts, { alertsOn, refreshAlertLocation } from '../offers/NearbyAlerts';
 import { NEARBY_LABEL, RUNNER, callNative, inApp, onBackButton, onNative } from '../native/bridge';
 import Welcome, { shouldWelcome } from '../onboarding/Welcome';
-import { demoBanner, followDemoTarget, nextDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, validPoint, visibleDemoRecords, type Point } from '../demo/demoRelocation';
+import { DEMO_FOLLOW_METRES, demoBanner, distanceMetres, followDemoTarget, parseDemoAnchor, presentationRecords, reanchorDemoTarget, validPoint, visibleDemoRecords, type Point } from '../demo/demoRelocation';
 import { tr, numberLocale, msg, dir, noteLocation } from '../i18n';
 
 const TEHRAN_CENTER: [number, number] = [35.775, 51.425];
@@ -173,21 +173,37 @@ export default function RealPublicApp() {
   const useMyLocation = () => {
     if (!navigator.geolocation) { setLocError('unavailable'); return; }
     setLocating(true);
-    // A quick network position first (a second or two), then GPS refines it; waiting for GPS alone took ~20 s.
-    const refine = () => navigator.geolocation.getCurrentPosition(({ coords }) => {
-      const next: Point = [coords.latitude, coords.longitude]; noteLocation(next[0], next[1]);
-      if (demoBuildEnabled && !validPoint(next)) return;
-      setMyPoint([next[0], next[1]]); setPoint([next[0], next[1]]);
-      // The quick first position can be kilometres off: the samples follow the precise one.
+    // Both requests at once: a quick network position (a second or two, but often unavailable in Iran, where Google's
+    // network location is blocked) and GPS (precise, slower). Whichever arrives first shows the person; GPS then
+    // refines it. Only when both fail is there an error — before, a failed quick request never tried GPS at all.
+    let first: Point | null = null;
+    let precise = false;
+    let failures = 0;
+    let denied = false;
+    const apply = (next: Point, isPrecise: boolean) => {
+      noteLocation(next[0], next[1]);
+      if (precise && !isPrecise) return;                 // a late rough position never undoes GPS
+      if (demoBuildEnabled && !validPoint(next)) { if (!first) { setLocating(false); setLocError('outside'); } return; }
+      if (isPrecise) precise = true;
+      setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]);
+      if (!first) {
+        first = next;
+        setFlyTo([next[0], next[1]]); setPointLabel(msg('موقعیت من')); setNearbyOnly(true); setLocating(false); setLocError(null);
+      } else if (distanceMetres(first, next) > DEMO_FOLLOW_METRES) {
+        // The quick position was kilometres off: the map follows, or the person and the businesses end up off-screen.
+        setFlyTo([next[0], next[1]]);
+      }
       if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => followDemoTarget(current, next));
-    }, () => undefined, { enableHighAccuracy: true, timeout: 30_000, maximumAge: 0 });
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => { refine(); const next: Point = [coords.latitude, coords.longitude]; noteLocation(next[0], next[1]); if (demoBuildEnabled && !validPoint(next)) { setLocating(false); setLocError('outside'); return; }
-        setPoint([next[0], next[1]]); setMyPoint([next[0], next[1]]); setFlyTo([next[0], next[1]]); setPointLabel(msg('موقعیت من')); setNearbyOnly(true); setLocating(false); setLocError(null);
-        if (demoBuildEnabled && demoEnabled && demoAnchor) setDemoTarget((current) => nextDemoTarget(current, next)); },
-      (error) => { setLocating(false); setLocError(error?.code === 1 ? 'denied' : 'unavailable'); },
-      { enableHighAccuracy: false, timeout: 15_000, maximumAge: 5 * 60_000 },
-    );
+    };
+    const fail = (error?: GeolocationPositionError) => {
+      failures += 1;
+      if (error?.code === 1) denied = true;
+      if (failures === 2 && !first) { setLocating(false); setLocError(denied ? 'denied' : 'unavailable'); }
+    };
+    navigator.geolocation.getCurrentPosition(({ coords }) => apply([coords.latitude, coords.longitude], false), fail,
+      { enableHighAccuracy: false, timeout: 15_000, maximumAge: 5 * 60_000 });
+    navigator.geolocation.getCurrentPosition(({ coords }) => apply([coords.latitude, coords.longitude], true), fail,
+      { enableHighAccuracy: true, timeout: 30_000, maximumAge: 0 });
   };
   // Already allowed on an earlier visit: locate straight away instead of showing an empty city.
   useEffect(() => {
