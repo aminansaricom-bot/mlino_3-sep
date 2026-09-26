@@ -94,3 +94,70 @@ export function searchProducts(records: readonly PublicUiRecord[], catalogs: Rea
   }
   return hits;
 }
+
+// ───────────── live storefront redesign helpers (owner's brief, 2026-09-26) ─────────────
+
+/** Persian/Arabic letters (ی/ي، ک/ك), diacritics, half-spaces and spaces do not decide a match. */
+export function foldText(text: string): string {
+  return text.replace(/ي/gu, 'ی').replace(/ك/gu, 'ک').replace(/[ً-ٰٟ]/gu, '').replace(/ـ/gu, '')
+    .replace(/[\s‌‏‎]+/gu, '').toLocaleLowerCase('fa-IR');
+}
+
+/** Active offers of the business that are NOT linked to one of its products: shown on the business, never on a product. */
+export function businessWideOffers(record: PublicUiRecord | undefined, catalog: CatalogRecord | undefined, now: number): PublicOffer[] {
+  const linked = new Set((catalog?.items ?? []).flatMap((item) => item.offer_version_links));
+  return activeOffers(record, now).filter((offer) => !linked.has(offer.offer_version_id));
+}
+
+/** The short offer tag on a business marker: the largest real product discount, else «آفر», else nothing. */
+export function offerTag(record: PublicUiRecord | undefined, catalog: CatalogRecord | undefined, now: number): { percent: number | null } | null {
+  const offers = activeOffers(record, now);
+  if (!offers.length) return null;
+  let best: number | null = null;
+  for (const item of catalog?.items ?? []) { const p = itemPrice(item, offers).percent; if (p !== null && (best === null || p > best)) best = p; }
+  return { percent: best };
+}
+
+export type NearbyHit = Readonly<{ businessId: string; item: CatalogItem }>;
+
+/** Products of these businesses whose name, description or group matches any of the words (after folding). */
+export function matchProducts(records: readonly PublicUiRecord[], catalogs: ReadonlyMap<string, CatalogRecord>, words: readonly string[], limit = 60): NearbyHit[] {
+  const wanted = [...new Set(words.map(foldText).filter((w) => w.length >= 2))];
+  if (!wanted.length) return [];
+  const hits: NearbyHit[] = [];
+  for (const record of records) {
+    for (const item of [...(catalogs.get(record.id)?.items ?? [])].sort((a, b) => a.display_order - b.display_order)) {
+      const hay = foldText(`${item.name} ${item.short_description ?? ''} ${item.grouping_label ?? ''}`);
+      if (wanted.some((w) => hay.includes(w))) hits.push({ businessId: record.id, item });
+      if (hits.length >= limit) return hits;
+    }
+  }
+  return hits;
+}
+
+/**
+ * Markers that would overlap go to another row (up to three); the chosen business always keeps the first row.
+ * `minGap` is in percent of the width. Markers that find no free row are left out (their business stays in the list).
+ */
+export function assignLanes<T extends { businessId: string; x: number }>(items: readonly T[], selectedId: string | null, minGap = 24, lanes = 3): Array<T & { lane: number }> {
+  const order = [...items].sort((a, b) => (a.businessId === selectedId ? -1 : b.businessId === selectedId ? 1 : 0));
+  const taken: number[][] = Array.from({ length: lanes }, () => []);
+  const out: Array<T & { lane: number }> = [];
+  for (const it of order) {
+    const lane = taken.findIndex((xs) => xs.every((x) => Math.abs(x - it.x) >= minGap));
+    if (lane < 0) continue;
+    taken[lane].push(it.x);
+    out.push({ ...it, lane });
+  }
+  return out;
+}
+
+/** Suggested questions that fit: availability for any product, sizes only for shop goods, offer end only with an offer. */
+export function chatSuggestions(opts: { hasItem: boolean; categoryKey: string | null; hasOffer: boolean }): string[] {
+  const out: string[] = [];
+  if (opts.hasItem) out.push(msg('این محصول موجوده؟'));
+  if (opts.hasItem && opts.categoryKey === 'retail_shop') out.push(msg('چه سایزهایی داره؟'));
+  if (opts.hasOffer) out.push(msg('این آفر تا کی فعاله؟'));
+  if (!opts.hasItem) out.push(msg('ساعت کاری؟'));
+  return out;
+}

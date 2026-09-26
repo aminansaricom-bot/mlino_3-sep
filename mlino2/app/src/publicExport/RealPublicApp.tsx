@@ -124,7 +124,7 @@ export default function RealPublicApp() {
     return () => { alive = false; };
   }, []);
   // The live storefront opens after the camera step (asked once per opening, skipped when already allowed).
-  const [cameraOk, setCameraOk] = useState(false);
+  const [vitrineMode, setVitrineMode] = useState<null | 'camera' | 'plain'>(null);
   const openChat = (target: ChatTarget | null) => { setChatTarget(target); setOverlay('chat'); };
 
   useEffect(() => {
@@ -399,12 +399,12 @@ export default function RealPublicApp() {
       onSuggest={() => setSuggestionEmpty(!nearby.some((item) => item.record.offers.length > 0))} suggestionEmpty={suggestionEmpty}
       radiusLabel={formatDistance(5000)} pointLabel={tr(pointLabel)} filtersApplied={category !== null || openOnly}
       onChangePoint={() => setOverlay('none')} onUseLocation={useMyLocation} locating={locating} onAccountChange={() => setChatRefresh((n) => n + 1)} />}
-    {overlay === 'vitrine' && !cameraOk && <CameraIntro onAllow={() => setCameraOk(true)} onLater={() => setOverlay('none')} />}
-    {overlay === 'vitrine' && cameraOk && <LiveVitrine onPhotoSearch={visualOn ? (photo) => setVisual({ initial: photo }) : undefined} records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point}
+    {overlay === 'vitrine' && !vitrineMode && <CameraIntro onAllow={() => setVitrineMode('camera')} onWithout={() => setVitrineMode('plain')} onBack={() => setOverlay('none')} />}
+    {overlay === 'vitrine' && vitrineMode && <LiveVitrine withCamera={vitrineMode === 'camera'} positionKnown={myPoint !== null} onPhotoSearch={visualOn ? (photo) => setVisual({ initial: photo }) : undefined} records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point}
       locationPending={myPoint === null && locError === null} initialRadius={demoBuildEnabled && demoEnabled ? 100 : undefined}
       offersOnly={offersOnly} onOffersOnly={setOffersOnly} query={query} onQuery={setQuery}
-      savedIds={experience.data.saved} onToggleSave={(id) => experience.toggle('saved', id)}
-      onOpenItem={openProduct} onOpenBusiness={openDetail} onClose={() => { setOverlay('none'); setCameraOk(false); }} demo={demoBuildEnabled && demoEnabled} />}
+      savedItems={experience.data.savedItems} onToggleSaveItem={experience.toggleItem}
+      onOpenItem={openProduct} onOpenBusiness={openDetail} onClose={() => { setOverlay('none'); setVitrineMode(null); }} demo={demoBuildEnabled && demoEnabled} />}
     {voiceInput.error && <div className="app-banner warn" role="status">{voiceInput.error}</div>}
     {searchOpen && <SearchPage query={query} onQuery={setQuery} onAsk={() => runAssistant(query, false)}
       assistant={assistant} ranked={assistantResults} records={allRecords.filter((r) => !experience.data.hidden.includes(r.id))} catalogByOrg={catalogByOrg}

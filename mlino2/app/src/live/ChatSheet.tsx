@@ -8,13 +8,14 @@ import { clean } from './liveData';
 import { tr, numberLocale, msg } from '../i18n';
 
 // Chat sheet over the live storefront (D-73). The recipient is fixed when the sheet opens; swiping to another
-// product does not change it. Suggested questions only fill the box — sending is always the person's own tap.
+// product does not change it. Suggested questions only fill the box (added after what is already written, never
+// replacing it) — sending is always the person's own tap.
 // Failed sends keep the text. The customer's number is never shown to the business.
 
-const QUICK = [msg('این محصول موجوده؟'), msg('شرایط آفر؟'), msg('ساعت کاری؟')] as const;
+const QUICK: readonly string[] = [msg('ساعت کاری؟')];
 const time = (iso: string) => { try { return new Date(iso).toLocaleTimeString(numberLocale(), { hour: '2-digit', minute: '2-digit' }); } catch { return ''; } };
 
-export type ChatContext = Readonly<{ organizationId: string; name: string; thumb?: CatalogMedia; item?: CatalogItem }>;
+export type ChatContext = Readonly<{ organizationId: string; name: string; thumb?: CatalogMedia; item?: CatalogItem; suggestions?: readonly string[] }>;
 
 export default function ChatSheet({ context, onClose, onOpenItem, onRead }: {
   context: ChatContext; onClose: () => void; onOpenItem?: (item: CatalogItem) => void; onRead?: () => void;
@@ -121,7 +122,9 @@ export default function ChatSheet({ context, onClose, onOpenItem, onRead }: {
     </div>
 
     {person && !closedForChat && !blocked && <footer className="lv-chat-foot">
-      <div className="lv-quick">{QUICK.map((q) => <button key={q} type="button" onClick={() => { setText(tr(q)); input.current?.focus(); }}>{tr(q)}</button>)}</div>
+      <div className="lv-quick">{((about ? context.suggestions : undefined) ?? QUICK).map((q) => <button key={q} type="button" onClick={() => {
+        setText((t) => (t.trim() ? `${t.trimEnd()} ${tr(q)}` : tr(q))); input.current?.focus();
+      }}>{tr(q)}</button>)}</div>
       {!thread && <input className="lv-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={40} placeholder={tr('نامی که کسب‌وکار می‌بیند (مثلاً سارا)')} aria-label={tr('نامی که کسب‌وکار می‌بیند')} />}
       <form className="lv-composer" onSubmit={(e) => { e.preventDefault(); void send(); }}>
         <textarea ref={input} rows={1} value={text} onChange={(e) => setText(e.target.value)} maxLength={900} placeholder={tr('پیامت را بنویس…')} aria-label={tr('متن پیام')} />
