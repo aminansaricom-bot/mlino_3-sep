@@ -42,6 +42,14 @@
 .lv2-search { flex: 1 1 0; width: 0; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 48px; padding-inline: 14px; border-radius: 999px; background: var(--lv-glass); color: var(--ml-muted); box-shadow: var(--lv-shadow); }
 .lv2-search input { flex: 1; width: 100%; min-width: 0; border: 0; outline: 0; background: none; color: var(--ml-text); font: inherit; font-size: 16px; }
 .lv2-search input::placeholder { color: var(--ml-muted); }
+.lv2-search { padding-inline: 14px 4px; gap: 4px; }
+.lv2-search > .lv-icon { margin-inline-end: 4px; }
+.lv2-infield { position: relative; width: 40px; height: 40px; flex: none; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; color: var(--ml-primary); }
+.lv2-infield::after { content: ""; position: absolute; inset: -2px; } /* 44px target */
+.lv2-infield.on { background: var(--ml-danger); color: #fff; animation: lv-listen 1.2s ease-in-out infinite; }
+.lv2-search.listening { box-shadow: 0 0 0 2px var(--ml-danger), var(--lv-shadow); }
+.lv2-status.warn { color: var(--ml-danger); }
+@keyframes lv-listen { 50% { box-shadow: 0 0 0 6px rgba(168,45,36,.18); } }
 .lv2-search:focus-within { box-shadow: 0 0 0 2px var(--ml-primary), var(--lv-shadow); }
 .lv2-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid transparent; background: var(--lv-glass); color: var(--ml-text); font-size: 13px; font-weight: 700; box-shadow: var(--lv-shadow); white-space: nowrap; }
 .lv2-chip.on { background: var(--lv-sel-bg); color: var(--lv-sel-text); }
@@ -142,6 +150,8 @@
 @keyframes lv-in-down { from { transform: translateY(-10px); opacity: 0; } to { transform: none; opacity: 1; } }
 
 @media (max-width: 360px) {
+  .lv2-search { padding-inline: 10px 2px; }
+  .lv2-search > .lv-icon { display: none; }
   .lv2-row { gap: 6px; padding: 0 8px; }
   .lv2-icon { width: 44px; height: 44px; }
   .lv2-card-img { width: 80px; height: 80px; }

@@ -12,6 +12,7 @@ import { CHAT_ENABLED } from '../chat/chatApi';
 import { onBackButton } from '../native/bridge';
 import { formatDistance } from '../uiFormat';
 import LiveIcon from './icons';
+import MicIcon from '../design/MicIcon';
 import { localIntent, normalizeFa } from '../assistant/assistantIntent';
 import ChatSheet, { type ChatContext } from './ChatSheet';
 import {
@@ -46,6 +47,8 @@ type Props = {
   query: string;
   onQuery: (q: string) => void;
   onPhotoSearch?: (photo: Photo | null) => void;
+  /** Speaking the product search (the app's own speech input; it only fills the box). */
+  voice?: { supported: boolean; listening: boolean; error: string | null; onMic: () => void };
   savedItems: readonly string[];
   onToggleSaveItem: (organizationId: string, itemId: string) => void;
   onOpenItem: (organizationId: string, item: CatalogItem) => void;
@@ -269,17 +272,20 @@ export default function LiveVitrine(p: Props) {
     <header className="lv2-top">
       <div className="lv2-row">
         <button type="button" className="lv2-icon" onClick={p.onClose} aria-label={tr('بازگشت به نقشه')}><LiveIcon name="chevron-right" /></button>
-        <form className="lv2-search" role="search" onSubmit={(e) => { e.preventDefault(); p.onQuery(text); searchInput.current?.blur(); if (hits.length) openResults(); }}>
+        <form className={`lv2-search${p.voice?.listening ? ' listening' : ''}`} role="search" onSubmit={(e) => { e.preventDefault(); p.onQuery(text); searchInput.current?.blur(); if (hits.length) openResults(); }}>
           <LiveIcon name="search" size={18} />
-          <input ref={searchInput} value={text} onChange={(e) => setText(e.target.value)} placeholder={tr('جست‌وجوی محصول')} aria-label={tr('جست‌وجوی محصول')} enterKeyHint="search" />
+          <input ref={searchInput} value={text} onChange={(e) => setText(e.target.value)} placeholder={p.voice?.listening ? tr('در حال شنیدن…') : tr('جست‌وجوی محصول')} aria-label={tr('جست‌وجوی محصول')} enterKeyHint="search" />
+          {text && <button type="button" className="lv2-infield" onClick={() => { setText(''); p.onQuery(''); setBrowse('business'); searchInput.current?.focus(); }} aria-label={tr('پاک کردن جست‌وجو')}><LiveIcon name="close" size={16} /></button>}
+          {p.voice?.supported && <button type="button" className={`lv2-infield${p.voice.listening ? ' on' : ''}`} aria-pressed={p.voice.listening} onClick={p.voice.onMic}
+            aria-label={p.voice.listening ? tr('توقف شنیدن') : tr('جست‌وجو با صدا')}><MicIcon size={20} /></button>}
+          {p.onPhotoSearch && <button type="button" className="lv2-infield" onClick={() => {
+            const v = camera.videoRef.current;
+            if (camera.state.kind === 'active' && v) photoFromVideo(v).then((ph) => p.onPhotoSearch!(ph), () => p.onPhotoSearch!(null));
+            else p.onPhotoSearch!(null);
+          }} aria-label={tr('جست‌وجو با عکس')}><LiveIcon name="photo-search" size={20} /></button>}
         </form>
         <button ref={catButton} type="button" className={`lv2-icon${group !== 'all' ? ' on' : ''}`} aria-expanded={popover === 'categories'} aria-haspopup="dialog"
           onClick={() => setPopover(popover === 'categories' ? 'none' : 'categories')} aria-label={tr('دسته‌بندی')}><LiveIcon name="grid" /></button>
-        {p.onPhotoSearch && <button type="button" className="lv2-icon" onClick={() => {
-          const v = camera.videoRef.current;
-          if (camera.state.kind === 'active' && v) photoFromVideo(v).then((ph) => p.onPhotoSearch!(ph), () => p.onPhotoSearch!(null));
-          else p.onPhotoSearch!(null);
-        }} aria-label={tr('جست‌وجو با این عکس')}><LiveIcon name="photo-search" /></button>}
       </div>
       <div className="lv2-row chips">
         <button type="button" className={`lv2-chip${p.offersOnly ? ' on' : ''}`} aria-pressed={p.offersOnly} onClick={() => p.onOffersOnly(!p.offersOnly)}><LiveIcon name="offer" size={16} />{tr('فقط آفرها')}</button>
@@ -288,10 +294,11 @@ export default function LiveVitrine(p: Props) {
         {q && <button type="button" className="lv2-chip on" onClick={() => { setText(''); p.onQuery(''); setBrowse('business'); }} aria-label={tr('برداشتن جست‌وجوی «{0}»', q)}>«{q}»<LiveIcon name="close" size={14} /></button>}
         {p.demo && <span className="lv2-chip static">{tr('نمونه‌ها ساختگی‌اند')}</span>}
       </div>
-      {(status || cameraOff) && <div className="lv2-status" role="status">
-        <span>{cameraOff ? tr('دوربین در دسترس نیست؛ ویترین بدون تصویر دوربین است.') : status!.text}</span>
-        {!cameraOff && status?.action && <button type="button" onClick={status.action.run}>{status.action.label}</button>}
-      </div>}
+      {p.voice?.error ? <div className="lv2-status warn" role="alert"><span>{p.voice.error}</span></div>
+        : (status || cameraOff) && <div className="lv2-status" role="status">
+          <span>{cameraOff ? tr('دوربین در دسترس نیست؛ ویترین بدون تصویر دوربین است.') : status!.text}</span>
+          {!cameraOff && status?.action && <button type="button" onClick={status.action.run}>{status.action.label}</button>}
+        </div>}
     </header>
 
     {/* one popover at a time */}

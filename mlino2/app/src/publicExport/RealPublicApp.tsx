@@ -311,7 +311,9 @@ export default function RealPublicApp() {
     if (ASSISTANT_REMOTE ? consent === 'unknown' : consent !== 'granted') { setPendingAsk({ query: '', voice: true }); return; }
     voiceInput.start();
   };
-  const voiceInput = useVoiceInput((text) => setQuery(text), (text) => { setQuery(text); runAssistant(text, true); });
+  // In the live storefront, speech only fills its product search (no spoken assistant answer over the camera).
+  const overlayNow = useRef(overlay); overlayNow.current = overlay;
+  const voiceInput = useVoiceInput((text) => setQuery(text), (text) => { setQuery(text); if (overlayNow.current !== 'vitrine') runAssistant(text, true); });
   const assistantDistances = useMemo(() => new Map(nearbyPublicUiRecords(allRecords, point[0], point[1], 20000).map((item) => [item.record.id, item.distanceMeters])), [allRecords, point]);
   const assistantResults = useMemo(() => assistant?.answer
     ? promoteDirect(rankRecords({ records: allRecords, catalogByOrg, distances: assistantDistances, intent: assistant.answer.intent, now }))
@@ -400,7 +402,7 @@ export default function RealPublicApp() {
       radiusLabel={formatDistance(5000)} pointLabel={tr(pointLabel)} filtersApplied={category !== null || openOnly}
       onChangePoint={() => setOverlay('none')} onUseLocation={useMyLocation} locating={locating} onAccountChange={() => setChatRefresh((n) => n + 1)} />}
     {overlay === 'vitrine' && !vitrineMode && <CameraIntro onAllow={() => setVitrineMode('camera')} onWithout={() => setVitrineMode('plain')} onBack={() => setOverlay('none')} />}
-    {overlay === 'vitrine' && vitrineMode && <LiveVitrine withCamera={vitrineMode === 'camera'} positionKnown={myPoint !== null} onPhotoSearch={visualOn ? (photo) => setVisual({ initial: photo }) : undefined} records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point}
+    {overlay === 'vitrine' && vitrineMode && <LiveVitrine withCamera={vitrineMode === 'camera'} positionKnown={myPoint !== null} onPhotoSearch={visualOn ? (photo) => setVisual({ initial: photo }) : undefined} voice={{ supported: voiceInput.supported, listening: voiceInput.listening, error: voiceInput.error, onMic: micPress }} records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point}
       locationPending={myPoint === null && locError === null} initialRadius={demoBuildEnabled && demoEnabled ? 100 : undefined}
       offersOnly={offersOnly} onOffersOnly={setOffersOnly} query={query} onQuery={setQuery}
       savedItems={experience.data.savedItems} onToggleSaveItem={experience.toggleItem}
@@ -409,6 +411,7 @@ export default function RealPublicApp() {
     {searchOpen && <SearchPage query={query} onQuery={setQuery} onAsk={() => runAssistant(query, false)}
       assistant={assistant} ranked={assistantResults} records={allRecords.filter((r) => !experience.data.hidden.includes(r.id))} catalogByOrg={catalogByOrg}
       now={now} distanceById={assistantDistances} voice={{ supported: voiceInput.supported, listening: voiceInput.listening, onMic: micPress }}
+      onPhoto={visualOn ? () => setVisual({ initial: null }) : undefined}
       onOpenBusiness={openDetail} onOpenItem={openProduct} onClose={() => setSearchOpen(false)}
       onShowMap={() => { setSearchOpen(false); setTab('discover'); setSheet('half'); }} />}
     {pendingAsk && <AssistantConsent remote={ASSISTANT_REMOTE} onAccept={() => { const voice = pendingAsk.voice && !pendingAsk.query; decideConsent('granted'); if (voice) voiceInput.start(); }}

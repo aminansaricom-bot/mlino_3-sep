@@ -1,5 +1,5 @@
 /* Search with a photo (D-91): «روشنای محله» tokens, RTL, 44 px targets, safe areas, light and dark. */
-.vs-root { position: fixed; inset: 0; z-index: 1300; display: flex; flex-direction: column; background: var(--canvas); color: var(--ink);
+.vs-root { position: fixed; inset: 0; z-index: 1400; /* above the live storefront (1350) it can open from */ display: flex; flex-direction: column; background: var(--canvas); color: var(--ink);
   padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
 .vs-head { display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
 .vs-head h1 { margin: 0; font-size: 17px; text-align: center; }

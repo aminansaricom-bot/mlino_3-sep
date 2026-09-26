@@ -27,6 +27,8 @@ export default function SearchPage(p: {
   assistant: { query: string; answer: AssistantAnswer | null; loading: boolean } | null; ranked: readonly RankedResult[];
   records: readonly PublicUiRecord[]; catalogByOrg: ReadonlyMap<string, CatalogRecord>; now: number; distanceById: ReadonlyMap<string, number>;
   voice?: { supported: boolean; listening: boolean; onMic: () => void };
+  /** «جست‌وجو با عکس» (only when the server has visual search). */
+  onPhoto?: () => void;
   onOpenBusiness: (id: string) => void; onOpenItem: (organizationId: string, item: CatalogItem) => void; onShowMap: () => void; onClose: () => void;
 }) {
   const [tab, setTab] = useState<Tab>('businesses');
@@ -72,6 +74,7 @@ export default function SearchPage(p: {
         {p.query && <button type="button" className="rs-search-clear" aria-label={tr('پاک کردن جست‌وجو')} onClick={() => p.onQuery('')}><LiveIcon name="close" size={18} /></button>}
         {p.voice?.supported && <button type="button" className={`rs-search-mic${p.voice.listening ? ' on' : ''}`} aria-pressed={p.voice.listening}
           aria-label={p.voice.listening ? tr('توقف شنیدن') : tr('پرسیدن با صدا')} onClick={p.voice.onMic}><MicIcon size={26} /></button>}
+        {p.onPhoto && <button type="button" className="rs-search-photo" aria-label={tr('جست‌وجو با عکس')} title={tr('جست‌وجو با عکس')} onClick={p.onPhoto}><LiveIcon name="photo-search" size={24} /></button>}
         <button type="submit" className="rs-search-ask" aria-label={tr('پرسیدن از دستیار')} disabled={p.query.trim().length < 2}>✦</button>
       </form>
       <Segmented label={tr('نوع نتیجه')} value={tab} onChange={setTab} options={[

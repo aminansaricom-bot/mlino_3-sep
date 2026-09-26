@@ -541,4 +541,8 @@ export const ES: Readonly<Record<string, string>> = {
 
   // Live storefront redesign (2026-09-26)
   'نزدیک‌ترین کسب‌وکارها': 'Negocios más cercanos',
+
+  // Voice and photo in search (2026-09-26)
+  'در حال شنیدن…': 'Escuchando…',
+  'جست‌وجو با صدا': 'Buscar por voz',
 };

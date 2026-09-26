@@ -583,4 +583,8 @@ export const AR: Readonly<Record<string, string>> = {
 
   // Live storefront redesign (2026-09-26)
   'نزدیک‌ترین کسب‌وکارها': 'أقرب الأنشطة',
+
+  // Voice and photo in search (2026-09-26)
+  'در حال شنیدن…': 'جارٍ الاستماع…',
+  'جست‌وجو با صدا': 'البحث بالصوت',
 };
