@@ -1,3 +1,5 @@
+import { noteServerDate } from './clock';
+
 export interface PublicExportTransport {
   read(): Promise<Uint8Array>;
 }
@@ -13,6 +15,8 @@ export class FetchTransport implements PublicExportTransport {
     try {
       const response = await fetch(this.url, { cache: 'no-store', signal: controller.signal });
       if (!response.ok) throw new Error('PUBLIC_EXPORT_FETCH_FAILED');
+      // A copy the service worker kept while offline carries an old Date: it must not set the clock.
+      if (!response.headers.get('x-mlino-offline')) noteServerDate(response.headers.get('date'));
       const length = Number(response.headers.get('content-length'));
       if (Number.isFinite(length) && length > this.maxBytes) throw new Error('PUBLIC_EXPORT_TOO_LARGE');
       const reader = response.body?.getReader();

@@ -229,3 +229,27 @@ describe('signed public export consumer', () => {
     expect(consumer.read(now + 1000)[0].business.name).toBe('نسخهٔ دوم');
   });
 });
+
+describe('a phone whose clock is off (server Date header)', () => {
+  it('a phone one minute slow still accepts the fresh export once the server time is known', async () => {
+    const { noteServerDate, resetServerClock, serverNow } = await import('./clock');
+    const { pair, trust } = await keyPair();
+    const phoneNow = now - 60_000;                      // the phone is 60 s behind the server
+    vi.useFakeTimers(); vi.setSystemTime(phoneNow);
+    try {
+      // Before any response: the export looks 60 s in the future and is refused, as it was on the owner's phone.
+      resetServerClock();
+      await expect(new PublicExportConsumer(new FileTransport(await signed(pair)), trust).refresh()).rejects.toThrow('PUBLIC_EXPORT_EXPIRED_OR_FUTURE');
+      // The export response carries the server's time; the offset corrects the phone.
+      noteServerDate(new Date(now).toUTCString());
+      expect(Math.abs(serverNow() - now)).toBeLessThan(1000);
+      const consumer = new PublicExportConsumer(new FileTransport(await signed(pair)), trust);
+      await consumer.refresh();
+      expect(consumer.hasValidSnapshot()).toBe(true);
+      expect(consumer.read()).toHaveLength(1);
+      // Small differences (the header's own rounding) keep the phone's clock.
+      noteServerDate(new Date(phoneNow + 1500).toUTCString());
+      expect(serverNow()).toBe(phoneNow);
+    } finally { vi.useRealTimers(); resetServerClock(); }
+  });
+});

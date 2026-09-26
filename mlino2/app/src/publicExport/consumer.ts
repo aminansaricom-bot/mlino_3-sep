@@ -1,4 +1,5 @@
 import { snapshotId } from './canonical';
+import { serverNow } from './clock';
 import { instant, mapRecords, near, visibleAt, type PublicRecord } from './mapping';
 import { TrustBundle } from './trustBundle';
 import type { PublicExportTransport } from './transport';
@@ -31,7 +32,7 @@ export class PublicExportConsumer {
 
   constructor(private readonly transport: PublicExportTransport, private readonly trust: TrustBundle) {}
 
-  refresh(now = Date.now()): Promise<void> {
+  refresh(now?: number): Promise<void> {
     if (this.pending) return this.pending;
     const work = this.load(now);
     this.pending = work;
@@ -39,8 +40,10 @@ export class PublicExportConsumer {
     return work;
   }
 
-  private async load(now: number): Promise<void> {
+  private async load(nowArg?: number): Promise<void> {
     const raw = await this.transport.read();
+    // After the read: the response has just told us the server's time.
+    const now = nowArg ?? serverNow();
     const artifact = await verifyArtifact(raw, this.trust);
     const generatedAt = instant(artifact.generated_at);
     if (generatedAt > now + MAX_CLOCK_SKEW_MS || now > generatedAt + TTL_MS) throw new Error('PUBLIC_EXPORT_EXPIRED_OR_FUTURE');
@@ -63,15 +66,15 @@ export class PublicExportConsumer {
   }
 
   get snapshotId(): string | null { return this.accepted?.snapshotId ?? null; }
-  hasValidSnapshot(now = Date.now()): boolean { return this.current(now) !== null; }
-  read(now = Date.now()): readonly PublicRecord[] {
+  hasValidSnapshot(now = serverNow()): boolean { return this.current(now) !== null; }
+  read(now = serverNow()): readonly PublicRecord[] {
     const value = this.current(now);
     return value ? value.records.map((record) => visibleAt(record, now)) : [];
   }
-  getById(id: string, now = Date.now()): PublicRecord | null {
+  getById(id: string, now = serverNow()): PublicRecord | null {
     return this.read(now).find((record) => record.business.organization_id === id) ?? null;
   }
-  findNear(latitude: number, longitude: number, radiusMeters: number, now = Date.now()) {
+  findNear(latitude: number, longitude: number, radiusMeters: number, now = serverNow()) {
     return near(this.read(now), latitude, longitude, radiusMeters);
   }
 }

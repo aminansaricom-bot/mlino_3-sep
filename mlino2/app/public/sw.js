@@ -32,7 +32,12 @@ function networkFirst(request, fallbackKey) {
       if (res.ok) cache.put(fallbackKey || request, res.clone());
       return res;
     }).catch(function () {
-      return cache.match(fallbackKey || request).then(function (hit) { return hit || Response.error(); });
+      // Offline: the saved copy, marked so the page does not take its old Date header for the server's time.
+      return cache.match(fallbackKey || request).then(function (hit) {
+        if (!hit) return Response.error();
+        var headers = new Headers(hit.headers); headers.set('x-mlino-offline', '1');
+        return new Response(hit.body, { status: hit.status, statusText: hit.statusText, headers: headers });
+      });
     });
   });
 }

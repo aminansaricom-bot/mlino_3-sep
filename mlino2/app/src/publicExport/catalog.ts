@@ -1,5 +1,6 @@
 import { snapshotId } from './canonical';
 import { MAX_CLOCK_SKEW_MS, TTL_MS, type PublicExportConsumer } from './consumer';
+import { serverNow } from './clock';
 import { instant, type PublicRecord } from './mapping';
 import type { TrustBundle } from './trustBundle';
 import { verifyArtifact } from './verify';
@@ -133,21 +134,22 @@ export class CatalogConsumer {
   private accepted: { generatedAt: number; snapshotId: string; records: readonly CatalogRecord[] } | null = null;
   constructor(private readonly transport: CatalogTransport, private readonly trust: TrustBundle) {}
 
-  async refresh(business: PublicExportConsumer, now = Date.now()): Promise<void> {
+  async refresh(business: PublicExportConsumer, now?: number): Promise<void> {
     // Every catalog failure is contained here; the business consumer is never mutated.
     try {
       const raw = await this.transport.read();
-      if (!raw || raw.length > CATALOG_CAP || !business.hasValidSnapshot(now)) { this.accepted = null; return; }
+      const t = now ?? serverNow();
+      if (!raw || raw.length > CATALOG_CAP || !business.hasValidSnapshot(t)) { this.accepted = null; return; }
       const artifact = await verifyArtifact(raw, this.trust, 'catalog');
       const generatedAt = instant(artifact.generated_at);
-      if (generatedAt > now + MAX_CLOCK_SKEW_MS || now > generatedAt + TTL_MS) throw new Error('CATALOG_EXPIRED');
+      if (generatedAt > t + MAX_CLOCK_SKEW_MS || t > generatedAt + TTL_MS) throw new Error('CATALOG_EXPIRED');
       const records = parseRecords(artifact.records);
       if (artifact.snapshot_id !== await snapshotId('mlino.v2.public-catalog.v1', artifact.records as unknown[])) shape();
       this.accepted = { generatedAt, snapshotId: business.snapshotId!, records };
     } catch { this.accepted = null; }
   }
 
-  read(business: PublicExportConsumer, now = Date.now()): readonly CatalogRecord[] {
+  read(business: PublicExportConsumer, now = serverNow()): readonly CatalogRecord[] {
     const current = this.accepted;
     if (!current || !business.hasValidSnapshot(now) || current.snapshotId !== business.snapshotId ||
         current.generatedAt > now + MAX_CLOCK_SKEW_MS || now > current.generatedAt + TTL_MS) return [];

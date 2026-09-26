@@ -1,3 +1,4 @@
+import { serverNow } from './clock';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PublicExportConsumer, FETCH_INTERVAL_MS } from './consumer';
 import { trustBundleFromBuildJson } from './trustBundle';
@@ -71,7 +72,8 @@ export default function RealPublicApp() {
     try { return new CatalogConsumer(new CatalogFetchTransport(), trustBundleFromBuildJson(bundle)); }
     catch { return null; }
   }, [consumer]);
-  const [now, setNow] = useState(() => Date.now());
+  // Server time (corrected phone clock): freshness and offer windows must not depend on a phone that is off.
+  const [now, setNow] = useState(() => serverNow());
   const [refreshFailed, setRefreshFailed] = useState(false);
   // The first download is still on its way: that is loading, not «no valid data».
   const [firstLoadDone, setFirstLoadDone] = useState(false);
@@ -128,11 +130,11 @@ export default function RealPublicApp() {
       catch { if (active) setRefreshFailed(true); }
       if (active) setFirstLoadDone(true);
       if (catalog) await catalog.refresh(consumer).catch(() => undefined);
-      if (active) setNow(Date.now());
+      if (active) setNow(serverNow());
     };
     void refresh();
     const polling = window.setInterval(() => { void refresh(); }, FETCH_INTERVAL_MS);
-    const clock = window.setInterval(() => setNow(Date.now()), 30_000);
+    const clock = window.setInterval(() => setNow(serverNow()), 30_000);
     return () => { active = false; window.clearInterval(polling); window.clearInterval(clock); };
   }, [consumer, catalog]);
 
