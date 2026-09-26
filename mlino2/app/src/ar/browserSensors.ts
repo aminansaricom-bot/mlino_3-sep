@@ -113,6 +113,11 @@ export function resolveHeadingSource(
  */
 export function useDeviceHeading(enabled: boolean): {
   headingDeg: number | null;
+  /**
+   * The phone's turn from a relative reading (no north: Brave on Android, some WebViews). The angle itself means
+   * nothing, but its changes are exact (gyroscope): the live storefront anchors it once and then follows the turns.
+   */
+  relativeDeg: number | null;
   simulated: boolean;
   /** وضعیت منبع heading — برای نوار وضعیت صادقانه UI */
   source: 'none' | 'compass' | 'manual' | 'notAbsolute';
@@ -120,6 +125,7 @@ export function useDeviceHeading(enabled: boolean): {
   request: () => void;
 } {
   const [headingDeg, setHeadingDeg] = useState<number | null>(null);
+  const [relativeDeg, setRelativeDeg] = useState<number | null>(null);
   const [simulated, setSimulated] = useState(false);
   const [source, setSource] = useState<'none' | 'compass' | 'manual' | 'notAbsolute'>('none');
   const simulatedRef = useRef(false);
@@ -137,17 +143,26 @@ export function useDeviceHeading(enabled: boolean): {
   useEffect(() => {
     if (!enabled) return;
     const handler = (event: Event) => {
-      if (simulatedRef.current) return;
       const e = event as OrientationEventIOS;
       const result = headingFromCompassEvent({
         webkitCompassHeading: e.webkitCompassHeading,
         alpha: typeof e.alpha === 'number' ? e.alpha : null,
         absolute: e.absolute === true,
       });
+      // The fixed fallback direction is only for «no reading yet»: any real reading (a compass, or the relative turns
+      // Brave on Android gives) takes over, even if it starts late. Before, a late sensor was ignored for good.
+      if (simulatedRef.current) {
+        if (result.kind !== 'ok' && result.kind !== 'not-absolute') return;
+        simulatedRef.current = false;
+        setSimulated(false);
+      }
       const now = Date.now();
       if (result.kind === 'ok') {
         lastAbsoluteRef.current = now;
         setHeadingDeg(result.headingDeg);
+      } else if (result.kind === 'not-absolute' && typeof e.alpha === 'number') {
+        const turned = screen.orientation && typeof screen.orientation.angle === 'number' ? screen.orientation.angle : 0;
+        setRelativeDeg(((360 - e.alpha + turned) % 360 + 360) % 360);
       }
       // صادقانه: مرجع رویداد نسبی شمال نیست — ولی فقط وقتی اعلام می‌شود که خوانش absolute تازه‌ای نباشد
       const next = resolveHeadingSource(
@@ -173,5 +188,5 @@ export function useDeviceHeading(enabled: boolean): {
     setHeadingDeg(((deg % 360) + 360) % 360);
   }, []);
 
-  return { headingDeg, simulated, source, setSimulatedHeading, request };
+  return { headingDeg, relativeDeg, simulated, source, setSimulatedHeading, request };
 }

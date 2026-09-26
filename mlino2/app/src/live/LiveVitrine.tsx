@@ -106,13 +106,24 @@ export default function LiveVitrine(p: Props) {
     }
     return best ? Math.round(best.b) : null;
   }, [pool, p.searchPoint]);
+  // Only a relative reading (no north: Brave on Android, some WebViews): the turns are exact, only north is unknown.
+  // The view starts on the nearest matching business and then follows every turn of the phone. Before, it froze on
+  // that business and ignored the phone, because the fixed direction also switched the sensor off.
+  const relative = heading.source === 'notAbsolute' && heading.relativeDeg !== null;
+  const offset = useRef<number | null>(null);
+  if (relative && offset.current === null && nearestBearing !== null) offset.current = nearestBearing - heading.relativeDeg!;
+  const recenter = () => { if (relative && nearestBearing !== null) offset.current = nearestBearing - heading.relativeDeg!; setPicked(null); };
   useEffect(() => {
-    if (heading.source === 'compass') return undefined;
+    // No reading at all: turn once towards the nearest business so there is something to see.
+    if (heading.source === 'compass' || heading.source === 'notAbsolute') return undefined;
     const t = window.setTimeout(() => heading.setSimulatedHeading(nearestBearing ?? 0), heading.headingDeg === null ? 1200 : 0);
     return () => window.clearTimeout(t);
   }, [heading.source, nearestBearing]); // eslint-disable-line react-hooks/exhaustive-deps
-  const headingDeg = heading.headingDeg;
-  const reliable = heading.source === 'compass';
+  const headingDeg = relative && offset.current !== null
+    ? Math.round((((offset.current + heading.relativeDeg!) % 360) + 360) % 360)
+    : heading.headingDeg;
+  // With exact turns, what is in front of the camera decides again (not only nearness).
+  const reliable = heading.source === 'compass' || relative;
   const scene = useMemo(() => {
     if (headingDeg === null) return null;
     const view = buildPublicArView(pool, { latitude: p.searchPoint[0], longitude: p.searchPoint[1], radiusMeters: radius, headingDeg }, p.now);
@@ -182,7 +193,7 @@ export default function LiveVitrine(p: Props) {
   const hours = selected ? openNow(selected, p.now) : 'unknown';
   const unreadHere = selectedId ? unread.get(selectedId) ?? 0 : 0;
 
-  const noCompass = heading.source !== 'compass';
+  const noCompass = heading.source !== 'compass' && !relative;
   const swipe = useRef<{ x: number; y: number } | null>(null);
   const stepGroup = (step: number) => {
     const i = CATEGORY_GROUPS.findIndex((g) => g.id === group);
@@ -216,6 +227,8 @@ export default function LiveVitrine(p: Props) {
           aria-label={tr('جست‌وجو در ویترین زنده')} enterKeyHint="search" />
         {text && <button type="button" className="lv-clear" onClick={() => { setText(''); p.onQuery(''); }} aria-label={tr('پاک کردن جست‌وجو')}><LiveIcon name="close" size={16} /></button>}
       </form>
+      {relative && <button type="button" className="lv-iconbtn small" onClick={recenter}
+        aria-label={tr('جهت را دوباره روی نزدیک‌ترین کسب‌وکار تنظیم کن')} title={tr('جهت را دوباره روی نزدیک‌ترین کسب‌وکار تنظیم کن')}><LiveIcon name="compass" size={20} /></button>}
     </header>
     <div className="lv-topstack" ref={topStack}>
     <div className="lv-chips">

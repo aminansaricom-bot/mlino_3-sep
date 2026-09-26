@@ -440,4 +440,7 @@ export const TR: Readonly<Record<string, string>> = {
   'از تنظیمات مرورگر یا گوشی، اجازه‌ی موقعیت را برای ملینو روشن کن و دوباره امتحان کن.': 'Tarayıcı veya telefon ayarlarından MLINO için konum iznini aç ve tekrar dene.',
   'تا کسب‌وکارها و تخفیف‌های کنار خودت را ببینی. موقعیت فقط روی همین گوشی حساب می‌شود.': 'Hemen yanındaki işletmeleri ve teklifleri görmek için. Konum yalnızca bu telefonda hesaplanır.',
   'روشن کردن': 'Aç',
+
+  // live storefront: re-aim
+  'جهت را دوباره روی نزدیک‌ترین کسب‌وکار تنظیم کن': 'Yönü en yakın işletmeye yeniden ayarla',
 };

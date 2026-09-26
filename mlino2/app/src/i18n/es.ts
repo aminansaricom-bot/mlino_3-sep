@@ -440,4 +440,7 @@ export const ES: Readonly<Record<string, string>> = {
   'از تنظیمات مرورگر یا گوشی، اجازه‌ی موقعیت را برای ملینو روشن کن و دوباره امتحان کن.': 'Activa el permiso de ubicación para MLINO en los ajustes del navegador o del teléfono y vuelve a intentarlo.',
   'تا کسب‌وکارها و تخفیف‌های کنار خودت را ببینی. موقعیت فقط روی همین گوشی حساب می‌شود.': 'Para ver los negocios y ofertas junto a ti. La ubicación solo se usa en este teléfono.',
   'روشن کردن': 'Activar',
+
+  // live storefront: re-aim
+  'جهت را دوباره روی نزدیک‌ترین کسب‌وکار تنظیم کن': 'Reorienta la dirección hacia el negocio más cercano',
 };

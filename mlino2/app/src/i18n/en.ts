@@ -482,4 +482,7 @@ export const EN: Readonly<Record<string, string>> = {
   'از تنظیمات مرورگر یا گوشی، اجازه‌ی موقعیت را برای ملینو روشن کن و دوباره امتحان کن.': 'Turn on location permission for MLINO in your browser or phone settings, then try again.',
   'تا کسب‌وکارها و تخفیف‌های کنار خودت را ببینی. موقعیت فقط روی همین گوشی حساب می‌شود.': 'To see the businesses and offers right around you. Your location is only used on this phone.',
   'روشن کردن': 'Turn on',
+
+  // live storefront: re-aim
+  'جهت را دوباره روی نزدیک‌ترین کسب‌وکار تنظیم کن': 'Re-aim the direction at the nearest business',
 };
