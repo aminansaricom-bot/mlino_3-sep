@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>بررسی ملینو روی این گوشی</title>
+<style>
+body { margin: 0; background: #F7F8F6; color: #172B2A; font: 15px/1.7 Tahoma, sans-serif; }
+.wrap { max-width: 520px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 19px; margin: 4px 0 12px; }
+.row { background: #fff; border: 1px solid #D5DEDA; border-radius: 14px; padding: 10px 14px; margin: 8px 0; }
+.row b { display: block; }
+.ok { color: #1E7B4F; } .bad { color: #AD4326; } .wait { color: #566663; }
+code { direction: ltr; unicode-bidi: plaintext; display: block; font-size: 12px; color: #566663; word-break: break-all; }
+button { font: inherit; background: #246B62; color: #fff; border: 0; border-radius: 12px; padding: 10px 16px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>بررسی ملینو روی این گوشی</h1>
+  <p>از همین صفحه یک عکس (اسکرین‌شات) بگیر و بفرست.</p>
+  <div id="out"></div>
+  <button onclick="location.reload()">دوباره</button>
+</div>
+<script>
+(function () {
+  var out = document.getElementById('out');
+  function row(title) {
+    var el = document.createElement('div'); el.className = 'row';
+    el.innerHTML = '<b class="wait">… ' + title + '</b><code></code>'; out.appendChild(el);
+    return function (ok, detail) {
+      el.querySelector('b').className = ok ? 'ok' : 'bad';
+      el.querySelector('b').textContent = (ok ? '✓ ' : '✗ ') + title;
+      el.querySelector('code').textContent = detail || '';
+    };
+  }
+  var PUB = 'lRYrhf7lSlxI6ZqxTTdJ6HSLrvrPtKZTe9D4cFnCGgM';   // the demo export's public key (public by design)
+  var b64u = function (s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); };
+
+  row('مرورگر')(true, navigator.userAgent);
+  row('اتصال امن')(!!window.isSecureContext && !!(window.crypto && crypto.subtle), 'secure=' + window.isSecureContext + ' subtle=' + !!(window.crypto && crypto.subtle));
+
+  var ed = row('پشتیبانی از امضای Ed25519');
+  (async function () {
+    try { await crypto.subtle.importKey('raw', b64u(PUB), { name: 'Ed25519' }, false, ['verify']); ed(true, 'supported'); }
+    catch (e) { ed(false, (e && e.name) + ': ' + (e && e.message)); }
+  })();
+
+  var sw = row('Service Worker');
+  if (navigator.serviceWorker) navigator.serviceWorker.getRegistration().then(function (r) {
+    sw(true, r ? ('active: ' + (r.active && r.active.scriptURL)) : 'none');
+  }).catch(function (e) { sw(false, String(e)); }); else sw(true, 'not available');
+
+  var loc = row('اجازه‌ی موقعیت');
+  if (navigator.permissions) navigator.permissions.query({ name: 'geolocation' }).then(function (p) { loc(p.state !== 'denied', p.state); }).catch(function (e) { loc(true, String(e)); });
+  else loc(true, 'unknown');
+
+  var data = row('دریافت اطلاعات کسب‌وکارها');
+  var clock = row('ساعت گوشی در برابر سرور');
+  var t0 = Date.now();
+  fetch('/public-export/public-business.v1.json?diag=' + t0, { cache: 'no-store' }).then(function (r) {
+    var server = Date.parse(r.headers.get('date') || '');
+    var local = Date.now();
+    clock(Math.abs(server - local) < 30000, 'phone=' + new Date(local).toISOString() + '  server=' + (isFinite(server) ? new Date(server).toISOString() : '?') + '  diff=' + Math.round((local - server) / 1000) + 's' + (r.headers.get('x-mlino-offline') ? '  (offline copy)' : ''));
+    return r.text().then(function (txt) {
+      var j = JSON.parse(txt);
+      var age = Math.round(((isFinite(server) ? server : local) - Date.parse(j.generated_at)) / 1000);
+      data(r.ok && Array.isArray(j.records), 'HTTP ' + r.status + '  ' + txt.length + ' bytes  records=' + (j.records || []).length + '  age=' + age + 's  key=' + (j.signature && j.signature.key_id) + '  took=' + (Date.now() - t0) + 'ms');
+    });
+  }).catch(function (e) { data(false, String(e)); clock(false, 'no response'); });
+
+  var app = row('نسخه‌ی برنامه');
+  fetch('/version.json?diag=' + t0, { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { app(true, v.slice(0, 160)); }).catch(function (e) { app(false, String(e)); });
+})();
+</script>
+</body>
+</html>

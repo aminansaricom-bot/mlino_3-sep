@@ -75,6 +75,8 @@ export default function RealPublicApp() {
   // Server time (corrected phone clock): freshness and offer windows must not depend on a phone that is off.
   const [now, setNow] = useState(() => serverNow());
   const [refreshFailed, setRefreshFailed] = useState(false);
+  // Why the last download was refused (a short code shown under the warning, so a problem on a phone can be read).
+  const [refreshError, setRefreshError] = useState<string | null>(null);
   // The first download is still on its way: that is loading, not «no valid data».
   const [firstLoadDone, setFirstLoadDone] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -126,8 +128,10 @@ export default function RealPublicApp() {
     if (!consumer) return;
     let active = true;
     const refresh = async () => {
-      try { await consumer.refresh(); if (active) setRefreshFailed(false); }
-      catch { if (active) setRefreshFailed(true); }
+      try { await consumer.refresh(); if (active) { setRefreshFailed(false); setRefreshError(null); } }
+      catch (e) {
+        if (active) { setRefreshFailed(true); setRefreshError(String((e as Error)?.name === 'NotSupportedError' ? 'ED25519_NOT_SUPPORTED' : (e as Error)?.message || e).slice(0, 60)); }
+      }
       if (active) setFirstLoadDone(true);
       if (catalog) await catalog.refresh(consumer).catch(() => undefined);
       if (active) setNow(serverNow());
@@ -312,7 +316,8 @@ export default function RealPublicApp() {
       onPickPoint={(lat, lng) => { setPoint([lat, lng]); setPointLabel(msg('نقطهٔ انتخابی روی نقشه')); setNearbyOnly(true); }}
       onMapReady={() => undefined} onTileStatus={setTileStatus} />
 
-    {!valid && firstLoadDone && <div className="app-banner warn" role="status">{tr('اطلاعات واقعی فعلاً در دسترس نیست. دادهٔ آزمایشی جای آن نمایش داده نمی‌شود.')}</div>}
+    {!valid && firstLoadDone && <div className="app-banner warn" role="status">{tr('اطلاعات واقعی فعلاً در دسترس نیست. دادهٔ آزمایشی جای آن نمایش داده نمی‌شود.')}
+      {refreshError && <small dir="ltr" style={{ display: 'block', opacity: 0.7, fontSize: 11, marginTop: 4 }}>{refreshError} · <a href="/diag.html">diag</a></small>}</div>}
     {valid && refreshFailed && <div className="app-banner warn" role="status">{tr('دریافت تازه انجام نشد؛ نسخهٔ معتبر پیشین فقط تا پایان اعتبارش نمایش داده می‌شود.')}</div>}
     {tileStatus === 'error' && <div className="map-state"><p>{tr('نقشه در دسترس نیست؛ فهرست دادهٔ امضاشده همچنان قابل استفاده است.')}</p><button onClick={() => setTileRetryKey((value) => value + 1)}>{tr('تلاش دوباره')}</button></div>}
     {demoBuildEnabled && !demoEnabled && <button className="demo-reenable" onClick={() => setDemoEnabled(true)}>{tr('روشن کردن حالت نمایشی')}</button>}
