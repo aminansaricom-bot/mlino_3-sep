@@ -116,6 +116,13 @@ export default function RealPublicApp() {
   const [searchOpen, setSearchOpen] = useState(false);
   // Search with a photo (D-91): open with no photo (pick one), or with a live-storefront frame.
   const [visual, setVisual] = useState<{ initial: Photo | null } | null>(null);
+  // The photo button shows only where the server has visual search (a server without it answers 404).
+  const [visualOn, setVisualOn] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/visual/status', { credentials: 'same-origin' }).then((r) => { if (alive) setVisualOn(r.ok); }).catch(() => undefined);
+    return () => { alive = false; };
+  }, []);
   // The live storefront opens after the camera step (asked once per opening, skipped when already allowed).
   const [cameraOk, setCameraOk] = useState(false);
   const openChat = (target: ChatTarget | null) => { setChatTarget(target); setOverlay('chat'); };
@@ -336,7 +343,7 @@ export default function RealPublicApp() {
         <span className={query ? 'search-launch-q' : 'search-launch-ph'}>{query || tr('چی می‌خوای؟')}</span>
         <span className="search-launch-spark" aria-hidden="true">✦</span>
       </button>
-      <button type="button" className="search-launch-photo" onClick={() => setVisual({ initial: null })} aria-label={tr('جست‌وجو با عکس')} title={tr('جست‌وجو با عکس')}><LiveIcon name="photo-search" size={22} /></button>
+      {visualOn && <button type="button" className="search-launch-photo" onClick={() => setVisual({ initial: null })} aria-label={tr('جست‌وجو با عکس')} title={tr('جست‌وجو با عکس')}><LiveIcon name="photo-search" size={22} /></button>}
       {voiceInput.supported && <button type="button" className={`search-launch-mic${voiceInput.listening ? ' on' : ''}`} aria-pressed={voiceInput.listening}
         aria-label={voiceInput.listening ? tr('توقف شنیدن') : tr('پرسیدن با صدا')} onClick={() => { setSearchOpen(true); micPress(); }}><MicIcon size={24} /></button>}
       {query && <button type="button" className="search-launch-clear" onClick={() => setQuery('')} aria-label={tr('پاک کردن جست‌وجو')}><LiveIcon name="close" size={18} /></button>}
@@ -393,7 +400,7 @@ export default function RealPublicApp() {
       radiusLabel={formatDistance(5000)} pointLabel={tr(pointLabel)} filtersApplied={category !== null || openOnly}
       onChangePoint={() => setOverlay('none')} onUseLocation={useMyLocation} locating={locating} onAccountChange={() => setChatRefresh((n) => n + 1)} />}
     {overlay === 'vitrine' && !cameraOk && <CameraIntro onAllow={() => setCameraOk(true)} onLater={() => setOverlay('none')} />}
-    {overlay === 'vitrine' && cameraOk && <LiveVitrine onPhotoSearch={(photo) => setVisual({ initial: photo })} records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point}
+    {overlay === 'vitrine' && cameraOk && <LiveVitrine onPhotoSearch={visualOn ? (photo) => setVisual({ initial: photo }) : undefined} records={allRecords} catalogByOrg={catalogByOrg} now={now} searchPoint={point}
       locationPending={myPoint === null && locError === null} initialRadius={demoBuildEnabled && demoEnabled ? 100 : undefined}
       offersOnly={offersOnly} onOffersOnly={setOffersOnly} query={query} onQuery={setQuery}
       savedIds={experience.data.saved} onToggleSave={(id) => experience.toggle('saved', id)}
