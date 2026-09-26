@@ -6,7 +6,7 @@ export type LiveIconName =
   | 'close' | 'menu' | 'search' | 'chat' | 'bookmark' | 'offer' | 'pause' | 'play' | 'chevron-left' | 'chevron-right'
   | 'chevron-down' | 'send' | 'location' | 'my-location' | 'store' | 'clock' | 'camera' | 'refresh' | 'warning' | 'lock'
   | 'grid' | 'food' | 'shop' | 'service' | 'health' | 'more' | 'map' | 'compass' | 'user' | 'image' | 'check'
-  | 'globe' | 'heart' | 'sparkle' | 'flag' | 'moon' | 'sun' | 'volume' | 'eye-off' | 'info' | 'logout' | 'phone';
+  | 'globe' | 'heart' | 'sparkle' | 'flag' | 'moon' | 'sun' | 'volume' | 'eye-off' | 'info' | 'logout' | 'phone' | 'photo-search' | 'crop';
 
 const P: Record<LiveIconName, ReactNode> = {
   close: <path d="m5 5 14 14M5 19 19 5" />,
@@ -39,6 +39,9 @@ const P: Record<LiveIconName, ReactNode> = {
   compass: <><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2 5-5 2 2-5Z" /></>,
   user: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
   image: <><rect x="3" y="4" width="18" height="16" rx="3" /><path d="m3 16 5-5 5 5 3-3 5 5M15.5 9.5h.01" /></>,
+  // Search with a photo: a picture with a magnifier (not the storefront/camera frame of the live storefront).
+  'photo-search': <><path d="M13 4H6a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h7" /><path d="m3 16 4.5-4.5 4 4M9 8.5h.01" /><circle cx="17.5" cy="13.5" r="3.5" /><path d="m20 16 2.5 2.5" /></>,
+  crop: <><path d="M6 2v14a2 2 0 0 0 2 2h14" /><path d="M18 22V8a2 2 0 0 0-2-2H2" /></>,
   check: <path d="m5 12 5 5 9-10" />,
   globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3Z" /></>,
   heart: <path d="M12 20s-8-4.7-8-10.3A4.7 4.7 0 0 1 12 7a4.7 4.7 0 0 1 8 2.7C20 15.3 12 20 12 20Z" />,

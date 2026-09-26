@@ -193,6 +193,8 @@
 .rs-search-mic { color: var(--brand); }
 .rs-search-mic.on { color: var(--bad); }
 .search-launch-mic { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 0; border-radius: 12px; background: none; color: var(--brand); cursor: pointer; }
+.search-launch-photo { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 0; border-radius: 12px; background: none; color: var(--brand); cursor: pointer; }
+.search-launch-photo:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .search-launch-mic.on { color: var(--bad); background: var(--bad-soft); }
 /* «فضای من» icons (owner's kit): 24px inside a 44px rounded frame; title up to two lines, value and chevron never cut */
 .pm-ico { width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0; }

@@ -1,3 +1,4 @@
+import { photoFromVideo, type Photo } from '../visual/prepareImage';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useCameraStream, useDeviceHeading } from '../ar/browserSensors';
 import { AR_DEFAULT_RADIUS, buildPublicArView, composeArScene, type ArSceneItem } from '../ar/ArOverlayService';
@@ -33,6 +34,8 @@ type Props = {
   onOffersOnly: (v: boolean) => void;
   query: string;
   onQuery: (q: string) => void;
+  /** Search with a photo (D-91): a frame of this camera (only on a tap), or null to pick a photo from the gallery. */
+  onPhotoSearch?: (photo: Photo | null) => void;
   savedIds: readonly string[];
   onToggleSave: (businessId: string) => void;
   onOpenItem: (organizationId: string, item: CatalogItem) => void;
@@ -227,6 +230,12 @@ export default function LiveVitrine(p: Props) {
           aria-label={tr('جست‌وجو در ویترین زنده')} enterKeyHint="search" />
         {text && <button type="button" className="lv-clear" onClick={() => { setText(''); p.onQuery(''); }} aria-label={tr('پاک کردن جست‌وجو')}><LiveIcon name="close" size={16} /></button>}
       </form>
+      {p.onPhotoSearch && <button type="button" className="lv-iconbtn small" onClick={() => {
+        // One frame of the stream already open (no second camera), only now; nothing is analysed in the background.
+        const video = camera.videoRef.current;
+        if (camera.state.kind === 'active' && video) photoFromVideo(video).then((ph) => p.onPhotoSearch!(ph), () => p.onPhotoSearch!(null));
+        else p.onPhotoSearch!(null);
+      }} aria-label={tr('جست‌وجو با این عکس')} title={tr('جست‌وجو با این عکس')}><LiveIcon name="photo-search" size={20} /></button>}
       {relative && <button type="button" className="lv-iconbtn small" onClick={recenter}
         aria-label={tr('جهت را دوباره روی نزدیک‌ترین کسب‌وکار تنظیم کن')} title={tr('جهت را دوباره روی نزدیک‌ترین کسب‌وکار تنظیم کن')}><LiveIcon name="compass" size={20} /></button>}
     </header>

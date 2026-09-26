@@ -1,0 +1,53 @@
+/* Search with a photo (D-91): «روشنای محله» tokens, RTL, 44 px targets, safe areas, light and dark. */
+.vs-root { position: fixed; inset: 0; z-index: 1300; display: flex; flex-direction: column; background: var(--canvas); color: var(--ink);
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
+.vs-head { display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.vs-head h1 { margin: 0; font-size: 17px; text-align: center; }
+.vs-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 18px; cursor: pointer; }
+.vs-head .vs-icon { border: 0; background: none; }
+.vs-icon.on { color: var(--brand); border-color: var(--brand); }
+.vs-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; max-width: 640px; width: 100%; margin: 0 auto; }
+.vs-center { align-items: center; justify-content: center; text-align: center; }
+.vs-pick { align-items: stretch; text-align: center; padding-top: 32px; }
+.vs-hero { width: 84px; height: 84px; margin: 0 auto 4px; border-radius: 26px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); }
+.vs-hero.warn { background: var(--bad-soft); color: var(--bad); }
+.vs-lead { color: var(--ink-2); line-height: 1.85; margin: 0 0 8px; }
+.vs-note { margin: 0; font-size: 13px; color: var(--ink-2); background: var(--brand-soft); border-radius: 12px; padding: 8px 12px; line-height: 1.8; }
+.vs-check { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; }
+.vs-check input { width: 20px; height: 20px; accent-color: var(--brand); }
+.vs-btn { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; border-radius: 14px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+.vs-btn.primary { background: var(--brand); color: var(--on-brand); border-color: transparent; }
+.vs-btn.small { min-height: 44px; padding: 0 12px; font-size: 13px; }
+.vs-btn:focus-visible, .vs-icon:focus-visible, .vs-open:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+.vs-crop { display: flex; flex-direction: column; gap: 10px; }
+.vs-stage { position: relative; direction: ltr; align-self: center; max-width: 100%; touch-action: none; user-select: none; }
+.vs-stage canvas { display: block; max-width: 100%; max-height: 52vh; border-radius: 14px; }
+.vs-box { position: absolute; border: 2px solid #fff; border-radius: 10px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, .45); cursor: move; }
+.vs-handle { position: absolute; right: -14px; bottom: -14px; width: 28px; height: 28px; border-radius: 50%; background: var(--brand); border: 3px solid #fff; cursor: nwse-resize; }
+.vs-stage { overflow: hidden; border-radius: 14px; }
+.vs-crop-tools { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; direction: ltr; }
+
+.vs-spinner { width: 44px; height: 44px; border-radius: 50%; border: 4px solid var(--brand-soft); border-top-color: var(--brand); animation: vs-spin .9s linear infinite; }
+@keyframes vs-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .vs-spinner { animation-duration: 3s; } }
+
+.vs-query { display: grid; grid-template-columns: 56px 1fr auto; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 8px; }
+.vs-query img { width: 56px; height: 56px; object-fit: cover; border-radius: 12px; }
+.vs-query strong { display: block; }
+.vs-query small { color: var(--ink-2); font-size: 12px; }
+.vs-empty { text-align: center; padding: 28px 8px; color: var(--ink-2); }
+.vs-empty p { color: var(--ink); font-weight: 700; margin: 0 0 6px; }
+.vs-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.vs-row { display: flex; gap: 8px; align-items: stretch; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 8px; }
+.vs-open { flex: 1; min-width: 0; display: flex; gap: 10px; align-items: center; border: 0; background: none; padding: 0; text-align: start; color: inherit; font: inherit; cursor: pointer; }
+.vs-open img { width: 76px; height: 76px; flex: none; object-fit: cover; border-radius: 12px; background: var(--canvas); }
+.vs-info { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.vs-info b { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vs-info small { color: var(--ink-2); font-size: 12.5px; }
+.vs-price { font-weight: 800; font-size: 14px; }
+.vs-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.vs-kind, .vs-demo { font-size: 11px; border-radius: 999px; padding: 1px 8px; background: var(--brand-soft); color: var(--brand); }
+.vs-demo { background: var(--warm-soft); color: var(--warm-text); }
+.vs-actions { display: flex; flex-direction: column; gap: 6px; justify-content: center; }
