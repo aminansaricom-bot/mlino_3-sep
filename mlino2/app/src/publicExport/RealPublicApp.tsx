@@ -1,3 +1,4 @@
+import { requestCompassPermission } from '../components/compassBeam';
 import { serverNow } from './clock';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PublicExportConsumer, FETCH_INTERVAL_MS } from './consumer';
@@ -179,6 +180,8 @@ export default function RealPublicApp() {
   const useMyLocation = () => {
     if (!navigator.geolocation) { setLocError('unavailable'); return; }
     setLocating(true);
+    // iPhone gives the compass (the facing beam on the map) only when asked inside a tap; elsewhere a no-op.
+    requestCompassPermission();
     // Both requests at once: a quick network position (a second or two, but often unavailable in Iran, where Google's
     // network location is blocked) and GPS (precise, slower). Whichever arrives first shows the person; GPS then
     // refines it. Only when both fail is there an error — before, a failed quick request never tried GPS at all.

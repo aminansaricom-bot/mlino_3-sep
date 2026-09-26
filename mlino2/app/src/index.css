@@ -408,13 +408,31 @@ button { font-family: inherit; }
   .pin-wrap.is-match::after, .pin-wrap.is-selected::after { animation: none; opacity: .55; }
 }
 
+.me-wrap { position: relative; }
 .me-dot {
+  position: relative; z-index: 1;
   width: 16px; height: 16px;
   border-radius: 50%;
   background: var(--accent);
   border: 3px solid #fff;
   box-shadow: 0 0 0 4px var(--accent-ring);
 }
+/* The way the person is facing: a soft 60° beam from the dot, turned by the compass (--beam). Hidden until the
+   compass gives a true reading. */
+.me-beam {
+  position: absolute; left: 50%; top: 50%;
+  width: 160px; height: 160px; margin: -80px 0 0 -80px;
+  border-radius: 50%; pointer-events: none;
+  background: conic-gradient(from -28deg, rgba(36, 107, 98, .55) 0deg, rgba(36, 107, 98, .55) 56deg, transparent 56deg);
+  -webkit-mask: radial-gradient(circle, #000 10%, rgba(0, 0, 0, .8) 36%, transparent 70%);
+  mask: radial-gradient(circle, #000 10%, rgba(0, 0, 0, .8) 36%, transparent 70%);
+  transform: rotate(var(--beam, 0deg));
+  transition: transform .12s linear, opacity .3s ease;
+  opacity: 0;
+}
+.me-wrap.has-heading .me-beam { opacity: 1; }
+:root[data-theme="dark"] .me-beam { background: conic-gradient(from -30deg, rgba(120, 212, 190, .45) 0deg, rgba(120, 212, 190, .45) 60deg, transparent 60deg); }
+@media (prefers-reduced-motion: reduce) { .me-beam { transition: opacity .3s ease; } }
 
 /* ───────────────────────── وضعیت نقشه ───────────────────────── */
 

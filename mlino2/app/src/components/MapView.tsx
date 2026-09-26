@@ -5,6 +5,7 @@ import { clusterByScreenCell } from './clusterMarkers';
 import { categoryIcon, iconMarkup } from '../design/Icon';
 import { businessCategory, businessCoordinates, businessId, type RichUiRecord } from './businessView';
 import { numberLocale } from '../i18n';
+import { attachCompassBeam } from './compassBeam';
 
 /**
  * لایه‌ی نقشه — روی SDK نشان.
@@ -52,7 +53,7 @@ function clusterIcon(count: number, hasMatch: boolean): L.DivIcon {
 
 const meIcon = L.divIcon({
   className: 'me-wrap',
-  html: '<div class="me-dot"></div>',
+  html: '<div class="me-beam"></div><div class="me-dot"></div>',
   iconSize: [16, 16],
   iconAnchor: [8, 8],
 });
@@ -230,8 +231,15 @@ export default function MapView({
       return;
     }
     if (meMarkerRef.current) meMarkerRef.current.setLatLng(myPoint);
-    else meMarkerRef.current = L.marker(myPoint, { icon: meIcon }).addTo(map);
+    else meMarkerRef.current = L.marker(myPoint, { icon: meIcon, zIndexOffset: 1000, interactive: false }).addTo(map);
   }, [myPoint]);
+
+  // The way the person is facing: a beam on their dot, turned straight from the compass (no re-render).
+  const hasMe = myPoint !== null;
+  useEffect(() => {
+    if (!hasMe) return undefined;
+    return attachCompassBeam(() => meMarkerRef.current?.getElement() ?? null);
+  }, [hasMe]);
 
   // پرواز به مورد انتخاب‌شده
   useEffect(() => {
